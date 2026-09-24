@@ -160,6 +160,19 @@ replacement(native_load_bypasses_the_claim, packages:package_load_native(File,Ow
 %Every source claimed, the stamped set's boundary gone.
 replacement(claim_every_source, seam:compiled_source(File), _,
             metta_qlf_boot:qlf_compile_aside(File)).
+%get-property's three policies, each put back the way it was before: the
+%second subject rule that read every spelling but (library ...) as a file, the
+%home answering a row's stored body, and a plain import's rows read nowhere.
+%The fourth removes the one test deciding which rows need no home.
+replacement(second_subject_rule, packages:package_subject_source(_,Subject,Path), _,
+            (( nonvar(Subject), Subject = [library|_]
+             -> metta_engine:resolve_module_form(Subject,File) ; File = Subject ),
+             packages:package_existing_source(Subject,File,Path))).
+replacement(stored_body_at_home, packages:package_home_property(Home,Key,Value), _,
+            ( Key == available -> metta_engine:metta_host_stored(Home,[available,Value])
+            ; metta_engine:metta_host_stored(Home,['=',[package,Key],Value]) )).
+replacement(no_manifest_read, packages:package_source_property(_,_,_,_), _, fail).
+replacement(computed_rows_as_written, packages:package_literal(_), _, true).
 
 % Discard export declarations while retaining the artifact's actual clauses.
 % The witness then observes the internal arity that an unrestricted scan leaks.
@@ -176,6 +189,13 @@ witness(packages, importing_a_backed_library_leaves_the_package_head_alone, no_h
 witness(packages, a_computed_row_normalises_and_then_performs, no_home).
 witness(packages, a_requirement_loads_before_the_file_that_declares_it, no_requires).
 witness(packages, the_package_head_is_internal_in_every_space, no_internal).
+witness(packages, a_subject_names_what_a_from_source_names, second_subject_rule).
+witness(packages, setup_names_its_subject_by_the_same_rule, second_subject_rule).
+witness(packages, a_subject_resolves_or_refuses_by_name, second_subject_rule).
+witness(packages, a_plain_import_is_read_from_its_manifest, no_manifest_read).
+witness(packages, a_computed_row_is_answered_only_in_a_home, stored_body_at_home).
+witness(packages, a_computed_row_is_answered_only_in_a_home, computed_rows_as_written).
+witness(packages, the_literal_rows_are_the_rows_the_normaliser_passes_through, computed_rows_as_written).
 
 group(no_claim_bootstrap, [default_claim_recovers_after_withdrawal_and_failed_activation]).
 group(no_coverage, [uncovered_backing_refuses_by_head]).

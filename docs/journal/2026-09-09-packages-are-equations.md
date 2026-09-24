@@ -313,3 +313,69 @@ Cargo's `[package.metadata.*]` convention.
 Alignment: equations, `match`, the union law, explicit-space evaluation, the
 effect lattice; no construct added. `lib_package` is the same shape as any
 shipped library and is loaded by the mechanism it defines.
+
+## 2026-09-24, reading a package's rows back
+
+Goal: `(get-property Subject Key)` answers or refuses by name for every
+subject a program can write. After `!(import! &self (library lib_spaces))` the
+subject `lib_spaces` refused as a missing requirement, `(library lib_spaces)`
+answered nothing, and after `!(import! &self ./greeter)` neither `./greeter`
+nor `"./greeter"` answered the manifest's `"0.1.0"`
+[measured in `docs/record/record-triage-2026-09-24.md`, section
+get-property-subjects, and again in battery 31 before the change].
+
+Two defects, one under the other. The subject went through a resolver of its
+own that knew only `(library ...)`, where a `from` source goes through
+`metta_reference_source_path/2`. And d6e09995c retires a load's package rows
+from every space but that path's library home, which only a `from` load
+makes, so after a plain `import!` law 1's "`(get-property lib version)` reads
+them at home" had no home to read.
+
+Tried: importlib.metadata's answer to the same question, measured on CPython
+3.14.4. `Distribution.at(path)` and `version(name)` read the installed METADATA
+from disk, whether or not anything imported the package; an absent
+distribution raises `PackageNotFoundError`; a distribution declaring no
+requirements answers `requires()` with None; one missing its Version field
+answers None and warns that it will raise.
+
+Decided:
+1. A subject is `perform`, a space, or a source named by the rule a `from`
+   source follows: `(library Name)` and a bare name are libraries under the
+   library root, and a spelling beginning `./`, `../` or `/` is a path.
+   `setup!` names its subject by the same rule. An unbound subject, and a
+   spelling no rule reads, refuse by name.
+2. A source a library home holds answers from that home, each row normalised
+   there by the loader's own normaliser, so a computed row answers its value.
+   Before, the home answered the stored body.
+3. A source no home holds answers from its own text: exactly the rows
+   normalisation passes through without consulting a space, an atomic body or
+   a row a claim answers, which is law 1's "a constant body is readable
+   syntactically by any tool". Any other row can only be decided in a home,
+   since whether its head is a function depends on what the home merged, so
+   the read refuses before answering anything and names the `from` load that
+   makes one. `available` is a load's record, never a manifest row, and
+   refuses the same way.
+4. A subject that reaches no source refuses as `package <S> does not exist`,
+   naming the file the rule looked for, which says how it was read. A resolved
+   subject's key with no row answers nothing: by the union law every key is
+   set-valued, and refusing an undeclared key would need the engine to know
+   which keys are single-valued, which only `requires` is the engine's to know.
+
+Rejected: deciding a compound row's constancy without a home by asking whether
+its head is callable in a fresh space or defined by the manifest itself. A
+head a required library supplies is callable in the home and in neither place,
+so a computed row calling it, the use this journal gives computed rows, would
+be answered as its unevaluated term: a wrong answer where a refusal belongs.
+Revisit if requirements stop merging into the home.
+
+Rejected: collecting the heads the home would hold syntactically, through each
+requirement's parse summary. It is the loader's requirement walk again in a
+second mode, and resolving a git requirement asserts a pin, so reading would
+have an effect. The `from` load the refusal names computes the same answer
+once, in the one loader. The cost of both rejections is that a `(git url sha)`
+requirement row, which is data because `git` names no function, is read only
+at a home.
+
+Found on the way: `..` alone reached `<lib>/../pkg.metta`, because the escape
+guard in `library_within/2` read only a name holding `/`. It is refused now,
+by the same guard.

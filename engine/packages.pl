@@ -1,5 +1,18 @@
-% Purpose: interpret package argument records, prepare them explicitly, and own
-% their activation and retirement through the existing source loader.
+% Purpose: interpret package argument records, prepare them explicitly, own
+% their activation and retirement through the existing source loader, and
+% answer what a package's rows say through get-property.
+% Guarantees: get-property and setup! name a subject by the rule a `from`
+% source follows; a source a library home holds answers its rows normalised in
+% that home once its load has finished, and one no home holds answers the rows
+% its text carries that normalisation passes through without a space, refusing
+% any other row and the `available` key by name with the `from` load that makes
+% a home; a subject that resolves to no source refuses by name, and a key the
+% source declares no row for answers nothing
+% [tested: packages:a_subject_names_what_a_from_source_names,
+% packages:a_plain_import_is_read_from_its_manifest,
+% packages:a_computed_row_is_answered_only_in_a_home,
+% packages:a_home_loading_in_the_background_answers_once_loaded,
+% packages:a_subject_resolves_or_refuses_by_name; commit=WORKTREE].
 % Assumes: the engine sequences requires first and bounds normalisation.
 % [source: engine/metta/interop.pl:metta_perform_package_rows/2; commit=561cfeaa23b27fc84f86a9bcccf6ccf8b9d2e73f].
 % Guarantees: local boot validation precedes effects; receipts belong to the
@@ -413,15 +426,158 @@ package_release_one(held(Space, Row, Handle), Outcome) :-
              ; Outcome = failed(Row, Handle) )
           ; Outcome = ok ), Error, Outcome = raised(Row, Handle, Error)).
 
-'get-property'(perform, claims, Pattern) :-
-    package_register_claims, package_claim(perform, Pattern, _).
+%%%% get-property: what a subject names, and where its rows are read %%%%
+%
+%A subject is `perform`, a space, or a SOURCE named by the rule a `from`
+%source follows, and a source's rows are read from the home a `from` load made
+%for it when there is one and from its own text when there is not.
+%
+%Where the text answers is what a plain import! needs: d6e09995c retires a
+%load's package rows from every space but that path's library home, and only a
+%`from` load makes a home, so after `!(import! &self ./greeter)` the manifest
+%is the one place its `(= (package version) "0.1.0")` still is. Reading the
+%files a package installed rather than wherever it was imported is
+%importlib.metadata's answer to the same question [measured 2026-09-24 on
+%CPython 3.14.4: Distribution.at(path) and version(name) read METADATA from
+%disk, and only an absent distribution raises PackageNotFoundError].
+%
+%A resolved subject answers one value per row its source holds for the key,
+%which is law 1's union law, so a key the source declares no row for answers
+%nothing; lib_spaces' manifest declares no version. Refusing that instead
+%would need this door to know which keys are single-valued, and the meaning of
+%every key but `requires` belongs to the packaging library, not to the engine
+%[source: docs/journal/2026-09-09-packages-are-equations.md, law 1 and "the
+%engine knows four things"].
+%
+%The subject's SHAPE is tested, never unified into: a head clause
+%`'get-property'(perform, claims, _)` bound an unbound subject to `perform` and
+%answered the claims before the second clause refused it.
 'get-property'(Subject, Key, Value) :-
-    Subject \== perform,
-    ( metta_engine:metta_space_name(Subject) -> Home = Subject
-    ; package_resolve_source(Subject, Path),
-      metta_engine:metta_reference_library_home(Home, Path) ),
-    ( Key == available -> metta_host_stored(Home, [available, Value])
-    ; metta_host_stored(Home, ['=', [package, Key], Value]) ).
+    (   Subject == perform
+    ->  Key = claims,
+        package_register_claims, package_claim(perform, Value, _)
+    ;   metta_engine:metta_space_name(Subject)
+    ->  package_home_property(Subject, Key, Value)
+    ;   package_subject_source('get-property', Subject, Path),
+        (   metta_engine:metta_reference_library_home(Home, Path)
+        ->  package_home_property(Home, Key, Value)
+        ;   package_source_property(Subject, Path, Key, Value)
+        )
+    ).
+
+%A home answers each row NORMALISED there, by the normaliser the loader
+%performs rows through, so a computed row answers its value in the one space
+%where a required library's equations have merged. Reading the stored body
+%answered the unevaluated term, which made a `from` load no remedy for the
+%refusal below [tested: packages:a_computed_row_is_answered_only_in_a_home].
+%
+%A home still loading in the background is waited for first, as a call to one
+%of its heads waits, so a read does not answer the rows stored so far; for any
+%other space the wait finds no load and returns
+%[source: engine/metta/reference_loading.pl:metta_reference_wait/1].
+%
+%An unbound key enumerates the package keys and not `available`, whose rows are
+%a different record kind.
+package_home_property(Home, Key, Value) :-
+    metta_engine:metta_reference_wait(Home),
+    (   Key == available
+    ->  metta_host_stored(Home, [available, Value])
+    ;   package_space_row(Home, Key, Written),
+        metta_engine:metta_package_normalise(Home, Written, Value)
+    ).
+
+%The package rows a space holds, RECOGNISED rather than unified into: a space
+%can hold `(= ($x version) ...)`, and matching the pattern
+%`(= (package version) $v)` would bind that `$x` and answer a row nobody wrote
+%on the reserved head [source: engine/filereader/source_lifecycle.pl:
+%package_row/3]. The stored atom is re-read by its reference so the pattern
+%that found it cannot bind into it, which is how the loader's own journal join
+%reads a load's rows; a foreign space has no references, so its atoms are
+%enumerated and recognised.
+%
+%Time: one indexed lookup plus O(r) decodes, r = package rows the space holds;
+%a foreign space pays O(a) for its a atoms.
+package_space_row(Space, Key, Written) :-
+    (   seam:foreign_space(Space)
+    ->  'get-atoms'(Space, Row)
+    ;   spaces:metta_native_pair(Space, ['=', [package, _], _], _, Ref),
+        spaces:stored_atom_of_ref(Ref, Space, Row, _)
+    ),
+    filereader:package_row(Row, Key, Written).
+
+%A source no home holds answers from its TEXT, which is complete only for rows
+%normalisation passes through without a space: law 1's constant bodies,
+%atomic or answered by a claim. Any other row is decided in a home, so the
+%read refuses naming the `from` load that makes one, and refuses before
+%answering anything, because a partial answer set reads as a complete one.
+%`available` is never in the text: package_perform_rows/4 records it where a
+%load chose between backings, so it too names the `from` load.
+%
+%Time: O(s) to read and parse the source, s = its length, and O(p) over its
+%p package rows. A manifest is a handful of rows and nothing is cached, so a
+%reader asking again reads the file again, which is what sees an edit.
+package_source_property(Subject, Path, Key, Value) :-
+    (   Key == available
+    ->  package_needs_home(Subject, Path,
+            'the available key reads the alternatives a load recorded')
+    ;   package_source_rows(Path, Rows),
+        findall(Kind-Written, ( member(Kind-Written, Rows), Kind = Key ), Selected),
+        (   member(Kind-Written, Selected),
+            \+ package_literal(Written)
+        ->  swrite(Written, Text),
+            format(atom(Why), '(package ~w) is the computed row ~s', [Kind, Text]),
+            package_needs_home(Subject, Path, Why)
+        ;   member(Key-Value, Selected)
+        )
+    ).
+
+%What metta_package_normalise/3 passes through WITHOUT consulting any space: a
+%row a claim answers, or an atomic body. Law 1's "a constant body is readable
+%syntactically by any tool" is exactly this, and it is the whole of what a
+%reader holding no home can answer, since the normaliser's remaining
+%pass-through asks the HOME whether a head is a function and the home is where
+%a required library's equations merge [source:
+%docs/journal/2026-09-09-packages-are-equations.md, law 1 and "the questions
+%are evaluated in the home space"].
+%
+%The normaliser's first two tests, stated again rather than called from there:
+%through this predicate an atomic row costs the loader 6 inferences where the
+%normaliser as written costs 5, and any order of the tests moves the loader's
+%cost and every twin importing a library with it [measured 2026-09-24: 5 as
+%written, 6 through this predicate, 4 with the atomic test first]. It is
+%defined here, at its one caller, rather than beside the normaliser, because
+%every predicate the engine module defines is published into each restricted
+%space's core (ensure_restricted_core/0 in engine/spaces/lifecycle.pl), and one
+%more there costs every restricted space 29 inferences [measured 2026-09-24:
+%02-restricted_spaces.metta read 66237 with it in engine/metta/interop.pl and
+%66208 without]. A test holds the two to one answer in both directions
+%[tested: packages:the_literal_rows_are_the_rows_the_normaliser_passes_through].
+package_literal(Written) :-
+    (   metta_engine:metta_package_claimed(Written)
+    ->  true
+    ;   atomic(Written)
+    ).
+
+%The package rows a source carries, read from its text without loading it:
+%every top-level equation on the reserved head, recognised by the loader's own
+%package_row/3. A runnable is excluded, since running it is the load.
+package_source_rows(Path, Rows) :-
+    filereader:read_source_text(Path, Text),
+    parse_metta_source(Text, Forms),
+    findall(Kind-Written,
+            ( member(Parsed, Forms),
+              parsed_form_parts(Parsed, FormKind, _, Row),
+              FormKind \== runnable,
+              filereader:package_row(Row, Kind, Written) ),
+            Rows).
+
+package_needs_home(Subject, Path, Why) :-
+    swrite(Subject, Text),
+    format(atom(Message),
+           '~w, which only a home answers, and no library home holds ~w; \c
+            (from ~s) makes one', [Why, Path, Text]),
+    throw(error(existence_error(package_home, Subject),
+                context('get-property', Message))).
 
 % Requirement resolution and the catalog.
 
@@ -615,11 +771,53 @@ package_collect_requirement(Required, Path) :-
        ( memberchk(Row, Rows) -> true ; nb_setarg(1, State, [Row|Rows]) )
     ; true ).
 
-package_resolve_source(Spec, Path) :-
-    ( nonvar(Spec), Spec = [library|_]
-    -> metta_engine:resolve_module_form(Spec, File)
-    ; Spec = File ),
-    package_existing_source(Spec, File, Path).
+%The source a package door's SUBJECT names, by the ONE rule a `from` source
+%follows: `(library Name)` and a bare name are libraries under the library
+%root, and a spelling beginning ./, ../ or / is a path, resolved as import!
+%resolves one [source: engine/metta/reference_loading.pl:
+%metta_reference_source_path/2]. get-property and setup! had a second rule of
+%their own that knew only `(library ...)` and read every other spelling as a
+%file, so `lib_spaces` was a file in the working directory and refused as a
+%missing REQUIREMENT, naming setup! as the remedy [measured 2026-09-24:
+%(get-property lib_spaces requires) exited 2 with package_requirement
+%`lib_spaces' does not exist].
+%
+%Every spelling is decided: an unbound subject is an instantiation error, a
+%spelling no rule reads is a type error naming the three that are, and one
+%that resolves to nothing refuses naming the file it looked for. Refusing rather
+%than answering nothing is the laws' own "refusal as absence" rejection, and
+%here it is also what keeps two answers apart, since nothing from a subject
+%nobody holds reads exactly like a package that declares no row
+%[source: docs/journal/2026-09-09-packages-are-equations.md, "Rejected: refusal
+%as absence"; tested: packages:a_subject_resolves_or_refuses_by_name].
+package_subject_source(Door, Subject, Path) :-
+    (   \+ ground(Subject)
+    ->  throw(error(instantiation_error, context(Door, _)))
+    ;   package_subject_spelling(Subject)
+    ->  catch(metta_engine:metta_reference_source_path(Subject, Path),
+              error(existence_error(source_sink, Tried), _),
+              package_missing_subject(Door, Subject, Tried))
+    ;   throw(error(type_error(package_subject, Subject),
+                    context(Door, 'a package is named by a library name, \c
+                                   a path written ./x, ../x or /x, or \c
+                                   (library Name)')))
+    ).
+
+package_subject_spelling(Subject) :-
+    (   atom(Subject), blob(Subject, text)
+    ;   string(Subject)
+    ;   Subject = [library|Arguments], length(Arguments, Count), between(1, 2, Count)
+    ),
+    !.
+
+%The refusal names the file the rule looked for, which is also what says how
+%the subject was read: a library name is tried as <library root>/<name>/pkg.metta
+%and a path as written.
+package_missing_subject(Door, Subject, Tried) :-
+    format(atom(Why),
+           '~w does not exist; a library name resolves under the library \c
+            root, and a path is written ./x, ../x or /x', [Tried]),
+    throw(error(existence_error(package, Subject), context(Door, Why))).
 
 % Native artifact contracts and selected publication.
 
@@ -868,7 +1066,7 @@ package_unknown_arrow(Arity, [->|Types]) :-
 % Explicit preparation and persistent receipts.
 
 'setup!'(Spec, true) :-
-    package_resolve_source(Spec, Path), package_register_claims,
+    package_subject_source('setup!', Spec, Path), package_register_claims,
     State = setup([]),
     metta_with_trailed('$metta_package_mode', setup,
         metta_with_trailed('$metta_package_setup', State,

@@ -60,6 +60,25 @@
 %     packages:a_row_reaching_the_filesystem_refuses_by_name,
 %     packages:a_row_reading_the_runtime_is_allowed,
 %     packages:a_row_that_will_not_reduce_refuses_past_its_budget]
+%   - get-property and setup! name a subject by the rule a `from` source
+%     follows, so every spelling of one source answers alike
+%     [tested: packages:a_subject_names_what_a_from_source_names,
+%     packages:setup_names_its_subject_by_the_same_rule]
+%   - a package no home holds is read from its own source, imported or not,
+%     and a key it declares no row for answers nothing
+%     [tested: packages:a_plain_import_is_read_from_its_manifest]
+%   - a computed row, and the available key, are answered only at a home,
+%     normalised there and waited for while a background load fills it, and
+%     refused by name without one
+%     [tested: packages:a_computed_row_is_answered_only_in_a_home,
+%     packages:a_home_loading_in_the_background_answers_once_loaded]
+%   - every spelling of a subject answers or refuses naming it, over a seeded
+%     generation of the grammar's classes
+%     [tested: packages:a_subject_resolves_or_refuses_by_name]
+%   - the rows a reader answers without a home are exactly the rows the
+%     normaliser passes through in every space, checked both ways over
+%     generated rows
+%     [tested: packages:the_literal_rows_are_the_rows_the_normaliser_passes_through]
 % Open Obligations:
 %   To Do: None
 %   Hacks: None
@@ -227,14 +246,18 @@ test(a_library_spec_cannot_walk_out_of_the_library_root) :-
              Outcome == refused(domain_error(library_name, Spec)) )).
 
 %A `from` source is a NAME or a PATH and the spelling decides, so the guard
-%above binds names without stopping a program naming a file beside itself. The
-%last case is the one that matters: a `..` that does not START the spec is
-%still a name, so it still takes the guarded route rather than slipping into
-%the path one.
+%above binds names without stopping a program naming a file beside itself. An
+%absolute path is a path, `..` in it included, since it never entered the
+%library root the guard keeps names inside. The names that matter are the ones
+%that look like paths: a `..` that does not START the spec, `..` with no slash
+%after it, and a `~` the shell would expand and this engine does not, each
+%still take the guarded route rather than slipping into the path one.
 test(a_from_spec_is_a_path_only_when_it_says_so) :-
-    forall(member(Spec, ['./fixtures/x', '../fixtures/x', "./fixtures/x"]),
+    forall(member(Spec, ['./fixtures/x', '../fixtures/x', "./fixtures/x",
+                         '/abs/fixtures/x', "/abs/../fixtures/x"]),
            metta_engine:metta_reference_source_is_path(Spec)),
-    forall(member(Spec, [lib_json, 'builtin_mods/skel.pl', 'nested/../escape.metta']),
+    forall(member(Spec, [lib_json, 'builtin_mods/skel.pl', 'nested/../escape.metta',
+                         '..', '~/x']),
            \+ metta_engine:metta_reference_source_is_path(Spec)).
 
 %The THREE-argument door is the other route and the worse one: its first
@@ -579,5 +602,302 @@ test(invalidating_one_importer_leaves_another_current,
     'import!'(A, Manifest, _),
     assertion(eval_metta_in_module(MA, ['iso-probe'], 7)),
     assertion(eval_metta_in_module(MB, ['iso-probe'], 7)).
+
+%%%% get-property: what a subject names, and where its rows are read %%%%
+
+%A package DIRECTORY, entered through its pkg.metta, written under the scratch
+%directory like the one-file fixtures above and answered as its canonical path.
+package_directory_fixture(Name, Body, Directory) :-
+    packages_scratch(Scratch),
+    atomic_list_concat([Scratch, '/ai-packages-', Name], Written),
+    make_directory_path(Written),
+    directory_file_path(Written, 'pkg.metta', Manifest),
+    setup_call_cleanup(open(Manifest, write, Stream),
+                       format(Stream, '~w', [Body]),
+                       close(Stream)),
+    absolute_file_name(Written, Directory, [file_type(directory)]).
+
+%What a subject answers or how it is refused, the whole outcome as a VALUE so
+%two spellings can be compared: the answers as a multiset, or the formal term
+%of the refusal. Only an error term is caught, so anything else still fails
+%the test that asked.
+getprop_outcome(Subject, Key, Outcome) :-
+    catch(( findall(Value, eval(['get-property', Subject, Key], Value), Values),
+            msort(Values, Sorted),
+            Outcome = answers(Sorted) ),
+          error(Formal, _),
+          Outcome = refused(Formal)).
+
+%The spellings of one library a reader can write, beside the two paths its
+%manifest has on disk. The rule a `from` source follows reads every one of them
+%as the same source, so each must answer what the others answer.
+test(a_subject_names_what_a_from_source_names) :-
+    once(eval([match, '&catalogs', [package, lib_spaces, Where], Where], _)),
+    file_directory_name(Where, Directory),
+    findall(Outcome,
+            ( member(Subject, [lib_spaces, "lib_spaces", [library, lib_spaces],
+                               [library, "lib_spaces"], Where, Directory]),
+              getprop_outcome(Subject, requires, Outcome) ),
+            [First|Rest]),
+    First = answers(Requires),
+    memberchk("lib.metta", Requires),
+    forall(member(Outcome, Rest), Outcome == First).
+
+%The reported defect, on a package of its own. After a PLAIN import no space
+%keeps the rows, so the reader answers from the manifest, and it does for every
+%spelling of the directory; a key the manifest declares no row for answers
+%nothing rather than refusing, since the package is there and says nothing
+%about it. Asked BEFORE the import too: like importlib.metadata's reader, the
+%answer is the installed files', not the import's.
+test(a_plain_import_is_read_from_its_manifest,
+     [setup('new-space'(Space)), cleanup(metta_release_space(Space))]) :-
+    package_directory_fixture(greeter,
+        '(= (package name) packages_greeter)\n\c
+         (= (package version) "0.1.0")\n\c
+         (= (packages-greet $who) (Hello $who))\n', Directory),
+    file_directory_name(Directory, Parent),
+    file_base_name(Directory, Base),
+    atom_concat('./', Base, Relative),
+    atom_string(Relative, RelativeText),
+    getprop_outcome(Directory, version, Unloaded),
+    Unloaded == answers(["0.1.0"]),
+    'import!'(Space, Directory, _),
+    \+ spaces:metta_space_pair(Space, ['=', [package, _], _], _, _),
+    % Qualified with this unit's module, because the door's own module is the
+    % context an explicitly qualified meta call hands its goal.
+    forall(member(Subject, [Relative, RelativeText]),
+           ( filereader:with_working_directory(Parent,
+                 plunit_packages:getprop_outcome(Subject, version, Version)),
+             Version == answers(["0.1.0"]) )),
+    getprop_outcome(Directory, name, Name),
+    Name == answers([packages_greeter]),
+    getprop_outcome(Directory, requires, Requires),
+    Requires == answers([]).
+
+%A computed row cannot be answered from text, because whether its head is a
+%function is a question about the HOME, where a required library's equations
+%merge; without one the read refuses before answering anything and names the
+%`from` load that makes one. Made, the home answers the row's normal form
+%rather than its unevaluated term, which is what makes the remedy a remedy.
+%`available` is a load's record rather than a manifest row, so it needs the
+%home too.
+test(a_computed_row_is_answered_only_in_a_home,
+     [setup('new-space'(Space)), cleanup(metta_release_space(Space))]) :-
+    package_directory_fixture(computed_docs,
+        '(= (packages-docs-file) "manual.md")\n\c
+         (= (package docs) (packages-docs-file))\n\c
+         (= (package version) "0.2.0")\n', Directory),
+    getprop_outcome(Directory, docs, Refused),
+    Refused == refused(existence_error(package_home, Directory)),
+    catch(eval(['get-property', Directory, docs], _), error(_, context(Door, Message)), true),
+    Door == 'get-property',
+    format(atom(Remedy), '(from ~w)', [Directory]),
+    once(sub_atom(Message, _, _, _, Remedy)),
+    getprop_outcome(Directory, available, Available),
+    Available == refused(existence_error(package_home, Directory)),
+    getprop_outcome(Directory, version, Constant),
+    Constant == answers(["0.2.0"]),
+    once(eval(['add-atom', Space, [from, Directory]], _)),
+    getprop_outcome(Directory, docs, Normalised),
+    Normalised == answers(["manual.md"]),
+    getprop_outcome(Directory, available, Recorded),
+    Recorded == answers([]).
+
+%A home a BACKGROUND load is still filling is waited for, as a call to one of
+%its heads waits, so the read answers the manifest's rows rather than whatever
+%the worker had stored when the read arrived. The policy is the fresh space's
+%own, set and used inside it, so no other case sees it.
+%
+%Silent, because the worker is another thread and its compile trace went to
+%the stream plunit captures this test's output on: the third of three runs
+%raised `with_output_to/2: Cannot represent due to code_point` and counted
+%"+-3 sub-tests" [measured 2026-09-24, battery 38].
+test(a_home_loading_in_the_background_answers_once_loaded,
+     [setup(( 'new-space'(Space), asserta(filereader:silent(true), Silent) )),
+      cleanup(( erase(Silent), metta_release_space(Space) ))]) :-
+    package_directory_fixture(background_version,
+        '(= (package version) "0.3.0")\n\c
+         (= (packages-background-value) 3)\n', Directory),
+    once(eval([evalc, ['pragma!', load, background], Space], _)),
+    once(eval([evalc, ['add-atom', Space, [from, Directory]], Space], _)),
+    getprop_outcome(Directory, version, Version),
+    Version == answers(["0.3.0"]),
+    % Only a background load records a load state, so this is what says the
+    % home above was filled by a worker rather than eagerly.
+    directory_file_path(Directory, 'pkg.metta', Manifest),
+    once(metta_engine:metta_reference_library_home(Home, Manifest)),
+    once(metta_engine:metta_reference_load_state(Home, ready(_))).
+
+%The reader holding no home answers exactly the rows packages' package_literal/1
+%accepts, and that predicate restates the normaliser's two space-free
+%pass-throughs rather than being called by it, so this holds the two to one
+%answer. Both directions, over generated rows: an accepted row passes through
+%the normaliser as written in every space tried, INCLUDING one that defines the
+%row's own head as a function, which is what makes it safe to answer without
+%a home; and a rejected row whose head is a symbol is rewritten by the
+%normaliser in a space defining that head, which is what makes refusing it
+%without one correct rather than timid. A compound whose head is not a symbol
+%is rejected too, since a lambda in head position reduces anywhere, and only
+%the first direction is asked of it.
+test(the_literal_rows_are_the_rows_the_normaliser_passes_through) :-
+    packages:package_register_claims,
+    set_random(seed(20260924)),
+    forall(between(1, 40, Round),
+           ( random_member(Class, [atomic, claimed, unclaimed, nested]),
+             literal_row(Class, Round, Row),
+             literal_agreement(Class, Round, Row) )).
+
+literal_row(atomic, _, Row) :-
+    random_member(Row, ["lib.metta", lib_x, 42, 1.5, "", 'a b']).
+literal_row(claimed, Round, [prolog, File, [Name]]) :-
+    format(string(File), "packages_agree_~d.pl", [Round]),
+    format(atom(Name), 'packages_agree_head_~d', [Round]).
+literal_row(unclaimed, Round, [Head, "argument"]) :-
+    format(atom(Head), 'packages-agree-~d', [Round]).
+literal_row(nested, Round, [[Head], "argument"]) :-
+    format(atom(Head), 'packages-agree-nested-~d', [Round]).
+
+%Whether each class is literal, which is the generator's ground truth.
+literal_expected(atomic, true).
+literal_expected(claimed, true).
+literal_expected(unclaimed, false).
+literal_expected(nested, false).
+
+%The two spaces every row meets: one that defines nothing, and one where the
+%row's own head, when it has a symbol for one, is a function answering
+%`packages-agreement-reduced`.
+literal_agreement(Class, _, Row) :-
+    (   packages:package_literal(Row) -> Literal = true ; Literal = false ),
+    literal_expected(Class, Expected),
+    Literal == Expected,
+    setup_call_cleanup(
+        ( 'new-space'(Plain), 'new-space'(Defining),
+          literal_defining_space(Defining, Row) ),
+        literal_normalised(Class, Row, Plain, Defining),
+        ( metta_release_space(Plain), metta_release_space(Defining) )).
+
+%What the normaliser owes each class: a literal row comes back as written from
+%both spaces, and an unclaimed one is rewritten where its head is a function.
+literal_normalised(Class, Row, Plain, Defining) :-
+    literal_expected(Class, true), !,
+    findall(R, metta_engine:metta_package_normalise(Plain, Row, R), InPlain),
+    findall(R, metta_engine:metta_package_normalise(Defining, Row, R), InDefining),
+    InPlain == [Row],
+    InDefining == [Row].
+literal_normalised(unclaimed, Row, _, Defining) :- !,
+    findall(R, metta_engine:metta_package_normalise(Defining, Row, R), InDefining),
+    InDefining == ['packages-agreement-reduced'].
+literal_normalised(nested, _, _, _).
+
+literal_defining_space(Space, [Head|Arguments]) :-
+    atom(Head), !,
+    length(Arguments, Arity), length(Pattern, Arity),
+    once(eval(['add-atom', Space, ['=', [Head|Pattern], 'packages-agreement-reduced']], _)).
+literal_defining_space(_, _).
+
+%setup! names its subject by the same rule, so a bare name is a LIBRARY and one
+%nothing holds refuses as a package, where the second rule read it as a file
+%and refused it as a missing requirement.
+test(setup_names_its_subject_by_the_same_rule) :-
+    catch(eval(['setup!', packages_absent_setup_subject], _),
+          error(Formal, context(Door, _)), true),
+    Formal == existence_error(package, packages_absent_setup_subject),
+    Door == 'setup!'.
+
+%The law over the subject space rather than over three probes: every spelling
+%a reader can write either answers or refuses BY NAME, and the outcome is a
+%function of the SOURCE the spelling names, never of the spelling. Generated
+%from the grammar's own classes, each drawn with a key that has rows, one that
+%has none, `available`, and an unbound key:
+%
+%  a library the catalog holds     six spellings, one outcome
+%  a package directory             five spellings, one outcome
+%  a name or path naming nothing   refused as existence_error(package, S)
+%  a spelling no rule reads        refused as type_error(package_subject, S)
+%  an unbound subject              refused as instantiation_error
+%
+%Seeded, as every property case in these suites is, so a red run reproduces.
+test(a_subject_resolves_or_refuses_by_name) :-
+    getprop_shipped_libraries(Libraries),
+    Libraries = [_|_],
+    package_directory_fixture(property_package,
+        '(= (package name) packages_property)\n\c
+         (= (package requires) "helper.metta")\n', Directory),
+    set_random(seed(20260924)),
+    forall(between(1, 60, _),
+           ( random_member(Key, [requires, version, name, available, _]),
+             getprop_subject_case(Libraries, Directory, Spellings, Expected),
+             getprop_case_holds(Spellings, Key, Expected) )).
+
+%The catalog's libraries that live under the library root, each with the
+%manifest path the catalog answers. Another catalog's row can name a library
+%anywhere, and a bare name only ever reaches the root, so only these have every
+%spelling the law compares.
+getprop_shipped_libraries(Libraries) :-
+    % The root is recorded as <engine>/../lib and the catalog answers
+    % canonical paths, so the prefix is compared canonical.
+    metta_engine:standard_library_path(Recorded),
+    absolute_file_name(Recorded, Root, [file_type(directory)]),
+    findall(Name-Where,
+            ( eval([match, '&catalogs', [package, Name, Where], Name], _),
+              atom(Where), sub_atom(Where, 0, _, _, Root) ),
+            Found),
+    sort(Found, Libraries).
+
+getprop_subject_case(Libraries, Directory, Spellings, Expected) :-
+    random_member(Class, [library, directory, absent, unread, unbound]),
+    getprop_class_case(Class, Libraries, Directory, Spellings, Expected).
+
+getprop_class_case(library, Libraries, _, Spellings, same) :-
+    random_member(Name-Where, Libraries),
+    file_directory_name(Where, Folder),
+    atom_string(Name, Text),
+    Spellings = [Name, Text, [library, Name], [library, Text], Where, Folder].
+getprop_class_case(directory, _, Directory, Spellings, same) :-
+    directory_file_path(Directory, 'pkg.metta', Manifest),
+    atom_string(Directory, Text),
+    atom_concat(Directory, '/', Slashed),
+    Spellings = [Directory, Text, Manifest, Slashed, [library, Directory]].
+getprop_class_case(absent, _, _, Spellings, refused(package)) :-
+    random_between(0, 999999, Draw),
+    format(atom(Name), 'packages_absent_~d', [Draw]),
+    atom_concat('./', Name, Relative),
+    atom_concat('../', Name, Parent),
+    atom_concat('/packages-absent-root/', Name, Absolute),
+    atom_string(Relative, Text),
+    Spellings = [Name, Relative, Parent, Absolute, Text, [library, Name]].
+getprop_class_case(unread, _, _, Spellings, refused(type)) :-
+    random_between(-1000, 1000, Number),
+    Spellings = [Number, [], [library], [library, a, b, c], [packages_unread, x], 1.5].
+getprop_class_case(unbound, _, _, [_], refused(instantiation)).
+
+%Every spelling's outcome is reduced to its SHAPE, which exists only for an
+%answer set or a refusal naming the spelling it was given, so a refusal that
+%names nothing, or names something else, has no shape and fails the law. The
+%shapes are then compared: one for every spelling of a source, the expected
+%refusal for every spelling of anything else.
+getprop_case_holds(Spellings, Key, Expected) :-
+    findall(Shape,
+            ( member(Subject, Spellings),
+              getprop_outcome(Subject, Key, Outcome),
+              getprop_shape(Subject, Outcome, Shape) ),
+            Shapes),
+    length(Spellings, Count),
+    length(Shapes, Count),
+    (   Expected == same
+    ->  Shapes = [First|_],
+        memberchk(First, [answers(_), refused(package_home)]),
+        forall(member(Shape, Shapes), Shape == First)
+    ;   forall(member(Shape, Shapes), Shape == Expected)
+    ).
+
+getprop_shape(_, answers(Values), answers(Values)).
+getprop_shape(Subject, refused(existence_error(package_home, Named)), refused(package_home)) :-
+    Named == Subject.
+getprop_shape(Subject, refused(existence_error(package, Named)), refused(package)) :-
+    Named == Subject.
+getprop_shape(Subject, refused(type_error(package_subject, Named)), refused(type)) :-
+    Named == Subject.
+getprop_shape(_, refused(instantiation_error), refused(instantiation)).
 
 :- end_tests(packages).

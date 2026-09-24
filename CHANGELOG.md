@@ -37,6 +37,12 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Changed
 
+- `setup!` names its subject by the rule `get-property` and `from` follow, so
+  a bare name is a library under the library root and a relative path is
+  written `./x`. A `from` source beginning with `/` is a path, so an absolute
+  one holding `..` resolves instead of being refused as walking out of the
+  library root.
+
 - An open `get-atoms` read of a native space, and the engine's own probes of a
   space by an atom's head, meet the space's atoms shortest first, in
   insertion order within one length. The engine took a space's lengths from
@@ -130,6 +136,21 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   need valgrind.
 
 ### Fixed
+
+- `(get-property Subject Key)` answers or refuses by name for every subject a
+  program can write. `lib_spaces` refused as a missing requirement naming
+  `setup!`, and after a plain `import!`, `(library lib_spaces)`, `./greeter`
+  and `"./greeter"` answered nothing, because a load's package rows are kept
+  only at the home a `from` load makes. A subject is now named by the rule a
+  `from` source follows, a bare name or `(library Name)` for a library and
+  `./x`, `../x` or `/x` for a path, and a package no home holds is read from
+  its own source, the way `importlib.metadata` reads the installed files:
+  `(get-property ./greeter version)` answers `"0.1.0"`, imported or not. A row
+  the source computes is answered only at a home, normalised there, and
+  without one the read refuses naming the `(from ...)` load that makes one,
+  as the `available` key does. A subject reaching no source refuses as
+  `package <S> does not exist`, naming the file it looked for, and a key the
+  package declares no row for answers nothing.
 
 - A battery can no longer hand a git command to the checkout it sits inside.
   At 11:06:03 on 2026-09-24 a `git reset --hard HEAD` meant for battery 33

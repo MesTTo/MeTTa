@@ -366,6 +366,15 @@
             metta_reference_definition_changed/1,
             metta_reference_face_wave/0,
             metta_reference_prepare/3,
+            % What the package laws read about a subject: the one rule for
+            % what it names, whether a home holds it and has finished loading
+            % there, and whether a claim answers a row, which is half of what
+            % needs no home to be answered
+            % [tested: packages:a_subject_names_what_a_from_source_names,
+            % packages:a_computed_row_is_answered_only_in_a_home].
+            metta_reference_source_path/2,
+            metta_reference_wait/1,
+            metta_package_claimed/1,
             % The reference and package services the prelude library calls.
             % A declaration publishes a callable service even where no Prolog
             % clause in this engine reaches it, because Python calls engine

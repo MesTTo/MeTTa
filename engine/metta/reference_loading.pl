@@ -63,8 +63,10 @@ metta_reference_home(Path, Home) :-
           gensym(Prefix, Home), assertz(metta_reference_library_home(Home, Path)) )).
 
 %A `from` source is a LIBRARY NAME or a PATH, and the spec says which: one
-%written `./x` or `../x` is a path and resolves the way any import does, while
-%anything else names a library and is joined to the library root.
+%written `./x`, `../x` or `/x` is a path and resolves the way any import does,
+%while anything else names a library and is joined to the library root.
+%get-property's and setup!'s subjects are named by the same rule
+%[tested: packages:a_subject_names_what_a_from_source_names].
 %
 %Without that split every source went through library/2, so the only way to
 %reach a file outside `lib/` was to walk out of the root with `..` and let the
@@ -80,15 +82,22 @@ metta_reference_source_path(Source, Path) :-
     ;   library(Source, File) ),
     resolve_metta_import_path(File, Path).
 
-%A leading `.` cannot begin a library name, so this needs no filesystem probe
-%and no ambiguity: the two spellings are disjoint by shape.
+%Neither a leading `.` nor an absolute path can begin a library name, so this
+%needs no filesystem probe and no ambiguity: the two spellings are disjoint by
+%shape. An absolute path is one because library/2 would otherwise read it as a
+%name whose `..` segment walks out of a root it never entered, and refuse it
+%[tested: packages:a_from_spec_is_a_path_only_when_it_says_so].
 metta_reference_source_is_path(Source) :-
     (   atom(Source)
     ->  Text = Source
     ;   string(Source)
     ->  atom_string(Text, Source)
     ),
-    ( sub_atom(Text, 0, _, _, './') ; sub_atom(Text, 0, _, _, '../') ), !.
+    (   sub_atom(Text, 0, _, _, './')
+    ;   sub_atom(Text, 0, _, _, '../')
+    ;   is_absolute_file_name(Text)
+    ),
+    !.
 
 metta_reference_read_manifest(Home, Path, manifest(Forms, Signatures)) :-
     filereader:read_source_text(Path, Source),
