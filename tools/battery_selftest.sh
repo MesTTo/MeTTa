@@ -538,6 +538,38 @@ else
     failures=$((failures + 1))
 fi
 
+# A commit landing while a battery is copied moves a base between provision and
+# verify, and verify refused the sound copy of the tree the source had just
+# left; run now copies again when the bases moved. A stand-in rsync first on
+# PATH runs the real one and commits in the source once, during a copy, never
+# during verify's itemised dry run.
+SHIM="$FIXTURE/shim"
+mkdir -p "$SHIM"
+real_rsync=$(command -v rsync)
+cat > "$SHIM/rsync" <<SHIMEOF
+#!/bin/sh
+"$real_rsync" "\$@"; shim_status=\$?
+case " \$* " in
+    *" -in "*) ;;
+    *) if [ ! -e "$FIXTURE/moved" ]; then
+           : > "$FIXTURE/moved"
+           git -C "$FIXTURE/src" -c user.name=t -c user.email=t@t commit -q --allow-empty -m moved
+       fi ;;
+esac
+exit \$shim_status
+SHIMEOF
+chmod +x "$SHIM/rsync"
+if PATH="$SHIM:$PATH" BATTERY_KEEP='' BATTERY_SOURCE="$FIXTURE/src" \
+       bounded sh "$BATTERY" run "$INDEX" -- true > "$FIXTURE/out" 2>&1 &&
+   grep -q 'copying again' "$FIXTURE/out"; then
+    answers "a commit during the copy is copied again rather than refused" . \
+        "$(git -C "$FIXTURE/src" rev-parse HEAD)"
+else
+    echo "  FAIL a commit during the copy refused the run:"; cat "$FIXTURE/out"
+    failures=$((failures + 1))
+fi
+rm -f "$(sed -n 's/^battery [^:]*: exit [0-9]*, log //p' "$FIXTURE/out")"
+
 # The battery now holds an identity from the repository above. Provisioned
 # again from a directory that is not a repository, it must lose that identity,
 # or git in it answers about the earlier repository's worktree.

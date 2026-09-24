@@ -210,6 +210,11 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- `tools/battery.sh run` copies a battery again when a commit lands while it
+  copies, instead of refusing the run. The commit moved the base the copy's
+  restored paths and git identity were held to, so `verify` refused a sound
+  copy of the tree the source had just left. A `verify` failure with the bases
+  unmoved is still the battery's own and stops the run.
 - `examples/ch15-writing-transactions-and-worlds/04-admission_pools.metta`
   specifies the shipped `space-admission-verdict` in MeTTa, and its chain now
   walks every capacity row the way it walks the admitted types, refusing at
