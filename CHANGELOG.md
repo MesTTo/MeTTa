@@ -131,6 +131,15 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- The Python seat's early-exit questions cost the same and answer the same
+  in every process. Whether a tagged program can answer a query now asks its
+  three tagged shapes by key rather than reading atoms until the first
+  conclusion, a refused save names the least unwritable symbol rather than
+  whichever the enumeration met first, and the two checks of whether a name
+  is still defined or visible read its arities in ascending order; each had
+  followed the functors the process allocated first, so its cost or its
+  answer moved between processes.
+
 - A `from` row binds the heads it brings and rebinds none of the heads the
   rows before it brought. What a head's last bind realised was kept in one
   flag for every head, since SWI keys `flag/3` on a compound by its principal
