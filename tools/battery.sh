@@ -15,10 +15,10 @@
 #   commit=6ab321d7d488f95bc7cc9f60cc2f803f5018398c]; `verify` exits
 #   nonzero and names every drifted path otherwise;
 #   `run` refuses to start unless `verify` passes, so no command reports a
-#   verdict about an unknown tree, copies again when a commit moved a base
-#   while it copied rather than refusing [tested: tools/battery_selftest.sh;
-#   commit=1cb6f70050516737824425f4ac7d1326b6227374], and runs its command with
-#   git's search for
+#   verdict about an unknown tree, copies again for as long as the source
+#   changes under the copy and refuses when two copies find the same drift
+#   [tested: tools/battery_selftest.sh; commit=WORKTREE], and runs its command
+#   with git's search for
 #   a repository stopped at the battery's parent, so no git command in it
 #   reaches the checkout the battery sits inside. `run` naming no index takes
 #   the lowest one no run holds, so a finished battery is reused and the pool
@@ -907,19 +907,27 @@ case "$command" in
         mkdir -p "$tree/ai-tmp"
         echo "$$" > "$tree/ai-tmp/battery.pid"
         git -C "$ROOT" rev-parse HEAD >> "$tree/ai-tmp/battery.pid" 2>/dev/null || true
-        # A commit landing while the battery is copied moves a base between
-        # provision and verify, so verify refuses a sound copy of the tree the
-        # source has just left: its restored paths and its identity both name
-        # the old base. That is the source moving, not the battery failing, so
-        # the copy is taken again, which copies only what changed; a verify
-        # failure with the bases unmoved is the battery's own and stops the
-        # run. Each retry needs another commit inside the copy's window.
+        # A source that changes while its battery is copied makes verify refuse
+        # a sound copy of the state it has just left: a commit moves a base, so
+        # the restored paths and the identity name the old one, and a rebuild
+        # rewrites ignored output, so its files read newer than the copy's
+        # [2026-09-24 22:18: batteries 119 and 121 refused on
+        # extensions/node/build/test/*.js, `>f..t......`, while another session
+        # rebuilt the Node seat]. That is the source moving, not the battery
+        # failing. So the copy is taken again, copying only what changed, for as
+        # long as verify's findings change; two refusals naming the same drift
+        # are the battery's own defect, or a file rewritten on every copy, and
+        # stop the run with that drift.
+        run_drift=
         while :; do
-            run_bases=$(battery_bases)
             provision "$index"
-            if (verify "$index" > /dev/null); then break; fi
-            [ "$(battery_bases)" != "$run_bases" ] || exit 1
-            echo "battery $index: a commit moved the source while it was copied; copying again" >&2
+            if run_found=$( (verify "$index" > /dev/null) 2>&1 ); then break; fi
+            if [ "$run_found" = "$run_drift" ]; then
+                printf '%s\n' "$run_found" >&2
+                exit 1
+            fi
+            run_drift=$run_found
+            echo "battery $index: the source changed while it was copied; copying again" >&2
         done
         # A repository's battery must answer git about itself before anything
         # runs in it, since the command may write through git.

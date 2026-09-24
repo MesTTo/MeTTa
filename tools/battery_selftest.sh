@@ -538,11 +538,15 @@ else
     failures=$((failures + 1))
 fi
 
-# A commit landing while a battery is copied moves a base between provision and
-# verify, and verify refused the sound copy of the tree the source had just
-# left; run now copies again when the bases moved. A stand-in rsync first on
-# PATH runs the real one and commits in the source once, during a copy, never
-# during verify's itemised dry run.
+# A source that changes while its battery is copied made verify refuse a sound
+# copy: a commit moves a base, and a rebuild rewrites output the copy has just
+# taken [2026-09-24 22:18, batteries 119 and 121 on the Node seat's build]. run
+# copies again while verify's findings change, and stops when two copies find
+# the same drift. A stand-in rsync first on PATH runs the real one and then,
+# during a copy but never during verify's itemised dry run, does what
+# SHIM_ACTION names to the source: commit once, rewrite a file once, or rewrite
+# it on every copy. Each rewrite is dated an hour after the file's own mtime, not
+# after the clock, so two rewrites in one second still differ.
 SHIM="$FIXTURE/shim"
 mkdir -p "$SHIM"
 real_rsync=$(command -v rsync)
@@ -551,17 +555,27 @@ cat > "$SHIM/rsync" <<SHIMEOF
 "$real_rsync" "\$@"; shim_status=\$?
 case " \$* " in
     *" -in "*) ;;
-    *) if [ ! -e "$FIXTURE/moved" ]; then
-           : > "$FIXTURE/moved"
-           git -C "$FIXTURE/src" -c user.name=t -c user.email=t@t commit -q --allow-empty -m moved
-       fi ;;
+    *) shim_count=\$(cat "$FIXTURE/shim-count" 2>/dev/null || echo 0)
+       shim_count=\$((shim_count + 1))
+       echo "\$shim_count" > "$FIXTURE/shim-count"
+       case \$SHIM_ACTION:\$shim_count in
+           commit-once:1)
+               git -C "$FIXTURE/src" -c user.name=t -c user.email=t@t \
+                   commit -q --allow-empty -m moved ;;
+           rewrite-once:1|rewrite-always:*)
+               shim_then=\$(stat -c %Y "$FIXTURE/src/package/mid.txt")
+               touch -d "@\$((shim_then + 3600))" "$FIXTURE/src/package/mid.txt" ;;
+       esac ;;
 esac
 exit \$shim_status
 SHIMEOF
 chmod +x "$SHIM/rsync"
-if PATH="$SHIM:$PATH" BATTERY_KEEP='' BATTERY_SOURCE="$FIXTURE/src" \
-       bounded sh "$BATTERY" run "$INDEX" -- true > "$FIXTURE/out" 2>&1 &&
-   grep -q 'copying again' "$FIXTURE/out"; then
+shimmed() {
+    rm -f "$FIXTURE/shim-count"
+    SHIM_ACTION=$1 PATH="$SHIM:$PATH" BATTERY_SOURCE="$FIXTURE/src" \
+        bounded sh "$BATTERY" run "$INDEX" -- true > "$FIXTURE/out" 2>&1
+}
+if BATTERY_KEEP='' shimmed commit-once && grep -q 'copying again' "$FIXTURE/out"; then
     answers "a commit during the copy is copied again rather than refused" . \
         "$(git -C "$FIXTURE/src" rev-parse HEAD)"
 else
@@ -569,6 +583,22 @@ else
     failures=$((failures + 1))
 fi
 rm -f "$(sed -n 's/^battery [^:]*: exit [0-9]*, log //p' "$FIXTURE/out")"
+if shimmed rewrite-once && grep -q 'copying again' "$FIXTURE/out"; then
+    echo "  ok   a file rewritten during the copy is copied again rather than refused"
+else
+    echo "  FAIL a file rewritten during the copy refused the run:"; cat "$FIXTURE/out"
+    failures=$((failures + 1))
+fi
+rm -f "$(sed -n 's/^battery [^:]*: exit [0-9]*, log //p' "$FIXTURE/out")"
+if shimmed rewrite-always; then
+    echo "  FAIL a file rewritten on every copy was accepted:"; cat "$FIXTURE/out"
+    failures=$((failures + 1))
+elif grep -q 'package/mid.txt' "$FIXTURE/out"; then
+    echo "  ok   a file rewritten on every copy stops the run, naming it"
+else
+    echo "  FAIL a file rewritten on every copy stopped the run without naming it:"
+    cat "$FIXTURE/out"; failures=$((failures + 1))
+fi
 
 # The battery now holds an identity from the repository above. Provisioned
 # again from a directory that is not a repository, it must lose that identity,
