@@ -665,7 +665,29 @@ provision() {
     fi
     mkdir -p "$tree"
     battery_git_identity "$ROOT" "$tree"
-    snapshot "" "$ROOT/" "$tree/"
+    # A directory the source lacks is removed by --delete unless something the
+    # excludes keep sits inside it, an install link, a scratch directory or a
+    # component's identity. That strands it, and rsync says so and still exits
+    # 0, so the battery can then never verify against this source. Reuse
+    # across sources, which the lowest-free allocation makes common, meets it:
+    # battery 1, last provisioned from wt-merge, refused a clone without
+    # extensions/node/build [2026-09-24, the gate-perf job's rung runs]. The
+    # source does not have those directories, so each is removed whole and the
+    # copy is taken again.
+    provision_report=$(snapshot "" "$ROOT/" "$tree/" 2>&1) || {
+        printf '%s\n' "$provision_report" >&2
+        exit 1
+    }
+    provision_stranded=$(printf '%s\n' "$provision_report" |
+                         sed -n 's/^cannot delete non-empty directory: //p')
+    if [ -n "$provision_stranded" ]; then
+        printf '%s\n' "$provision_stranded" | while IFS= read -r provision_directory; do
+            [ -n "$provision_directory" ] && rm -rf -- "${tree:?}/$provision_directory"
+        done
+        snapshot "" "$ROOT/" "$tree/"
+    elif [ -n "$provision_report" ]; then
+        printf '%s\n' "$provision_report" >&2
+    fi
     # AFTER the snapshot, because the component directories have to exist and
     # the snapshot is what creates them on a first provision.
     for component in $(battery_component_paths); do

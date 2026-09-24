@@ -444,6 +444,24 @@ else
     echo "  ok   a battery re-provisioned from a non-repository drops its earlier git identity"
 fi
 
+# A battery reused for a source that lacks one of its directories strands that
+# directory when something the excludes keep sits inside it, here an install
+# link; rsync reports it and exits 0, and verify then refuses for ever.
+# Provision removes the stranded directory and copies again.
+mkdir -p "$FIXTURE/first/gone/node_modules/pkg" "$FIXTURE/second"
+printf 'first\n' > "$FIXTURE/first/gone/file.txt"
+printf 'dep\n' > "$FIXTURE/first/gone/node_modules/pkg/index.js"
+printf 'second\n' > "$FIXTURE/second/file.txt"
+BATTERY_SOURCE="$FIXTURE/first" bounded sh "$BATTERY" provision "$INDEX" > "$FIXTURE/out" 2>&1
+BATTERY_SOURCE="$FIXTURE/second" bounded sh "$BATTERY" provision "$INDEX" > "$FIXTURE/out" 2>&1
+if BATTERY_SOURCE="$FIXTURE/second" bounded sh "$BATTERY" verify "$INDEX" > "$FIXTURE/out" 2>&1; then
+    echo "  ok   a directory the next source lacks is removed even with an excluded entry inside"
+else
+    echo "  FAIL a battery reused for a source without one of its directories cannot verify:"
+    cat "$FIXTURE/out"
+    failures=$((failures + 1))
+fi
+
 # Callers used to name their own index, each settling on a range of its own, so
 # batteries only accumulated. A run naming none takes the lowest free index and
 # reuses it once free, and prune removes what no run holds and nothing touched.

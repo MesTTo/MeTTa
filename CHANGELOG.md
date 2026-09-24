@@ -178,6 +178,12 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- A battery reused for a source that lacks one of its directories no longer
+  refuses for ever. rsync cannot delete a directory holding something the
+  excludes keep, an install link or a component's identity, reports it and
+  exits 0, so the battery could never verify against that source; reuse across
+  sources, which `run` with no index makes common, met it at once. Provision
+  now removes each stranded directory whole and copies again.
 - `tools/battery.sh run -- <command>` with no index takes the lowest index no
   other run holds, reusing a finished battery instead of copying the working
   tree again, and `tools/battery.sh prune <hours>` removes the batteries no run
