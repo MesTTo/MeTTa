@@ -27,7 +27,7 @@
 %   - an open read and an open-tail probe answer a space's atoms shortest
 %     first after any number of functors planted ahead of them [tested:
 %     spaces_cycles:native_reads_follow_ascending_arity_wherever_functors_land;
-%     commit=WORKTREE].
+%     commit=850d2a660b1c428279779928a08f2e9904be08e3].
 %   - restricted spaces select curated grant profiles and raw calls pass the
 %     sandbox boundary [tested: spaces_restricted_modules;
 %     commit=6a08901f4125c2536f5b4032daac9937f793870f].

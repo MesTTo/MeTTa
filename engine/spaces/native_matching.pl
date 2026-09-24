@@ -12,7 +12,7 @@
 %   shortest first, in insertion order within one length, whatever functors
 %   the process allocated before them (metta_arity_ascending/3) [tested:
 %   spaces_cycles:native_reads_follow_ascending_arity_wherever_functors_land;
-%   commit=WORKTREE].
+%   commit=850d2a660b1c428279779928a08f2e9904be08e3].
 % Guarantees: annotated arrow effects reach catalog policy and follow their
 %   declaration lifetime [tested: run_tests(metta_arrow_products); commit=bbb512316280110a747e31c26adfc31e8c5104be].
 % Guarded by: catalog clear acquires '$metta_typing_policy' before
