@@ -147,6 +147,15 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- A startup `Setting` in the Python seat now declares the SWI flag it sets
+  (`flag=`; only startup settings may), and `stack_limit` names `stack_limit`.
+  `boundsgen.py` renders the flagged settings, with their defaults and
+  variable names, into `extensions/cmetta/settings.h`, which the C seat boots
+  from: its stack ceiling is `mt_config.stack_limit`, else `METTA_STACK_LIMIT`
+  read as the Python seat reads it, else the seat's default. The C seat had
+  booted under SWI's own 1 GiB ceiling whenever the host named none, so ch18's
+  05-matespacefast overflowed there while the CLI and PyMeTTa ran it, and
+  clearing a bound with `mt_limit(0)` reset a configured ceiling to 1 GiB.
 - An exact removal's selection carries the head the code that selected it
   already holds, and an equation removal that the live selection already
   decides runs under it instead of installing it again. The selection read
