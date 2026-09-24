@@ -82,6 +82,10 @@ Guarantees:
     than reporting as a pass, and has no effect where ``CI=true`` [tested:
     check_upstream_parity_selftest.upstream_prerequisite_failures;
     commit=2b1d45b347027f0290a86315ccc770f3dac08851]
+  - a present clone that holds no pinned commit refuses, exit 1, naming the
+    commit, and a present tree that is no repository of its own is judged by
+    its engine alone [tested 2026-09-25T04:49:05+10:00:
+    check_upstream_parity_selftest.upstream_prerequisite_failures]
   - the sibling checkout is AT the pin, and a kernel or container that denies
     the counter is named with the two knobs that decide it [tested: this file
     is its own gate; commit=fc990fa3042ee05d931d3928694e89021be32855]
@@ -793,7 +797,33 @@ def upstream_prerequisite_failures() -> list[str]:
                     "METTA_UPSTREAM_OPTIONAL=1 let an absent checkout pass under "
                     "CI=true"
                 )
+        os.environ.pop("CI")
+        os.environ.pop("METTA_UPSTREAM_OPTIONAL")
+        # METTA_UPSTREAM names a clone and never a revision: a clone holding an
+        # engine and no pinned commit is refused by the commit's name, and the
+        # same tree without a repository of its own is judged by its engine.
+        clone = lane.REPO / "ai-tmp" / "ai upstream commit fixture"
+        shutil.rmtree(clone, ignore_errors=True)
+        (clone / "src").mkdir(parents=True)
+        (clone / "src" / "metta.pl").write_text("% planted\n", encoding="utf-8")
+        lane.UPSTREAM = clone
+        with contextlib.redirect_stderr(io.StringIO()):
+            if lane.upstream_prerequisite() is not None:
+                failures.append("a planted tree with no repository of its own was refused")
+        git = ["git", "-C", str(clone), "-c", "user.name=selftest", "-c", "user.email=selftest@invalid"]
+        subprocess.run([*git, "init", "-q"], check=True, capture_output=True)
+        subprocess.run([*git, "commit", "-q", "--allow-empty", "-m", "fixture"], check=True,
+                       capture_output=True)
+        missing = io.StringIO()
+        with contextlib.redirect_stderr(missing):
+            lacking = lane.upstream_prerequisite()
+        if lacking != 1 or lane.UPSTREAM_COMMIT not in missing.getvalue():
+            failures.append(
+                f"a clone without {lane.UPSTREAM_COMMIT} answered {lacking} and said "
+                f"{missing.getvalue()!r}, instead of refusing by the commit's name"
+            )
     finally:
+        shutil.rmtree(lane.REPO / "ai-tmp" / "ai upstream commit fixture", ignore_errors=True)
         lane.UPSTREAM = original_upstream
         os.environ.pop("METTA_UPSTREAM_OPTIONAL", None)
         if original_optional is not None:

@@ -294,6 +294,17 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- `example-origins` and the upstream parity lane each read the upstream commit
+  they are pinned to, from whichever clone they find, so exporting
+  `METTA_UPSTREAM` for one no longer turns the other red. Both took their
+  upstream from that one variable and read its working tree, while origins
+  attributes against PeTTa-base 43705f5 and parity runs a newer upstream:
+  pointed at the newer clone, origins credited its later history and its
+  untracked `ai_fz_progs/` as sources. The variable now names a clone, never a
+  revision, and a clone that lacks the pinned commit is refused by the
+  commit's name. With no clone at all `example-origins` reads skipped where it
+  read ok for a run that compared nothing.
+
 - `test_observation_restores_the_cost_of_ordinary_successful_execution`
   takes its baseline after `lib_observe` and the libraries it requires have
   loaded, so it measures the observation alone. Run first in its process it

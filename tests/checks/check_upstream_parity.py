@@ -106,6 +106,11 @@ Guarantees:
     turns it into a printed skip, exit 125, except where CI=true
     [tested: check_upstream_parity_selftest.upstream_prerequisite_failures;
     commit=2b1d45b347027f0290a86315ccc770f3dac08851].
+  - METTA_UPSTREAM names a clone, never a revision: a clone that holds no
+    UPSTREAM_COMMIT is refused, exit 1, by the commit's name, and one that holds
+    it is accepted whatever its HEAD, which only --rebaseline, the one path
+    running the checkout's own tree for a recorded number, still requires to be
+    the pin [tested 2026-09-25T04:49:05+10:00: check_upstream_parity_selftest.upstream_prerequisite_failures].
   - a kernel or container that will not let this count instructions is named
     with the two knobs that decide it, rather than reported as a parse failure
     [tested: tests/checks/check_upstream_parity_selftest.py; commit=fc990fa3042ee05d931d3928694e89021be32855].
@@ -1350,6 +1355,31 @@ def upstream_present() -> bool:
     return holds_engine(UPSTREAM)
 
 
+def lacks_commit(checkout: pathlib.Path) -> bool:
+    """Whether `checkout` is a clone of its own whose object store lacks UPSTREAM_COMMIT.
+
+    METTA_UPSTREAM names a CLONE and never a revision, because
+    extensions/python/tools/example_origins.py reads its own, older commit out
+    of the same variable's clone: exporting it for this lane turned that one
+    red while both lanes read whatever the working tree held. So a clone is
+    refused here only when it cannot supply this lane's commit at all, and the
+    refusal names the commit. A checkout that is not a repository of its own,
+    a planted tree or an unpacked archive, says nothing about commits and is
+    judged by the engine it holds alone.
+    """
+    top = subprocess.run(
+        ["git", "-C", str(checkout), "rev-parse", "--show-toplevel"],
+        capture_output=True, text=True, timeout=30, check=False,
+    )
+    if top.returncode != 0 or pathlib.Path(top.stdout.strip()).resolve() != checkout.resolve():
+        return False
+    held = subprocess.run(
+        ["git", "-C", str(checkout), "cat-file", "-e", f"{UPSTREAM_COMMIT}^{{commit}}"],
+        capture_output=True, timeout=30, check=False,
+    )
+    return held.returncode != 0
+
+
 def upstream_head() -> str | None:
     """The commit the sibling checkout is on, or None when it cannot say."""
     try:
@@ -1392,6 +1422,12 @@ def upstream_prerequisite(
     let the gate pass there having measured nothing.
     """
     if upstream_present():
+        if lacks_commit(UPSTREAM):
+            print(f"error: {UPSTREAM} holds no commit {UPSTREAM_COMMIT}, the one the "
+                  f"recorded upstream numbers were measured from; fetch "
+                  f"{UPSTREAM_REMOTE} into it, or name a clone that holds it with "
+                  f"METTA_UPSTREAM. {remedy}", file=sys.stderr)
+            return 1
         return None
     looked = UPSTREAM_CANDIDATES if UPSTREAM in UPSTREAM_CANDIDATES else [UPSTREAM]
     absence = "upstream checkout not found at " + ", ".join(str(p) for p in looked)
