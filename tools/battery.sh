@@ -384,9 +384,8 @@ battery_git_identity() {
     # state came with it, so a run on battery 5 at e1979a305 opened with an
     # earlier run's staging, `AD tests/checks/evidence_sites.py` and `MM
     # CHANGELOG.md` among nine paths, in front of every lane that reads the
-    # tracked set [measured 2026-09-25T01:57:42+10:00: git status at the run's
-    # start, ai-tmp/battery-logs/battery-5-20260925T015742-1015220.log;
-    # tested 2026-09-25T04:00:30+10:00: tools/battery_selftest.sh].
+    # tracked set [measured 2026-09-25T01:57:42+10:00: git status at the start
+    # of that run; tested 2026-09-25T04:00:30+10:00: tools/battery_selftest.sh].
     #
     # A fresh identity costs no checkout. `git worktree add --no-checkout`
     # writes only the gitfile and leaves the index empty, and `git read-tree`

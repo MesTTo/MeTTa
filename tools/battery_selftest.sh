@@ -349,8 +349,7 @@ fi
 # earlier run's staging, `AD tests/checks/evidence_sites.py` and `MM
 # CHANGELOG.md` among nine paths, so every lane reading the tracked set read
 # files that were neither the base's nor the snapshot's
-# [measured 2026-09-25T01:57:42+10:00: git status at the run's start,
-# ai-tmp/battery-logs/battery-5-20260925T015742-1015220.log].
+# [measured 2026-09-25T01:57:42+10:00: git status at the start of that run].
 printf 'staged by a run\n' > "$TREE/second.txt"
 # MERGE_HEAD is written as a file in the worktree's own git directory, which is
 # what an interrupted merge leaves: git 2.53 refuses `update-ref MERGE_HEAD`
