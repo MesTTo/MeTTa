@@ -54,6 +54,14 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Changed
 
+- The `evidence` lane reads a tag's time. Since 2026-09-24T23:27:42+10:00 a
+  tag carries the time its evidence ran, as `date -Iseconds` prints it:
+  `[tested 2026-09-25T00:10:11+10:00: translator_type_extensions]`. A time
+  that is not the whole stamp is now reported in every kind, `assumed`
+  included. Nothing read it before. A malformed time passed, and a stamp
+  glued to its name, `...+10:00:name`, hid the name, so a citation of a test
+  that does not exist passed. A tag carrying a date alone is read as before.
+
 - Hook verdicts, typing-rule outcomes and translator-rule refusals are
   capitalized constructors, as MeTTa's other data and control values are
   (`True`, `Empty`, `Error`). A pre-add or post-add handler answers `(Accept)`,

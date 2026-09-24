@@ -152,16 +152,24 @@ needs `Owns`, one that holds a lock needs `Guarded by`, one that fixes a
 constant on the operator's behalf needs `Decides`. A field that would say
 nothing is left out.
 
-Four tags carry the evidence, and each has to bring what it claims:
+Four tags carry the evidence. Each is stamped with the time its evidence ran,
+as `date -Iseconds` prints it at the run, and each has to bring what it claims:
 
-- `[measured 2026-08-14: 2.05x]`, a number with a date, so the claim can go
-  stale and be seen to have gone stale.
-- `[tested 2026-08-15: translator_type_extensions]`, naming a test, a PlUnit
-  unit, a named check, a shell suite, an example or a path that exists, that
-  can report a failure, and that a runner executes.
-- `[source 2026-08-19: swi-prolog.org/pldoc/...]`, a date or a reference, a
-  URL or a `file:line`.
-- `[assumed 2026-08-14: ...]`, a claim nobody has verified.
+- `[measured 2026-09-25T00:10:11+10:00: 2.05x]`, a number with its time, so the
+  claim can go stale and be seen to have gone stale.
+- `[tested 2026-09-25T00:10:11+10:00: translator_type_extensions]`, naming a
+  test, a PlUnit unit, a named check, a shell suite, an example or a path that
+  exists, that can report a failure, and that a runner executes.
+- `[source 2026-09-25T00:10:11+10:00: swi-prolog.org/pldoc/...]`, a time or a
+  reference, a URL or a `file:line`.
+- `[assumed 2026-09-25T00:10:11+10:00: ...]`, a claim nobody has verified.
+
+The stamp is also how the tree a claim ran on is found: it is the first commit
+that carries the stamp. So a tag never carries a commit ID of its own
+repository, which the commit carrying it could not contain. A tag written
+before 2026-09-24T23:27:42+10:00 carries a date alone, `[measured 2026-08-14:
+2.05x]`, and keeps it until its evidence runs again, which stamps it. A time
+that is not the whole stamp is a finding in every kind, `assumed` included.
 
 `assumed` is the load-bearing one. It costs nothing to write and it is the
 only thing that makes an unverified claim visible as one, so use it rather

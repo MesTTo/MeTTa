@@ -112,11 +112,19 @@ TAG = "tested"
 #: THIS repository as far as the gate is concerned, and it read the scratch
 #: plant below as one -- as it read this very sentence, until the word left it.
 MEASURED = "measured"
+#: The last two tag words, variables for the same reason: the stamp cases
+#: below plant a tag of every kind.
+SOURCE = "source"
+ASSUMED = "assumed"
 #: And the scratch directory, spelled once here and written into the fixture's
 #: own gate_scratch.sh, so the plant and the runner the checker reads it from
 #: cannot disagree about what the rule is refusing.
 SCRATCH = "ai-tmp"
 WHEN = "2026-08-18"
+#: A whole `date -Iseconds` stamp, the time every tag carries since the
+#: obligation-header rule of 2026-09-24T23:27:42+10:00, where WHEN is the date
+#: a tag from before it carries.
+STAMPED = "2026-09-25T00:10:11+10:00"
 
 # (accepted, what the citation names, why it is written this way)
 CITATIONS = (
@@ -847,6 +855,76 @@ def scratch_path_complaints() -> list[str]:
     return complaints
 
 
+def stamp_complaints() -> list[str]:
+    """A tag's time is the whole `date -Iseconds` stamp, read in every kind.
+
+    Nothing read a tag's time before this. A malformed one passed in every
+    kind, and a stamp glued to the name after it, `...+10:00:name`, hid the
+    name, since the two read as one token that is not a name and so were never
+    looked up: a citation of a test that does not exist passed. A time that is
+    not a whole stamp cannot be read back as the moment its evidence ran, so it
+    is a finding of its own in every kind, an assumed tag's included; a date
+    with no time is a tag from before the rule and passes as it always has.
+
+    The stamped citations pin the other half, that a well-formed stamp leaves
+    the name after it to be read as a name: one of a real test passes and one
+    of nothing is reported for that name and not for its time.
+    """
+    # (kind, what the tag carries after its kind, what it must be reported
+    # for -- None, "time", or the name it gives -- and what the case is)
+    cases = (
+        (TAG, f"{STAMPED}: test_collected", None, "a stamped tested tag whose name resolves"),
+        (TAG, f"{STAMPED}: no_such_thing_at_all", "no_such_thing_at_all",
+         "a stamped tested tag naming nothing"),
+        (MEASURED, f"{STAMPED}: 2.05x", None, "a stamped measured tag"),
+        (SOURCE, f"{STAMPED}: https://example.org/spec", None, "a stamped source tag"),
+        (ASSUMED, f"{STAMPED}: the fixture holds", None, "a stamped assumed tag"),
+        (MEASURED, f"{WHEN}: 2.05x", None, "a tag from before the rule, dated alone"),
+        (TAG, f"{STAMPED}:no_such_thing_at_all", "time",
+         "a stamp glued to the name it gives, which hid the name"),
+        (MEASURED, "2026-09-25T00:10: 2.05x", "time", "a time without its seconds or offset"),
+        (TAG, "2026-09-25T00:10:11: test_collected", "time", "a time without its offset"),
+        (MEASURED, "2026-09-25T00:10:11Z: 2.05x", "time",
+         "a time written with Z, which date -Iseconds never prints"),
+        (SOURCE, "2026-09-25T25:10:11+10:00: https://example.org/spec", "time", "an hour past 23"),
+        (ASSUMED, "2026-09-25T00:10+10:00: the fixture holds", "time",
+         "an assumed tag whose time is not a whole stamp"),
+    )
+    complaints = []
+    with tempfile.TemporaryDirectory() as directory:
+        root = Path(directory)
+        build(root, PYTEST_ANCHOR)
+        fixture = root / "engine/fixture.pl"
+        lines = fixture.read_text().splitlines()
+        head = lines.index("% Open Obligations:")
+        planted = [f"%   - {what} [{kind} {written}]." for kind, written, _, what in cases]
+        fixture.write_text("\n".join(lines[:head] + planted + lines[head:]) + "\n")
+        output = run(root)
+        for offset, (kind, written, expect, what) in enumerate(cases, start=1):
+            reported = [
+                line for line in output
+                if line.startswith(f"engine/fixture.pl:{head + offset}:")
+            ]
+            if expect is None:
+                if reported:
+                    complaints.append(f"rejected {what}: {reported[0]}")
+                continue
+            if not reported:
+                complaints.append(f"accepted {what}, which carries {kind} {written}")
+                continue
+            if len(reported) > 1:
+                complaints.append(f"reported {what} {len(reported)} times, expected once")
+            # What the finding is FOR is what discriminates: a bad time is
+            # reported as a time, and a stamped citation of nothing for the
+            # name it gives and not for its time.
+            about_time = "date -Iseconds" in reported[0]
+            if expect == "time" and not about_time:
+                complaints.append(f"reported {what} for something other than its time: {reported[0]}")
+            if expect != "time" and (about_time or expect not in reported[0]):
+                complaints.append(f"reported {what} for something other than {expect}: {reported[0]}")
+    return complaints
+
+
 def commit_pin_complaints() -> list[str]:
     """A commit= must name a real commit, and WORKTREE must not survive a release.
 
@@ -963,6 +1041,7 @@ def main() -> int:
     complaints += prolog_tool_complaints()
     complaints += ignored_output_complaints()
     complaints += scratch_path_complaints()
+    complaints += stamp_complaints()
     complaints += commit_pin_complaints()
 
     for complaint in complaints:
@@ -976,7 +1055,8 @@ def main() -> int:
         f"under the scratch root beside one the tree tracks, and a tracked "
         f"probe, native support sources, a nested example fixture, a root build hook, a component shell test "
         f"and a Prolog tool citing tests that are not there, "
-        f"and a stale copy under an ignored build directory"
+        f"a stale copy under an ignored build directory, "
+        f"and a tag's time read whole in every kind"
     )
     return 1 if complaints else 0
 

@@ -60,8 +60,8 @@ TAGS = "check_evidence_tags.py"
 RUNNERS = "evidence_runners.py"
 
 #: (what it takes away, module, the text, what replaces it). One per rule the
-#: gate gained on 2026-09-07, each written as the smallest edit that puts the
-#: rule back the way it was.
+#: gate gained on 2026-09-07 and since, each written as the smallest edit that
+#: puts the rule back the way it was.
 MUTATIONS = (
     (
         "the quoted lookup, so a name written as a sentence is dropped in silence",
@@ -119,8 +119,14 @@ MUTATIONS = (
     (
         "the scratch refusal",
         TAGS,
-        "        if root is not None:\n            problems += scratch_problems(body, under, root)\n",
+        "            if root is not None:\n                problems += scratch_problems(body, under, root)\n",
         "",
+    ),
+    (
+        "the time rule, so a time that is not a whole stamp goes unreported",
+        TAGS,
+        "        problems = time_problems(body)\n",
+        "        problems = []\n",
     ),
     (
         "the tsconfig hop, so a suite compiled before it runs reads as unrun",

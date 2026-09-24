@@ -28,6 +28,10 @@ What each tag has to carry, and why only this much:
             report a failure; and a runner executes it
   measured  a YYYY-MM-DD date, so the claim can go stale
   source    a date or a reference
+  any kind  a time after its date is the whole time `date -Iseconds` prints,
+            YYYY-MM-DDTHH:MM:SS+HH:MM, the stamp every tag carries since the
+            obligation-header rule of 2026-09-24T23:27:42+10:00; a tag from
+            before it carries the date alone and is read as it always was
 
 Existence alone was the whole check until 2026-08-18, and it is the weakest of
 the three. engine/translator.pl cited a tests/performance/reduce_dispatch.pl for
@@ -137,6 +141,10 @@ Guarantees:
     tests/checks/check_pin_provenance_selftest.py; commit=8ee8fcd4e43a932131909f7c58ad4fbe4dcf8d1d]
   - tracked TOML configuration pins resolve through the same provenance scan
     [tested: tests/checks/check_pin_provenance_selftest.py; commit=f88b11ae305c4e1bfafa8387d1f24e51d0d8cb92]
+  - a tag's time is read whole in every kind: a `date -Iseconds` stamp is one
+    token, so a tested tag's names are the words after it, and a time that is
+    not a whole stamp is reported, an assumed tag's included
+    [tested 2026-09-25T00:34:33+10:00: tests/checks/check_evidence_selftest.py]
 Fails when:
   - asked whether a target tests the PARTICULAR guarantee it is cited for.
     Every rule here is necessary and none is sufficient: a script that runs
@@ -169,6 +177,7 @@ import subprocess
 import sys
 from collections.abc import Iterator
 from dataclasses import dataclass
+from datetime import datetime
 from functools import cache
 from pathlib import Path
 
@@ -677,7 +686,18 @@ QUOTED_NAME = re.compile(r'"([^"]{4,}?)"', re.DOTALL)
 #carries the marker on its continuation line, and without it here the
 #second half of a two-line test name reads as `// ...`, so four copies of
 COMMENT_PREFIX = re.compile(r"^[ \t]*[%#*/]*[ \t]*", re.MULTILINE)
+#: A tag's date, which is what lets a measured or source claim go stale.
 DATE = re.compile(r"\d{4}-\d{2}-\d{2}")
+#: A tag's time as written: its date and whatever is attached to it, one token,
+#: so a time is judged whole. A tag carried the date alone until the
+#: obligation-header rule of 2026-09-24T23:27:42+10:00 and carries the whole
+#: `date -Iseconds` stamp since.
+TIME = re.compile(r"\d{4}-\d{2}-\d{2}(?:T[\w:+.-]*)?")
+#: The whole of what `date -Iseconds` prints, and so the only time a tag may
+#: carry after its date [source 2026-09-25T00:29:31+10:00: date(1), whose -I
+#: option with FMT=seconds prints date and time to the second, its own example
+#: being 2006-08-14T02:34:56-06:00].
+STAMP = re.compile(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}[+-]\d{2}:\d{2}")
 IDENTIFIER = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*(?::[A-Za-z_][A-Za-z0-9_]*)*$")
 #: What makes a token READ as a name rather than as the sentence around it.
 #: A claim's prose sits in the same brackets as its names, and PROSE cannot
@@ -1546,6 +1566,39 @@ def tested_problems(body: str, known: Evidence, where: Path | None = None) -> li
     return problems
 
 
+def time_problems(body: str) -> list[str]:
+    """What is wrong with a tag's time, in any kind: a time after its date that is not a whole stamp.
+
+    The stamp is how a claim is aged and how the tree it ran on is found, the
+    first commit carrying it, so a time that cannot be read back as the moment
+    the evidence ran leaves the claim unaged whatever it says. A date with no
+    time is a tag from before the rule and is read as it always was.
+
+    Nothing read a time before this. A malformed one passed in every kind, and
+    a stamp glued to the name after it, `...+10:00:name`, hid the name: the two
+    read as one token IDENTIFIER rejects, which resolve() answers with nothing,
+    so a citation of a test that does not exist passed unread. A well-formed
+    stamp followed by a space is left to that same rule, since no time is an
+    IDENTIFIER, and the self-test's stamped citations pin it.
+    """
+    problems = []
+    for found in TIME.finditer(body):
+        written = found.group(0).rstrip(":.")
+        if "T" not in written:
+            continue
+        if STAMP.fullmatch(written):
+            try:
+                datetime.fromisoformat(written)
+                continue
+            except ValueError:
+                pass
+        problems.append(
+            f"carries the time {written}, which is not a whole `date -Iseconds` "
+            "stamp (YYYY-MM-DDTHH:MM:SS+HH:MM)"
+        )
+    return problems
+
+
 def measured_problems(body: str, known: Evidence, where: Path | None = None) -> list[str]:
     """What is wrong with one `measured` tag, which needs a date so it can go stale."""
     problems = []
@@ -1869,21 +1922,24 @@ def main() -> int:
     under = re.compile(rf"(?<![\w/-]){re.escape(root or 'ai-tmp')}/[\w./$-]*")
     checked = 0
     for path, line, tag, body in sites:
-        if tag == "assumed":
-            # Unchecked on purpose: it is the honest tag for a claim nobody has
-            # verified, and demanding evidence for it would push authors back to
-            # stating unverified claims in the same voice as measured facts. Its
-            # commit pin was read above, where the word does not matter.
-            continue
-        checked += 1
-        if tag == "tested":
-            problems = tested_problems(body, known, path)
-        elif tag == "measured":
-            problems = measured_problems(body, known, path)
-        else:
-            problems = source_problems(body)
-        if root is not None:
-            problems += scratch_problems(body, under, root)
+        # A tag's time is read in every kind: one that cannot be read back
+        # leaves the claim unaged, whatever the claim is.
+        problems = time_problems(body)
+        # An assumed claim is otherwise unchecked on purpose: it is the honest
+        # tag for a claim nobody has verified, and demanding evidence for it
+        # would push authors back to stating unverified claims in the same
+        # voice as measured facts. Its commit pin was read above, where the
+        # word does not matter.
+        if tag != "assumed":
+            checked += 1
+            if tag == "tested":
+                problems += tested_problems(body, known, path)
+            elif tag == "measured":
+                problems += measured_problems(body, known, path)
+            else:
+                problems += source_problems(body)
+            if root is not None:
+                problems += scratch_problems(body, under, root)
         for problem in problems:
             findings.append(f"{path.relative_to(ROOT)}:{line}: {tag}: {problem}")
     for finding in findings:
