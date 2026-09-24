@@ -18,7 +18,7 @@ Guarantees:
     patch rewrites is declared, since the stack is read last first;
     `require TREE` lists exactly the
     patches under TREE in name order under that tree's module header, and
-    refuses two patches sharing a name [tested: this file; commit=WORKTREE]
+    refuses two patches sharing a name [tested: this file; commit=95aaabc0b4bd4d1748e0e11fb1adead93e52ee3c]
   - `declare --built-by COMMAND...` binds a home with no launcher, the shape
     of the WebAssembly host, to the one line COMMAND prints, and refuses,
     writing nothing, when COMMAND exits nonzero, prints nothing or prints more

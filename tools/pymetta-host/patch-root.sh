@@ -42,7 +42,7 @@
 #     applied in packages/utf8proc, and a second fetch-source.sh run refused
 #     it as a moved pin [measured 2026-09-24: an existing clone at V10.1.14
 #     with every patch applied; tested: tools/pymetta-host/fetch_selftest.sh;
-#     commit=WORKTREE]
+#     commit=630a20e49e4aa29b4fab2617e2ae6dc474a06189]
 
 pristine_tree() {
     git -C "$1" checkout --quiet --force -- . &&

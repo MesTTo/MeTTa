@@ -63,7 +63,7 @@
 #     applied and a patch another one builds on still reads as carried. A
 #     patch the tree lacks is absent from the declaration and the
 #     requirement holding it names it
-#     [tested: tests/checks/check_host_declaration_selftest.py; commit=WORKTREE]
+#     [tested: tests/checks/check_host_declaration_selftest.py; commit=95aaabc0b4bd4d1748e0e11fb1adead93e52ee3c]
 #   - `declare` records the one line the identity command prints, run with
 #     SWI_HOME_DIR unset so the answer is that build's own: HOME/bin/<arch>/swipl
 #     reporting its compiled_at, or the command after --built-by. It refuses,
