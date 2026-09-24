@@ -29,7 +29,7 @@
 %   function of the term alone, so two observations of one source store
 %   identical rows [tested:
 %   source_observation:two_observations_of_one_source_store_identical_rows;
-%   commit=WORKTREE].
+%   commit=11882680a6549ab9e52f78970950edefbd10a8c2].
 % Guarantees: an engine that never runs observe-source loads none of this and
 %   pays nothing for it. Loading it at boot cost 3,696 inferences, and its
 %   resident prolog:prolog_exception_hook/5 clause cost another 119 on the
