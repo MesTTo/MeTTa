@@ -169,6 +169,14 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- `tools/run.sh` starts swipl under the stack ceiling the Python and C seats
+  boot under, 8,000,000,000 bytes, where it passed its own `8g`. The ceiling
+  and the variable that replaces it come from `tools/settings.sh`, which
+  `extensions/python/tools/boundsgen.py` generates from the Setting
+  declarations that name an SWI flag, so the launcher and both seats read one
+  declaration and `bounds-sync` fails when the fragment drifts.
+  `METTA_STACK_LIMIT` now reaches the launcher too, and a value that is not a
+  positive decimal integer stops it before swipl starts, in the seats' words.
 - A startup `Setting` in the Python seat now declares the SWI flag it sets
   (`flag=`; only startup settings may), and `stack_limit` names `stack_limit`.
   `boundsgen.py` renders the flagged settings, with their defaults and

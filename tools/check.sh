@@ -1129,12 +1129,12 @@ artifact_layer_sync_witnesses() {
 # Umbrella: artifact inputs and outputs span DEVELOPING.md, extensions/python, pyproject.toml.
 run GATE layer-sync-selftest artifact_layer_sync_witnesses
 
-# Umbrella: artifact inputs and outputs span engine, extensions/node, extensions/python, lib.
+# Umbrella: artifact inputs and outputs span engine, extensions/cmetta, extensions/node, extensions/python, lib.
 run GATE vocab-sync "$PY" "$HERE/extensions/python/tools/vocabgen.py"
 artifact_vocab_sync_witnesses() {
     bounded env CHECK_PY="$PY" sh "$HERE/extensions/python/test.sh" "$HERE/extensions/python/tests/repository/test_artifact_projections.py" -k vocabulary || return $?
 }
-# Umbrella: artifact inputs and outputs span engine, extensions/node, extensions/python, lib.
+# Umbrella: artifact inputs and outputs span engine, extensions/cmetta, extensions/node, extensions/python, lib.
 run GATE vocab-sync-selftest artifact_vocab_sync_witnesses
 
 # Umbrella: artifact inputs and outputs span DEVELOPING.md, extensions/python, tools.
@@ -1153,14 +1153,15 @@ artifact_binding_witnesses() {
 # Umbrella: artifact inputs and outputs span engine, extensions/python.
 run GATE binding-selftest artifact_binding_witnesses
 
-# Umbrella: artifact inputs and outputs span DEVELOPING.md, extensions/python.
+# Umbrella: artifact inputs and outputs span DEVELOPING.md, extensions/cmetta, extensions/python, tools.
 run GATE bounds-sync "$PY" "$HERE/extensions/python/tools/boundsgen.py"
 artifact_bounds_sync_witnesses() {
     bounded env CHECK_PY="$PY" sh "$HERE/extensions/python/test.sh" "$HERE/extensions/python/tests/repository/test_layout_projections.py" -k boundsgen || return $?
     bounded env CHECK_PY="$PY" sh "$HERE/extensions/python/test.sh" "$HERE/extensions/python/tests/ch01_getting_started/test_config.py" || return $?
     bounded env CHECK_PY="$PY" sh "$HERE/extensions/python/test.sh" "$HERE/extensions/python/tests/repository/test_artifact_projections.py" -k setting_configuration || return $?
+    bounded sh "$HERE/tests/shell/test_run_stack_limit.sh" || return $?
 }
-# Umbrella: artifact inputs and outputs span DEVELOPING.md, extensions/python.
+# Umbrella: artifact inputs and outputs span DEVELOPING.md, extensions/cmetta, extensions/python, tools.
 run GATE bounds-sync-selftest artifact_bounds_sync_witnesses
 
 # Umbrella: artifact inputs and outputs span CODEC.md, tests.
