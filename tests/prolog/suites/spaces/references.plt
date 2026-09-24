@@ -14,7 +14,7 @@
 %   consuming published spaces leaves pending the ones queued since [tested:
 %   references:a_space_set_costs_the_same_whatever_its_spaces_are_named,
 %   references:consuming_published_spaces_keeps_the_ones_queued_since;
-%   commit=WORKTREE].
+%   commit=d4a365c16bdf1801f9839597e56ecfcc8c2b7a0c].
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
 :- ensure_loaded('../../../../engine/metta.pl').

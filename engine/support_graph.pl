@@ -52,7 +52,7 @@
 %     the node's hash collides, so a node named after a different checkout
 %     path costs the same [tested:
 %     support_graph:an_invalidation_costs_the_same_whatever_its_nodes_are_named;
-%     commit=WORKTREE].
+%     commit=d4a365c16bdf1801f9839597e56ecfcc8c2b7a0c].
 %   - Stabilization reuses a clean value and cuts off a second propagation
 %     wave when recomputation is variant-equal [tested:
 %     support_graph:an_unchanged_stabilization_cuts_off_propagation;

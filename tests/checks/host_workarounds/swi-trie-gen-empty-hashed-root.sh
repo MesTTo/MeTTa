@@ -14,7 +14,7 @@
 #     [measured 2026-09-24: present on SWI-Prolog 10.1.14 built with the
 #     ledger's patches, both the 09-16 and the 09-24 builds, while one key
 #     inserted and deleted answers `[]` and two keys with one deleted answer
-#     `[a]`; commit=WORKTREE]
+#     `[a]`; commit=d4a365c16bdf1801f9839597e56ecfcc8c2b7a0c]
 # Owns resources: bounded.sh joins the child; the lane removes the scratch files.
 set -eu
 scratch=${HOST_WORKAROUND_SCRATCH:?}

@@ -13,7 +13,7 @@
 %   - Two graphs of one shape whose modules are named after two checkout
 %     paths cost the same inferences to invalidate [tested:
 %     support_graph:an_invalidation_costs_the_same_whatever_its_nodes_are_named;
-%     commit=WORKTREE].
+%     commit=d4a365c16bdf1801f9839597e56ecfcc8c2b7a0c].
 %   - Releasing a module removes only that module's retained graph state
 %     across every node shape and either edge endpoint, without pruning a
 %     live cross-module symbol index [tested:

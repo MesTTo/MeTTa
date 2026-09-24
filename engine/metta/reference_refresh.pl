@@ -33,7 +33,7 @@
 %   published batch leaves pending the spaces queued since [tested:
 %   references:a_space_set_costs_the_same_whatever_its_spaces_are_named,
 %   references:consuming_published_spaces_keeps_the_ones_queued_since;
-%   commit=WORKTREE].
+%   commit=d4a365c16bdf1801f9839597e56ecfcc8c2b7a0c].
 % Owns resources: the pending faces and each transaction frame's roots are
 %   tries whose handles engine-local SWI global variables hold. Publication
 %   destroys the pending trie it consumed and stores a fresh one holding the
