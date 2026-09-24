@@ -1521,8 +1521,18 @@ variable_member(Variables, Variable) :-
 %arity is still registered [tested: translator_capturing_lambda_curries].
 %
 %Only when nothing DEFINES that arity, because a function may genuinely be
-%overloaded and another of its equations may have supplied it. That equation
-%re-registers the arity when it compiles, whichever order the two arrive in.
+%overloaded and another of its equations may have supplied it. An equation
+%arriving later re-registers the arity when it compiles; one that arrived
+%earlier is found by asking the modules that define the function, the ones
+%fun_in/2 names and the engine's own, which is where compiled equations live.
+%The registry is one table for every module, so its row stays while any of
+%them still defines the arity. The probe used to be unqualified, so it looked
+%in this module, where no equation is compiled, and dropped the arity whenever
+%the one-input equation came first: (plunit-overloaded (keep 1)) then answered
+%a partial application where upstream PeTTa at 43705f5 answers `kept` in both
+%orders [tested:
+%translator_capturing_lambda_curries:an_overloaded_head_keeps_the_arity_another_equation_defines;
+%commit=WORKTREE].
 %Called ONLY from the eta-expansion branch above, which is the only place the
 %two arities can differ, so an ordinary equation pays nothing for this. Called
 %unconditionally instead it cost five inferences on every compiled clause,
@@ -1535,7 +1545,8 @@ drop_superseded_arity(F, SourceArgs, _) :-
     SourceArity is SourceInputArity + 1,
     compiled_function_name(F, Predicate),
     functor(Probe, Predicate, SourceArity),
-    (   catch(clause(Probe, _), _, fail)
+    (   ( fun_in(Module, F) ; metta_engine_module(Module) ),
+        catch(clause(Module:Probe, _), _, fail)
     ->  true
     ;   retractall(arity(F, SourceArity))
     ).

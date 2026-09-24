@@ -3062,6 +3062,43 @@ test(only_the_compiled_arity_stays_registered,
     sort(Arities, Sorted),
     Sorted == [3].
 
+%A head may genuinely be defined at two arities: here one equation takes one
+%input and the other is eta-expanded to three by a body applying a two-input
+%function to nothing. The arity the expanded equation's head names is dropped
+%only when no equation defines it, so a one-argument call reaches the
+%one-input equation in either order of definition, as upstream PeTTa at
+%43705f5 answers both orders. Probed in the translator's own module instead
+%of the equations', the check dropped the arity whenever the one-input
+%equation came first, and the call compiled to a partial application.
+overloaded_source(one_input_first, "
+(= (plunit-pair2 $a $b) ($a $b))
+(= (plunit-overloaded (keep $x)) kept)
+(= (plunit-overloaded (skip $x)) (plunit-pair2))").
+overloaded_source(expanded_first, "
+(= (plunit-pair2 $a $b) ($a $b))
+(= (plunit-overloaded (skip $x)) (plunit-pair2))
+(= (plunit-overloaded (keep $x)) kept)").
+
+setup_overloaded(Order) :-
+    retractall(silent(_)), assertz(silent(true)),
+    overloaded_source(Order, Source),
+    process_metta_string(Source, _).
+
+cleanup_overloaded :-
+    forall(member(F, ['plunit-overloaded', 'plunit-pair2']),
+           ( 'remove-atom'('&self', [=, [F|_], _], _),
+             forget_test_function(F) )),
+    retractall(silent(_)), assertz(silent(false)).
+
+test(an_overloaded_head_keeps_the_arity_another_equation_defines,
+     [ forall(member(Order, [one_input_first, expanded_first])),
+       setup(setup_overloaded(Order)), cleanup(cleanup_overloaded) ]) :-
+    process_metta_string("!(collapse (plunit-overloaded (keep 1)))", Results),
+    assertion(Results == [[kept]]),
+    findall(A, user:arity('plunit-overloaded', A), Arities),
+    sort(Arities, Sorted),
+    assertion(Sorted == [2, 4]).
+
 :- end_tests(translator_capturing_lambda_curries).
 
 

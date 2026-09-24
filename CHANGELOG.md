@@ -189,6 +189,15 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- A function defined at two arities keeps both when one of its equations is
+  eta-expanded. With `(= (pj (keep $x)) (Accept))` and then
+  `(= (pj (skip $x)) (drop2))`, where `drop2` takes two inputs, `(pj (keep 1))`
+  answered `(partial pj ((keep 1)))`, because compiling the extended equation
+  dropped `pj`'s one-input arity. It dropped it after asking its own module,
+  where no equation is compiled, whether anything defined that arity. It now
+  asks the modules that define the function, so both orders answer `(Accept)`,
+  as upstream PeTTa at 43705f5 does.
+
 - The C seat's `make install` no longer copies version-control metadata. Its
   copy of the engine walked `engine` and `lib` with `find -type f`, so an
   install from the checkout carried `lib`'s whole `.git` repository (1,105 of
