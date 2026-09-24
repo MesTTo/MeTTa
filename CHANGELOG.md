@@ -9,6 +9,15 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- Known issue, pinned rather than fixed: a copy of a `&self` holding
+  compiled `|->` lambda code holds rows its source does not. Every compile
+  names a lambda afresh and a specialization after its lambda, so after one
+  `zip` call with lib_functional loaded the copy held 8 generated rows its
+  source lacked and the source 6 the copy lacked.
+  `test_a_copy_of_compiled_lambda_code_equals_its_source` pins it as a strict
+  xfail (i-copy-compile-cross-space); the fix that names lambdas by their
+  content turns it green and removes the marker.
+
 - The C seat turns a C array of values into an expression with `mt_array(count,
   values)`, converting each element as `mt_atom_of` converts one value and
   reading the element type from the array, so a bool array answers `True` and
