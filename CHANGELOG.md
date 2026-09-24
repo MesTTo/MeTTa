@@ -210,6 +210,12 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- The `pylint` lane passes on the weak-table entry `_WeakEntry.__new__` in
+  `metta/_atoms/model.py`. astroid cannot infer `weakref.ref`, so pylint
+  checked `super().__new__(cls, referent, callback)` against
+  `object.__new__` and reported too many arguments whatever the arity; the
+  line carries a disable naming why, and mypy and ty check the arity against
+  typeshed.
 - The layering self-test's fixture workspace holds the directories
   `metta._roots._MOUNTS` names (`engine/` and `lib/`), so the `_workspace.py`
   it plants finds the fixture as its workspace. Since the helper began walking
