@@ -82,7 +82,7 @@
 #   - a name the caller gives that selects no lane, directly or as a selector,
 #     refuses the run with exit 2 naming it, even beside names that do select
 #     lanes [tested: tests/shell/test_check_refuses_an_unknown_lane.sh;
-#     commit=WORKTREE].
+#     commit=fb6ac3c09ae4af2e2c475f92c870619b6363147f].
 #   - door-sync checks every row projection, runs its planted discrimination
 #     tests and executes every declared refusal witness [tested:
 #     test_contract_checks_refuse_missing_coverage_and_unbacked_refusals,

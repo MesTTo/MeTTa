@@ -21,7 +21,8 @@
 #   the lowest one no run holds, so a finished battery is reused and the pool
 #   grows only to the most runs in flight at once, and each run's log is a
 #   file no later run writes, opening with the provenance of the tree it ran
-#   in [tested: tools/battery_selftest.sh; commit=WORKTREE]; `prune <hours>`
+#   in [tested: tools/battery_selftest.sh;
+#   commit=16280a91ac5db06856fa512bbb632468335f7cca]; `prune <hours>`
 #   removes the batteries no run holds, no process is inside and nothing has
 #   touched for that long, and the logs as old.
 # Fails when: a battery tree is occupied by a live run (it refuses rather than
