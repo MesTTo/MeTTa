@@ -303,6 +303,12 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- The Python seat's `test_the_c_binding_suite_passes` passes: the C seat's
+  suite names its three `mt_register_prolog` fixture files from
+  `MT_ENGINE_PATH`, where it named them relative to the working directory and
+  so failed its file registrations whenever it ran outside
+  `extensions/cmetta`.
+
 - `example-origins` and the upstream parity lane each read the upstream commit
   they are pinned to, from whichever clone they find, so exporting
   `METTA_UPSTREAM` for one no longer turns the other red. Both took their
