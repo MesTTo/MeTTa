@@ -11,7 +11,11 @@
 #   `run` refuses to start unless `verify` passes, so no command reports a
 #   verdict about an unknown tree, and runs its command with git's search for
 #   a repository stopped at the battery's parent, so no git command in it
-#   reaches the checkout the battery sits inside.
+#   reaches the checkout the battery sits inside. `run` naming no index takes
+#   the lowest one no run holds, so a finished battery is reused and the pool
+#   grows only to the most runs in flight at once; `prune <hours>` removes the
+#   batteries no run holds, no process is inside and nothing has touched for
+#   that long.
 # Fails when: a battery tree is occupied by a live run (it refuses rather than
 #   corrupting it); a repository's battery cannot be given a git identity of
 #   its own (it refuses rather than run a command git would hand to the
@@ -172,10 +176,17 @@ snapshot() {
 
 usage() {
     cat >&2 <<USAGE
-usage: tools/battery.sh provision <index>
+usage: tools/battery.sh run       [<index>] -- <command...>
+       tools/battery.sh provision <index>
        tools/battery.sh verify    <index>
        tools/battery.sh path      <index>
-       tools/battery.sh run       <index> -- <command...>
+       tools/battery.sh prune     <hours>
+
+'run' with no index takes the lowest index no other run holds, reusing a
+finished battery, and prints the index and the log path when it ends. Name an
+index only when a comparison needs two particular batteries. 'prune' removes
+this checkout's batteries that no run holds, no process is inside and nothing
+has touched for <hours>.
 
 BATTERY_SOURCE=<dir> snapshots that tree instead of this one. Batteries always
 live under this repository, whatever the source is.
@@ -229,6 +240,74 @@ claim() {
         echo "battery $1 is claimed by another run; pick another index" >&2
         exit 1
     }
+}
+
+# The lowest index no run holds, claimed on descriptor 9 for the rest of this
+# process exactly as claim takes a named one. Callers used to name their own,
+# each settling on a range of its own (31 to 40, 99 to 125), so batteries only
+# accumulated: 228 trees holding 461 GiB under Dev on 2026-09-24, most idle
+# for days, where the runs actually in flight never needed more than about
+# twenty. Taking the lowest free index reuses a finished battery, whose next
+# provision copies only what changed, so the pool grows to the most runs ever
+# in flight at once and no further. It sets `index` rather than printing it,
+# because a command substitution's subshell would release the lock on exit.
+allocate() {
+    mkdir -p "$HOME_TREE/ai-tmp"
+    index=1
+    while :; do
+        exec 9>"$HOME_TREE/ai-tmp/wt-battery-$index.lock"
+        if flock -n 9; then
+            occupant "$(tree_for "$index")" >/dev/null || return 0
+        fi
+        index=$((index + 1))
+    done
+}
+
+# Removes each of this checkout's batteries that no run holds, whose recorded
+# PID is gone, that no process is working inside, and that nothing has touched
+# for the given number of hours. How long a finished battery's log is still
+# wanted is known only to whoever will read it, so the window is an argument
+# and never a default. A removed tree's worktree identities are unregistered
+# under the per-repository lock battery_git_identity takes, so a prune cannot
+# delete the admin entry of a seed a concurrent provision is moving
+# [c-gp-seed-race]. Paths are taken to hold no whitespace, as elsewhere here.
+prune() {
+    case ${1:-} in ''|*[!0-9]*) usage ;; esac
+    prune_minutes=$(($1 * 60))
+    # Another user's process, PID 1 included, refuses readlink; it cannot be
+    # working inside this user's battery, so its refusal is skipped, not fatal.
+    prune_cwds=$(for prune_proc in /proc/[0-9]*; do
+                     readlink "$prune_proc/cwd" 2>/dev/null || true
+                 done)
+    prune_count=0
+    for prune_tree in "$HOME_TREE"/ai-tmp/wt-battery-*; do
+        [ -d "$prune_tree" ] || continue
+        prune_index=${prune_tree##*/wt-battery-}
+        case $prune_index in *.gitseed) continue ;; esac
+        exec 9>"$HOME_TREE/ai-tmp/wt-battery-$prune_index.lock"
+        flock -n 9 || continue
+        occupant "$prune_tree" >/dev/null && continue
+        prune_busy=
+        for prune_cwd in $prune_cwds; do
+            case $prune_cwd in "$prune_tree"|"$prune_tree"/*) prune_busy=yes ;; esac
+        done
+        [ -z "$prune_busy" ] || continue
+        [ -z "$(find "$prune_tree" "$prune_tree/ai-tmp" -maxdepth 1 \
+                     -mmin "-$prune_minutes" -print -quit 2>/dev/null)" ] || continue
+        rm -rf -- "${prune_tree:?}" "${prune_tree:?}.gitseed"
+        rm -f -- "$HOME_TREE/ai-tmp/wt-battery-$prune_index.lock"
+        prune_count=$((prune_count + 1))
+        echo "pruned battery $prune_index"
+    done
+    exec 9>&-
+    for prune_repository in . $(battery_component_paths); do
+        battery_repository_root "$ROOT/$prune_repository" || continue
+        prune_common=$(git -C "$ROOT/$prune_repository" rev-parse --path-format=absolute \
+                           --git-common-dir)
+        ( flock 8 && git -C "$ROOT/$prune_repository" worktree prune ) \
+            8>"$prune_common/battery-identity.lock"
+    done
+    echo "pruned $prune_count batteries idle for over $1 hours"
 }
 
 # A battery has to be able to answer `git` about ITSELF. Without a .git it has
@@ -295,7 +374,14 @@ battery_git_identity() {
     # worktree, also rewrites the gitfile of every linked worktree still
     # pointing at it, which is how battery 34's provision broke battery 33's
     # seed between its move and its own repair [c-gp-seed-race].
-    battery_repository_root "$identity_source" || return 0
+    # A tree once provisioned from a repository keeps that identity when the
+    # same index is provisioned from a source that is not one, so git in it
+    # would answer about the earlier repository's worktree; it is removed, and
+    # the discovery ceiling then leaves git in the battery answering nothing.
+    battery_repository_root "$identity_source" || {
+        rm -rf -- "${identity_tree:?}/.git"
+        return 0
+    }
     identity_common=$(git -C "$identity_source" rev-parse --path-format=absolute \
                           --git-common-dir)
     (
@@ -641,17 +727,24 @@ EXCLUDED
     cat "$tree/ai-tmp/battery.provenance" 2>/dev/null || true
 }
 
-[ $# -ge 2 ] || usage
-command=$1; index=$2; shift 2
+[ $# -ge 1 ] || usage
+command=$1; shift
 case "$command" in
-    provision) claim "$index"; provision "$index" ;;
-    path)      tree_for "$index" ;;
-    verify)    verify "$index" ;;
+    provision) [ $# -eq 1 ] || usage; claim "$1"; provision "$1" ;;
+    path)      [ $# -eq 1 ] || usage; tree_for "$1" ;;
+    verify)    [ $# -eq 1 ] || usage; verify "$1" ;;
+    prune)     [ $# -eq 1 ] || usage; prune "$1" ;;
     run)
-        [ "${1:-}" = "--" ] || usage
-        shift
+        if [ "${1:-}" = "--" ]; then
+            shift
+            allocate
+        else
+            [ $# -ge 2 ] && [ "$2" = "--" ] || usage
+            index=$1
+            shift 2
+            claim "$index"
+        fi
         [ $# -ge 1 ] || usage
-        claim "$index"
         tree=$(tree_for "$index")
         # The occupancy record goes in with the claim, before the copy, so a
         # reader of it sees the tree taken for the whole provision too.

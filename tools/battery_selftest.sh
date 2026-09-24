@@ -6,9 +6,11 @@
 #   the source does not have; prove a provisioned battery answers `git`
 #   about ITSELF rather than about the checkout it sits inside, and that git
 #   run in one never reaches that checkout; prove a battery re-provisioned
-#   from another source reads that source's installs; and prove BATTERY_KEEP
+#   from another source reads that source's installs; prove BATTERY_KEEP
 #   carries the kept paths and holds HEAD at every other uncommitted one, in
-#   the tree and in a component.
+#   the tree and in a component; and prove a run naming no index takes the
+#   lowest free one and reuses it, and prune removes only what no run holds
+#   and nothing touched within its window.
 # Assumes: tools/battery.sh sits beside this file; a writable ai-tmp/.
 # Guarantees: exits nonzero if any planted drift goes unreported, or if
 #   anything the snapshot leaves out on purpose is reported as drift: scratch,
@@ -29,8 +31,14 @@ FIXTURE=$(cd "$HERE/.." && pwd)/ai-tmp/battery-selftest
 INDEX=selftest
 failures=0
 
-cleanup() { rm -rf "$FIXTURE"; }
+# Asked for rather than recomputed: a second copy of the layout rule here is a
+# second thing to keep in step, and it was wrong the first time. The battery
+# is removed at both ends, because one a failed run leaves behind carries
+# state, a git identity among it, into the next run's first cases.
+TREE=$(bounded sh "$BATTERY" path "$INDEX")
+cleanup() { rm -rf "$FIXTURE" "$TREE"; }
 trap cleanup EXIT
+rm -rf "$TREE"
 
 plant_source() {
     rm -rf "$FIXTURE"
@@ -63,9 +71,6 @@ expect() {
 
 plant_source
 BATTERY_SOURCE="$FIXTURE/src" bounded sh "$BATTERY" provision "$INDEX"
-# Asked for rather than recomputed: a second copy of the layout rule here is a
-# second thing to keep in step, and it was wrong the first time.
-TREE=$(bounded sh "$BATTERY" path "$INDEX")
 
 echo "battery selftest:"
 expect "an untouched copy" 0
@@ -423,6 +428,76 @@ if BATTERY_KEEP='' BATTERY_SOURCE="$FIXTURE/src" bounded sh "$BATTERY" provision
     holds "an empty BATTERY_KEEP gives a nested component's committed tree" comp/inner/e.txt "inner one"
 else
     echo "  FAIL a provision with an empty BATTERY_KEEP refused:"; cat "$FIXTURE/out"
+    failures=$((failures + 1))
+fi
+
+# The battery now holds an identity from the repository above. Provisioned
+# again from a directory that is not a repository, it must lose that identity,
+# or git in it answers about the earlier repository's worktree.
+mkdir -p "$FIXTURE/plain"
+printf 'plain\n' > "$FIXTURE/plain/plain.txt"
+BATTERY_SOURCE="$FIXTURE/plain" bounded sh "$BATTERY" provision "$INDEX" > "$FIXTURE/out" 2>&1
+if [ -e "$TREE/.git" ]; then
+    echo "  FAIL a battery re-provisioned from a non-repository kept its earlier git identity"
+    failures=$((failures + 1))
+else
+    echo "  ok   a battery re-provisioned from a non-repository drops its earlier git identity"
+fi
+
+# Callers used to name their own index, each settling on a range of its own, so
+# batteries only accumulated. A run naming none takes the lowest free index and
+# reuses it once free, and prune removes what no run holds and nothing touched.
+# A pool of its own, so allocation here never takes one of this checkout's
+# real batteries: a copy of the script in a repository of its own derives its
+# pool from where it sits.
+POOL="$FIXTURE/pool"
+mkdir -p "$POOL/tools" "$FIXTURE/poolsource"
+cp "$BATTERY" "$HERE/bounded.sh" "$POOL/tools/"
+printf 'pooled\n' > "$FIXTURE/poolsource/file.txt"
+( cd "$POOL" && git init -q . &&
+  git -c user.name=t -c user.email=t@t commit -q --allow-empty -m pool ) > "$FIXTURE/out" 2>&1
+pooled() {
+    BATTERY_SOURCE="$FIXTURE/poolsource" bounded sh "$POOL/tools/battery.sh" run -- true 2>&1 |
+        sed -n 's/^battery \([^:]*\): exit.*/\1/p'
+}
+allotted() {
+    if [ "$2" = "$3" ]; then echo "  ok   $1"; else
+        echo "  FAIL $1: took battery '$2', wanted $3"; failures=$((failures + 1)); fi
+}
+allotted "a run naming no index takes the lowest" "$(pooled)" 1
+exec 7>"$POOL/ai-tmp/wt-battery-1.lock"
+flock -n 7
+allotted "a run naming no index passes over one another run holds" "$(pooled)" 2
+exec 7>&-
+allotted "a finished battery is reused rather than a new one made" "$(pooled)" 1
+aged() {
+    find "$POOL/ai-tmp/wt-battery-$1" "$POOL/ai-tmp/wt-battery-$1/ai-tmp" -maxdepth 1 \
+         -exec touch -h -d '2 days ago' {} +
+}
+aged 1
+aged 2
+exec 7>"$POOL/ai-tmp/wt-battery-1.lock"
+flock -n 7
+bounded sh "$POOL/tools/battery.sh" prune 6 > "$FIXTURE/out" 2>&1
+exec 7>&-
+if [ -e "$POOL/ai-tmp/wt-battery-2" ]; then
+    echo "  FAIL prune kept a battery no run holds and nothing touched for two days"
+    failures=$((failures + 1))
+else
+    echo "  ok   prune removes a battery no run holds and nothing touched within the window"
+fi
+if [ -e "$POOL/ai-tmp/wt-battery-1" ]; then
+    echo "  ok   prune keeps a battery another run holds, however old"
+else
+    echo "  FAIL prune removed a battery another run held"
+    failures=$((failures + 1))
+fi
+touch "$POOL/ai-tmp/wt-battery-1/ai-tmp/battery-1.log"
+bounded sh "$POOL/tools/battery.sh" prune 6 > "$FIXTURE/out" 2>&1
+if [ -e "$POOL/ai-tmp/wt-battery-1" ]; then
+    echo "  ok   prune keeps a battery touched within the window"
+else
+    echo "  FAIL prune removed a battery whose log was just written"
     failures=$((failures + 1))
 fi
 

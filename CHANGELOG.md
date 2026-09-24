@@ -178,6 +178,15 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- `tools/battery.sh run -- <command>` with no index takes the lowest index no
+  other run holds, reusing a finished battery instead of copying the working
+  tree again, and `tools/battery.sh prune <hours>` removes the batteries no run
+  holds, no process is inside and nothing has touched for that long. Callers
+  used to name their own indices, each settling on a range of its own, so
+  batteries only accumulated: 228 trees holding 461 GiB under the workspace on
+  2026-09-24, most idle for days, where the runs in flight never needed more
+  than about twenty. A battery re-provisioned from a directory that is not a
+  repository now drops the git identity an earlier provision gave it.
 - `tools/pymetta-host/fetch-source.sh` can be rerun on a clone where a patch
   created a file. Its reset put every tracked file back and left untracked
   ones, so a patch that adds a file, as
