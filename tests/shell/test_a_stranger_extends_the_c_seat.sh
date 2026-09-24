@@ -196,7 +196,7 @@ bool mt_extension_init(metta *runtime)
   /* ABI 1 publishes the name EXACTLY, so the MeTTa spelling is written here
      rather than derived from the C identifier beside it. */
   if ( !mt_def(runtime, (mt_op){ .name = "solar-double", .arity = 1,
-                                 .effect = MT_PURE, .fn = solar_double }) )
+                                 .effect = MT_EFFECT_CLASS_PURE_STRUCTURAL, .fn = solar_double }) )
     return false;
 
   if ( directory && !mt_library(runtime, "solars", directory) ) return false;

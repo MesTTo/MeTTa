@@ -265,16 +265,19 @@ static mt_status op_hypot(mt_call *call, void *user)
 }
 
 mt_def(m, (mt_op){ .name = "hypot", .arity = 2,
-                   .effect = MT_PURE, .fn = op_hypot });
+                   .effect = MT_EFFECT_CLASS_PURE_STRUCTURAL,
+                   .fn = op_hypot });
 ```
 
 `(hypot 3.0 4.0)` now answers `5.0`. Designated initializers are what C has
 instead of keyword arguments, and they are why the effect class reads at the
-call site rather than being the third of five positional arguments. Naming it
-is required: the engine cannot see inside a published function, so it reasons
+call site rather than being the third of five positional arguments. The class
+is a member of `enum mt_effect_class`, the engine's effect-class vocabulary,
+which `vocabularies.h` generates from the engine's own rows. Naming it is
+required: the engine cannot see inside a published function, so it reasons
 about caching, reordering and transactions from that one field. The name
-reaches MeTTa through C's own casing convention, so a function called
-`word_count` publishes as `word-count`.
+reaches MeTTa exactly as written, so `word_count` and `word-count` are two
+different names.
 
 `mt_lower` installs an EQUATION, which is a different thing:
 

@@ -37,6 +37,16 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Changed
 
+- The C seat names an effect class by the generated `enum mt_effect_class`, the
+  engine's effect-class vocabulary, instead of a hand-named enum of its own:
+  `MT_PURE`, `MT_LOOKUP`, `MT_NONDET`, `MT_WRITES` and `MT_IO` are now
+  `MT_EFFECT_CLASS_PURE_STRUCTURAL`, `MT_EFFECT_CLASS_READ_ONLY_LOOKUP`,
+  `MT_EFFECT_CLASS_NONDETERMINISTIC_READ_ONLY`, `MT_EFFECT_CLASS_WRITES_STATE`
+  and `MT_EFFECT_CLASS_ORACLE_IO`, and `mt_effect_str` gives way to
+  `mt_effect_class_names`. The stranger-C lane's fixture and the C seat's
+  tutorial follow. The tutorial also no longer says `word_count` publishes as
+  `word-count`, which ABI 1's exact names made false.
+
 - `setup!` names its subject by the rule `get-property` and `from` follow, so
   a bare name is a library under the library root and a relative path is
   written `./x`. A `from` source beginning with `/` is a path, so an absolute
