@@ -11,7 +11,8 @@
 #   its HEAD, except that under BATTERY_KEEP a component no kept path equals,
 #   contains or sits inside has the commit its parent's base records at its
 #   path, and the git of every repository in the battery answers its base
-#   [tested: tools/battery_selftest.sh; commit=WORKTREE]; `verify` exits
+#   [tested: tools/battery_selftest.sh;
+#   commit=6ab321d7d488f95bc7cc9f60cc2f803f5018398c]; `verify` exits
 #   nonzero and names every drifted path otherwise;
 #   `run` refuses to start unless `verify` passes, so no command reports a
 #   verdict about an unknown tree, and runs its command with git's search for
