@@ -147,6 +147,16 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- An exact removal's selection carries the head the code that selected it
+  already holds, and an equation removal that the live selection already
+  decides runs under it instead of installing it again. The selection read
+  the selected clause's head back through `clause/3` each time it was made,
+  and a removal it decided installed it a second time, copying the whole
+  stored equation in and back out. `06-spaces_removeallatoms.metta` falls
+  from 26,984 inferences to 26,708 and reads 32.42M to 32.72M instructions
+  where its parent read 32.76M to 33.10M, back under the 32,760,161 its
+  parity row allows.
+
 - `tools/battery.sh` reads every component's own `.gitmodules`, not only the
   superproject's, so a component's own components get an identity, a
   protected `.git` and `BATTERY_KEEP`'s restriction. The seat's twins

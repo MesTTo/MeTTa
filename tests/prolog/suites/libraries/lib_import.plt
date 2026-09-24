@@ -335,6 +335,39 @@ test(a_replaced_requirement_does_not_select_a_specialization_it_forgets,
                                  eval(['string-pad-left', "y", 2, "-"], R)), Again),
     assertion(Again == ["-y"]).
 
+%An equation removal that finds the live selection already deciding it runs
+%under that selection as it stands: installing it again copied the selected
+%head, the whole stored equation, in and back out, once for every equation a
+%source withdrawal removed.
+test(an_adopted_selection_is_not_installed_again) :-
+    with_owned_import("(= (lifecycle-once) 1)\n(= (lifecycle-twice) 2)\n",
+                      check_no_reinstall).
+
+check_no_reinstall(Space, Path) :-
+    'import!'(Space, Path, true),
+    lifecycle_reinstalls('unimport!'(Space, Path, true), Reinstalls),
+    assertion(Reinstalls == 0),
+    findall(A, 'get-atoms'(Space, A), Atoms), assertion(Atoms == []).
+
+%How many times Goal installs a removal selection while one is already live.
+%Withdrawing a source's equations nests none, so every such install is the
+%live selection installed again.
+lifecycle_reinstalls(Goal, Reinstalls) :-
+    nb_setval(lifecycle_reinstalls, 0),
+    setup_call_cleanup(
+        wrap_predicate(spaces:with_native_removal_reference(_, _),
+                       lifecycle_reinstalls, Original,
+                       ( (   nb_current('$metta_native_removal_reference', _)
+                         ->  nb_getval(lifecycle_reinstalls, Before),
+                             After is Before + 1,
+                             nb_setval(lifecycle_reinstalls, After)
+                         ;   true ),
+                         call(Original) )),
+        ( call(Goal), nb_getval(lifecycle_reinstalls, Reinstalls) ),
+        ( unwrap_predicate(spaces:with_native_removal_reference(_, _),
+                           lifecycle_reinstalls),
+          nb_delete(lifecycle_reinstalls) )).
+
 test(undo_skips_removed_occurrences_and_preserves_replacements) :-
     with_owned_import("(payload x)\n", check_removed_occurrence).
 

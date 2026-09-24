@@ -1911,19 +1911,31 @@ metta_host_native_fact(Module, Goal, Space, Fact) :-
 %unstore_atom/3 receives.
 remove_equation(Space, Term, F, Args, Body, Removed) :-
     (   \+ seam:foreign_space(Space)
-    ->  transaction(
+    ->  Removal = ( resolved_equation_removal(Space, Term, Source, Origin),
+                    remove_equation_source(Space, Term, Source, Origin, Removed) ),
+        transaction(
             (   native_storage_module_ready(Space, Storage),
-                native_atom_clause(Space, Term, _, Head),
-                %An outer selection is adopted only when it selects an
+                native_atom_clause(Space, Term, _, Head)
+            ->  %An outer selection is adopted only when it selects an
                 %occurrence of THIS equation, so every reader of the selector
                 %below, resolved_equation_removal/4 included, sees one that
-                %is about this atom [source: native_removal_selects/2].
-                ( native_removal_selects(Storage:Head, Selected)
-                -> true
-                ; metta_least_storage_reference(Storage:Head, Selected) )
-            ->  with_native_removal_reference(Selected,
-                    ( resolved_equation_removal(Space, Term, Source, Origin),
-                      remove_equation_source(Space, Term, Source, Origin, Removed) ))
+                %is about this atom [source: native_removal_selects/2], and
+                %the removal runs under it as it stands: installing it again
+                %copied its head twice more, in and back out. Otherwise the
+                %removal selects by the storage head it matched. Each branch
+                %calls the removal where it stands, because the removal's
+                %transaction receipt climbs to its transaction frame
+                %(metta_receipt_nearest_frame/3), so one more call level
+                %costs every equation removal five inferences [measured
+                %2026-09-24: 02-functionremoval's twin, three removals, read
+                %+15 with the removal called through call/1 after this
+                %condition; commit=WORKTREE].
+                (   native_removal_selects(Storage:Head, _)
+                ->  call(Removal)
+                ;   metta_least_storage_reference(Storage:Head, Selected)
+                ->  with_native_removal_reference(
+                        selected(Storage, Head, Selected), Removal)
+                ;   Removed = false )
             ;   Removed = false )),
         ( current_transaction(_) -> true ; metta_repair_emptied_shadows )
     ;   metta_substitute_self(Space, [=, [F|Args], Body], Resolved),
