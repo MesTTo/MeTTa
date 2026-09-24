@@ -242,6 +242,13 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- The gate's plunit lane no longer fails at random on
+  `source_observation_artifacts`. That check purges every engine and library
+  artifact before a cold and a warm shipping run, and as a suite it ran
+  beside every other suite, so a suite writing an artifact during the purge
+  failed it. It is now `tests/shell/test_source_observation_artifacts.sh`,
+  run alone by its own lane, `source-artifacts`.
+
 - `(pragma! max-time N)` refuses at the call on a host without the deadlines
   capability, the WebAssembly one tsmetta runs on, and stores nothing, so the
   next form runs as before. It answered `()` and stored the bound, and every

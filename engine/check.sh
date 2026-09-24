@@ -8,7 +8,7 @@
 #   evidence_runners.py models which files a lane covers by READING this text
 #   and resolving $HERE/, so a path reached through a local variable is a path
 #   the evidence gate cannot see. Its plunit collector names THIS file as the
-#   runner carrying check_plunit's suite loop, which is how all 49 suites stay
+#   runner carrying check_plunit's suite loop, which is how every suite stays
 #   in the executed model. The collector's anchor is that loop's own line, and
 #   nothing here quotes it deliberately: a comment holding the anchor verbatim
 #   would keep satisfying the drift check after the loop it models had gone.
@@ -185,6 +185,19 @@ run_solo GATE engine-bench check_engine_bench
 # [measured 2026-09-24: the WebAssembly job's multi-lane gates and battery 74's
 # lane at 06:41, 343,852 against 343,832].
 run_solo GATE boot-determinism sh -c "cd '$HERE' && sh tests/shell/test_boot_inference_determinism.sh"
+
+# A cold and a warm shipping run of the source-errors example, alone for
+# tools/check.sh's third reason: the test purges every engine/ and lib/
+# artifact before its cold run, so beside other lanes it deletes what they
+# boot from. It was a plunit suite, and the suite queue runs suites
+# concurrently, so the purge raced every suite writing a library artifact at
+# that moment and could delete one another suite was about to load
+# [measured 2026-09-25T03:46:41+10:00: beside a loop that renames
+# lib/lib_vector/lib_vector.qlf into place and unlinks it, the suite failed
+# 2 of 10 runs with find refusing to delete that file, No such file
+# or directory, the file gone between find listing it and deleting it, where
+# alone it passed 10 of 10].
+run_solo GATE source-artifacts sh -c "cd '$HERE' && sh tests/shell/test_source_observation_artifacts.sh"
 
 # Undefined predicates in the engine. Nothing checked the Prolog side before
 # this; SWI has had the check built in all along.
