@@ -227,6 +227,14 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- `(pragma! max-time N)` refuses at the call on a host without the deadlines
+  capability, the WebAssembly one tsmetta runs on, and stores nothing, so the
+  next form runs as before. It answered `()` and stored the bound, and every
+  later runnable form then refused with the pragma's message,
+  `(pragma! max-time none)` included, so nothing short of a new engine
+  cleared it. A `with-pragma!` scope that sets max-time refuses the same way,
+  and `(pragma! max-time none)` still answers `()`.
+
 - `observe-source` stores an error or exception it keeps as text as a function
   of the term alone. The text came from `term_string/2`, which names an unbound
   variable by its place in the engine's history, so observing one source twice

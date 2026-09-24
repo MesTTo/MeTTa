@@ -9,6 +9,12 @@
 %   commit=aedde810f4af0e4fc55de275c06a6758e6edae21].
 %
 % Purpose: implement pragmas, limits, control forms, goal construction, and higher-order functions
+% Guarantees: on a host without the deadlines capability, (pragma! max-time N)
+%   and a with-pragma! scope setting max-time refuse with the platform refusal
+%   naming deadlines before anything is stored, so the next form evaluates
+%   unbounded, and (pragma! max-time none) answers ()
+%   [tested 2026-09-25T01:29:03+10:00:
+%   platform_capabilities_reduced:a_pragma_bound_refuses_by_name_when_deadlines_are_absent].
 % Guarantees: eval-one counts at most two answers before result unification,
 %   restores the unique Source/Result binding graph, including raw attributes,
 %   without repeating its hooks, and holds the returned value
@@ -265,6 +271,7 @@ set_metta_pragma('from-map', Value) :- !,
 set_metta_pragma(load, Value) :- !,
     metta_reference_set_option(load, Value).
 set_metta_pragma(Key, Value) :-
+    require_metta_pragma_capability(Key, Value),
     retractall(metta_pragma(Key, _)),
     (   Value == none
     ->  true
@@ -281,6 +288,23 @@ set_metta_pragma(Key, Value) :-
     ->  specializer:metta_refresh_specialization_verification
     ;   true
     ).
+
+%A setting that arms something the host may lack is refused where it is
+%STORED, so a host without it records nothing and every later form runs as
+%before. The max-time bound used to be refused only where run_under_pragmas/1
+%applied it, after it was stored: on the WebAssembly host, which has no
+%deadlines capability, (pragma! max-time 5) answered () and every later ask
+%was refused with the pragma's message, the (pragma! max-time none) that
+%would have cleared it included [measured 2026-09-24T23:48:55+10:00: one
+%m.run ask per form through the Node seat on WebAssembly build 9].
+%set_metta_pragma/2 is the one writer of metta_pragma/2, so a stored bound now
+%implies the capability and nothing downstream asks again; with-pragma!'s
+%restore already covers a write that refuses part-way through a scope.
+require_metta_pragma_capability('max-time', Seconds) :-
+    Seconds \== none,
+    !,
+    metta_require_platform('(pragma! max-time N)', deadlines).
+require_metta_pragma_capability(_, _).
 
 %pragma! scoped to one expression, MeTTaLog's with-pragma! adopted:
 %each (key value) pair validates exactly as pragma! validates it, the
@@ -351,13 +375,15 @@ metta_with_pragmas_answer(answered(Values), _, Value) :-
 %problem is the one reported, because it is the one with a cause; the later
 %ones are usually its consequences.
 %
-%Neither this nor the arming above is reachable through a public door TODAY:
-%no key's write can fail, measured 2026-08-31 by driving set_metta_pragma/2
-%with foo, -1 and 1.5 for max-stack-depth, all three of which are accepted
-%without a word. The shape is here because the alternative is correct only by
-%that accident. Planting a raise in set_metta_pragma/2 for the second key of a
-%two-key scope leaves max-stack-depth set at 5 under the setup_call_cleanup
-%spelling this replaced and leaves nothing set under this one
+%A public door reaches this and the arming above on a host without the
+%deadlines capability, where a max-time write refuses
+%(require_metta_pragma_capability/2), so (with-pragma! ((max-stack-depth 5)
+%(max-time 30)) ...) there applies the first key before the second refuses.
+%Elsewhere no key's write can fail, measured 2026-08-31 by driving
+%set_metta_pragma/2 with foo, -1 and 1.5 for max-stack-depth, all three of
+%which are accepted without a word. Planting a raise in set_metta_pragma/2 for
+%the second key of a two-key scope leaves max-stack-depth set at 5 under the
+%setup_call_cleanup spelling this replaced and leaves nothing set under this one
 %[measured 2026-08-31: swipl -g "consult('engine/qlf_boot.pl'),
 %consult('engine/metta.pl')" with the planted clause, both ways round;
 %tested: scoped_stack_limit:a_restore_that_fails_still_restores_the_rest;
@@ -455,8 +481,7 @@ disable_metta_pragma_bounds :-
 %test_a_wall_clock_bound_that_is_exceeded_refuses].
 run_under_pragmas(Goal) :-
     (   metta_pragma('max-time', Seconds), number(Seconds), Seconds > 0
-    ->  metta_require_platform('(pragma! max-time N)', deadlines),
-        metta_host_time_budget(Goal, Seconds, Deadlined),
+    ->  metta_host_time_budget(Goal, Seconds, Deadlined),
         Timed = catch(call_with_time_limit(Seconds, Deadlined),
                       time_limit_exceeded,
                       throw(error(metta_control_signal(time_limit, Seconds),

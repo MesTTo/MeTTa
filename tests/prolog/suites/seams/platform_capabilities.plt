@@ -29,7 +29,7 @@
 %   - on a build without the five WebAssembly libraries the engine loads
 %     without writing one ERROR line, still evaluates, and every form that
 %     rests on an absent capability refuses by name
-%     [tested: the_engine_boots_silently_without_the_five_libraries,
+%     [tested 2026-09-25T01:29:03+10:00: the_engine_boots_silently_without_the_five_libraries,
 %     a_reduced_build_still_evaluates,
 %     a_bounded_form_refuses_by_name_when_deadlines_are_absent,
 %     a_pragma_bound_refuses_by_name_when_deadlines_are_absent,
@@ -38,8 +38,7 @@
 %     git_import_refuses_by_name_when_subprocess_is_absent,
 %     sha_hashing_survives_without_crypto,
 %     crypto_only_operations_refuse_by_name_without_crypto,
-%     redis_import_refuses_by_name_without_redis;
-%     commit=59792b524568755a2fbfe1c5f7cdb571bd78a3bf]
+%     redis_import_refuses_by_name_without_redis]
 %   - and the same on a build with one further library taken away, one set per
 %     capability: pcre, zlib, and fastrw with memfile
 %     [tested: the_engine_boots_silently_without_pcre,
@@ -379,7 +378,13 @@ test(a_bounded_form_refuses_by_name_when_deadlines_are_absent,
 test(a_pragma_bound_refuses_by_name_when_deadlines_are_absent,
      [condition(reduced_platform_buildable)]) :-
     refusal_names("pragma", ["(pragma! max-time N)", "deadlines",
-                             "library(time)"]).
+                             "library(time)"]),
+    refusal_names("with-pragma", ["(pragma! max-time N)", "deadlines",
+                                  "library(time)"]),
+    % and the refusal stored nothing, so the next form answers rather than
+    % refusing with the pragma's message
+    reduced_line("answer after-pragma ", Line),
+    assertion(sub_string(Line, _, _, _, "3")).
 
 test(hyperpose_refuses_by_name_when_concurrency_is_absent,
      [condition(reduced_platform_buildable)]) :-

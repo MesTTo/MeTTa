@@ -166,11 +166,13 @@ reduced_platform_report :-
     child_fixture('plain.metta', Plain),
     format(string(RoundTrip), "!(import! &self \"~w\")\n!(round-trip)", [Plain]),
     answer('round-trip', RoundTrip),
-    %LAST, and it has to be: a max-time pragma is a process-wide setting, so
-    %once it is refused every later form is wrapped by the same bound and
-    %refuses with the pragma's message rather than its own. Setting it back is
-    %not available either, because the reset form would be wrapped too.
-    refusal(pragma, "!(pragma! max-time 5)\n!(+ 1 2)").
+    %A max-time bound is refused where it would be stored, so refusing it
+    %records nothing: the form after it answers. It used to be stored and then
+    %refused by every later form, the reset included, which is why this probe
+    %had to run last.
+    refusal(pragma, "!(pragma! max-time 5)"),
+    refusal('with-pragma', "!(with-pragma! ((max-time 5)) (+ 1 2))"),
+    answer('after-pragma', "!(+ 1 2)").
 
 %A fixture the parent wrote beside the farms, as an absolute path.
 child_fixture(Name, Path) :-
