@@ -3748,7 +3748,7 @@ raised out of `__getattr__`; the bracket and method doors (`fn["car-atmo"]`,
 nothing.
 
 Errors: `MettaError` is the base, then `EngineError`, `MettaSyntaxError`,
-`CastError`, `CompileError`, `SourceNotFound`,
+`CastError`, `CompileError`, `SourceNotFound`, `RegistrationError`,
 `MettaResultError`, `AssertionFailure`, `TransportFailure`, and `ResourceLimitError` with
 `TimeLimitError`, `InferenceLimitError` and `RestraintError` under it, plus
 `Interrupted`. Every refusal this library makes on purpose carries
@@ -3776,7 +3776,10 @@ the key a` rather than naming a term.
 A deprecation's catalog remedy term decodes the same way: the
 DeprecationWarning instance carries `.remedy` with the term as its `edit`. `RestraintError` is a bound the program declared for one of its
 own tables, `(cache f (max-answers N))` or a size restraint, tripping; it
-carries `restraint`, `bound` and `call`.
+carries `restraint`, `bound` and `call`. `RegistrationError` is a
+registration of Prolog as MeTTa functions its contract refuses, a `ValueError`
+too, carrying `requires`, what the registration lacks: the names to register,
+a declaration in the source, or a file origin for a rename.
 Remote-backend authors use `metta._errors.errors.is_transport_failure(error)` to
 classify an absent connection, timeout, or closed stream before choosing retry
 or abandonment; ordinary application errors answer false.
@@ -3800,16 +3803,16 @@ WHICH class a Prolog-side refusal becomes is decided engine-side rather than by
 reading its message: `engine/metta/registration.pl` declares one kind word per
 refusal a host can act on differently (`syntax`, `time_limit`,
 `inference_limit`, `restraint`, `interrupted`, `value`, `type`, `assertion`,
-`capability`, `operation`, `stack`, `source`, and `engine` for a ball it did
-not shape) with the fields each carries, and reads one off a raised ball.
+`capability`, `platform`, `operation`, `stack`, `source`, `registration`, and
+`engine` for a ball it did not shape) with the fields each carries, and reads
+one off a raised ball. Every kind renders as its own sentence wherever a seat
+shows the engine's message text, a signal without the envelope's framing.
 `tests/data/error-kinds.json` lists them with the class each seat raises, and
 each seat's suite reads that file against its own map. This seat classifies the
-seven signal kinds through `_EXCEPTION_TYPES` and reaches `assertion`,
-`capability` and `operation` through their own classifiers; it does NOT
-classify `stack` or `source` from the ball, so a stack overflow arrives as
-`EngineError` and `SourceNotFound` comes from this library's own file check
-before the crossing rather than from the engine. The Node seat maps all
-fourteen.
+seven signal kinds through `_EXCEPTION_TYPES`, reaches `assertion`,
+`capability` and `operation` through their own classifiers, and every other
+kind from the one the engine reads off the ball, with that kind's fields as
+the class's keywords. The Node seat maps all fifteen.
 Each kind is also a ROW in the `&metta` catalog, `(refusal <kind> <class>
 (ground <authority> "<citation>") (remedy "<title>" <kind> <applicability>
 <act>...))`, and the rows are what a seat READS rather than what it keeps a
@@ -3824,7 +3827,7 @@ carries `raise the bound past 0.05 seconds, or narrow the query`; a hole left
 over is the reader's own choice, which is what keeps that remedy `prose`, and
 a remedy whose every hole was filled keeps its row's applicability, which is
 how `capability` arrives `maybe` carrying `(edit (grants &restricted
-process))`. Ten of the fourteen carry a title and no act, because their
+process))`. Eleven of the fifteen carry a title and no act, because their
 repair is a decision. Every engine refusal reaching this seat therefore has
 `.ground` and `.remedy` without any raise site here naming them; the Node seat
 carries the same two on `MettaError`, and the C seat as `mt_ground()` and
@@ -3844,9 +3847,9 @@ carrying the path and `create <path>, or correct the path that names it`. The
 table it reads is `metta/_errors/refusals.py`, GENERATED from those rows joined with
 `tests/data/error-kinds.json` by `tools/refusalgen.py` with the `refusal-sync`
 gate lane, and it is what the crossing classifies a ball with too: every one of
-the fourteen kinds arrives as the class its row names, `stack` as
-`StackLimitError` and `source` as `SourceNotFound`, each carrying the fields
-its kind declares. The `refusal-grounds` lane counts a class the rows name for
+the fifteen kinds arrives as the class its row names, `stack` as
+`StackLimitError`, `source` as `SourceNotFound` and `registration` as
+`RegistrationError`, each carrying the fields its kind declares. The `refusal-grounds` lane counts a class the rows name for
 a SPECIFIC kind, raised without its row, as a finding; an inline `raise` is for
 a Python-level refusal of an argument's shape, a class the taxonomy does not
 name, and the catch-all `EngineError`, which is what a refusal with no specific

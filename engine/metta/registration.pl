@@ -357,26 +357,64 @@ control_exception(error(metta_control_signal(inference_limit, _), _)).
 %MeTTa catch must not be able to disarm it either.
 control_exception(error(metta_control_signal(restraint, _), _)).
 
-%The reserved envelope renders its payload: a reader failure used to cross
-%as a bare syntax_error and take SWI's own message with it, and wrapping
-%it in the envelope must not trade "missing ')' ..." for an unknown-term
-%dump on a host that shows message text.
-:- multifile prolog:error_message//1.
-prolog:error_message(metta_control_signal(syntax, Detail)) -->
-    [ 'MeTTa syntax error: ~w'-[Detail] ].
+%THE RESERVED ENVELOPE RENDERS AS ITS REFUSAL, WHOLE. SWI lays an error term
+%out as a location, the formal and the context's comment, and the envelope's
+%context is context(metta, Kind), so every signal crossed framed by both: a
+%reader failure read `metta: MeTTa syntax error: missing ) (syntax)`, and the
+%kinds with no rendering, value, type and interrupted, read `metta: Unknown
+%error term: metta_control_signal(value, ...) (value)` [measured 2026-09-25T05:40:28+10:00:
+%translate_message//1 over one envelope per signal kind, before this
+%rendering].
 %The two bound kinds had no rendering at all, so a program that spent its own
 %(pragma! max-inferences N) printed `Unknown error term:
 %metta_control_signal(inference_limit,500)` at the CLI [measured 2026-08-27 on
 %!(with-pragma! ((max-inferences 500)) (spin 1000000)); commit=6da1b0dacc500fc7691a66722ba58f52ab2df081]. Every
 %seat that shows message text reads these, the C binding included, so they say
 %which bound stopped the work and what it was set to.
-prolog:error_message(metta_control_signal(inference_limit, Limit)) -->
+%
+%So the WHOLE term is rendered here, which SWI asks before it lays an error out
+%itself [source 2026-09-25T05:48:17+10:00:
+%https://github.com/SWI-Prolog/swipl-devel/blob/69775434c8226897626b226aefcc8266499f1e2e/boot/messages.pl#L134-L167,
+%translate_message//1 asks prolog:message//1 before translate_message2//1 lays
+%out the location, the formal and the context], and for EVERY kind the
+%refusal table declares a signal, read off metta_host_error_kind_row/3 below
+%rather than listed again here, so a kind added to the table renders the day
+%it is added [tested 2026-09-25T05:48:06+10:00:
+%error_kinds:every_declared_kind_renders_a_message_of_its_own].
+:- multifile prolog:message//1.
+prolog:message(error(metta_control_signal(Kind, Detail), _)) -->
+    { metta_host_error_kind_row(Kind, signal, _) },
+    metta_host_signal_message(Kind, Detail).
+
+%What each kind says. A bound says which bound stopped the work and what it
+%was set to, a restraint names its row and its call, a syntax refusal carries
+%the reader's own sentence, and a run stopped from outside says so. Every other
+%signal's detail IS the sentence its thrower wrote, the JSON codec's "JSON
+%cannot carry ..." among them; a detail that is not text is written as the
+%term it is, after the kind, rather than guessed at.
+metta_host_signal_message(syntax, Detail) -->
+    !,
+    [ 'MeTTa syntax error: ~w'-[Detail] ].
+metta_host_signal_message(inference_limit, Limit) -->
+    !,
     [ 'the evaluation passed its ~w inference bound and was stopped'-[Limit] ].
-prolog:error_message(metta_control_signal(time_limit, Seconds)) -->
+metta_host_signal_message(time_limit, Seconds) -->
+    !,
     [ 'the evaluation passed its ~w second bound and was stopped'-[Seconds] ].
-prolog:error_message(metta_control_signal(restraint, [Word, Bound, Call])) -->
+metta_host_signal_message(restraint, [Word, Bound, Call]) -->
+    !,
     [ 'the (~w ~w) restraint declared for the table of ~w tripped and the \c
        evaluation was stopped'-[Word, Bound, Call] ].
+metta_host_signal_message(interrupted, _) -->
+    !,
+    [ 'the run was stopped from outside before it finished' ].
+metta_host_signal_message(_, Detail) -->
+    { atom(Detail) ; string(Detail) },
+    !,
+    [ '~w'-[Detail] ].
+metta_host_signal_message(Kind, Detail) -->
+    [ '~w: ~q'-[Kind, Detail] ].
+
 control_exception(error(resource_error(_), _)).
 
 %%%% The refusal taxonomy every seat classifies by %%%%
@@ -435,6 +473,7 @@ metta_host_error_kind_row(platform,        term,    [operation, capability,
 metta_host_error_kind_row(operation,       term,    [operation, kind, expected, culprit]).
 metta_host_error_kind_row(stack,           term,    [limit]).
 metta_host_error_kind_row(source,          term,    [source]).
+metta_host_error_kind_row(registration,    term,    [requires]).
 metta_host_error_kind_row(engine,          default, []).
 
 %!  metta_host_error_kind(+Ball, -Kind, -Fields) is det.
@@ -485,6 +524,12 @@ metta_host_error_kind(error(resource_error(stack), Context), stack, [limit-Bytes
     metta_host_stack_ceiling(Context, Bytes).
 metta_host_error_kind(error(existence_error(source_sink, Source), _), source,
                       [source-Source]) :-
+    !.
+%A registration its contract refuses, carrying what the caller has to supply,
+%which the kind's remedy names [source 2026-09-25T05:48:09+10:00: engine/metta/interop.pl,
+%prolog_registration_refused/2].
+metta_host_error_kind(error(metta_registration_refused(_, Requires), _),
+                      registration, [requires-Requires]) :-
     !.
 metta_host_error_kind(_, engine, []).
 

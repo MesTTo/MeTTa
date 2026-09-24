@@ -1117,8 +1117,10 @@ prolog_registration_shape(Names, Load, renames(Names, Tos)) :-
     ->  maplist(renamed_to, Names, Tos)
     ;   prolog_registration_refused(
             'a rename imports a Prolog module\'s export under another name, \c
-             and SWI\'s import list names a module by its file, so renames \c
-             need a file origin')
+             and SWI\'s import list names a module by its file, so a rename \c
+             cannot come from text',
+            'a file origin, the path of the module file whose exports the \c
+             renames name')
     ).
 prolog_registration_shape(Names, _, named(Names)) :-
     prolog_function_name_list(Names, metta_register_prolog/3).
@@ -1137,10 +1139,11 @@ prolog_registration(declared, Load, Source, Registered) :-
         sort(Exported, Registered),
         (   Registered == []
         ->  prolog_registration_refused(
-                'registering Prolog needs the names to register, or a \c
-                 :- metta_export("...") declaration naming a function in the \c
-                 source; discovering them would silently register whatever \c
-                 else the source defines')
+                'the source declares metta exports and loading it recorded \c
+                 none, and discovering its names would silently register \c
+                 whatever else it defines',
+                'the names to register, or a :- metta_export("...") \c
+                 declaration naming a function the source defines')
         ;   true
         )
     ).
@@ -1164,12 +1167,13 @@ prolog_declared(Declarations, extension) :-
     !.
 prolog_declared(_, _) :-
     prolog_registration_refused(
-        'registering Prolog needs one of three things: the names to \c
-         register, a :- metta_export("...") declaration for a source that \c
-         defines functions, or a :- metta_extension(name, []) declaration for \c
-         one that contributes clauses to an extension point and exports \c
-         nothing, such as a space provider; discovering the names would \c
-         silently register whatever else the source defines').
+        'the source declares neither a function nor an extension, and \c
+         discovering its names would silently register whatever else it \c
+         defines',
+        'the names to register, a :- metta_export("...") declaration for a \c
+         source that defines functions, or a :- metta_extension(name, []) \c
+         declaration for one that only contributes clauses to an extension \c
+         point, such as a space provider').
 
 prolog_origin_declarations(file(File), Declarations) :-
     metta_source_declarations(File, Declarations).
@@ -1181,13 +1185,21 @@ prolog_origin_load(file(File)) :-
 prolog_origin_load(text(Module, Text)) :-
     consult_string_global(Module, Text).
 
-%A registration refused for what the caller passed crosses as the engine's
-%value signal, which every host reads as its own word for a value it cannot
-%use, with this sentence as the detail. Any other ball from an engine
-%predicate reaches a host as the generic engine kind
-%[source: engine/metta/registration.pl, metta_host_error_kind/3].
-prolog_registration_refused(Sentence) :-
-    throw(error(metta_control_signal(value, Sentence), context(metta, value))).
+%A registration its contract refuses crosses as a kind of its own,
+%`registration`: Sentence says what was missing, and Requires what the caller
+%has to supply, which the kind's catalog row in engine/spaces/catalog.pl cites
+%the contract for and names in its remedy [tested 2026-09-25T05:48:07+10:00:
+%prolog_registration_service:every_registration_refusal_names_what_to_supply].
+prolog_registration_refused(Sentence, Requires) :-
+    throw(error(metta_registration_refused(Sentence, Requires),
+                context(metta_register_prolog/3, _))).
+
+%The refusal renders as its sentence, whole: SWI's own layout would put the
+%predicate indicator in front of it, which names the engine's door rather than
+%the caller's call.
+:- multifile prolog:message//1.
+prolog:message(error(metta_registration_refused(Sentence, _), _)) -->
+    [ '~w'-[Sentence] ].
 
 %The head names one registration FORM claims, read from the form itself and
 %never run. A library that publishes its surface through

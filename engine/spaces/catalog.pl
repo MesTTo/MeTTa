@@ -2962,8 +2962,8 @@ metta_catalog_preset([refusal, Kind, Class, Ground, Remedy]) :-
 %at `prose`, which is rustc's HasPlaceholders
 %[source: rustc_lint_defs::Applicability,
 %https://doc.rust-lang.org/nightly/nightly-rustc/rustc_lint_defs/enum.Applicability.html].
-%The nine refusals whose repair is a decision carry a title and no act, which
-%is PostgreSQL's errhint and clang's note: advice with no mechanical edit
+%A refusal whose repair is a decision carries a title and no act, which is
+%PostgreSQL's errhint and clang's note: advice with no mechanical edit
 %[source: PostgreSQL documentation, 55.3.2 Error Message Style Guide,
 %errhint()].
 %
@@ -3077,6 +3077,21 @@ metta_refusal_declaration(
       sentence about it"],
     [remedy, "create <source>, or correct the path that names it",
      quickfix, prose]).
+%A registration of Prolog as MeTTa functions registers exactly the names its
+%caller gives or its source declares, so the repair is always something the
+%caller supplies: the names, a declaration in the source, or a file origin for
+%a rename. These refusals wore the value row before this one existed, whose
+%ground is the JSON crossing and whose remedy asks for "a value JSON can carry"
+%[tested 2026-09-25T05:48:07+10:00: prolog_registration_service:every_registration_refusal_names_what_to_supply].
+metta_refusal_declaration(
+    registration, 'RegistrationError',
+    [ground, 'metta-law',
+     "HostLaws: engine/metta/interop.pl metta_register_prolog/3 -- a \c
+      registration registers exactly the names its caller gives or its source \c
+      declares, and a rename imports from a module file, so one that supplies \c
+      neither is refused before the source loads rather than registered by \c
+      guess"],
+    [remedy, "give the registration <requires>", quickfix, prose]).
 metta_refusal_declaration(
     engine, 'EngineError',
     [ground, 'metta-law',

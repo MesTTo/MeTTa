@@ -14,6 +14,10 @@
 %     [tested: every_declared_kind_classifies_from_its_own_ball]
 %   - the check is not vacuous: a ball checked against the wrong row fails
 %     [tested: the_check_sees_a_planted_mismatch]
+%   - every declared kind's ball renders a message of its own, and a signal
+%     renders without the envelope's framing, its sentence when its detail is
+%     one [tested 2026-09-25T05:48:06+10:00: every_declared_kind_renders_a_message_of_its_own,
+%     a_sentence_signal_renders_as_its_sentence]
 %   - a ball the engine did not shape is the `engine` kind rather than a
 %     misreading of a name nested inside it
 %     [tested: a_signal_name_nested_in_another_term_is_not_a_signal]
@@ -91,6 +95,44 @@ test(every_declared_kind_classifies_from_its_own_ball,
     pairs_keys_values(Carried, Names, Values),
     msort(Carried, Sorted),
     assertion(Sorted == Expected).
+
+%Every kind's ball renders a message of its own rather than SWI's `Unknown
+%error term` dump, which is what every seat that shows message text printed for
+%the value, type and interrupted signals until 2026-09-24. A signal renders as
+%what it says, without the envelope's framing: SWI's `metta:` location and the
+%`(kind)` comment are not part of the refusal. The kinds come from the fixture,
+%so a kind added to the table is checked from its own ball the day it is added.
+test(every_declared_kind_renders_a_message_of_its_own,
+     [ forall(error_kind_fixture(Kind, _, BallText, _)) ]) :-
+    term_string(Ball, BallText),
+    rendered(Ball, Text),
+    assertion(Text \== ""),
+    assertion(\+ sub_string(Text, _, _, _, "Unknown")),
+    (   metta_host_error_kind_row(Kind, signal, _)
+    ->  assertion(\+ sub_string(Text, 0, _, _, "metta:")),
+        format(string(Comment), "(~w)", [Kind]),
+        assertion(\+ sub_string(Text, _, _, 0, Comment))
+    ;   true
+    ).
+
+%A signal whose detail is a sentence renders as that sentence, whichever kind
+%it is: the codec's value and type refusals say what JSON cannot carry.
+test(a_sentence_signal_renders_as_its_sentence,
+     [ forall(member(Kind, [value, type])) ]) :-
+    Ball = error(metta_control_signal(Kind, "JSON cannot carry the term"),
+                 context(metta, Kind)),
+    rendered(Ball, Text),
+    assertion(Text == "JSON cannot carry the term").
+
+%The message a seat reads for one ball: the translation print_message/2 makes,
+%through the predicate it calls [source 2026-09-25T05:48:17+10:00:
+%https://github.com/SWI-Prolog/swipl-devel/blob/69775434c8226897626b226aefcc8266499f1e2e/boot/messages.pl#L2483-L2521,
+%print_message/2 calls translate_message/3], laid out as it lays it, without
+%the trailing newline.
+rendered(Ball, Text) :-
+    '$messages':translate_message(Ball, Lines, []),
+    with_output_to(string(Laid), print_message_lines(current_output, '', Lines)),
+    split_string(Laid, "", "\n", [Text]).
 
 %The fixture carries ONE ball per kind, so it reaches one shape of a field
 %that has two. A platform requirement is library(thread) for most capabilities

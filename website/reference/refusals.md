@@ -44,6 +44,7 @@ word; `tests/data/error-kinds.json` records what it spells and why.
 | `operation` | `MettaOperationError` | `MettaOperationError` | `OperationError` | `operation` `kind` `expected` `culprit` |
 | `stack` | `StackLimitError` | `StackLimitError` | `StackLimitError` | `limit` |
 | `source` | `SourceNotFound` | `SourceNotFound` | `SourceNotFoundError` | `source` |
+| `registration` | `RegistrationError` | `RegistrationError` | `RegistrationError` | `requires` |
 | `engine` | `EngineError` | `EngineError` | `EngineError` | none |
 
 ## Each kind
@@ -191,6 +192,16 @@ Raised as `SourceNotFound`, off a ball whose own shape names the refusal.
 An LSP `quickfix` at rustc's `prose`, with no act: the repair is a decision.
 
 On TypeScript this is `SourceNotFoundError`: every condition in this package ends in Error; the row keeps the shorter name because the Python seat's own N818 exemption records that spelling as deliberate.
+
+### `registration`
+
+Raised as `RegistrationError`, off a ball whose own shape names the refusal.
+
+**Ground.** metta-law: HostLaws: engine/metta/interop.pl metta_register_prolog/3 -- a registration registers exactly the names its caller gives or its source declares, and a rename imports from a module file, so one that supplies neither is refused before the source loads rather than registered by guess
+
+**Remedy.** give the registration `<requires>`
+
+An LSP `quickfix` at rustc's `prose`, with no act: the repair is a decision.
 
 ### `engine`
 

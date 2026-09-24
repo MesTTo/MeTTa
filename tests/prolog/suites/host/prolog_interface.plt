@@ -29,6 +29,9 @@
 %   - inline text loads under metta_inline_<sha256 of the text>, and the same
 %     text again replaces its clauses rather than adding to them
 %     [tested: a_text_loads_under_the_module_its_content_names]
+%   - a registration its contract refuses is the `registration` kind, whose
+%     message is its sentence and whose remedy names what to supply
+%     [tested 2026-09-25T05:48:07+10:00: every_registration_refusal_names_what_to_supply]
 %   - an extension's members are what it installed, and one nothing loaded
 %     is refused rather than answered empty
 %     [tested: an_extensions_members_are_what_it_installed,
@@ -968,8 +971,8 @@ registration_shape(renames).
 %module file; a source registered without names has to declare what it is;
 %and every other registration registers exactly its one name.
 registration_expected(missing, _, refused(source_sink)) :- !.
-registration_expected(text, renames, refused(value)) :- !.
-registration_expected(_, none(nothing), refused(value)) :- !.
+registration_expected(text, renames, refused(registration)) :- !.
+registration_expected(_, none(nothing), refused(registration)) :- !.
 registration_expected(_, none(extension), registered(extension)) :- !.
 registration_expected(_, _, registered(name)).
 
@@ -1030,8 +1033,8 @@ registration_origin_term(missing, Directory, Tag, _, file(File)) :-
 %it answered; anything else is a defect in the service and rethrown.
 registration_outcome(raised(error(existence_error(source_sink, _), _)), _, _,
                      refused(source_sink)) :- !.
-registration_outcome(raised(error(metta_control_signal(value, _), context(metta, value))),
-                     _, _, refused(value)) :- !.
+registration_outcome(raised(error(metta_registration_refused(_, _), _)),
+                     _, _, refused(registration)) :- !.
 registration_outcome(raised(Error), _, _, _) :- !,
     throw(Error).
 registration_outcome(registered([Name]), Name, _, registered(name)) :- !.
@@ -1044,7 +1047,7 @@ registration_outcome(registered(Other), _, _, registered(Other)).
 registration_effect(registered(name), _, Name) :- !,
     reduce([Name, 3], Answer, _),
     assertion(Answer == 21).
-registration_effect(refused(value), none(nothing), Name) :- !,
+registration_effect(refused(registration), none(nothing), Name) :- !,
     assertion(\+ current_predicate(user:Name/2)).
 registration_effect(_, _, _).
 
@@ -1089,13 +1092,55 @@ test(a_text_loads_under_the_module_its_content_names,
 test(a_source_declaring_nothing_is_refused_before_it_loads) :-
     Text = "'plunit-prs-silent'(X, X).\n",
     catch(metta_register_prolog(text(Text), [], _),
-          error(metta_control_signal(value, Sentence), context(metta, value)),
+          error(metta_registration_refused(_, Requires), _),
           true),
-    assertion(nonvar(Sentence)),
+    assertion(nonvar(Requires)),
     % All three routes named, since a provider has no function to export.
     forall(member(Route, ['the names to register', 'metta_export', 'metta_extension']),
-           assertion(sub_atom(Sentence, _, _, _, Route))),
+           assertion(sub_atom(Requires, _, _, _, Route))),
     assertion(\+ current_predicate(user:'plunit-prs-silent'/2)).
+
+%A refusal a host shows is its kind, its message and its repair, read the way
+%every seat reads them: metta_host_error_kind/3 for the kind and what to
+%supply, the engine's message translation for the text, and
+%metta_host_refusal/6 for the ground and the remedy. Both refusals the rule
+%table above produces are checked: a rename from text and a source that
+%declares nothing.
+test(every_registration_refusal_names_what_to_supply,
+     [ forall(member(Case-Supply,
+                     [ renames-'a file origin',
+                       nothing-'the names to register' ])) ]) :-
+    registration_refusal(Case, Ball),
+    Ball = error(metta_registration_refused(Sentence, Requires), _),
+    metta_host_error_kind(Ball, Kind, Fields),
+    assertion(Kind == registration),
+    assertion(Fields == [requires-Requires]),
+    assertion(sub_atom(Requires, 0, _, _, Supply)),
+    %What print_message/2 renders, through the predicate it calls.
+    '$messages':translate_message(Ball, Lines, []),
+    with_output_to(string(Message),
+                   print_message_lines(current_output, '', Lines)),
+    atom_string(Sentence, Said),
+    assertion(sub_string(Message, 0, _, _, Said)),
+    assertion(\+ sub_string(Message, _, _, _, "Unknown")),
+    metta_host_refusal(Ball, registration, _, Class, Ground, Remedy),
+    assertion(Class == 'RegistrationError'),
+    Ground = [ground, _, Citation],
+    assertion(sub_string(Citation, _, _, _, "metta_register_prolog/3")),
+    Remedy = [remedy, Title|_],
+    assertion(sub_string(Title, _, _, _, Requires)),
+    assertion(\+ sub_string(Title, _, _, _, "JSON")).
+
+registration_refusal(renames, Ball) :-
+    catch(metta_register_prolog(
+              text(":- module(plunit_prs_rename_text, [e/2]).\ne(X, X).\n"),
+              [[e, 'plunit-prs-renamed']], _),
+          Ball, true),
+    nonvar(Ball).
+registration_refusal(nothing, Ball) :-
+    catch(metta_register_prolog(text("'plunit-prs-mute'(X, X).\n"), [], _),
+          Ball, true),
+    nonvar(Ball).
 
 test(an_extensions_members_are_what_it_installed,
      [cleanup(registration_cleanup('plunit-prs-member', plunit_prs_members,

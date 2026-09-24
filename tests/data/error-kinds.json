@@ -119,6 +119,14 @@
    "node": {"error": "SourceNotFoundError", "code": "ERR_METTA_SOURCE", "attributes": {"source": "source"},
             "why": "every condition in this package ends in Error; the row keeps the shorter name because the Python seat's own N818 exemption records that spelling as deliberate"}
   },
+  "registration": {
+   "origin": "term",
+   "fields": ["requires"],
+   "ball": "error(metta_registration_refused('a rename imports a Prolog module\\'s export under another name, so a rename cannot come from text', 'a file origin'), context(metta_register_prolog/3, _))",
+   "expects": {"requires": "a file origin"},
+   "python": {"error": "RegistrationError", "attributes": {"requires": "requires"}},
+   "node": {"error": "RegistrationError", "code": "ERR_METTA_REGISTRATION", "attributes": {"requires": "requires"}}
+  },
   "engine": {
    "origin": "default",
    "fields": [],

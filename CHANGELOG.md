@@ -63,6 +63,18 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Changed
 
+- A registration of Prolog that its contract refuses is the `registration`
+  refusal kind, raised as `RegistrationError` by both seats and a
+  `ValueError` too in Python, carrying `requires`: what the registration
+  lacks, which is the names to register, a declaration in the source, or a
+  file origin for a rename. Its catalog row cites the registration contract
+  and its remedy reads `give the registration <requires>`, filled. These
+  refusals used to cross as the `value` kind, whose ground is the JSON crossing
+  and whose remedy asked for "a value JSON can carry". Python's
+  `register_prolog` raises the same class for the two refusals it makes
+  itself, a call naming neither `source=` nor `path=` and a rename from
+  `source=`.
+
 - The Python seat's cost, scaling and memory-scale ledgers record when each
   row was measured as the time its run started, as `date -Iseconds` prints
   it, in the row's `measured`. Each row's cause used to carry
@@ -302,6 +314,14 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   stamp.
 
 ### Fixed
+
+- A seat that shows the engine's message text reads every refusal as its own
+  sentence. The engine rendered four of its seven signal kinds, so a value,
+  type or interrupted refusal read `Unknown error term:
+  metta_control_signal(value, ...) (value)`, and a rendered one still carried
+  SWI's framing, `metta: MeTTa syntax error: missing ) (syntax)`. The whole
+  envelope renders now, for every signal kind the refusal table declares, read
+  off the table so a kind added to it renders from the day it is added.
 
 - The git-import example's fixture takes a lock beside the repository it
   builds and holds it until the process exits, and makes and clears its

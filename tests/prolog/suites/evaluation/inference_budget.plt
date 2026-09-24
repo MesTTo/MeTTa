@@ -304,9 +304,13 @@ test(a_swallowed_ball_still_refuses_at_the_c_door) :-
     assertion(subsumes_term(error(metta_control_signal(inference_limit, 5000), _),
                             Ball)).
 
+%The ball as it is thrown, rendered the way print_message/2 renders it, which
+%is what every seat that shows message text reads.
 test(a_spent_budget_names_the_bound_that_stopped_it) :-
-    phrase(prolog:error_message(metta_control_signal(inference_limit, 500)),
-           Parts),
+    '$messages':translate_message(
+        error(metta_control_signal(inference_limit, 500),
+              context(metta, inference_limit)),
+        Parts, []),
     memberchk(Format-[500], Parts),
     once(sub_atom(Format, _, _, _, 'inference bound')).
 
