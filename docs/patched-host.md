@@ -164,6 +164,23 @@ the package with `cmake -DCMAKE_INSTALL_PREFIX=<prefix> -P
 <build>/packages/utf8proc/cmake_install.cmake`, which puts `unicode.qlf` in
 beside `unicode.pl` so the library still loads from its compiled form, and
 rerun `declare-host.sh declare`.
+A host other processes are running from is replaced, not rebuilt in place.
+Install the new build into a prefix of its own, `swipl-patched.2`, declare it,
+and move the path everything names onto it by renaming a symlink over it:
+`ln -s swipl-patched.2 swipl-patched.next && mv -T swipl-patched.next
+swipl-patched`. The first time, while that path is still the installed
+directory, `ln -s swipl-patched.1 swipl-patched.1 && mv --exchange
+swipl-patched swipl-patched.1` turns it into a symlink to the moved tree in one
+step, since the exchange swaps the two names and the symlink's target is its
+own old name. A running process keeps the libswipl it has mapped, so the old
+tree stays. It is no longer a host of its own, though: its launcher finds
+libswipl through a RUNPATH naming the original path, which now leads to the
+new tree, so it runs as itself only with `LD_LIBRARY_PATH` and `SWI_HOME_DIR`
+naming its own directories. A rebuild in an existing build tree recompiles
+only what changed, and `compiled_at` is the `__DATE__` and `__TIME__` of
+`src/os/pl-prologflag.c`, so touch that file first; otherwise the new binary
+keeps the old identity, and a declaration cannot tell the two builds apart.
+
 Each requirement is regenerated in the same change: `engine/host_patches.pl`
 with `sh tools/pymetta-host/declare-host.sh require > engine/host_patches.pl`,
 and pymetta's `extensions/python/metta/_binding/host_patches.pl` with
