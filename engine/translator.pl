@@ -389,6 +389,14 @@
             substitute_written_variable/4,
             lift_pattern_modifiers/4,
             metta_host_dispatch_proof_step/6,
+            %The host evaluation door, which runs a term inside the fuel scope
+            %for every seat, and the questions a host asks about an evaluation
+            %without running it.
+            metta_host_evaluate/5,
+            metta_host_evaluation_prepare/2,
+            metta_host_evaluation_repeatable/2,
+            metta_host_evaluation_effect_plan/4,
+            metta_host_unmatched/2,
             %The head-context note engine/filereader.pl reads to decide whether a
             %symbol was executed as a runnable or as a clause head.
             symbol_head/2,

@@ -44,6 +44,17 @@
             json_codec_c_active/0
           ]).
 
+% The codec is a service the shipped libraries call: lib/lib_json/lib_json.pl
+% decodes and encodes through it. It is published from this module, since the
+% engine's import chain does not reach it, so its seams are declared here where
+% seam_home/2 reads their home from the declaring file [source 2026-09-25T05:56:02+10:00:
+% engine/ext_points.pl, seam_home/2], and the library surface walk finds each
+% one published [tested 2026-09-25T05:51:05+10:00: tests/prolog/library_surface.pl].
+:- multifile seam:kind/2.
+seam:kind(json_codec_read/3, service).
+seam:kind(json_codec_write/3, service).
+seam:kind(json_codec_write/4, service).
+
 % Assumes: metta_engine:goal_expansion/2 is visible while clauses compile.
 % Set the base before the clauses and their engine-dependent directives.
 % [source: https://github.com/SWI-Prolog/swipl-devel/blob/fc7ef84b949378b729052c3ade79c90ce5416abb/boot/expand.pl#L239; commit=ede2ac57e213a0d4502c6bbbca6227f97015b720]

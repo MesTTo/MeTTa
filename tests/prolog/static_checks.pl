@@ -166,6 +166,7 @@ main :-
     undefined_report,
     a_backend_calls_only_published_surface,
     a_host_binding_calls_only_published_surface,
+    a_host_binding_evaluates_only_through_the_door,
     every_dispatch_row_declares_the_arity_its_clause_accepts,
     no_cut_in_a_live_hook_clause,
     every_engine_emitted_goal_is_protected,
@@ -1619,9 +1620,14 @@ a_host_binding_calls_only_published_surface :-
     findall(Directory, host_transport(_, Directory), Directories),
     reaches_past_surface(Directories, Reaches),
     length(Directories, Bindings),
+    extension_clause_count(Directories, Examined),
     (   Reaches == []
-    ->  format("static: every one of ~d host bindings calls only published \c
-                surface~n", [Bindings])
+    ->  every_included_host_file_is_walked(Directories),
+        host_scan_sees_a_submodule_reach,
+        format("static: every one of ~d host bindings calls only published \c
+                surface in ~d clauses, included files among them, and the \c
+                walk saw a planted reach into a subsystem module~n",
+               [Bindings, Examined])
     ;   forall(member(Caller-Callee, Reaches),
                format(user_error,
                       'the host transport predicate ~w calls ~w, an engine \c
@@ -1632,6 +1638,207 @@ a_host_binding_calls_only_published_surface :-
                       [Caller, Callee, Callee])),
         fail
     ).
+
+%Every file a host transport includes contributes its clauses to the walk,
+%which tests/prolog/surface_walk.pl's extension_clauses/2 selects by each
+%clause's own file. The files are asked of SWI's include record and the
+%predicates each defines of predicate_property/2, so neither comes from the
+%selection the walk makes; an included file that defines nothing has nothing
+%to walk.
+every_included_host_file_is_walked(Directories) :-
+    extension_clauses(Directories, References),
+    findall(ClauseFile,
+            ( member(Reference, References),
+              clause_property(Reference, file(ClauseFile)) ),
+            Walked0),
+    sort(Walked0, Walked),
+    findall(Included,
+            ( member(Relative, Directories),
+              tree_directory(Relative, Directory),
+              source_file(File),
+              sub_atom(File, 0, _, _, Directory),
+              source_file_property(File, includes(Included, _)),
+              sub_atom(Included, 0, _, _, Directory),
+              \+ memberchk(Included, Walked),
+              once(( source_file(Module:Head, File),
+                     predicate_property(Module:Head, file(Included)) )) ),
+            Unwalked0),
+    sort(Unwalked0, Unwalked),
+    (   Unwalked == []
+    ->  true
+    ;   forall(member(File, Unwalked),
+               format(user_error,
+                      'the host-binding walk examined no clause of ~w, which \c
+                       a host transport includes and which defines \c
+                       predicates, so its calls are unchecked~n', [File])),
+        fail
+    ).
+
+%A call qualified into a subsystem module for a name that module keeps to
+%itself is a reach past the surface too. resolve_dispatch/4 is the
+%translator's own, the one the Python binding's direct call used to reach,
+%and a planted clause calling it must come back as a reach.
+host_scan_sees_a_submodule_reach :-
+    Internal = resolve_dispatch/4,
+    (   published_surface(Internal)
+    ->  format(user_error,
+               'the planted submodule reach ~w is published surface, so it \c
+                proves nothing; pick a subsystem predicate that is not~n',
+               [Internal]),
+        fail
+    ;   setup_call_cleanup(
+            assertz((planted_submodule_probe :-
+                        translator:resolve_dispatch(_, _, _, _)), Reference),
+            walked_reaches([Reference], Reaches),
+            erase(Reference)),
+        (   memberchk(planted_submodule_probe/0-Internal, Reaches)
+        ->  true
+        ;   format(user_error,
+                   'the host-binding walk did not report a planted call to \c
+                    translator:~w, so a reach into a subsystem module is \c
+                    invisible to it~n', [Internal]),
+            fail
+        )
+    ).
+
+%%%% A host binding evaluates only through the door %%%%
+%
+% engine/translator/runtime.pl's metta_host_evaluate/5 evaluates a term inside
+% the fuel scope for every seat, so (pragma! max-stack-depth N) bounds what a
+% host asks. This refuses a host transport that reaches the rest of the
+% engine's evaluation vocabulary: each name is published for a caller already
+% inside an evaluation, where a runnable form's scope is open, and a host that
+% calls one evaluates outside it.
+%
+% The vocabulary by role: a term evaluated to answers, a term translated into
+% goals, goals run. It is the published predicates that evaluate a term their
+% caller hands over, a higher-order builtin applying the caller's function
+% among them, translate one, or run what a translation made. It is chosen, not
+% derived: the least set closed under calling from translate_expr/3 and
+% call_goals_in_/2 holds 223 published names, match/4, remove-atom/3
+% and the host services the seats call among them, since a write compiles its
+% equations and type inference translates. What the choice leaves out is
+% measured instead: each other published name that reaches a row through the
+% engine's unpublished predicates is a compiled-body helper (a
+% seam:engine_emitted/1 name, refused below as a class unless a seam declares
+% it host surface), opens the fuel scope itself (the door, a declared algebra
+% operation or negation), translates without running (the door's questions,
+% the equation compilers), or evaluates a term the engine chose (a package's
+% rows, a module or space reference, a carrier's membership question, a space
+% hook's handler, a written lambda's own form) [measured 2026-09-25T06:00:04+10:00:
+% 50 published names reach a row through unpublished predicates].
+%
+% The walk reports which clause calls which predicate, not the argument a call
+% sits in, which is why the door takes a term: with a goal-taking door, eval/2
+% written inside its goal would read here exactly as eval/2 written beside it.
+evaluation_vocabulary(evaluates, eval/2).
+evaluation_vocabulary(evaluates, evalc/3).
+evaluation_vocabulary(evaluates, 'eval-one'/2).
+evaluation_vocabulary(evaluates, metta/4).
+evaluation_vocabulary(evaluates, 'metta-thread'/4).
+evaluation_vocabulary(evaluates, assert/2).
+evaluation_vocabulary(evaluates, 'on-unwind'/3).
+evaluation_vocabulary(evaluates, reduce/2).
+evaluation_vocabulary(evaluates, reduce/3).
+evaluation_vocabulary(evaluates, eval_metta_in_module/3).
+evaluation_vocabulary(evaluates, 'add-reduct'/3).
+evaluation_vocabulary(evaluates, 'add-reducts'/3).
+evaluation_vocabulary(evaluates, assertAlphaEqual/3).
+evaluation_vocabulary(evaluates, assertAlphaEqualMsg/4).
+evaluation_vocabulary(evaluates, assertAlphaEqualToResult/3).
+evaluation_vocabulary(evaluates, assertAlphaEqualToResultMsg/4).
+evaluation_vocabulary(evaluates, 'bind!'/3).
+evaluation_vocabulary(evaluates, 'filter-atom'/3).
+evaluation_vocabulary(evaluates, 'foldl-atom'/4).
+evaluation_vocabulary(evaluates, 'for-each-in-atom'/3).
+evaluation_vocabulary(evaluates, interpret/4).
+evaluation_vocabulary(evaluates, 'map-atom'/3).
+evaluation_vocabulary(translates, translate_expr/3).
+evaluation_vocabulary(translates, translate_cached_expr/3).
+evaluation_vocabulary(translates, translate_runnable_expr/3).
+evaluation_vocabulary(translates, translate_runnable_expr/4).
+evaluation_vocabulary(runs, call_goals_in/2).
+evaluation_vocabulary(runs, call_goals_in_/2).
+
+evaluation_barred(Indicator, Role) :-
+    evaluation_vocabulary(Role, Indicator),
+    !.
+evaluation_barred(Indicator, emitted) :-
+    seam:engine_emitted(Indicator),
+    \+ seam:kind(Indicator, _).
+
+evaluation_barred_why(evaluates, 'evaluates a term outside the fuel scope').
+evaluation_barred_why(translates, 'translates a term into goals a host could run outside the fuel scope').
+evaluation_barred_why(runs, 'runs translated goals outside the fuel scope').
+evaluation_barred_why(emitted, 'is a name the compiler writes into compiled bodies, which run inside a scope a runnable form opened').
+
+:- dynamic host_evaluation_reach/3.
+
+record_host_evaluation(Callee, Caller, _Location) :-
+    engine_callee(Callee, Indicator),
+    evaluation_barred(Indicator, Role),
+    indicator(Caller, CallerIndicator),
+    (   host_evaluation_reach(CallerIndicator, Indicator, _)
+    ->  true
+    ;   assertz(host_evaluation_reach(CallerIndicator, Indicator, Role))
+    ).
+record_host_evaluation(_, _, _).
+
+host_evaluation_reaches(References, Reaches) :-
+    retractall(host_evaluation_reach(_, _, _)),
+    walk_clause_edges(References, record_host_evaluation),
+    findall(Caller-Callee-Role, host_evaluation_reach(Caller, Callee, Role), Reaches0),
+    sort(Reaches0, Reaches).
+
+a_host_binding_evaluates_only_through_the_door :-
+    findall(Indicator,
+            ( evaluation_vocabulary(_, Indicator),
+              \+ engine_predicate(Indicator) ),
+            Stale),
+    (   Stale == []
+    ->  true
+    ;   format(user_error,
+               'the evaluation vocabulary names ~w, which the engine no longer \c
+                defines; remove the row or name what replaced it~n', [Stale]),
+        fail
+    ),
+    findall(Directory, host_transport(_, Directory), Directories),
+    extension_clauses(Directories, References),
+    host_evaluation_reaches(References, Reaches),
+    (   Reaches == []
+    ->  host_evaluation_scan_sees_its_planted_reaches,
+        format("static: every host binding evaluates only through \c
+                metta_host_evaluate/5, and the walk saw a planted evaluator \c
+                and a planted compiled-body helper~n", [])
+    ;   forall(member(Caller-Callee-Role, Reaches),
+               ( evaluation_barred_why(Role, Why),
+                 format(user_error,
+                        'the host transport predicate ~w calls ~w, which ~w; \c
+                         evaluate through metta_host_evaluate/5, the door \c
+                         that runs a term inside the fuel scope~n',
+                        [Caller, Callee, Why]) )),
+        fail
+    ).
+
+%Both ways a name is barred, each proven against a real clause walked by the
+%real recorder: a vocabulary row, and a compiled-body helper no seam declares.
+host_evaluation_scan_sees_its_planted_reaches :-
+    forall(member(Body-Expected,
+                  [ eval(x, _)-(eval/2-evaluates),
+                    metta_run_with_fuel(_, _, true)-(metta_run_with_fuel/3-emitted) ]),
+           (   setup_call_cleanup(
+                   assertz((planted_evaluation_probe :- Body), Reference),
+                   host_evaluation_reaches([Reference], Reaches),
+                   erase(Reference)),
+               Expected = Callee-Role,
+               (   memberchk(planted_evaluation_probe/0-Callee-Role, Reaches)
+               ->  true
+               ;   format(user_error,
+                          'the evaluation walk did not refuse a planted call \c
+                           to ~w, so its clean result says nothing~n', [Callee]),
+                   fail
+               )
+           )).
 
 %%%% A dispatch table declares the arity its clauses accept %%%%
 %

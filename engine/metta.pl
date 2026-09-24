@@ -442,7 +442,6 @@
             metta_refined_union_type/1,
             metta_runtime_type/2,
             metta_shipped_types_match/2,
-            metta_typed_dispatch_applies/2,
             metta_types_match_in/3,
             normalize_callable_type_in/3,
             normalize_cast_type/3,
@@ -1991,6 +1990,7 @@ metta_import_shared_registries(Subsystem) :-
 :- consult('metta/algebra_fixpoint.pl').
 :- ensure_loaded([atom_index, parser, type_rules, translator, translator_rules,
                   support_graph, specializer, materialize, filereader,
+                  owned_resources,
                   '../lib/lib_gitimport/lib_gitimport', spaces, tracer,
                   duals, kernel, '../lib/lib_memo/lib_memo',
                   '../lib/minimal_metta_lib/minimal_metta_lib']).
@@ -2034,6 +2034,9 @@ metta_engine_reexport(filereader, metta_host_source_atoms/2).
 metta_engine_reexport(filereader, metta_host_program_source/2).
 metta_engine_reexport(filereader, metta_host_set_silent/1).
 metta_engine_reexport(filereader, metta_host_substitute/3).
+metta_engine_reexport(filereader, metta_settle_definitions/0).
+metta_engine_reexport(filereader, with_definition_batch/1).
+metta_engine_reexport(filereader, source_children/3).
 metta_engine_reexport(filereader, parse_metta_source/2).
 metta_engine_reexport(filereader, parsed_form_parts/4).
 metta_engine_reexport(filereader, process_metta_string/2).
@@ -2147,6 +2150,11 @@ metta_engine_reexport(translator, drop_fun_meta/4).
 metta_engine_reexport(translator, eval_metta_in_module/3).
 metta_engine_reexport(translator, lift_pattern_modifiers/4).
 metta_engine_reexport(translator, metta_host_dispatch_proof_step/6).
+metta_engine_reexport(translator, metta_host_evaluate/5).
+metta_engine_reexport(translator, metta_host_evaluation_prepare/2).
+metta_engine_reexport(translator, metta_host_evaluation_repeatable/2).
+metta_engine_reexport(translator, metta_host_evaluation_effect_plan/4).
+metta_engine_reexport(translator, metta_host_unmatched/2).
 metta_engine_reexport(translator, metta_reducible_head/2).
 metta_engine_reexport(translator, metta_special_form_head/1).
 metta_engine_reexport(translator, reduce/2).
@@ -2199,6 +2207,8 @@ metta_engine_reexport(spaces, metta_exec_module_generation/2).
 metta_engine_reexport(spaces, metta_exec_module_known/2).
 metta_engine_reexport(spaces, metta_exec_module_parent/2).
 metta_engine_reexport(spaces, metta_match_atoms/2).
+metta_engine_reexport(spaces, metta_arity_ascending/3).
+metta_engine_reexport(spaces, space_parent_child_used/1).
 metta_engine_reexport(spaces, metta_policy_members/3).
 metta_engine_reexport(spaces, metta_space_claim/2).
 metta_engine_reexport(spaces, metta_space_operand/1).
@@ -2256,6 +2266,7 @@ metta_engine_reexport(lib_memo, memo_withdraw_removed_definition/2).
 metta_engine_reexport(lib_memo, metta_memo_total_bytes/1).
 metta_engine_reexport(parser, 'register-token!'/3).
 metta_engine_reexport(spaces, clear_foreign_atoms/1).
+metta_engine_reexport(owned_resources, with_outcome_cleanup/3).
 
 :- forall(metta_engine_reexport(_, PredicateIndicator), export(PredicateIndicator)).
 

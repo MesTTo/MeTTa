@@ -619,7 +619,6 @@ Engine binding: `metta_py_evaluate`, wire `prolog-goal`.
 | `form` | `wire` | Wire/text target or an already decoded term. |
 | `using` | `()` | Named substitutions applied to the decoded term. |
 | `answers` | `all` | One solution, eager bag, cursor, count, retained count, or status rows. |
-| `fuel` | `True` | Reuse or open the engine fuel scope. |
 | `inferences` | `-1` | Cumulative engine-step quota; negative means unbounded. |
 | `seconds` | `-1.0` | Engine time quota in seconds; negative means unbounded. |
 | `under` | `None` | Evaluation algebra, demand limit and direction, or no override. |
@@ -628,7 +627,6 @@ Engine binding: `metta_py_evaluate`, wire `prolog-goal`.
 | `columns` | `()` | Caller variable names projected beside each cursor answer. |
 | `accounting` | `False` | Return the work measured inside this evaluation. |
 | `batch` | `False` | Return one result group per target, in input order. |
-| `unmatched` | `True` | Preserve an unreduced original after an empty eager bag. |
 
 Assumes receiver state `live`.
 
@@ -739,7 +737,6 @@ Engine binding: `metta_py_evaluate`, wire `prolog-goal`.
 | `form` | `wire` | Wire/text target or an already decoded term. |
 | `using` | `()` | Named substitutions applied to the decoded term. |
 | `answers` | `cursor` | One solution, eager bag, cursor, count, retained count, or status rows. |
-| `fuel` | `True` | Reuse or open the engine fuel scope. |
 | `inferences` | `-1` | Cumulative engine-step quota; negative means unbounded. |
 | `seconds` | `-1.0` | Engine time quota in seconds; negative means unbounded. |
 | `under` | `None` | Evaluation algebra, demand limit and direction, or no override. |
@@ -748,7 +745,6 @@ Engine binding: `metta_py_evaluate`, wire `prolog-goal`.
 | `columns` | `()` | Caller variable names projected beside each cursor answer. |
 | `accounting` | `False` | Return the work measured inside this evaluation. |
 | `batch` | `False` | Return one result group per target, in input order. |
-| `unmatched` | `True` | Preserve an unreduced original after an empty eager bag. |
 
 Assumes receiver state `live`.
 
@@ -983,7 +979,6 @@ Engine binding: `metta_py_evaluate`, wire `prolog-goal`.
 | `form` | `wire` | Wire/text target or an already decoded term. |
 | `using` | `()` | Named substitutions applied to the decoded term. |
 | `answers` | `status` | One solution, eager bag, cursor, count, retained count, or status rows. |
-| `fuel` | `True` | Reuse or open the engine fuel scope. |
 | `inferences` | `-1` | Cumulative engine-step quota; negative means unbounded. |
 | `seconds` | `-1.0` | Engine time quota in seconds; negative means unbounded. |
 | `under` | `None` | Evaluation algebra, demand limit and direction, or no override. |
@@ -992,7 +987,6 @@ Engine binding: `metta_py_evaluate`, wire `prolog-goal`.
 | `columns` | `()` | Caller variable names projected beside each cursor answer. |
 | `accounting` | `False` | Return the work measured inside this evaluation. |
 | `batch` | `False` | Return one result group per target, in input order. |
-| `unmatched` | `True` | Preserve an unreduced original after an empty eager bag. |
 
 Assumes receiver state `live`.
 

@@ -303,6 +303,10 @@
             metta_host_clear_defined/1,
             metta_host_clear_space/1,
             metta_host_explain_match/3,
+            %A host reads the arities a module stores a function at, and asks
+            %whether a space name it would recycle was ever used.
+            metta_arity_ascending/3,
+            space_parent_child_used/1,
             metta_host_native_fact/4,
             metta_host_remove_reported/3,
             metta_host_space_capability_error/4,

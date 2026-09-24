@@ -1236,8 +1236,6 @@ kind(backend_selftest/0, event).
 %exactly the engine predicates the shipped shim calls, and shrinking it is
 %the shim-thinning work's scoreboard.
 kind(catch_recover/2, host_service).
-kind(translate_expr/3, host_service).
-kind(translate_cached_expr/3, host_service).
 kind(lift_pattern_modifiers/4, host_service).
 kind(metta_seq_query_plan/2, host_service).
 %The callable doors' deprecation reads: the per-name row lookup, and the
@@ -1396,11 +1394,35 @@ kind(metta_host_reference_names/2, host_service).
 %engine-side once (CMeTTa C2, which filed the duplication as an engine finding
 %rather than fixing it in the third binding).
 kind(metta_host_set_silent/1, host_service).
-%A host may ask for a cardinality hint before opening a cursor. The engine owns
-%whether doing so would repeat an effect, so this one semidet question wraps
-%the shared effect walk and fails closed on unknown goals.
-kind(metta_host_goal_repeatable/2, host_service).
-kind(metta_host_goal_effect_plan/4, host_service).
+%EVALUATION HAS ONE HOST DOOR. metta_host_evaluate/5 in
+%engine/translator/runtime.pl evaluates a term inside the fuel scope for every
+%seat, and the note there says why no seat evaluates any other way. The
+%questions a host asks about an evaluation without running it take the term
+%too, so no host holds a translated goal it could call outside the scope:
+%whether asking twice would repeat an effect (a cardinality hint before a
+%cursor opens), the plan a world admits, the translation a saga warms before
+%it wraps effects, and whether a call is one its equations do not match. The
+%goal-level walks they wrap stay the engine's.
+kind(metta_host_evaluate/5, host_service).
+kind(metta_host_evaluation_repeatable/2, host_service).
+kind(metta_host_evaluation_effect_plan/4, host_service).
+kind(metta_host_evaluation_prepare/2, host_service).
+kind(metta_host_unmatched/2, host_service).
+%A door that reads definitions settles a batch still open around it first;
+%the evaluation door does, and so must a host door that reads definitions
+%without evaluating. A host batches its own definitions, forces a deferred
+%function before it reads its clauses, reads the arities a module stores a
+%function at, asks whether a recycled space name was ever used, reads a
+%relation's rows, and walks a parsed form's source origins. Each was a call
+%into a subsystem module the host-binding walk could not see until it tested
+%a callee in the module it resolves in.
+kind(metta_settle_definitions/0, host_service).
+kind(with_definition_batch/1, host_service).
+kind(metta_ensure_compiled/1, host_service).
+kind(metta_arity_ascending/3, host_service).
+kind(space_parent_child_used/1, host_service).
+kind(metta_match_atoms/2, host_service).
+kind(source_children/3, host_service).
 %The three source-side projections of that same walk. A world must be able to
 %ask what a target WOULD do before translating it, what replaying a frozen
 %image compiles, and which operations a saga step can execute, and none of
@@ -1618,11 +1640,6 @@ kind(metta_register_prolog/3, host_service).
 kind(metta_extension_members/2, host_service).
 kind(unregister_metta_extension/1, host_service).
 kind(with_metta_module/2, host_service).
-%The dispatch-ownership question behind every host direct-call door: a
-%declared or rule-owned head declines the raw fast path (P14.32). One
-%engine-owned door instead of the two raw reads it wraps, so the
-%declaration walk and the rule registry stay free to move.
-kind(metta_typed_dispatch_applies/2, host_service).
 %What this build's PLATFORM carries: every capability, whether it is present,
 %the platform library it rests on and what its absence costs. A host on a
 %reduced platform (SWI compiled to WebAssembly has no threads, alarms or
@@ -1706,6 +1723,15 @@ kind(metta_symbol_writable/1, service).
 %name.
 kind(metta_requires/1, service).
 kind(metta_require_platform/2, service).
+
+%The outcome-preserving release combinator: Setup, then Goal with its exit,
+%failure or exception restored after Cleanup has seen it, and an accidental
+%choice point refused. engine/packages.pl releases through it and so do the
+%shipped libraries, lib/lib_json/lib_json.pl, lib/lib_csv/lib_csv.pl and
+%lib/lib_database/lib_database.pl, which the library surface walk saw only once
+%it resolved a callee in the module it resolves in, so the engine loads it and
+%publishes it [tested 2026-09-25T05:51:05+10:00: tests/prolog/library_surface.pl].
+kind(with_outcome_cleanup/3, service).
 
 %Every head the compiler gives a special meaning to, enumerable. A reflection
 %library wants the SET, and reading engine/translator.pl's clause table for it

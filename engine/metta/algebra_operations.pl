@@ -11,6 +11,9 @@
 %   the polynomial carrier's plus, times and var are the free semiring's
 %   [tested: algebra_fixpoint:the_polynomial_carrier_answers_every_witness_with_its_multiplicity;
 %   commit=49478d67a10793a114d27d01a51f09a685d5136a].
+%   A declared operation and a declared negation run in the fuel scope,
+%   opened when the caller has none [tested 2026-09-25T05:48:27+10:00:
+%   host_evaluation:a_declared_algebra_operation_runs_in_the_fuel_scope].
 % Decides: a custom operation runs under the requested algebra after boot.
 
 metta_apply_algebra_operation(formula, 'formula-or', A, B, R) :-
@@ -55,8 +58,17 @@ metta_apply_algebra_operation(_, min, A, B, R) :-
 metta_apply_algebra_operation(_, max, A, B, R) :-
     number(A), number(B), !,
     R is max(A, B).
+%A declared operation is an equation, and evaluating it is evaluating MeTTa, so
+%it runs in the fuel scope: inside a program the scope is already open and
+%this is one read of it; asked by a host, which names the operation itself,
+%it opens one, and a stack-depth pragma bounds the operation as it bounds the
+%host evaluation door, an exhausted branch answering its
+%(Error Culprit StackOverflow) as the result [tested 2026-09-25T05:48:27+10:00:
+%host_evaluation:a_declared_algebra_operation_runs_in_the_fuel_scope].
 metta_apply_algebra_operation(Algebra, Operation, A, B, R) :-
-    (   once(metta_with_under(Algebra, eval([Operation, A, B], R0)))
+    (   once(metta_with_under(Algebra,
+                              metta_run_with_fuel(Value, R0,
+                                                  eval([Operation, A, B], Value))))
     ->  R = R0
     ;   throw(error(metta_algebra_operation_failed(Algebra, Operation, A, B),
                     none))
@@ -72,7 +84,9 @@ metta_apply_algebra_negation(formula, 'formula-not', Value, Negated) :-
     !,
     metta_formula_not(Value, Negated).
 metta_apply_algebra_negation(Algebra, Operation, Value, Negated) :-
-    (   once(metta_with_under(Algebra, eval([Operation, Value], R0)))
+    (   once(metta_with_under(Algebra,
+                              metta_run_with_fuel(Out, R0,
+                                                  eval([Operation, Value], Out))))
     ->  Negated = R0
     ;   throw(error(metta_algebra_operation_failed(Algebra, Operation, Value),
                     none))

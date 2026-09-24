@@ -9,6 +9,21 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- Every seat evaluates through one engine door,
+  `metta_host_evaluate(Space, Generator, Term, Answer, Delays)`. It runs the
+  term inside the evaluation fuel scope, so `(pragma! max-stack-depth N)`
+  bounds what a host asks as it bounds a runnable form, and it answers every
+  value as data with its well-founded residue, a branch the scope stopped
+  answering `(Error <call> StackOverflow)` after the finished ones. It runs the
+  term once per solution of a host goal, `true` for a plain ask, which is how a
+  guarded query evaluates its guard against every matched row in one scope.
+  It translates every term, so what a host evaluates is what the same term
+  written as a `!` form runs, a call no equation head accepts answering by the
+  dispatch policy. What a host asks about an evaluation without running it
+  reads the same translation:
+  `metta_host_evaluation_repeatable/2`, `metta_host_evaluation_effect_plan/4`,
+  `metta_host_evaluation_prepare/2` and `metta_host_unmatched/2`.
+
 - Known issue, pinned rather than fixed: a copy of a `&self` holding
   compiled `|->` lambda code holds rows its source does not. Every compile
   names a lambda afresh and a specialization after its lambda, so after one
@@ -62,6 +77,32 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   browser path is unchanged.
 
 ### Changed
+
+- `prolog-static` refuses a host transport that evaluates any other way: a call
+  to `eval/2`, `evalc/3`, `eval-one/2`, `metta/4`, `metta-thread/4`,
+  `interpret/4`, `reduce/2,3`, `assert/2`, the four `assertAlphaEqual`
+  forms, `on-unwind/3`, `bind!/3`, `add-reduct/3`, `add-reducts/3`,
+  `map-atom/3`, `for-each-in-atom/3`, `filter-atom/3`, `foldl-atom/4`,
+  `eval_metta_in_module/3`, the translator's term entries, the goal runners,
+  or a name the compiler writes into compiled bodies that no seam declares.
+  The vocabulary is chosen rather than derived, because the least set closed
+  under calling from the translator bars `match/4` and every space write too.
+  Its host-binding walk now reads every clause a transport includes, where it
+  read 149 of the 967 clauses under the Python binding's directory and none of
+  the 29 files `shim.pl` includes, and checks a call qualified into a
+  subsystem module against that module's own surface; the seven binding calls
+  it had not seen are declared host services or moved engine-side.
+- The Python seat's evaluation options lose `fuel` and `unmatched`, and a flat
+  call of a compiled function on plain data translates like every other term
+  instead of calling the function's predicate directly. Every evaluation runs
+  in the fuel scope and answers an unmatched call by the dispatch policy, so a
+  plain `eval` batch, which ran outside the scope, is bounded by a stack-depth
+  pragma like every other door. The costs move with it: an ask no longer runs
+  the direct call's gate, a type-declaration match through the space's
+  storage, so eval-arith reads 11.8 inferences an ask less and py-method-call
+  48 a call less; every answer pays three for its well-founded residue, a
+  guarded query nine a guard evaluation, and a flat call its translation the
+  first time it is asked.
 
 - A registration of Prolog that its contract refuses is the `registration`
   refusal kind, raised as `RegistrationError` by both seats and a
@@ -307,6 +348,11 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Removed
 
+- The engine no longer publishes `metta_typed_dispatch_applies/2`. It answered
+  whether a call's checks live in translation, the question a host's
+  direct-call door asked before bypassing translation, and no seat calls a
+  function's predicate directly now.
+
 - `tests/checks/pin_provenance.py` and its `provenance-pin-selftest` lane. A
   tag carries the time its evidence ran and names no commit of its own
   repository, so no placeholder waits to be resolved and no provenance commit
@@ -314,6 +360,10 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   stamp.
 
 ### Fixed
+
+- A carrier's declared algebra operation and its declared negation run in the
+  fuel scope. Asked by a host directly, which names the operation itself,
+  each evaluated unbounded.
 
 - A seat that shows the engine's message text reads every refusal as its own
   sentence. The engine rendered four of its seven signal kinds, so a value,

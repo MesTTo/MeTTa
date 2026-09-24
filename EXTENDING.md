@@ -3454,31 +3454,18 @@ the materialization mutex.
 The other half of the host contract is the engine predicates a host BINDING's
 transport may call back, measured from the shipped shim and declared in
 `engine/ext_points.pl` as `host_service` so the static walk can keep the list
-honest. Today's list: `catch_recover/2`, `match_foreign/5`, `metta_add_atoms/2`,
-`metta_host_adopt_function/4`, `metta_host_clear_defined/1`,
-`metta_host_clear_space/1`, `metta_host_digest/2`,
-`metta_host_drop_function/2`, `metta_host_explain_match/3`,
-`metta_host_fast_header/1`, `metta_host_forget_function/1`,
-`metta_host_inference_budget/3`, `metta_host_load_fast/2`,
-`metta_host_load_file/3`, `metta_host_open_function/3`,
-`metta_host_operation_error/5`, `metta_host_read_forms/2`,
-`metta_host_register_reader_token/2`, `metta_host_remove_reported/3`,
-`metta_host_run_source/4`, `metta_host_run_source_status/3`,
-`metta_host_save_fast/3`, `metta_host_set_silent/1`, `metta_host_stored/2`,
-`metta_host_substitute/3`, `metta_host_unregister_reader_token/1`,
-`metta_reducible_head/2`, `metta_source_declarations/2`, `metta_space_names/1`,
-`metta_native_pair/4`, `metta_owned_clause/2`, `metta_owned_record_occurrences/3`,
-`metta_string_declarations/2`, `metta_substitute_self/3`,
-`metta_trace_source/4`, `metta_annotations/2`, `metta_contract_fact/1`,
-`metta_error_answer/3`, `metta_handles_coherent/1`, `metta_on_error_mode/3`,
-`metta_require_algebra_value/3`,
-`metta_with_evaluation_context/2`, `metta_evaluation_context/1`,
-`metta_ordered_match_limit/6`,
-`metta_source_reset/1`, `metta_transaction/1`, `metta_transaction/2`,
-`metta_transport_failure/1`,
-`sread_with_names/3`, `translate_expr/3`, `unregister_metta_extension/1` and
-`with_metta_module/2`. Shrinking this list is the shim-thinning work's
-scoreboard; growing it is a deliberate publication, not a drive-by.
+honest. The list is the `host_service` rows of `engine/ext_points.pl`, and
+`extensions/python/tests/repository/test_shim_surface.py` pins it with the
+reason each row may stay, so a copy here would only drift from both; shrinking
+it is the shim-thinning work's scoreboard, and growing it is a deliberate
+publication, not a drive-by. One row is how a host evaluates at all:
+`metta_host_evaluate(Space, Generator, Term, Answer, Delays)` runs a term inside
+the evaluation fuel scope, answers every value as data with its well-founded
+residue, and runs the term once per solution of the host's own `Generator`
+(`true` for a plain ask). `tests/prolog/static_checks.pl` refuses a host
+transport that reaches the engine's other evaluation vocabulary, `eval/2` and
+its siblings, the translator's term entries and the goal runners, or a name the
+compiler writes into compiled bodies that no seam declares.
 
 `spaces:metta_owned_record_occurrences(Declaration, OwnerRefs, RefRowPairs)`
 shares the owned-record reader's original-key, duplicate and liveness checks.

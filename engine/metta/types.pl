@@ -390,36 +390,6 @@ governing_type_chains_in(Module, X, InScope, Unique) :-
         list_to_set(Selected, Unique)
     ).
 
-%Whether a call to F from Module's view is OWNED by call-site machinery the
-%raw compiled clause knows nothing about, which is the question a host's
-%direct-call door must ask before bypassing translation. Two owners exist.
-%A declaration in scope: typed_functioncall_dl runs when
-%call_site_type_chains/2 is nonempty, and for a plain-argument call those
-%chains are exactly the declarations this walk answers -- ANY declaration,
-%not only an arrow, because a wildcard row like (: $x T) reaches the chains
-%through unification the same way. The prelude tier is load-bearing, not an
-%over-approximation: a prelude-declared head like + makes the chains
-%nonempty in every module, so the engine's own form of (+ 1 x) runs the
-%argument checks and a bypass door must decline too. And a translator rule:
-%the orientation gate (a bidirectional rewrite fires only when it lowers
-%the form's cost) and the rule's own refusals live in translation, and the
-%raw equation derived from a rule carries none of them -- !(twin 1 1) is
-%blocked by cost through every translated door and a raw call rewrote it
-%anyway [measured 2026-08-25,
-%examples/ch20-extending-the-engine/20-01-translator-rules/02-translatorrule_direction.metta]. One indexed registry
-%miss per ruleless head. Guarded because the door runs on every direct
-%call, including from a module whose space is already gone, and "no
-%dispatch owner" is that state's honest answer.
-%Published for hosts (ext_points.pl host_service): every binding with a
-%direct-call door needs exactly this disjunction, and the shim used to
-%carry its own copy.
-metta_typed_dispatch_applies(Module, F) :-
-    (   catch_recover(raw_type_declaration_in(Module, F, _, _), fail),
-        catch_recover(raw_governing_type_declaration_in(Module, F, _, _), fail)
-    ->  true
-    ;   translator_rules:translator_rule(F, _, _)
-    ).
-
 %A declaration that is not an arrow types the SYMBOL and cannot type a call to
 %it, and nothing said so. `(: inc Number)` beside `(= (inc $x) (+ $x 1))`
 %compiles the call site as bare `inc("s", A)`, so the string travels into `+`

@@ -1,7 +1,7 @@
 % Purpose: the explicit answer form against the live engine: residue
-%   closure through eval/2, the bounded-conditional guard, and theta plan
-%   rows. shim.plt covers the same predicates engineless; these need
-%   eval/2 and native spaces, so this file loads engine AND shim, kept
+%   closure through the host evaluation door, the bounded-conditional guard,
+%   and theta plan rows. shim.plt covers the same predicates engineless; these
+%   need evaluation and native spaces, so this file loads engine AND shim, kept
 %   apart from python_surface.plt because shim hooks change which bridge
 %   answers the typing tests there.
 % Guarantees:
@@ -10,10 +10,6 @@
 %   - evaluation context preserves demand across carrier overrides, restores
 %     after every exit, and licenses ordered provider bounds consistently
 %     [tested: run_tests(evaluation_context); commit=8358dfc233bf299bb23eceddd94593a62372fe4b].
-%   - the Python repeatability bridge fails closed on an ordinary classifier
-%     refusal but never catches a control limit [tested:
-%     python_repeatability_control:the_bridge_preserves_inference_limits;
-%     commit=6917bef7ca902671999eafcae3a7a86db8f69723].
 % Open Obligations:
 %   To Do: None
 %   Hacks: None
@@ -23,30 +19,16 @@
 :- ensure_loaded('../../../../engine/metta.pl').
 :- initialization(consult('../../extensions/python/metta/_binding/shim.pl')).
 
-:- begin_tests(python_repeatability_control).
-
-repeatability_term_conjoin(Goal, Tail, [and, Goal, Tail]).
-
-test(the_bridge_preserves_inference_limits) :-
-    length(Goals, 5000),
-    maplist(=(true), Goals),
-    foldl(repeatability_term_conjoin, Goals, true, Term),
-    call_with_inference_limit(
-        ( metta_py_repeatable('&metta', Term)
-        -> Outcome = repeatable
-        ;  Outcome = declined ),
-        50,
-        Result),
-    assertion(var(Outcome)),
-    assertion(Result == inference_limit_exceeded).
-
-:- end_tests(python_repeatability_control).
-
 :- begin_tests(python_answer_residue).
 
 % Residue closure at the engine level: the residue decodes against the
-% query's own variables and closes through eval/2, each not-false result
-% one closure. The wires here are hand-built exactly as janus delivers
+% query's own variables and closes through the host evaluation door,
+% metta_host_evaluate/5, each result that is neither false nor Empty one
+% closure. A test that closes a residue which holds is nondet: outside an
+% evaluation the door opens a fuel scope, and the scope keeps a choicepoint
+% after its last answer so that a branch it stopped can answer its error
+% after the finished ones [source 2026-09-25T05:56:02+10:00: engine/metta/control.pl,
+% metta_fuel_answer/3]. The wires here are hand-built exactly as janus delivers
 % them, so this runs without Python in the process.
 
 % The names the encoder wrote, read out of the map it hands back, which is
@@ -57,7 +39,7 @@ residue_name(Table, Variable, Name) :-
     metta_py_var_name(Table, Variable, Written),
     atom_string(Written, Name).
 
-test(a_true_condition_holds_and_a_false_one_drops) :-
+test(a_true_condition_holds_and_a_false_one_drops, [nondet]) :-
     Pattern1 = [edge, a, Y1],
     residue_table(Pattern1, T1),
     residue_name(T1, Y1, N1),
@@ -96,7 +78,7 @@ test(a_match_residue_composes_one_closure_per_solution) :-
             Values),
     assertion(Values == [b, d]).
 
-test(a_nonreducing_residue_answers_itself_and_holds) :-
+test(a_nonreducing_residue_answers_itself_and_holds, [nondet]) :-
     Pattern = [edge, a, Y],
     residue_table(Pattern, Table),
     residue_name(Table, Y, N),

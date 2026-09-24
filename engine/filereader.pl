@@ -415,7 +415,14 @@
             metta_restore_static_import/3,
             metta_host_digest/2,
             metta_host_set_silent/1,
-            metta_host_substitute/3
+            metta_host_substitute/3,
+            %A door that reads definitions settles a pending batch first; the
+            %evaluation door does it for every seat, and a host door that
+            %reads definitions without evaluating asks here. A host batches
+            %its own definitions, and walks a parsed form's source origins.
+            metta_settle_definitions/0,
+            with_definition_batch/1,
+            source_children/3
           ]).
 
 % Assumes: metta_engine:goal_expansion/2 is visible while clauses compile.
@@ -1186,6 +1193,19 @@ flush_source_program_analysis_if_needed :-
     ;   true
     ),
     flush_source_prefix_repairs.
+
+%What a door that READS definitions owes a batch still open around it: inside
+%with_definition_batch/1 or a source program, reference publication and
+%dependent recompilation wait for the first door that evaluates or plans, and
+%this is that door's flush. Outside a program it is one context read. The
+%evaluation door calls it for every seat; it moved here from the Python
+%binding, which had asked filereader for both halves itself
+%[tested 2026-09-25T05:48:27+10:00: host_evaluation:a_definition_batch_is_settled_before_a_term_evaluates].
+metta_settle_definitions :-
+    (   active_source_program(_)
+    ->  flush_source_program_analysis_if_needed
+    ;   true
+    ).
 
 %A file load journals dependent recompilations until the source transaction
 %commits.  A runnable in that SAME file is earlier than the commit, however,

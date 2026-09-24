@@ -598,6 +598,134 @@ eval_metta_in_module(Module, Expr, Out) :-
                       ( translate_expr(Expr, Goals, Out),
                         call_goals_in_(Module, Goals) )).
 
+%%% The host evaluation door %%%
+%
+%EVERY SEAT EVALUATES THROUGH HERE, AND HERE IS INSIDE THE FUEL SCOPE. The
+%three seats each wrapped their own evaluation in metta_run_with_fuel/3, and
+%two of the three forgot: cmetta's mt_eval and tsmetta's m.eval and m.fn ran
+%outside it, so (pragma! max-stack-depth 20) did not bound them and a
+%factorial overflowed the 1 GB host stack [source 2026-09-25T05:48:17+10:00: extensions/cmetta
+%34f6aa6, extensions/node 1fb3276]. Owned here, the scope is a property of
+%evaluating rather than a line each seat has to remember, and
+%tests/prolog/static_checks.pl refuses a host transport that reaches the
+%engine's evaluation vocabulary any other way [tested 2026-09-25T05:57:16+10:00:
+%prolog-static a_host_binding_evaluates_only_through_the_door].
+%
+%It takes the TERM rather than a goal. The static walk reports which clause
+%calls which predicate and cannot tell a call inside a goal argument from one
+%beside it, so a door taking a goal would leave eval/2 or a translated goal
+%writable next to it; a term leaves a host nothing to call.
+%
+%Every term is translated, a flat call of a compiled function on plain data
+%included, so what a host evaluates is what the same term written as a ! form
+%runs [tested 2026-09-25T05:48:27+10:00: host_evaluation:the_door_answers_what_translation_answers].
+%A seat that called the function's predicate beside the door would hold a
+%second evaluation path, kept equal by hand to every rule the translation
+%applies, a typing rule's refusal and a translator rule's orientation among
+%them.
+%
+%Generator is the host's own goal, `true` for a plain ask. Term is translated
+%once, before Generator binds anything, and its goals run for each of
+%Generator's solutions inside the one scope: a guarded query evaluates its
+%guard against every row its match joins at the cost of the guard's goals
+%alone, where a door asked per row would repeat the translation lookup, the
+%module switch and the scope on every row [measured 2026-09-25T06:04:52+10:00: the Python
+%seat's query-limit-guarded row answers 5,000 guarded rows in
+%34,007 inferences, about 7 a row].
+%
+%Answer is each value as data, the symbol Empty included: pruning Empty is
+%MeTTa's rule inside a program, and eval/2 keeps it, but an answer that crosses
+%to a host is data, so a seat that wants the pruning filters after the door
+%[tested 2026-09-25T05:48:27+10:00: host_evaluation:the_symbol_empty_crosses_as_data]. A branch
+%the scope stopped answers (Error Culprit StackOverflow) after the finished
+%ones, with Delays true [tested 2026-09-25T05:48:27+10:00:
+%host_evaluation:a_stack_depth_pragma_bounds_the_door_branch_by_branch].
+%Delays is each answer's well-founded residue, true when the answer is
+%unconditional, read inside the enumeration before a collector can erase it
+%[source 2026-09-25T05:48:17+10:00:
+%https://github.com/SWI-Prolog/swipl-devel/blob/69775434c8226897626b226aefcc8266499f1e2e/library/wfs.pl#L61-L71,
+%call_delays/2].
+:- use_module(library(wfs), [call_delays/2]).
+:- meta_predicate metta_host_evaluate(+, 0, +, -, -).
+metta_host_evaluate(Space, Generator, Term, Answer, Delays) :-
+    metta_settle_definitions,
+    space_module(Space, Module),
+    metta_run_with_fuel(answer(Value, Residue), Held,
+                        metta_host_evaluation(Module, Generator, Term,
+                                              Value, Residue)),
+    (   Held = answer(HeldValue, HeldResidue)
+    ->  Answer = HeldValue,
+        Delays = HeldResidue
+    ;   Answer = Held,
+        Delays = true
+    ).
+
+metta_host_evaluation(Module, Generator, Term, Value, Delays) :-
+    %with_metta_module/2 is no meta-predicate and runs its goal in the
+    %engine's module, so the goal names the translator's own.
+    with_metta_module(Module,
+        translator:( translate_cached_expr(Term, Goals, Produced),
+                     call(Generator),
+                     call_delays(call_goals_in_(Module, Goals), Delays) )),
+    metta_boundary_result(Term, Produced, Value).
+
+%Term translated as the door translates it, and not run: the translation cache
+%holds it and every deferred function it calls is compiled. Saga.run asks
+%before it wraps a step's effectful predicates, so the writes compilation makes
+%on its own account (include/3 publishing a function's metadata) are not
+%captured as effects the step performed.
+metta_host_evaluation_prepare(Space, Term) :-
+    metta_settle_definitions,
+    space_module(Space, Module),
+    with_metta_module(Module, translator:translate_cached_expr(Term, _, _)).
+
+%Whether evaluating Term twice answers the same without repeating an effect,
+%which a host asks before it takes a cardinality hint ahead of a cursor: the
+%cache-admission walk over the goals the door would run. A term that does not
+%translate is not repeatable, and a control exception, an inference limit
+%included, is the caller's to see rather than a quiet no, because
+%catch_recover/2 re-throws it [tested 2026-09-25T05:48:27+10:00:
+%host_evaluation:the_repeatability_question_never_catches_a_control_limit].
+metta_host_evaluation_repeatable(Space, Term) :-
+    metta_settle_definitions,
+    space_module(Space, Module),
+    catch_recover(
+        ( metta_host_evaluation_body(Module, Term, Body),
+          metta_host_goal_repeatable(Module, Body) ),
+        fail).
+
+%The operations evaluating Term would perform and their joined effect, the
+%plan a world admits a target against: the world-admission walk over the goals
+%the door would run, with the source term beside them so a translator rule is
+%planned from its retained source
+%[tested 2026-09-25T05:48:27+10:00: host_evaluation:a_planned_term_names_the_operations_the_door_would_run].
+metta_host_evaluation_effect_plan(Space, Term, Operations, Effect) :-
+    metta_settle_definitions,
+    space_module(Space, Module),
+    metta_host_evaluation_body(Module, Term, Body),
+    metta_host_goal_effect_plan(Module, (metta_effect_source_term(Term), Body),
+                                Operations, Effect).
+
+%The goals the door would run for Term in Module, as one body for the walks
+%that read it rather than run it.
+metta_host_evaluation_body(Module, Term, Body) :-
+    with_metta_module(Module, translator:translate_cached_expr(Term, Goals, _)),
+    goals_list_to_conj(Goals, Body).
+
+%Whether Term is a call no clause head of its function's equations in Space
+%accepts, the case a compiled call site hands to the function's no-match
+%policy, which a host asks to classify a term as not-reducible before
+%evaluating it. A deferred function has no fun_meta rows until its equations
+%translate, and those rows are the whole question
+%[tested 2026-09-25T05:48:27+10:00: host_evaluation:an_unmatched_call_is_told_apart_from_an_empty_body].
+metta_host_unmatched(Space, [F|Args]) :-
+    atom(F),
+    metta_settle_definitions,
+    space_module(Space, Module),
+    metta_ensure_compiled(F),
+    fun_meta_module(Module, F, _),
+    \+ dispatch_any_head_matches(Module, F, Args).
+
 %A minimal `eval` is one equality step, not the full result-type continuation
 %used by an ordinary MeTTa call.  In particular, a `%Undefined%` equation
 %whose RHS is another call returns that call as its staged result.  A function

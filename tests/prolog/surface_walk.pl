@@ -12,10 +12,12 @@
 %       discovery below asks it which spaces exist. Both callers do that in
 %       their own main/0.
 % Guarantees:
-%     - reaches_past_surface/2 answers every call from a clause under one of
-%       the given directories to a predicate defined under engine/ that is neither
-%       a declared extension point nor a MeTTa builtin, in whichever modules
-%       candidate_engine_module/1 below discovers rather than only in `user`
+%     - reaches_past_surface/2 answers every call from a clause whose own file
+%       is under one of the given directories, a file include/1 brought in
+%       among them, to a predicate defined under engine/ that is neither a
+%       declared extension point nor a MeTTa builtin, whether the call resolves
+%       in a module candidate_engine_module/1 below discovers or is qualified
+%       into a subsystem module the engine does not import from
 %     - that discovery lives HERE rather than in a caller. It was written in
 %       static_checks.pl and left as a contract the caller had to satisfy, and
 %       the OTHER caller never did: tests/prolog/library_surface.pl raised
@@ -101,8 +103,7 @@ walk_clause_edges(References, OnEdge) :-
                        undefined(ignore) ]).
 
 record_reach(Callee, Caller, _Location) :-
-    indicator(Callee, CalleeIndicator),
-    engine_predicate(CalleeIndicator),
+    engine_callee(Callee, CalleeIndicator),
     \+ published_surface(CalleeIndicator),
     indicator(Caller, CallerIndicator),
     (   reach_found(CallerIndicator, CalleeIndicator)
@@ -115,6 +116,31 @@ record_reach(_, _, _).
 % '<initialization>', which has no arity and is not one of ours.
 indicator(_:Goal, Indicator) :- !, indicator(Goal, Indicator).
 indicator(Goal, Name/Arity) :- callable(Goal), functor(Goal, Name, Arity).
+
+%A callee is an engine predicate when the module its call resolves in, which
+%is the qualification the walk hands over, finds a definition under engine/.
+%engine_predicate/1 asks only the modules the engine's own import chain
+%reaches, so a call qualified into a subsystem module for a name that module
+%does not export went unexamined: the Python binding's
+%translator:resolve_dispatch/4, filereader:with_definition_batch/1 and five
+%more reached past the published surface with nothing saying so [measured
+%2026-09-25T05:40:28+10:00: seven such reaches over the binding's included files, none
+%reported, by the walk before this rule] [tested 2026-09-25T05:57:16+10:00: prolog-static
+%a_host_binding_calls_only_published_surface, whose planted submodule reach is
+%refused].
+engine_callee(Module:Goal, Indicator) :-
+    atom(Module),
+    callable(Goal),
+    !,
+    indicator(Goal, Indicator),
+    Indicator = Name/Arity,
+    functor(Head, Name, Arity),
+    catch(predicate_property(Module:Head, file(File)), _, fail),
+    tree_directory('../../engine', EngineDir),
+    sub_atom(File, 0, _, _, EngineDir).
+engine_callee(Callee, Indicator) :-
+    indicator(Callee, Indicator),
+    engine_predicate(Indicator).
 
 %The clause has to be IN the file, not merely belong to a predicate the file
 %defines. source_file/2 names the heads a file contributes and nth_clause/3
@@ -131,6 +157,17 @@ indicator(Goal, Name/Arity) :- callable(Goal), functor(Goal, Name, Arity).
 %unqualified form saw NONE of its four predicates while the qualified form saw
 %all four, so the walk reported a file it had not looked at
 %[measured 2026-08-22, on this tree, before and after the kernel cut].
+%A clause belongs to the directory its OWN file is in, which is the included
+%file for a clause include/1 brought in: clause_property/2's file is where the
+%clause is written and its source is the file that loaded it [source 2026-09-25T05:48:17+10:00:
+%https://github.com/SWI-Prolog/swipl-devel/blob/69775434c8226897626b226aefcc8266499f1e2e/boot/syspred.pl#L1064-L1094,
+%clause_property/2's file(-File) and source(-File)]. Requiring the loading
+%file instead walked the Python binding's shim.pl and none of the 29 files it
+%includes directly, 149 of the 967 clauses under its directory [measured
+%2026-09-25T05:40:28+10:00: the selection before this rule] [tested 2026-09-25T05:57:16+10:00: prolog-static
+%every_included_host_file_is_walked]. A predicate two loaded files of one
+%directory contribute to is enumerated from each, so the references are
+%deduplicated.
 extension_clauses(Directories, References) :-
     findall(Reference,
             ( member(Relative, Directories),
@@ -149,8 +186,10 @@ extension_clauses(Directories, References) :-
               %at 0 throughout].
               Module \== system,
               catch(nth_clause(Module:Head, _, Reference), _, fail),
-              clause_property(Reference, file(File)) ),
-            References).
+              clause_property(Reference, file(ClauseFile)),
+              sub_atom(ClauseFile, 0, _, _, Directory) ),
+            References0),
+    sort(References0, References).
 
 extension_clause_count(Directories, Count) :-
     extension_clauses(Directories, References),
