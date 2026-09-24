@@ -178,6 +178,12 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- `tools/battery.sh run` writes each run's log to a file of its own under
+  `ai-tmp/battery-logs/`, opening with the battery's provenance. The log lived
+  inside the battery tree, and because `run` takes the lowest free battery,
+  the next run's provision rewrote it within seconds: a caller reading it a
+  minute after its run exited 0 found it empty. `prune` removes run logs on
+  the batteries' window.
 - The host-workarounds lane and its selftest pass again. The reproduction for
   `swi-trie-gen-empty-hashed-root` answered `present` only on exit 139, and
   under `tools/check.sh` SWI's crash handler finishes its report and aborts,

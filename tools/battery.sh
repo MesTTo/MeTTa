@@ -19,9 +19,11 @@
 #   a repository stopped at the battery's parent, so no git command in it
 #   reaches the checkout the battery sits inside. `run` naming no index takes
 #   the lowest one no run holds, so a finished battery is reused and the pool
-#   grows only to the most runs in flight at once; `prune <hours>` removes the
-#   batteries no run holds, no process is inside and nothing has touched for
-#   that long.
+#   grows only to the most runs in flight at once, and each run's log is a
+#   file no later run writes, opening with the provenance of the tree it ran
+#   in [tested: tools/battery_selftest.sh; commit=WORKTREE]; `prune <hours>`
+#   removes the batteries no run holds, no process is inside and nothing has
+#   touched for that long, and the logs as old.
 # Fails when: a battery tree is occupied by a live run (it refuses rather than
 #   corrupting it); a repository's battery cannot be given a git identity of
 #   its own (it refuses rather than run a command git would hand to the
@@ -30,8 +32,10 @@
 #   revision but the snapshot is of the WORKING tree, which is the point.
 # Owns resources: the battery directory, its ai-tmp/battery.pid occupancy
 #   record, its ai-tmp/battery.provenance and, restricted, its
-#   ai-tmp/battery.restricted. A tree whose recorded PID no longer answers
-#   `kill -0` is free whatever the file says. battery-identity.lock in each
+#   ai-tmp/battery.restricted; and each run's log,
+#   ai-tmp/battery-logs/battery-<index>-<time>-<pid>.log beside the
+#   batteries, which `prune` removes on the batteries' window. A tree whose
+#   recorded PID no longer answers `kill -0` is free whatever the file says. battery-identity.lock in each
 #   repository's common git directory is held only while an identity is made.
 # Decides: batteries are FILESYSTEM snapshots, not git worktrees. Every
 #   submodule this repo mounts, whatever .gitmodules currently lists, is a
@@ -206,9 +210,10 @@ change is put back. BATTERY_KEEP= (set to nothing) gives the committed tree
 alone. Pass the same value to verify.
 
 Makes ai-tmp/wt-battery-<index> a byte-identical snapshot of this working tree
-and runs a gate inside it. 'run' provisions, verifies, then executes, keeping
-the log at ai-tmp/battery-<index>.log INSIDE that tree where no sibling run
-can reach it, and preserving the command's own exit status.
+and runs a gate inside it. 'run' provisions, verifies, then executes,
+preserving the command's own exit status, and writes the log to a file of its
+own under ai-tmp/battery-logs/, headed by the battery's provenance, which no
+later run of that battery rewrites.
 USAGE
     exit 2
 }
@@ -315,6 +320,10 @@ prune() {
         ( flock 8 && git -C "$ROOT/$prune_repository" worktree prune ) \
             8>"$prune_common/battery-identity.lock"
     done
+    # Run logs go on the same window: a log is wanted exactly as long as its
+    # battery would have been.
+    find "$HOME_TREE/ai-tmp/battery-logs" -maxdepth 1 -name 'battery-*.log' \
+         -mmin "+$prune_minutes" -delete 2>/dev/null || true
     echo "pruned $prune_count batteries idle for over $1 hours"
 }
 
@@ -906,7 +915,16 @@ case "$command" in
                 exit 1
             }
         fi
-        log="$tree/ai-tmp/battery-$index.log"
+        # The log outlives the claim. A finished battery is the next run's
+        # lowest free index, and a log kept inside the tree was rewritten by
+        # that run's provision within seconds: battery 4's read empty a minute
+        # after its run exited 0 [2026-09-24 17:25]. So each run writes a file
+        # of its own beside the batteries, named by index, time and PID, which
+        # no later run opens, and headed by the provenance, so a reader can
+        # confirm from its opening lines which tree the verdict is about.
+        log="$HOME_TREE/ai-tmp/battery-logs/battery-$index-$(date +%Y%m%dT%H%M%S)-$$.log"
+        mkdir -p "$(dirname "$log")"
+        cat "$tree/ai-tmp/battery.provenance" > "$log"
         # Never piped: a pipeline reports the filter's status and a failed gate
         # would read as a pass. The log is read separately. The claim's
         # descriptor is closed for the command, so a daemon the gate leaves
@@ -917,7 +935,7 @@ case "$command" in
         # [GIT_CEILING_DIRECTORIES, git(1): the directories git will not chdir
         # up into while looking for a repository].
         ( cd "$tree" && GIT_CEILING_DIRECTORIES=$(dirname "$tree") && \
-          export GIT_CEILING_DIRECTORIES && "$@" 9>&- ) > "$log" 2>&1 && status=0 || status=$?
+          export GIT_CEILING_DIRECTORIES && "$@" 9>&- ) >> "$log" 2>&1 && status=0 || status=$?
         rm -f "$tree/ai-tmp/battery.pid"
         echo "battery $index: exit $status, log $log"
         exit "$status"

@@ -130,7 +130,11 @@ expect "a battery whose claim was released" 0
 home=$(cd "$HERE/.." && git rev-parse --show-toplevel)
 BATTERY_SOURCE="$FIXTURE/src" bounded sh "$BATTERY" run "$INDEX" -- \
     sh -c 'git rev-parse --show-toplevel' > "$FIXTURE/out" 2>&1 || true
-if grep -qxF "$home" "$TREE/ai-tmp/battery-$INDEX.log"; then
+ceiling_log=$(sed -n 's/^battery [^:]*: exit [0-9]*, log //p' "$FIXTURE/out")
+if [ ! -f "$ceiling_log" ]; then
+    echo "  FAIL the run named no log it kept:"; cat "$FIXTURE/out"
+    failures=$((failures + 1))
+elif grep -qxF "$home" "$ceiling_log"; then
     echo "  FAIL git in a battery reached the enclosing checkout $home"
     failures=$((failures + 1))
 elif [ -e "$TREE/.git" ]; then
@@ -139,6 +143,7 @@ elif [ -e "$TREE/.git" ]; then
 else
     echo "  ok   git in a battery stops at the battery instead of reaching the enclosing checkout"
 fi
+rm -f "$ceiling_log"
 
 # A compiled Prolog artifact is a cache whose copy is wrong rather than stale:
 # SWI loads a .qlf found outside the directory it was compiled in as moved and
@@ -590,6 +595,31 @@ flock -n 7
 allotted "a run naming no index passes over one another run holds" "$(pooled)" 2
 exec 7>&-
 allotted "a finished battery is reused rather than a new one made" "$(pooled)" 1
+
+# A finished battery is the next run's lowest free index, so a log kept inside
+# it was rewritten by that run: battery 4's read empty a minute after its run
+# exited 0 [2026-09-24 17:25]. Each run's log is a file of its own beside the
+# batteries, opening with the provenance of the tree it ran in.
+logged() {
+    BATTERY_SOURCE="$FIXTURE/poolsource" bounded sh "$POOL/tools/battery.sh" run -- echo "$1" 2>&1 |
+        sed -n 's/^battery [^:]*: exit [0-9]*, log //p'
+}
+first_log=$(logged first-run)
+second_log=$(logged second-run)
+case ${first_log##*/}${second_log##*/} in
+    battery-1-*battery-1-*) one_battery=yes ;;
+    *) one_battery= ;;
+esac
+if [ -n "$one_battery" ] && [ "$first_log" != "$second_log" ] &&
+   grep -qx first-run "$first_log" && ! grep -q second-run "$first_log" &&
+   head -1 "$first_log" | grep -q '^source:'; then
+    echo "  ok   a run's log survives the next run of its battery and names its tree"
+else
+    echo "  FAIL a run's log did not survive the next run of battery 1: '$first_log', '$second_log'"
+    cat "$first_log" 2>/dev/null
+    failures=$((failures + 1))
+fi
+touch -d '2 days ago' "$first_log"
 aged() {
     find "$POOL/ai-tmp/wt-battery-$1" "$POOL/ai-tmp/wt-battery-$1/ai-tmp" -maxdepth 1 \
          -exec touch -h -d '2 days ago' {} +
@@ -612,7 +642,16 @@ else
     echo "  FAIL prune removed a battery another run held"
     failures=$((failures + 1))
 fi
-touch "$POOL/ai-tmp/wt-battery-1/ai-tmp/battery-1.log"
+if [ -e "$first_log" ]; then
+    echo "  FAIL prune kept a run log older than its window"
+    failures=$((failures + 1))
+elif [ ! -e "$second_log" ]; then
+    echo "  FAIL prune removed a run log written within its window"
+    failures=$((failures + 1))
+else
+    echo "  ok   prune removes run logs older than its window and keeps newer ones"
+fi
+touch "$POOL/ai-tmp/wt-battery-1/ai-tmp/battery.provenance"
 bounded sh "$POOL/tools/battery.sh" prune 6 > "$FIXTURE/out" 2>&1
 if [ -e "$POOL/ai-tmp/wt-battery-1" ]; then
     echo "  ok   prune keeps a battery touched within the window"
