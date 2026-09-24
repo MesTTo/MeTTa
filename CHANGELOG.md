@@ -294,6 +294,16 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- The gate's `door-order` lane passes again. The Python seat's door-order
+  table, `metta/doors/_orders.py`, was generated before three of its rows
+  moved, and regenerating it at each of the 32 seat commits that touched
+  `metta/` since places both moves: `space:watch` stopped being mixed when an
+  abandoned watch's finaliser came to only stop its subscription and queue it,
+  and `register_prolog` became one crossing to the engine's registration
+  service, so `context:register-prolog` and `space:register-prolog` read orders
+  2 and 1. The table is the lane's own `tools/doororder.py --write`, and no
+  other row moves.
+
 - The Python seat's `object-reclamation` memory curve counts the boxes still
   alive after a space drops its objects. A dead box's entry waits in a queue
   until the box table's next operation removes it, and the curve counted the
