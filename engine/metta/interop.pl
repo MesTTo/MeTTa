@@ -1213,13 +1213,34 @@ ensure_loaded_global(File) :- refuse_unloadable_source_file(File),
 %A claimed source loads under qcompile(auto) by its resolved path: the
 %artifact rule applies to a spec that names its .pl extension as it does to
 %a stem (host ledger, swi-qlf-extension-spec).
+%
+%SWI's loader is handed only what the engine resolved. A PATH, written as
+%text, is resolved here against the working directory, as upstream's consult
+%resolves one, and loads by the file that answered or refuses by the spec it
+%was given; an alias term such as library(x) keeps SWI's own resolution. The
+%loader used to take any text this could not resolve, and a host's loader
+%hooks answer such a spec in their own way: swipl-wasm's library(wasm) reads
+%a relative one as a URL, autoloading wasm:sequence/5 from dcg/high_order
+%under the engine's no-autoload boot, so an absent `./x.pl` raised an
+%EngineError carrying a dict the Node wire cannot encode, where an absent
+%absolute path raised the named existence error [measured 2026-09-24 by the
+%TS corpus job on tsmetta 6663d06; tested:
+%prolog_interface:a_missing_relative_file_is_refused_before_the_host_loader,
+%prolog_interface:a_relative_file_reaches_the_host_loader_resolved].
 :- meta_predicate metta_load_source(:, +).
 metta_load_source(Module:Spec, Options) :-
     (   absolute_file_name(Spec, File,
-                           [file_type(prolog), access(read), file_errors(fail)]),
-        seam:compiled_source(File),
-        file_name_extension(_, pl, File)
-    ->  load_files(Module:File, [qcompile(auto)|Options])
+                           [file_type(prolog), access(read), file_errors(fail)])
+    ->  (   seam:compiled_source(File),
+            file_name_extension(_, pl, File)
+        ->  load_files(Module:File, [qcompile(auto)|Options])
+        ;   load_files(Module:File, Options)
+        )
+    ;   ( atom(Spec) ; string(Spec) )
+    ->  throw(error(existence_error(source_sink, Spec),
+                    context(metta_load_source/2,
+                            'no Prolog source is there, resolving a path \c
+                             against the working directory')))
     ;   load_files(Module:Spec, Options)
     ).
 

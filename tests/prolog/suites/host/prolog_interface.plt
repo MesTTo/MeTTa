@@ -114,6 +114,51 @@ test(a_missing_file_is_named,
      [throws(error(existence_error(source_sink, '/nonexistent/metta/none.pl'), _))]) :-
     consult_global('/nonexistent/metta/none.pl').
 
+% The same refusal for a RELATIVE path, raised by the engine before SWI's
+% loader sees the spec. A loader hook is where a host answers a spec its own
+% way, and swipl-wasm's library(wasm) answers a relative one it cannot find as
+% a URL, which under the engine's no-autoload boot raised an EngineError where
+% this refusal belongs; so the observable is whether the spec reaches the hook
+% [source: swipl-devel library/wasm.pl, user:prolog_load_file/2 and
+% file_url/2, whose relative clause builds the URL from window.location].
+:- dynamic pi_loader_saw/1.
+
+pi_loader_note(Spec) :- assertz(pi_loader_saw(Spec)).
+
+pi_watch_loader(Ref) :-
+    retractall(pi_loader_saw(_)),
+    asserta((user:prolog_load_file(_:Spec, _) :-
+                 plunit_prolog_interface:pi_loader_note(Spec), fail), Ref).
+
+test(a_missing_relative_file_is_refused_before_the_host_loader,
+     [setup(pi_watch_loader(Ref)), cleanup(erase(Ref))]) :-
+    Spec = './plunit_pi_absent_directory/none.pl',
+    catch(consult_global(Spec), error(Formal, _), true),
+    Formal == existence_error(source_sink, Spec),
+    \+ pi_loader_saw(Spec).
+
+% A relative path that DOES resolve reaches the loader as the file that
+% answered, which is what keeps library(wasm)'s hook out of it: that hook
+% leaves an absolute path to SWI's own loader.
+test(a_relative_file_reaches_the_host_loader_resolved,
+     [setup(pi_watch_loader(Ref)), cleanup(erase(Ref))]) :-
+    with_scratch_directory(plunit_pi_relative, pi_load_relative).
+
+pi_load_relative(Directory) :-
+    directory_file_path(Directory, 'pi_relative_marker.pl', File),
+    setup_call_cleanup(open(File, write, Out),
+                       format(Out, "pi_relative_marker(42).~n", []),
+                       close(Out)),
+    working_directory(Here, Here),
+    directory_file_path(Here, anchor, HereFile),
+    relative_file_name(File, HereFile, Relative0),
+    atom_concat('./', Relative0, Relative),
+    consult_global(Relative),
+    user:pi_relative_marker(42),
+    absolute_file_name(File, Absolute),
+    pi_loader_saw(Absolute),
+    \+ pi_loader_saw(Relative).
+
 test(registering_the_same_name_twice_is_idempotent) :-
     import_prolog_function(plunit_pi_double, true),
     import_prolog_function(plunit_pi_double, true),

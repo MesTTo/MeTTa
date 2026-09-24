@@ -137,6 +137,18 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- An absent Prolog source named by a relative path is refused as the source
+  not found, naming the path, on the WebAssembly host as natively.
+  `metta_load_source/2` handed SWI's loader any text it could not resolve,
+  and swipl-wasm's `library(wasm)` loader hook reads a relative path it cannot
+  find as a URL, autoloading `dcg/high_order` under the engine's no-autoload
+  boot, so `(import_prolog_functions_from_file "./no/such/file.pl" ())` raised
+  an `EngineError` whose ball the Node wire could not encode, where an absent
+  absolute path raised `SourceNotFoundError`. The engine now resolves a path
+  itself against the working directory and hands the loader only the file
+  that answered; an alias term such as `library(x)` keeps SWI's own
+  resolution.
+
 - `(get-property Subject Key)` answers or refuses by name for every subject a
   program can write. `lib_spaces` refused as a missing requirement naming
   `setup!`, and after a plain `import!`, `(library lib_spaces)`, `./greeter`
