@@ -44,7 +44,7 @@
 %   runs under it without installing it again
 %   [tested: lib_import_lifecycle:an_exact_removal_does_not_select_what_its_callbacks_remove,
 %   lib_import_lifecycle:an_adopted_selection_is_not_installed_again;
-%   commit=WORKTREE].
+%   commit=d781eab8f9976775350dd70cd7ae58483fe6dbc0].
 % Guarded by: non-backtrackable thread-local storage isolates removal selection
 %   from database snapshots [tested: lib_import_lifecycle,
 %   extensions/python/tests/ch05_equations_and_evaluation/test_reload.py; commit=4f2d6c0f8eb293b73f8dde30a1c84e24834f7393].
@@ -326,7 +326,7 @@ native_removal_reference(Ref) :-
 %pytest module whose fixture imported a library after another library's
 %function had been specialized
 %[tested: lib_import_lifecycle:an_exact_removal_does_not_select_what_its_callbacks_remove;
-%commit=WORKTREE].
+%commit=d781eab8f9976775350dd70cd7ae58483fe6dbc0].
 %
 %The head is the one the selection's maker already holds, never one read back
 %through the reference: metta_remove_atom_reference/1 names the occurrence by
@@ -334,7 +334,7 @@ native_removal_reference(Ref) :-
 %time a callback asks, the selected clause may be gone, as in the lane's case,
 %where the equation's own transaction had erased it before its completion ran
 %[tested: lib_import_lifecycle:a_replaced_requirement_does_not_select_a_specialization_it_forgets;
-%commit=WORKTREE]. Reading the head back through the reference at selection
+%commit=d781eab8f9976775350dd70cd7ae58483fe6dbc0]. Reading the head back through the reference at selection
 %decompiled every selected clause, and installing an adopted selection again
 %copied that head, the whole stored equation, in and back out: carrying heads
 %raised 06-spaces_removeallatoms.metta from 32,661,406 instructions and 26,864
@@ -344,7 +344,7 @@ native_removal_reference(Ref) :-
 %against six readings of 32,764,757 to 33,098,798 there [measured 2026-09-24:
 %the parity lane's own measure() on each tree, provisioned in turn into one
 %battery at loadavg 78 to 175, which refused most null controls;
-%commit=WORKTREE]. Every removal passes its head as
+%commit=d781eab8f9976775350dd70cd7ae58483fe6dbc0]. Every removal passes its head as
 %Module:Term with Module the space's storage module, so the head of this
 %clause takes it apart and nothing strips it.
 native_removal_selects(Module:Term, Selection) :-

@@ -1929,7 +1929,7 @@ remove_equation(Space, Term, F, Args, Body, Removed) :-
                 %costs every equation removal five inferences [measured
                 %2026-09-24: 02-functionremoval's twin, three removals, read
                 %+15 with the removal called through call/1 after this
-                %condition; commit=WORKTREE].
+                %condition; commit=d781eab8f9976775350dd70cd7ae58483fe6dbc0].
                 (   native_removal_selects(Storage:Head, _)
                 ->  call(Removal)
                 ;   metta_least_storage_reference(Storage:Head, Selected)
