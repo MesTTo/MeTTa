@@ -17,7 +17,7 @@
 #     2ea06e2 (WebAssembly build 6); the same program answers Runs=2 on a
 #     native single-threaded build of V10.1.14 and Runs=1 on that build with
 #     tests/checks/host_workarounds/swi-threadless-shared-table-private-per-engine.patch;
-#     commit=WORKTREE]
+#     commit=622e425d40c126681c04c7f7f81d92618ab83d0d]
 set -eu
 here=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 cd "$here/support"

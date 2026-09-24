@@ -26,7 +26,7 @@
 #     single-threaded build of V10.1.14, which prints the message; absent on
 #     both builds with
 #     tests/checks/host_workarounds/swi-destroyed-leader-keeps-shared-table.patch;
-#     commit=WORKTREE]
+#     commit=622e425d40c126681c04c7f7f81d92618ab83d0d]
 set -u
 probe="$HOST_WORKAROUND_SCRATCH/destroyed_leader.pl"
 cat > "$probe" <<'EOF'

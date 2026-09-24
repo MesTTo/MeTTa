@@ -25,7 +25,7 @@
 #     (10.1.14 patched, threaded); absent on a threaded build of V10.1.14
 #     with every patch of the ledger and
 #     tests/checks/host_workarounds/swi-shared-table-waits-for-owner-beneath.patch,
-#     broken on the single-threaded build of the same tree; commit=WORKTREE]
+#     broken on the single-threaded build of the same tree; commit=622e425d40c126681c04c7f7f81d92618ab83d0d]
 set -u
 probe="$HOST_WORKAROUND_SCRATCH/owner_beneath.pl"
 cat > "$probe" <<'EOF'

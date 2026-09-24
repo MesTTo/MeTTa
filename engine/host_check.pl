@@ -5,7 +5,7 @@
 %   no host's patches.
 % Assumes:
 %   - engine/host_patches.pl is current, which the host-declaration lane holds
-%     [tested: tests/checks/check_host_declaration.py; commit=WORKTREE].
+%     [tested: tests/checks/check_host_declaration.py; commit=622e425d40c126681c04c7f7f81d92618ab83d0d].
 %   - a patched host carries <home>/metta-host.pl, written by
 %     tools/pymetta-host/declare-host.sh from the tree it was built from; the
 %     host-workarounds lane runs every reproduction against that host, which is
@@ -19,7 +19,7 @@
 %     error(metta_host_declaration_foreign(Declaration, Built, Running), _)
 %     before comparing a single patch, because the C patches live in the
 %     binary and SWI_HOME_DIR can start any binary on any home
-%     [tested: tests/prolog/suites/host/host_check.plt; commit=WORKTREE].
+%     [tested: tests/prolog/suites/host/host_check.plt; commit=622e425d40c126681c04c7f7f81d92618ab83d0d].
 %   - metta_require_host_patches(Requirer, Required) succeeds exactly when,
 %     beyond that, every File-Sha256 pair in Required appears in the host's
 %     declaration with the same digest, and otherwise throws
@@ -28,18 +28,18 @@
 %     under another digest, Declaration is the file read or none(Home), and N
 %     counts Required. Requirer is the caller's own name for itself, which the
 %     refusal quotes [tested: tests/prolog/suites/host/host_check.plt;
-%     commit=WORKTREE].
+%     commit=622e425d40c126681c04c7f7f81d92618ab83d0d].
 %   - metta_require_patched_host/0 is that check over the engine's own
 %     requirement, engine/host_patches.pl, under the name `the MeTTa engine`.
 %     The patches to a package only one host loads are that host's to require:
 %     janus's are required by the Python host's bridge, which calls
 %     metta_require_host_patches/2 with the list declare-host.sh generates for
 %     packages/swipy [source: tools/pymetta-host/patch-root.sh;
-%     commit=WORKTREE].
+%     commit=622e425d40c126681c04c7f7f81d92618ab83d0d].
 %   - the declaration is READ as terms, never consulted, so a file in the SWI
 %     home cannot run code in the engine; a term that is not one host_build/1
 %     or a host_patch/2 over atoms is refused as malformed rather than skipped
-%     [tested: tests/prolog/suites/host/host_check.plt; commit=WORKTREE].
+%     [tested: tests/prolog/suites/host/host_check.plt; commit=622e425d40c126681c04c7f7f81d92618ab83d0d].
 % Fails when: a host is patched by hand without running declare-host.sh; the
 %   engine then refuses a host that may be sound, and the remedy it prints is
 %   the command that writes the declaration.

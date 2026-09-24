@@ -13,7 +13,7 @@
 % (10.1.14 patched, threaded); absent on a threaded build of V10.1.14 with
 % every patch of the ledger and
 % tests/checks/host_workarounds/swi-reeval-prepare-writes-past-its-arguments.patch;
-% commit=WORKTREE].
+% commit=622e425d40c126681c04c7f7f81d92618ab83d0d].
 % Owns resources: the message queue and the re-evaluating thread, joined
 % before main reports.
 

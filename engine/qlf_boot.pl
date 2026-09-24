@@ -27,7 +27,7 @@
 %     loads anything else, by the exception metta_host_check raises, so every
 %     host that boots through it -- engine/main.pl, the Python seat and the C
 %     seat -- meets the same refusal as its own error
-%     [tested: tests/shell/test_stock_host_refused.sh; commit=WORKTREE].
+%     [tested: tests/shell/test_stock_host_refused.sh; commit=622e425d40c126681c04c7f7f81d92618ab83d0d].
 %   - a missing runtime source or failed extension directive raises a named
 %     load error after restoring the loader's source module
 %     [tested: tests/shell/test_packaged_cli.sh; commit=8ee8fcd4e43a932131909f7c58ad4fbe4dcf8d1d].
