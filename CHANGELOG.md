@@ -54,6 +54,50 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Changed
 
+- The Python seat's cost, scaling and memory-scale ledgers record when each
+  row was measured as the time its run started, as `date -Iseconds` prints
+  it, in the row's `measured`. Each row's cause used to carry
+  `"commit": "WORKTREE"` from a `--cause-commit` or `--memory-cause-commit`
+  flag nothing ever filled. The flags, their environment variables and
+  `benchmarks.costs --measured-on` are gone. A row a run does not measure
+  keeps its legacy date and commit until it is measured again, and `help()`
+  shows a stamp or a legacy date as the ledger writes it. The seat's one
+  stamp pattern and clock are `benchmarks.STAMP` and `benchmarks.started`,
+  which `twin_coverage.py --repin` shares.
+
+- The `evidence` lane holds every line written since the obligation-header
+  rule of 2026-09-24T23:27:42+10:00 to it, in any file git sees in the checkout
+  and its components: a tag there carries a whole `date -Iseconds` stamp, in
+  every kind, and no pin says `commit=WORKTREE` or names a commit of its own
+  repository, while another repository's commit passes. A line is dated by
+  `git blame -M -C` over the working tree, so a legacy tag moved within its
+  file, into another file or with its file's rename stays legacy, and an
+  uncommitted edit or an untracked file is written since. A line from before
+  the rule is legacy and stays until its evidence runs again: `RELEASE=1` no
+  longer refuses a legacy `commit=WORKTREE`, and the summary counts those as
+  legacy placeholders. The files to date are those a commit since the rule
+  touched, found with `git log --since-as-filter`, and blame is bounded at the
+  rule only where no commit dated before it descends from one dated after,
+  since `--since` stops at a backdated commit and hid the rule-era commit
+  beneath it.
+
+- Whether a tag or pin sits in prose or in code is decided by
+  `tests/checks/evidence_sites.py`, the classifier that was the first half of
+  `pin_provenance.py`. `classify(path, text, offsets)` answers for any
+  offset; a malformed C, C++, CMake or TOML file and a file class with no
+  comment rule raise `UnclassifiableError` naming it; Dockerfiles, workflow
+  YAML and the example skip list take the `#` rule and `llms.txt` the Markdown
+  one; and a backtick pairs only with another in prose, where a regex's, a
+  template literal's or a command substitution's used to shift the pairing of
+  every mention below it. Its lane is `evidence-sites-selftest`.
+
+- The `evidence` lane reads every component `git submodule status --recursive`
+  lists, where two fixed-depth globs stopped two directories down and missed
+  the twins repository, and reports a placeholder in a tracked file no glob
+  reaches, the net `pin_provenance.py --check` held, across the components too.
+  `ext/*.sh` and `ext/*.md` join the pin half, whose two legacy placeholders
+  nothing read.
+
 - Every `py-*` door, `py-call`, `py-atom`, `py-dot`, `py-list`, `py-tuple`,
   `py-dict`, `py-iter` and `py-iter-once`, refuses with the platform refusal
   naming the python capability wherever no Python seat is loaded: under
@@ -239,6 +283,14 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   is never quiet, so its comparisons were declined in nearly every run. The load
   ceiling, `CPU_SECONDS` and their helpers are gone; the C lane and the CI image
   need valgrind.
+
+### Removed
+
+- `tests/checks/pin_provenance.py` and its `provenance-pin-selftest` lane. A
+  tag carries the time its evidence ran and names no commit of its own
+  repository, so no placeholder waits to be resolved and no provenance commit
+  follows a change. DEVELOPING.md, EXTENDING.md and CONTRIBUTING.md teach the
+  stamp.
 
 ### Fixed
 

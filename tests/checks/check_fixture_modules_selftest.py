@@ -10,8 +10,8 @@ that matters in practice: the entry each fixture actually copies must reach
 Assumes: a writable scratch directory under `ai-tmp/`.
 Guarantees:
   - transitive siblings are reached, and a name that is not a file beside the
-    source is dropped [tested: this file; commit=c6ed562a1a6f964aba906206f2558489b107dc24]
-  - an import cycle terminates [tested: this file; commit=c6ed562a1a6f964aba906206f2558489b107dc24]
+    source is dropped [tested 2026-09-25T04:18:23+10:00: this file]
+  - an import cycle terminates [tested 2026-09-25T04:18:23+10:00: this file]
 Fails when: a checker reaches a module without an import statement naming it;
     that is outside what reading the source can decide and the module says so.
 """
@@ -92,7 +92,7 @@ def findings() -> list[str]:
     # The repository's own case, and the reason this module exists: the entry
     # each fixture copies must reach gate_layout.py, because evidence_runners
     # imports it and a fixture tree without it cannot import the checker.
-    for entry in ("check_evidence_tags.py", "check_spec_status.py", "pin_provenance.py"):
+    for entry in ("check_evidence_tags.py", "check_spec_status.py"):
         answered = sibling_closure((entry,), HERE)
         if "gate_layout.py" not in answered:
             out.append(f"{entry} does not reach gate_layout.py, which evidence_runners imports: {answered}")
@@ -105,7 +105,7 @@ def main() -> int:
     for problem in problems:
         print(f"  {problem}")
     print(f"fixture-modules selftest: {len(problems)} defect(s), over {len(CASES)} planted trees "
-          f"and the three entries this repository's fixtures copy")
+          f"and the two entries this repository's fixtures copy")
     return 1 if problems else 0
 
 

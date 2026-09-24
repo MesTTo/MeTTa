@@ -8,9 +8,9 @@ which is what makes it corrosive rather than untidy.
 
 Guarantees: nested distribution modules, native library and suite support,
 CMake recipes, vendor configuration headers and nested host reproductions participate in
-the same evidence and provenance checks as their callers
-[tested: tests/checks/check_evidence_selftest.py,
-tests/checks/check_pin_provenance_selftest.py; commit=6471fbad35eced5ed6440ebf2c25a053b20221f3].
+the same evidence and pin checks as their callers
+[tested 2026-09-25T04:18:23+10:00: tests/checks/check_evidence_selftest.py,
+tests/checks/check_evidence_sites_selftest.py].
 
 Reads files and the engine-free door grammar. Structured row assumptions,
 guarantees, local refusals and evidence are checked through doorgen's contract
@@ -19,7 +19,7 @@ test_contract_checks_refuse_missing_coverage_and_unbacked_refusals;
 commit=b615b5a33b43252ef9826e5387da7c9bd7f6b543].
 
 Guarantees: MeTTa data fixtures carry checked citations and resolvable provenance
-[tested: tests/checks/check_evidence_selftest.py; commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
+[tested 2026-09-25T04:18:23+10:00: tests/checks/check_evidence_selftest.py].
 
 What each tag has to carry, and why only this much:
 
@@ -30,8 +30,25 @@ What each tag has to carry, and why only this much:
   source    a date or a reference
   any kind  a time after its date is the whole time `date -Iseconds` prints,
             YYYY-MM-DDTHH:MM:SS+HH:MM, the stamp every tag carries since the
-            obligation-header rule of 2026-09-24T23:27:42+10:00; a tag from
-            before it carries the date alone and is read as it always was
+            obligation-header rule of RULE_INSTANT; a tag from before it
+            carries the date alone and is read as it always was
+  written   on a line written since RULE_INSTANT, in any file git sees in the
+  since     checkout or its components: a tag carries that whole stamp, and a
+  the rule  pin says neither `commit=WORKTREE` nor a commit of its own repository
+
+The last row is dated by line, as SonarQube dates its new code: a line is
+written since the rule when `git blame -M -C` over the working tree gives it a
+committer time at or after RULE_INSTANT, or none because it is not committed,
+and every line of an untracked file is [source 2026-09-25T01:02:21+10:00:
+https://docs.sonarsource.com/sonarqube-server/9.9/project-administration/defining-new-code,
+lines "changed since the start date of the new code period are marked" by SCM
+blame]. Blame follows a move where a diff's added lines do not: 0dcf53ea8
+rewrote engine/bench-baseline.json in sorted key order and moved two tags
+written at 23:06, before the rule, which its added lines and plain blame date
+to 23:52 and `git blame -M` to 23:06 [measured 2026-09-25T01:16:56+10:00: lines
+66 and 141, switch_to_build9_host_repin_comment]. A line from before the rule
+is legacy and stays as it is until its evidence runs again, so a legacy
+`commit=WORKTREE` is counted and never refused, RELEASE=1 or not.
 
 Existence alone was the whole check until 2026-08-18, and it is the weakest of
 the three. engine/translator.pl cited a tests/performance/reduce_dispatch.pl for
@@ -92,59 +109,76 @@ verified, and demanding evidence for it would push authors back to stating
 unverified claims in the same voice as measured facts.
 Assumes:
   - evidence_runners.executed reports REPORT for a file only a forgiven lane
-    runs [tested 2026-08-18: tests/checks/check_evidence_selftest.py]
+    runs [tested 2026-09-25T04:18:23+10:00: tests/checks/check_evidence_selftest.py]
 Guarantees:
   - a tested claim naming something absent fails the run, and a claim spanning
     several comment lines is read as one claim
-    [tested 2026-08-18: tests/checks/check_evidence_selftest.py]
+    [tested 2026-09-25T04:18:23+10:00: tests/checks/check_evidence_selftest.py]
   - a tested claim naming a target that cannot fail, that no runner executes,
     or that only a REPORT lane runs, fails the run
-    [tested 2026-08-18: tests/checks/check_evidence_selftest.py]
+    [tested 2026-09-25T04:18:23+10:00: tests/checks/check_evidence_selftest.py]
   - the four command shapes a claim may name instead of a test are each
     resolved and each falsified: a check.sh lane, an npm script, a `make -C
     <seat> <target>`, and a `sh <script>` with environment assignments in
-    front of it [tested 2026-09-05: tests/checks/check_evidence_selftest.py]
+    front of it [tested 2026-09-25T04:18:23+10:00: tests/checks/check_evidence_selftest.py]
   - a path in a claim resolves from the repository root, from beside the
     citing file, and from the citing file's SEAT root, and one that resolves
     under none of the three is reported
-    [tested 2026-09-05: tests/checks/check_evidence_selftest.py]
+    [tested 2026-09-25T04:18:23+10:00: tests/checks/check_evidence_selftest.py]
   - reading a file's tags and requiring its Guarantees lines to carry one are
     separate scopes, so a class can clear the first without clearing the
     second; SOURCES is the first and GUARANTEE_SOURCES the second
-    [tested 2026-09-05: tests/checks/check_evidence_selftest.py]
+    [tested 2026-09-25T04:18:23+10:00: tests/checks/check_evidence_selftest.py]
   - a name written as a SENTENCE resolves when it is quoted, against every
     suite in the tree rather than one directory's, and a quoted name the tree
     does not declare is reported rather than dropped in silence
-    [tested 2026-09-07: tests/checks/check_evidence_selftest.py; commit=45615fb15d8a1d041e3ce0698d789d4d1392a0eb]
+    [tested 2026-09-25T04:18:23+10:00: tests/checks/check_evidence_selftest.py]
   - a C suite's two names for one case both resolve, the `test_` function and
     the `CASE(...)` prose inside it, and a CASE in a function main() never
     calls is as unbacked as the function
-    [tested 2026-09-07: tests/checks/check_evidence_selftest.py; commit=45615fb15d8a1d041e3ce0698d789d4d1392a0eb]
+    [tested 2026-09-25T04:18:23+10:00: tests/checks/check_evidence_selftest.py]
   - a tag offering a path under the repository's scratch directory is
     reported, and the directory is read from the runner that allocates it, so
     a runner that stops declaring it is reported too
-    [tested 2026-09-07: tests/checks/check_evidence_selftest.py; commit=45615fb15d8a1d041e3ce0698d789d4d1392a0eb]
-  - MORK's Python benchmark selftest carries checked evidence and provenance
-    [tested: tests/checks/check_pin_provenance_selftest.py; commit=6da518669cb9e39557d537857c0aa7190dd2e78f]
+    [tested 2026-09-25T04:18:23+10:00: tests/checks/check_evidence_selftest.py]
+  - MORK's Python benchmark selftest carries checked evidence, and its pins
+    are placed as prose or as code by its grammar
+    [tested 2026-09-25T04:18:23+10:00: tests/checks/check_evidence_sites_selftest.py]
   - Python package claims remain checked after sources move into subpackages
     [tested: test_nested_package_evidence_rejects_a_missing_test; commit=cd62330ceacc8f1254eed9791c3f6203b48a1c9e]
-  - every walk reads the files git tracks or has staged and nothing else, so
-    build output under an ignored directory is never read as a claim of the
-    tree [tested: tests/checks/check_evidence_selftest.py; commit=b29acf394a2711a9cb1625557acdbe44997db601]
-  - nested example fixtures carry checked claims and resolvable comment pins
-    [tested: tests/checks/check_evidence_selftest.py,
-    tests/checks/check_pin_provenance_selftest.py; commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427]
-  - C-embedded Prolog fixtures carry checked evidence and provenance
-    [tested: tests/checks/check_pin_provenance_selftest.py; commit=8ca8a387fc61d0918484b19a1a3baf85b6523043]
-  - root build hooks and component shell tests carry checked claims and
-    resolvable comment pins [tested: tests/checks/check_evidence_selftest.py,
-    tests/checks/check_pin_provenance_selftest.py; commit=8ee8fcd4e43a932131909f7c58ad4fbe4dcf8d1d]
-  - tracked TOML configuration pins resolve through the same provenance scan
-    [tested: tests/checks/check_pin_provenance_selftest.py; commit=f88b11ae305c4e1bfafa8387d1f24e51d0d8cb92]
+  - every walk reads the files git tracks or has staged, and the rule-era
+    check the untracked files git does not ignore as well, so build output
+    under an ignored directory is never read as a claim of the tree
+    [tested 2026-09-25T04:18:23+10:00: tests/checks/check_evidence_selftest.py]
+  - nested example fixtures, C-embedded Prolog fixtures, root build hooks and
+    component shell tests carry checked claims, and their comment pins are
+    placed as prose and their code's as code
+    [tested 2026-09-25T04:18:23+10:00: tests/checks/check_evidence_selftest.py,
+    tests/checks/check_evidence_sites_selftest.py]
+  - a TOML configuration's pins are placed by the TOML parser, so a key or a
+    value is never read as one
+    [tested 2026-09-25T04:18:23+10:00: tests/checks/check_evidence_sites_selftest.py]
   - a tag's time is read whole in every kind: a `date -Iseconds` stamp is one
     token, so a tested tag's names are the words after it, and a time that is
     not a whole stamp is reported, an assumed tag's included
-    [tested 2026-09-25T00:34:33+10:00: tests/checks/check_evidence_selftest.py]
+    [tested 2026-09-25T04:18:23+10:00: tests/checks/check_evidence_selftest.py]
+  - on a line written since RULE_INSTANT, in any file git sees in the checkout
+    or a component, a tag without a whole stamp, a `commit=WORKTREE`, and a pin
+    naming a commit of its own repository are each reported, and a pin naming
+    another repository's commit is not; the same line before the instant is
+    legacy and passes, a `commit=WORKTREE` there counted and never refused
+    [tested 2026-09-25T04:18:23+10:00: tests/checks/check_evidence_selftest.py]
+  - a line is dated by where blame follows it, so a legacy tag moved within
+    its file, moved into another file, or carried by its file's rename after
+    the instant stays legacy, while an uncommitted edit and every line of an
+    untracked file are written since
+    [tested 2026-09-25T04:18:23+10:00: tests/checks/check_evidence_selftest.py]
+  - a commit dated after the instant is found beneath one backdated before it,
+    and the lines it wrote are dated to it
+    [tested 2026-09-25T04:18:23+10:00: tests/checks/check_evidence_selftest.py]
+  - a placeholder in a tracked file no glob reaches is reported, in the
+    checkout and in its components
+    [tested 2026-09-25T04:18:23+10:00: tests/checks/check_evidence_selftest.py]
 Fails when:
   - asked whether a target tests the PARTICULAR guarantee it is cited for.
     Every rule here is necessary and none is sufficient: a script that runs
@@ -161,6 +195,10 @@ Fails when:
   - reading a plunit test that does not start in column 1, or a Python name
     bound by anything but a def. Both are how this tree is written and neither
     is how Prolog or Python must be written.
+  - a commit's committer date is not when it was written. A line is dated by
+    the committer time blame gives it, so a commit backdated before the
+    instant makes its own lines legacy; one that is the rule's to hold is
+    hidden only by backdating it.
 Open Obligations:
   To Do: None
   Hacks: None
@@ -170,11 +208,10 @@ Open Obligations:
 from __future__ import annotations
 
 import ast
-import json
-import os
 import re
 import subprocess
 import sys
+from bisect import bisect_left
 from collections.abc import Iterator
 from dataclasses import dataclass
 from datetime import datetime
@@ -513,10 +550,17 @@ PROVENANCE_SOURCES = (
     # [measured 2026-09-20: 5 pins, and the net exits 1 on any file it cannot
     # reach, so an unreachable one blocks the release pass rather than only
     # the report]. It is listed so the net REACHES it and stops reporting it;
-    # the pins themselves are declined at the write point, because the file is
+    # the pins themselves are declined by the classifier, because the file is
     # hash-chained and rewriting it in place destroys the record. The reason
-    # lives once, on pin_provenance.UNPINNABLE.
+    # lives once, on evidence_sites.UNPINNABLE_REASON.
     "agenticmind.json",
+    # The ext component's runner and guide, the two files the out-of-glob net
+    # found once it read the components as the gate's own walks do, each
+    # holding a placeholder nothing read [measured 2026-09-25T01:17:45+10:00:
+    # ext/check.sh:11 and ext/README.md:5]. The PIN half only, the staging this
+    # list's entries take.
+    "ext/*.sh",
+    "ext/*.md",
     "*.sh",
     # The gate's own runners, for the reason given on CLAIM_SOURCES above.
     "tools/*.sh",
@@ -686,12 +730,21 @@ QUOTED_NAME = re.compile(r'"([^"]{4,}?)"', re.DOTALL)
 #carries the marker on its continuation line, and without it here the
 #second half of a two-line test name reads as `// ...`, so four copies of
 COMMENT_PREFIX = re.compile(r"^[ \t]*[%#*/]*[ \t]*", re.MULTILINE)
+#: The instant of the obligation-header rule [source 2026-09-25T01:14:59+10:00:
+#: ~/.claude/skills/obligation-headers/SKILL.md, "Stamping, validating and
+#: refreshing a tag", sha256 ee67e55a49a4fdf1]. Since it a tag carries the
+#: whole `date -Iseconds` stamp its evidence ran at, and no pin says
+#: `commit=WORKTREE` or names a commit of its own repository; a line written
+#: before it is legacy and stays as it is until its evidence runs again. The
+#: second is the file's modification time when the rewrite was first read
+#: [assumed 2026-09-25T01:14:59+10:00: the file was edited again at
+#: 2026-09-25T00:31:33+10:00, so its time no longer shows the rewrite's].
+RULE_INSTANT = "2026-09-24T23:27:42+10:00"
 #: A tag's date, which is what lets a measured or source claim go stale.
 DATE = re.compile(r"\d{4}-\d{2}-\d{2}")
 #: A tag's time as written: its date and whatever is attached to it, one token,
-#: so a time is judged whole. A tag carried the date alone until the
-#: obligation-header rule of 2026-09-24T23:27:42+10:00 and carries the whole
-#: `date -Iseconds` stamp since.
+#: so a time is judged whole. A tag carried the date alone until RULE_INSTANT
+#: and carries the whole `date -Iseconds` stamp since.
 TIME = re.compile(r"\d{4}-\d{2}-\d{2}(?:T[\w:+.-]*)?")
 #: The whole of what `date -Iseconds` prints, and so the only time a tag may
 #: carry after its date [source 2026-09-25T00:29:31+10:00: date(1), whose -I
@@ -1584,19 +1637,23 @@ def time_problems(body: str) -> list[str]:
     problems = []
     for found in TIME.finditer(body):
         written = found.group(0).rstrip(":.")
-        if "T" not in written:
-            continue
-        if STAMP.fullmatch(written):
-            try:
-                datetime.fromisoformat(written)
-                continue
-            except ValueError:
-                pass
-        problems.append(
-            f"carries the time {written}, which is not a whole `date -Iseconds` "
-            "stamp (YYYY-MM-DDTHH:MM:SS+HH:MM)"
-        )
+        if "T" in written and not _whole_stamp(written):
+            problems.append(
+                f"carries the time {written}, which is not a whole `date -Iseconds` "
+                "stamp (YYYY-MM-DDTHH:MM:SS+HH:MM)"
+            )
     return problems
+
+
+def _whole_stamp(written: str) -> bool:
+    """Whether a tag's time is the whole of what `date -Iseconds` prints, at a time that exists."""
+    if not STAMP.fullmatch(written):
+        return False
+    try:
+        datetime.fromisoformat(written)
+    except ValueError:
+        return False
+    return True
 
 
 def measured_problems(body: str, known: Evidence, where: Path | None = None) -> list[str]:
@@ -1669,80 +1726,52 @@ def scratch_problems(body: str, under: re.Pattern[str], root: str) -> list[str]:
 
 COMMIT = re.compile(r"\bcommit=([0-9a-zA-Z]+)")
 
-#: The lawful in-progress spelling of a commit pin, spelled ONCE here and
-#: referenced everywhere else, including by the self-test, which imports it.
-#: A provenance sweep resolves every pin in the tree to an object ID by
-#: replacing this word, and on 2026-08-31 one reached into the messages
+#: The in-progress spelling of a commit pin before RULE_INSTANT, spelled ONCE
+#: here and referenced everywhere else, including by the self-tests, which
+#: import it. A provenance sweep resolved every pin in the tree to an object
+#: ID by replacing this word, and on 2026-08-31 one reached into the messages
 #: below and into the self-test's planted fixture: the checker still tested
 #: the word while the self-test planted an object ID, so the two halves
-#: disagreed about what a placeholder is and the RELEASE=1 rule went
-#: untested. One occurrence of the word cannot desynchronise from itself.
+#: disagreed about what a placeholder is and the release rule went untested.
+#: One occurrence of the word cannot desynchronise from itself. Since the rule
+#: a tag carries its stamp instead, and the word stands only on legacy lines.
 PLACEHOLDER = "WORKTREE"
 
 
+
+#: git blame's object ID for a line no commit carries yet, as a SHA-1 or a
+#: SHA-256 repository spells it.
+UNCOMMITTED = re.compile(r"0{40}(?:0{24})?")
+#: The object ID opening each line's entry in `git blame --line-porcelain`.
+OBJECT = re.compile(r"[0-9a-f]{40}(?:[0-9a-f]{24})?")
+#: How far into a file git looks for a NUL before calling it binary, the test a
+#: file has to pass to hold a tag at all [source 2026-09-25T01:14:53+10:00:
+#: https://github.com/git/git/blob/67ad42147a7acc2af6074753ebd03d904476118f/xdiff-interface.c#L197-L203,
+#: buffer_is_binary].
+BINARY_PREFIX = 8000
+#: One line of `git submodule status --recursive`: a status character, the
+#: checked-out commit, the path, and git describe's answer in parentheses when
+#: it has one. A status of `-` is a component that is not checked out, whose
+#: files are not here to read [source 2026-09-25T01:14:47+10:00:
+#: git-submodule(1), status].
+SUBMODULE = re.compile(r"^(?P<status>[ +U-])[0-9a-f]+ (?P<path>.+?)(?: \(.*\))?$")
+
+
+def _git(repository: Path, *arguments: str) -> str:
+    """What one git command answers in `repository`, or a RuntimeError naming its refusal."""
+    done = subprocess.run(
+        ["git", *arguments], cwd=repository, capture_output=True,
+        encoding="utf-8", errors="replace", check=False,
+    )
+    if done.returncode != 0:
+        msg = f"git {arguments[0]} refused {repository}: {done.stderr.strip()}"
+        raise RuntimeError(msg)
+    return done.stdout
+
+
 @cache
-def hash_chained(path: Path) -> bool:
-    """Whether this file is a record whose entries hash over the ones before them.
-
-    An agenticmind record stores every log entry beside `after`, the id of the
-    entry before it, so rewriting one byte in place breaks the chain and the
-    WHOLE record stops reading rather than the line that moved. pin_provenance
-    therefore declines it, and this is the same decision read from the same
-    place, because the two halves disagreeing about what a placeholder IS is
-    the failure the PLACEHOLDER comment above already names in its other form:
-    the pass declined 93 occurrences here while RELEASE=1 counted them and
-    refused a release nothing could ever make pinnable.
-
-    Nor is a pin owed there. A claim in that record is never edited, only
-    attacked, so `commit=WORKTREE` inside a reason is an account of what was
-    believed when the reason was given, rather than a source pin awaiting
-    resolution.
-
-    Keyed on the SHAPE rather than the filename, because this tree has
-    submodules and each can carry its own record, while a file that merely
-    shares the name is not one.
-    """
-    try:
-        loaded = json.loads(_text(path))
-    except (ValueError, RecursionError, OSError):
-        return False
-    log = loaded.get("log") if isinstance(loaded, dict) else None
-    return (isinstance(log, list) and bool(log) and isinstance(log[0], dict)
-            and "after" in log[0] and "id" in log[0])
-
-
-@cache
-def pinnable(path: Path) -> frozenset[int]:
-    """The lines of this file where a placeholder is a pin the release must resolve.
-
-    RELEASE=1 refuses a tree whose evidence still names an uncommitted
-    worktree, and the question of which occurrences ARE evidence is lexical:
-    one inside a string literal belongs to code that emits or matches pins,
-    and one inside a hash-chained record is an account of what was believed
-    rather than a source pin. pin_provenance decides that per file class and
-    is the only place it is decided, so this asks it rather than keeping a
-    second model.
-
-    A second model is what was here, and it had already desynchronised twice:
-    the pass declined 93 occurrences while RELEASE=1 counted them, so a
-    release was refused over 91 placeholders that no run of the pass could
-    ever have resolved -- 85 in the record and one in the regex of the very
-    checker that matches pins.
-
-    Imported inside the function because pin_provenance imports this module
-    for the globs and the placeholder word. Deferring the one edge keeps the
-    definition in the module that owns it rather than splitting the grammar
-    readers across both.
-    """
-    # Deferred: see the docstring. Importing at module scope would make the
-    # two checkers import each other, and this one is the gate.
-    from pin_provenance import sites
-
-    return frozenset(line for _at, line, reason in sites(path, _text(path)) if reason is None)
-
-
 def _repositories() -> tuple[Path, ...]:
-    """This checkout and every component repository mounted inside it.
+    """This checkout and every component repository checked out inside it, nested ones included.
 
     A component is a submodule, so its history is its OWN: a file under
     extensions/python cites a commit that `git cat-file` at the root cannot
@@ -1752,64 +1781,292 @@ def _repositories() -> tuple[Path, ...]:
     direction and the honest one, since a cross-cutting change is cited from a
     component just as a component's own change is.
 
-    Time: one `git cat-file --batch-check` per repository per run, at most nine
-    on this tree, against one before.
+    Asked of git rather than globbed. The `*/.git` and `*/*/.git` globs this
+    replaced stopped two directories down, where the twins repository is a
+    submodule of extensions/python four down, so its commits and its lines
+    were out of reach, and they took in every worktree and test repository
+    that happened to sit two down [measured 2026-09-25T01:39:33+10:00: on the
+    shared checkout they answered 85 entries, 75 of them worktrees in its
+    scratch directory and two test repositories under repos/, and neither the
+    twins repository nor the one inside it; submodule status answers the nine
+    components].
     """
-    return (ROOT, *sorted(
-        found.parent for found in ROOT.glob("*/.git")
-    ), *sorted(found.parent for found in ROOT.glob("*/*/.git")))
+    repositories = [ROOT]
+    for line in _git(ROOT, "submodule", "status", "--recursive").splitlines():
+        found = SUBMODULE.match(line)
+        if found is None:
+            msg = f"git submodule status answered a line this does not read: {line!r}"
+            raise RuntimeError(msg)
+        if found["status"] != "-":
+            repositories.append(ROOT / found["path"])
+    return tuple(repositories)
 
 
 @cache
+def _resolves_in(oid: str, repository: Path) -> bool:
+    """Whether `repository` names OID as a commit."""
+    answer = subprocess.run(
+        ["git", "cat-file", "--batch-check"],
+        cwd=repository,
+        input=f"{oid}^{{commit}}\n",
+        capture_output=True,
+        text=True,
+        check=False,
+    ).stdout
+    return " commit " in f" {answer.strip()} "
+
+
 def _resolves_anywhere(oid: str) -> bool:
     """Whether any repository in this checkout names OID as a commit."""
-    for repository in _repositories():
-        answer = subprocess.run(
-            ["git", "cat-file", "--batch-check"],
-            cwd=repository,
-            input=f"{oid}^{{commit}}\n",
-            capture_output=True,
-            text=True,
-            check=False,
-        ).stdout
-        if " commit " in f" {answer.strip()} ":
-            return True
-    return False
+    return any(_resolves_in(oid, repository) for repository in _repositories())
 
 
-def commit_problems(sites: list[tuple[Path, int, str, str]]) -> tuple[list[str], int]:
-    """Check every pinned object ID, and count the WORKTREE placeholders.
+def commit_problems(sites: list[tuple[Path, int, str, str]]) -> list[str]:
+    """Check every pinned object ID, in every site the globs read.
 
     A tag's commit= names the repository state that produced its evidence. A
     commit that no longer resolves is an unbacked claim of the same kind the
-    rest of this file refuses, so it is a finding. WORKTREE is the legitimate
-    in-progress spelling, because a commit cannot contain its own object ID;
-    it is counted here and, under RELEASE=1, refused, so a release cannot
-    ship a tree whose evidence still points at an uncommitted worktree.
+    rest of this file refuses, so it is a finding. The placeholder names no
+    object and placeholder_problems counts it instead.
     """
     wanted: dict[str, list[str]] = {}
-    placeholders = 0
     for path, line, tag, body in sites:
         for oid in COMMIT.findall(body):
-            if oid == PLACEHOLDER:
-                placeholders += 1 if line in pinnable(path) else 0
+            if oid != PLACEHOLDER:
+                wanted.setdefault(oid, []).append(f"{path.relative_to(ROOT)}:{line}: {tag}")
+    return [
+        f"{site}: commit={oid} does not resolve to a commit"
+        for oid, where in wanted.items()
+        if not _resolves_anywhere(oid)
+        for site in where
+    ]
+
+
+def reached() -> set[Path]:
+    """Every file either half of the evidence globs reaches."""
+    return {path for glob in (*SOURCES, *PROVENANCE_SOURCES) for path in owned(ROOT.glob(glob), ROOT)}
+
+
+def placeholder_problems(files: set[Path]) -> tuple[set[tuple[Path, int]], list[str]]:
+    """Every `commit=WORKTREE` pin in these files as (path, line), and what is wrong around them.
+
+    Which occurrences ARE pins is lexical: one inside a string literal belongs
+    to code that emits or matches pins, and one inside a hash-chained record is
+    an account of what was believed rather than a source pin. evidence_sites
+    decides that per file class and is the only place it is decided. A second
+    model is what the release count once kept, and it had desynchronised
+    twice: the provenance pass declined 93 occurrences while RELEASE=1 counted
+    them, 85 in the record and one in the regex of the very checker that
+    matches pins.
+
+    Two findings come with the count: a file whose grammar cannot be read far
+    enough to tell a pin from code, and a tracked file holding a pin that no
+    glob reaches, so nothing reads the claims around it.
+
+    Imported inside the function because evidence_sites imports this module for
+    the tag grammar and the placeholder word. Deferring the one edge keeps each
+    definition in the module that owns it rather than splitting the grammar
+    readers across both.
+    """
+    from evidence_sites import UnclassifiableError, sites, unscanned
+
+    pins: set[tuple[Path, int]] = set()
+    findings: list[str] = []
+    for path in sorted(files):
+        text = _text(path)
+        if PLACEHOLDER not in text:
+            continue
+        try:
+            found = sites(path.relative_to(ROOT), text)
+        except UnclassifiableError as error:
+            findings.append(f"{error}; so its placeholders cannot be told from code")
+            continue
+        pins.update((path, line) for _at, line, reason in found if reason is None)
+    findings.extend(
+        f"{path.relative_to(ROOT)}: {count} pin(s) OUTSIDE the evidence gate's globs, "
+        f"so nothing reads this file's claims; add its glob to check_evidence_tags.SOURCES"
+        for path, count in unscanned(files, ROOT)
+    )
+    return pins, findings
+
+
+def _names(listing: str) -> list[str]:
+    """The paths a `-z` git listing answers."""
+    return [name for name in listing.split("\0") if name]
+
+
+def _history(repository: Path, instant: int) -> tuple[bool, bool]:
+    """Whether a commit here is dated at or after the instant, and whether none before it descends from one.
+
+    The second is what makes `git blame --since` exact. Blame hands a line from
+    a commit to its parent until it reaches the commit that wrote it, and stops
+    at the first commit dated before the bound, so it misdates a line only by
+    meeting a commit dated before the instant on its way down from HEAD, and
+    every commit on that way descends from the one that wrote the line.
+    """
+    dates: dict[str, int] = {}
+    parents: dict[str, list[str]] = {}
+    for row in _git(repository, "rev-list", "--timestamp", "--parents", "HEAD").splitlines():
+        stamp, commit, *above = row.split()
+        dates[commit] = int(stamp)
+        parents[commit] = above
+    after = any(date >= instant for date in dates.values())
+    ordered = not any(
+        dates[commit] < instant and any(dates.get(parent, 0) >= instant for parent in above)
+        for commit, above in parents.items()
+    )
+    return after, ordered
+
+
+def _written_since(repository: Path, name: str, lines: list[int], instant: int, *, bounded: bool) -> set[int]:
+    """Which of these lines of `name`'s working-tree text git blame dates at or after the instant.
+
+    One blame per file, over its tag and pin lines alone. -M follows a line
+    moved within the file and -C one moved from a file the same commit
+    changed. A line no commit carries has the all-zero object ID and the
+    current time, and either makes it written since.
+    """
+    spans: list[list[int]] = []
+    for line in sorted(set(lines)):
+        if spans and spans[-1][1] + 1 == line:
+            spans[-1][1] = line
+        else:
+            spans.append([line, line])
+    arguments = ["blame", "-M", "-C", "--line-porcelain"]
+    if bounded:
+        arguments.append(f"--since={RULE_INSTANT}")
+    for low, high in spans:
+        arguments += ["-L", f"{low},{high}"]
+    written: set[int] = set()
+    line = 0
+    for row in _git(repository, *arguments, "--", name).split("\n"):
+        if row.startswith("\t"):
+            continue
+        head = row.split(" ")
+        if len(head) >= 3 and OBJECT.fullmatch(head[0]):
+            line = int(head[2])
+            if UNCOMMITTED.fullmatch(head[0]):
+                written.add(line)
+        elif head[0] == "committer-time" and int(head[1]) >= instant:
+            written.add(line)
+    return written
+
+
+def rule_era_problems() -> tuple[list[str], int, int, set[tuple[Path, int]], list[Path]]:
+    """Every tag and pin on a line written since RULE_INSTANT that is not in the rule's form.
+
+    Its domain is every file git sees in each repository of the checkout, not
+    the evidence globs, so no file class escapes it: the files a commit dated
+    since the instant touched, those carrying an uncommitted edit, and every
+    untracked file git does not ignore. A line in one is written since when git
+    blame dates it at or after the instant, and every line of an untracked file
+    is. A tag or pin there that evidence_sites places in prose must be in the
+    rule's form: a tag carries a whole stamp, in every kind, and a pin says
+    neither `commit=WORKTREE` nor a commit its own repository names. Another
+    repository's commit passes, since only a commit of its own repository
+    cannot contain the claim that names it.
+
+    `git log --since-as-filter` picks the files rather than --since, and the
+    blame is bounded by --since only where _history says it is exact: --since
+    stops at the first commit dated before the date, so a commit backdated on
+    top of one dated after the instant hid that commit from `git log --since`
+    and blamed its lines to itself under `git blame --since`
+    [measured 2026-09-25T01:39:16+10:00: git 2.53.0, a commit dated
+    2026-09-25T00:00:00+10:00 under one dated 2026-09-24T12:00:00+10:00; `git
+    log --since` named neither, `--since-as-filter` named the first, and `git
+    blame --since` blamed its line to the second as a boundary where plain
+    blame gave the first].
+
+    Answers the findings; how many tags and pins on lines written since were
+    held to the rule, and in how many files; where a line written since says
+    `commit=WORKTREE`, which the legacy count leaves out; and the repositories
+    blamed over their whole history because their dates are out of order.
+
+    Time, with R repositories, H commits in one's history, F files touched
+    since the instant, uncommitted or untracked, and h the commits since the
+    instant that touched one of them: per repository one `git rev-list
+    --timestamp --parents` over its whole history, O(H), one `git log
+    --since-as-filter`, which walks O(H) and lists O(F), one `git diff` and
+    one `git ls-files`; then one `git blame -L` per file holding a tag or pin,
+    over those lines alone, walking h commits under --since and the file's
+    whole history when the dates are out of order. Blames run only on files
+    touched since the instant, so the work is O(R * H + F * h) in date order
+    [measured 2026-09-25T01:43:59+10:00: 0.71s at the least of three runs over
+    the shared checkout, R = 10 repositories, F = 39 files holding 104 tags and
+    pins on lines written since, the whole lane 9.17s against 8.35s before it].
+    """
+    from evidence_sites import UnclassifiableError, classify
+
+    instant = int(datetime.fromisoformat(RULE_INSTANT).timestamp())
+    findings: list[str] = []
+    held = 0
+    files = 0
+    fresh: set[tuple[Path, int]] = set()
+    unordered: list[Path] = []
+    for repository in _repositories():
+        after, ordered = _history(repository, instant)
+        if not ordered:
+            unordered.append(repository)
+        names = set(_names(_git(repository, "diff", "HEAD", "--name-only", "-z")))
+        if after:
+            names.update(_names(_git(
+                repository, "log", f"--since-as-filter={RULE_INSTANT}", "--format=",
+                "--name-only", "--diff-merges=first-parent", "-z", "HEAD",
+            )))
+        untracked = set(_names(_git(repository, "ls-files", "--others", "--exclude-standard", "-z")))
+        for name in sorted(names | untracked):
+            path = repository / name
+            if path.is_symlink() or not path.is_file():
                 continue
-            wanted.setdefault(oid, []).append(f"{path.relative_to(ROOT)}:{line}: {tag}")
-    problems = []
-    if wanted:
-        unresolved = {oid for oid in wanted if not _resolves_anywhere(oid)}
-        problems.extend(
-            f"{site}: commit={oid} does not resolve to a commit"
-            for oid in wanted
-            if oid in unresolved
-            for site in wanted[oid]
-        )
-    if placeholders and os.environ.get("RELEASE") == "1":
-        problems.append(
-            f"{placeholders} evidence tag(s) still say commit={PLACEHOLDER}; a release "
-            f"pins each to the commit whose tree produced the evidence"
-        )
-    return problems, placeholders
+            raw = path.read_bytes()
+            if b"\0" in raw[:BINARY_PREFIX]:
+                continue
+            text = raw.decode("utf-8", errors="replace")
+            breaks = [found.start() for found in re.finditer("\n", text)]
+            placed = [
+                (bisect_left(breaks, found.start()) + 1, bisect_left(breaks, found.end() - 1) + 1, found)
+                for pattern in (CLAIM, COMMIT) for found in pattern.finditer(text)
+            ]
+            if not placed:
+                continue
+            lines = [line for first, last, _found in placed for line in range(first, last + 1)]
+            era = set(lines) if name in untracked else _written_since(
+                repository, name, lines, instant, bounded=ordered)
+            chosen = [(first, found) for first, last, found in placed
+                      if any(line in era for line in range(first, last + 1))]
+            if not chosen:
+                continue
+            files += 1
+            relative = path.relative_to(ROOT)
+            try:
+                sides = classify(relative, text, [found.start() for _first, found in chosen])
+            except UnclassifiableError as error:
+                findings.append(f"{error}; it holds a tag or pin on a line written since {RULE_INSTANT}")
+                continue
+            for (first, found), side in zip(chosen, sides, strict=True):
+                if side is not None:
+                    continue
+                held += 1
+                where = f"{relative}:{first}"
+                if found.re is CLAIM:
+                    if not any(_whole_stamp(time.group(0).rstrip(":.")) for time in TIME.finditer(found.group(2))):
+                        findings.append(
+                            f"{where}: {found.group(1).lower()}: written since {RULE_INSTANT} without a "
+                            f"whole `date -Iseconds` stamp, which every tag written since carries"
+                        )
+                elif found.group(1) == PLACEHOLDER:
+                    fresh.add((path, first))
+                    findings.append(
+                        f"{where}: commit={PLACEHOLDER} written since {RULE_INSTANT}, where a tag "
+                        f"carries the time its evidence ran instead"
+                    )
+                elif _resolves_in(found.group(1), repository):
+                    findings.append(
+                        f"{where}: commit={found.group(1)} written since {RULE_INSTANT} names a commit "
+                        f"of its own repository, {repository.relative_to(ROOT)}, where a tag carries "
+                        f"the time its evidence ran instead"
+                    )
+    return findings, held, files, fresh, unordered
 
 
 def provenance_sites() -> list[tuple[Path, int, str, str]]:
@@ -1915,8 +2172,9 @@ def main() -> int:
         doors = "no door table in this tree, so no door contracts read"
     findings += untagged_guarantees()
     sites = claim_sites()
-    pins, placeholders = commit_problems(sites + provenance_sites())
-    findings += pins
+    findings += commit_problems(sites + provenance_sites())
+    placeholders, trouble = placeholder_problems(reached())
+    findings += trouble
     root, trouble = scratch_root()
     findings += trouble
     under = re.compile(rf"(?<![\w/-]){re.escape(root or 'ai-tmp')}/[\w./$-]*")
@@ -1942,13 +2200,22 @@ def main() -> int:
                 problems += scratch_problems(body, under, root)
         for problem in problems:
             findings.append(f"{path.relative_to(ROOT)}:{line}: {tag}: {problem}")
+    era, held, touched, fresh, unordered = rule_era_problems()
+    findings += era
+    order = "".join(
+        f", {repository.relative_to(ROOT)} blamed over its whole history since a "
+        f"commit dated before the instant descends from one after it"
+        for repository in unordered
+    )
     for finding in findings:
         print(finding)
     print(
         f"{len(findings)} unbacked evidence tag(s) in {checked} claims, against "
         f"{len(known.targets)} known test names in {len(known.runs)} files a runner "
-        f"executes; {placeholders} commit={PLACEHOLDER} placeholder(s) awaiting a "
-        f"provenance pin; {doors}"
+        f"executes; {held} tag(s) and pin(s) held to the stamp rule on lines written "
+        f"since {RULE_INSTANT}, in {touched} file(s){order}; {len(placeholders - fresh)} "
+        f"legacy commit={PLACEHOLDER} placeholder(s), which stay until their evidence "
+        f"is re-run; {doors}"
     )
     return 1 if findings else 0
 

@@ -928,9 +928,10 @@ and `libdoc`, in that order. If the callable catalog changed, also run
 `python extensions/python/tools/fngen.py --write` for the Python function
 namespace. Update the authored llms contract, changelog and
 dated journal section. Run the face, documentation, corpus, imports, evidence,
-Python checks and twins lanes before committing the implementation as A.
-Run `python tests/checks/pin_provenance.py --commit <A>` and commit its
-provenance-only result as B; `--check` must report zero pending pins.
+Python checks and twins lanes on the tree you are about to commit, stamp each
+tag whose evidence they ran with the `date -Iseconds` time captured at that
+run, and commit the implementation with its tags. There is no provenance
+commit: a tag names no commit of its own repository.
 
 Every later provider edit requires fresh measurements of its direct and
 transitive twins, including native sibling imports. Use

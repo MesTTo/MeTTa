@@ -9,7 +9,10 @@ clean tree is the same mistake one level up, and it is the mistake the gate
 itself exists to catch.
 
 So each rule is TAKEN AWAY, one at a time, and the self-test has to go red. A
-mutation that nothing notices is a plant pinning nothing.
+mutation that nothing notices is a plant pinning nothing. The mutations share
+nothing but the machine, each self-test building its own temporary trees, so
+they run as many at once as METTA_LANE_WIDTH, the gate's division for one
+lane, allows.
 
 This is mutation testing with a hand-written mutant set rather than a generated
 one, which is what a targeted question wants: one mutant per guarantee, each
@@ -25,16 +28,16 @@ it. A harness that patched the real file and restored it in a `finally` is one
 SIGKILL away from committing a mutated gate.
 Assumes:
   - check_evidence_selftest.build() applies METTA_EVIDENCE_MUTATION to the
-    module it names while copying [source: tests/checks/check_evidence_selftest.py,
-    MUTATION and build; commit=45615fb15d8a1d041e3ce0698d789d4d1392a0eb]
+    module it names while copying [source 2026-09-25T04:24:29+10:00: tests/checks/check_evidence_selftest.py,
+    MUTATION and build]
 Guarantees:
   - a mutation the self-test does not notice is reported by name, and the
     unmutated control has to pass, so a self-test broken to fail always cannot
     make every mutation look caught
-    [tested 2026-09-07: evidence-mutations; commit=45615fb15d8a1d041e3ce0698d789d4d1392a0eb]
+    [tested 2026-09-25T04:18:23+10:00: evidence-mutations]
   - a mutation whose text is no longer in the module it names is reported
     rather than skipped, so a rule that moved cannot leave its plant untested
-    in silence [tested 2026-09-07: evidence-mutations; commit=45615fb15d8a1d041e3ce0698d789d4d1392a0eb]
+    in silence [tested 2026-09-25T04:18:23+10:00: evidence-mutations]
 Fails when:
   - asked which plant catches which mutation. Several plants answer one
     mutation and one plant answers several; what is checked is that every
@@ -52,6 +55,7 @@ import os
 import subprocess
 import sys
 import tempfile
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
@@ -129,6 +133,117 @@ MUTATIONS = (
         "        problems = []\n",
     ),
     (
+        "the stamp a tag written since the rule carries",
+        TAGS,
+        '                    if not any(_whole_stamp(time.group(0).rstrip(":.")) for time in TIME.finditer(found.group(2))):\n',
+        "                    if False:\n",
+    ),
+    (
+        "the stamp's acceptance, so a whole stamp is refused as a date alone is",
+        TAGS,
+        '                    if not any(_whole_stamp(time.group(0).rstrip(":.")) for time in TIME.finditer(found.group(2))):\n',
+        "                    if True:\n",
+    ),
+    (
+        "the refusal of a placeholder written since the rule",
+        TAGS,
+        "                elif found.group(1) == PLACEHOLDER:\n",
+        "                elif False:\n",
+    ),
+    (
+        "the refusal of a pin naming its own repository's commit",
+        TAGS,
+        "                elif _resolves_in(found.group(1), repository):\n",
+        "                elif False:\n",
+    ),
+    (
+        "the pin's OWN repository, so another repository's commit is refused too",
+        TAGS,
+        "                elif _resolves_in(found.group(1), repository):\n",
+        "                elif _resolves_anywhere(found.group(1)):\n",
+    ),
+    (
+        "blame's move detection, so a move dates a legacy line to the commit that moved it",
+        TAGS,
+        '    arguments = ["blame", "-M", "-C", "--line-porcelain"]\n',
+        '    arguments = ["blame", "--line-porcelain"]\n',
+    ),
+    (
+        "blame's detection across files, so a block moved into another file is new",
+        TAGS,
+        '    arguments = ["blame", "-M", "-C", "--line-porcelain"]\n',
+        '    arguments = ["blame", "-M", "--line-porcelain"]\n',
+    ),
+    (
+        "the dating, so every tag line of a touched file reads as written since",
+        TAGS,
+        "            era = set(lines) if name in untracked else _written_since(\n"
+        "                repository, name, lines, instant, bounded=ordered)\n",
+        "            era = set(lines)\n",
+    ),
+    (
+        "the uncommitted edits among the files examined",
+        TAGS,
+        '        names = set(_names(_git(repository, "diff", "HEAD", "--name-only", "-z")))\n',
+        "        names = set()\n",
+    ),
+    (
+        "the untracked files among the files examined",
+        TAGS,
+        '        untracked = set(_names(_git(repository, "ls-files", "--others", "--exclude-standard", "-z")))\n',
+        "        untracked = set()\n",
+    ),
+    (
+        "the classifier's say, so a placeholder a string literal holds is refused",
+        TAGS,
+        "                if side is not None:\n                    continue\n                held += 1\n",
+        "                held += 1\n",
+    ),
+    (
+        "--since-as-filter, so a backdated commit hides the rule-era one beneath it",
+        TAGS,
+        'f"--since-as-filter={RULE_INSTANT}"',
+        'f"--since={RULE_INSTANT}"',
+    ),
+    (
+        "the order check, so blame is bounded where a backdated commit misdates it",
+        TAGS,
+        "bounded=ordered)",
+        "bounded=True)",
+    ),
+    (
+        "--recursive, so a component two submodules down is out of reach",
+        TAGS,
+        '_git(ROOT, "submodule", "status", "--recursive")',
+        '_git(ROOT, "submodule", "status")',
+    ),
+    (
+        "the legacy count's exclusion of placeholders written since the rule",
+        TAGS,
+        "{len(placeholders - fresh)}",
+        "{len(placeholders)}",
+    ),
+    (
+        "the release refusal's retirement, so RELEASE=1 refuses again",
+        TAGS,
+        "    findings += era\n",
+        '    findings += era\n    findings += ["a release refusal"] if __import__("os").environ.get("RELEASE") == "1" else []\n',
+    ),
+    (
+        "the out-of-glob net",
+        TAGS,
+        "        for path, count in unscanned(files, ROOT)\n",
+        "        for path, count in []\n",
+    ),
+    (
+        "the refusal of a class with no rule on a line written since",
+        TAGS,
+        '            except UnclassifiableError as error:\n'
+        '                findings.append(f"{error}; it holds a tag or pin on a line written since {RULE_INSTANT}")\n'
+        "                continue\n",
+        "            except UnclassifiableError:\n                continue\n",
+    ),
+    (
         "the tsconfig hop, so a suite compiled before it runs reads as unrun",
         RUNNERS,
         "            for pattern in (token, *tsc_sources(package, token)):",
@@ -167,6 +282,7 @@ def main() -> int:
         findings.append(
             "the unmutated self-test does not pass, so nothing below means anything"
         )
+    runnable = []
     for what, module, old, new in MUTATIONS:
         if old not in (HERE / module).read_text(encoding="utf-8"):
             findings.append(
@@ -174,8 +290,18 @@ def main() -> int:
                 f"plant is untested until this mutation follows it"
             )
             continue
-        if selftest({"module": module, "old": old, "new": new}) == 0:
-            findings.append(f"the self-test still passes without {what}")
+        runnable.append((what, {"module": module, "old": old, "new": new}))
+    # Each run builds its own temporary trees and shares nothing with the
+    # others but the machine, so they run as many at once as the gate's
+    # division gives one lane, and the whole machine's worth outside the gate.
+    width = int(os.environ.get("METTA_LANE_WIDTH") or os.cpu_count() or 1)
+    with ThreadPoolExecutor(max_workers=width) as pool:
+        codes = list(pool.map(lambda item: selftest(item[1]), runnable))
+    findings.extend(
+        f"the self-test still passes without {what}"
+        for (what, _mutation), code in zip(runnable, codes, strict=True)
+        if code == 0
+    )
     for finding in findings:
         print(finding)
     print(

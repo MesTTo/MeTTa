@@ -892,17 +892,24 @@ run GATE   parity-fuzz-selftest "$PY" "$HERE/tests/checks/check_upstream_fuzz_se
 # named tests that had never existed in the tree's history, including some
 # cited by the engine pool's Guarantees block, and nothing anywhere would have
 # said so: a claim with nothing behind it reads exactly like the many that are
-# real. This is the linter the scheme has always implied. It reads only, needs
-# no engine, and finishes in under a second, so it runs before anything that
-# can hang.
+# real. This is the linter the scheme has always implied. It reads only and
+# needs no engine, so it runs before anything that can hang [measured
+# 2026-09-25T01:43:59+10:00: 9.17s at the least of three runs over the shared
+# checkout and its nine components, where the lane took 8.35s before the stamp
+# rule's check joined it].
 #
 # It also reads the commit= half of every tag, which was unchecked until
 # 2026-08-26 because a token carrying an `=` never looked like a test name.
 # One citation was pinned to a full object ID sharing eight characters with a
-# real commit and nothing else. WORKTREE is the lawful in-progress spelling,
-# since a commit cannot contain its own object ID, so the run counts those and
-# RELEASE=1 refuses them: that is the cut-time check that a release does not
-# ship evidence pointing at an uncommitted worktree.
+# real commit and nothing else. Since the obligation-header rule of
+# check_evidence_tags.RULE_INSTANT a tag carries the time its evidence ran and
+# no commit of its own repository, so nothing waits on a provenance commit: on
+# every line written since, in any file git sees, the lane refuses a tag
+# without a whole `date -Iseconds` stamp, a `commit=WORKTREE` and a pin naming
+# its own repository's commit, dating each line by `git blame -M -C` so a moved
+# legacy tag stays legacy. The placeholders written before the rule are
+# counted and stay until their evidence runs again, and RELEASE=1 changes
+# nothing.
 # The cheat sheets against the tree and the engine they describe. llms.txt
 # has always OPENED by claiming this lane, and the lane did not exist until
 # 2026-09-01: the library roster drifted to 33 of 34 names behind the claim.
@@ -949,6 +956,12 @@ run GATE evidence   "$PY" "$HERE/tests/checks/check_evidence_tags.py"
 # second fixture is a real repository with one commit, carrying a live pin, a
 # fabricated pin differing from it only in its tail, and a WORKTREE
 # placeholder; disabling either commit rule was caught [measured 2026-08-26].
+# Every fixture tree is committed a day before the obligation-header rule, so
+# each of those cases is legacy, and three more trees hold the rule itself:
+# lines committed either side of it, moved, renamed, edited without a commit
+# and left untracked; a commit backdated over one written since; and a
+# component two submodules down, whose own commit is refused where another
+# repository's passes.
 # Umbrella: claims across components must reach tests through the composed gate.
 run GATE evidence-selftest "$PY" "$HERE/tests/checks/check_evidence_selftest.py"
 
@@ -958,29 +971,33 @@ run GATE evidence-selftest "$PY" "$HERE/tests/checks/check_evidence_selftest.py"
 # unrelated to why it exists, and the self-test reads the same either way. That
 # is the mistake the gate itself exists to catch, one level up.
 #
-# So each rule is taken away in turn and the self-test has to go red. Nine
-# mutations, one per rule the gate gained on 2026-09-07, plus an unmutated
-# control, because without it a self-test broken to fail always would report
-# every mutation as caught. It is mutation testing with a hand-written mutant
-# set, the targeted form of what the `mutation` REPORT lane does to the Python
-# package with a generated one, and it writes nothing outside a temporary
-# directory: the self-test patches the COPY it makes of the checker.
+# So each rule is taken away in turn and the self-test has to go red. One
+# mutation per rule the gate gained on 2026-09-07 and since, the stamp rule's
+# eighteen included, plus an unmutated control, because without it a
+# self-test broken to fail always would report every mutation as caught. It is
+# mutation testing with a hand-written mutant set, the targeted form of what
+# the `mutation` REPORT lane does to the Python package with a generated one,
+# and it writes nothing outside a temporary directory: the self-test patches
+# the COPY it makes of the checker. The mutations share nothing, so they run
+# METTA_LANE_WIDTH at a time.
 # Umbrella: mutations check citation rules across component sources and composed runners.
 run GATE evidence-mutations "$PY" "$HERE/tests/checks/check_evidence_mutations.py"
 
-# The other half of the provenance rule. A commit cannot contain its own object
-# ID, so the scheme writes the work as commit A and resolves every placeholder
-# to A's ID in a provenance-only commit B. That resolution was a hand sweep
-# until 2026-08-31, when one reached into twelve STRING LITERALS: the twin
-# re-pin tool started writing a stale object ID into every twin it priced, and
-# this lane's own neighbour stopped testing its RELEASE=1 rule because the
-# self-test planted an ID where the gate tested for the word. Nothing said so,
+# Where a tag or a pin sits, in every component language. The evidence lane
+# counts only the placeholders that are pins and holds only the tags and pins
+# in prose to the stamp rule, and which ones those are is lexical: on
+# 2026-08-31 a hand sweep that could not tell reached into twelve STRING
+# LITERALS, the twin re-pin tool started writing a stale object ID into every
+# twin it priced, and the evidence self-test stopped testing the release rule
+# because it planted an ID where the gate tested for the word. Nothing said so,
 # because a resolvable ID is exactly what the gate wants to see.
-# tests/checks/pin_provenance.py is that pass, deciding per file class from
-# each language's own grammar, and this lane plants one of every shape to prove
-# it can tell a pin from the code that writes one.
-# Umbrella: the shared provenance tool rewrites headers in every component language.
-run GATE provenance-pin-selftest "$PY" "$HERE/tests/checks/check_pin_provenance_selftest.py"
+# tests/checks/evidence_sites.py decides it per file class from each
+# language's own grammar, and this lane plants one of every shape to prove it
+# can tell a pin from the code that writes one. It was the first half of the
+# provenance pass, whose second half resolved placeholders into provenance
+# commits until the stamp rule left nothing to resolve.
+# Umbrella: the shared evidence classifier places tags and pins in every component language.
+run GATE evidence-sites-selftest "$PY" "$HERE/tests/checks/check_evidence_sites_selftest.py"
 
 # `git diff --check` reports a leftover conflict marker and this repository runs
 # it, but it reads a DIFF, so it sees one only while the change carrying it is

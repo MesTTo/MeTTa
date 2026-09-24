@@ -74,10 +74,10 @@ def carriers() -> list[Path]:
     """
     # Markdown only. The marker is a string literal in THIS file and in its
     # self-test, so a search over every tracked file reports the checker as a
-    # page whose block is malformed -- the same shape as pin_provenance
-    # rewriting its own pin template, and the same answer: a token inside code
-    # that matches the token is not an instance of it. The block never lives
-    # anywhere but a page.
+    # page whose block is malformed -- the same shape as the 2026-08-31 pin
+    # sweep that rewrote the re-pin tool's own tag template, and the answer
+    # evidence_sites gives it: a token inside code that matches the token is
+    # not an instance of it. The block never lives anywhere but a page.
     listing = subprocess.run(
         ["git", "grep", "-l", "--recurse-submodules", "-F", OPEN, "--", "*.md"],
         cwd=ROOT, capture_output=True, text=True, check=False,

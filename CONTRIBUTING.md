@@ -170,6 +170,10 @@ repository, which the commit carrying it could not contain. A tag written
 before 2026-09-24T23:27:42+10:00 carries a date alone, `[measured 2026-08-14:
 2.05x]`, and keeps it until its evidence runs again, which stamps it. A time
 that is not the whole stamp is a finding in every kind, `assumed` included.
+On a line written since, in any file git sees, a tag without a whole stamp,
+a `commit=WORKTREE` and a pin naming its own repository's commit are
+findings too. The line is dated by `git blame -M -C`, so moving a legacy tag
+within its file or into another keeps it legacy.
 
 `assumed` is the load-bearing one. It costs nothing to write and it is the
 only thing that makes an unverified claim visible as one, so use it rather

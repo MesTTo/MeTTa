@@ -24,34 +24,53 @@ about a tree it is only visiting.
 Every citation is built from a TAG variable instead of being written out. A
 literal one in this file is a claim about THIS repository as far as the gate is
 concerned, and the fixtures are deliberately unbacked.
+
+Every tree is a repository committed a day before check_evidence_tags'
+RULE_INSTANT, the obligation-header rule's, so each case written before that
+rule reads legacy lines and keeps its expectation; the rule-era cases commit
+an hour after it, and leave an edit uncommitted and a file untracked.
 Guarantees:
   - MeTTa data fixtures accept a collected test and reject a missing citation
-    [tested: tests/checks/check_evidence_selftest.py; commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1]
+    [tested 2026-09-25T04:18:23+10:00: tests/checks/check_evidence_selftest.py]
   - nested Prolog suite helpers accept backed claims and reject stale citations
-    [tested: tests/checks/check_evidence_selftest.py; commit=6471fbad35eced5ed6440ebf2c25a053b20221f3]
+    [tested 2026-09-25T04:18:23+10:00: tests/checks/check_evidence_selftest.py]
   - nested distribution modules, Prolog/C/C++ library support and native face fixtures report stale citations
-    [tested: tests/checks/check_evidence_selftest.py; commit=3aaad3435292e4c7d5cc3a01bfda39430aacc6e8]
+    [tested 2026-09-25T04:18:23+10:00: tests/checks/check_evidence_selftest.py]
   - Prolog tools accept a backed claim and report an absent test on its own line
-    [tested: tests/checks/check_evidence_selftest.py; commit=8358dfc233bf299bb23eceddd94593a62372fe4b]
+    [tested 2026-09-25T04:18:23+10:00: tests/checks/check_evidence_selftest.py]
   - a shared build symlink preserves the selected TypeScript sources and
     still refuses a source the command does not select
-    [tested: tests/checks/check_evidence_selftest.py; commit=ea2c1bde39a7b002b1e5948cf6c53bc469dac084]
+    [tested 2026-09-25T04:18:23+10:00: tests/checks/check_evidence_selftest.py]
   - a planted citation of each rejected kind produces exactly one finding on
     its own line, and none of the accepted kinds produces any
-    [tested 2026-08-18: tests/checks/check_evidence_selftest.py]
+    [tested 2026-09-25T04:18:23+10:00: tests/checks/check_evidence_selftest.py]
   - a collector whose anchor has left the runner is reported
-    [tested 2026-08-18: tests/checks/check_evidence_selftest.py]
+    [tested 2026-09-25T04:18:23+10:00: tests/checks/check_evidence_selftest.py]
   - a gate command is accepted when check.sh runs the lane it names and
     reported when it does not, which is the second half of the scheme's
     "test name or exact gate command" and the form llms.txt's checker uses
-    [tested 2026-08-22: tests/checks/check_evidence_selftest.py]
+    [tested 2026-09-25T04:18:23+10:00: tests/checks/check_evidence_selftest.py]
   - every plant here fails when the rule it pins is taken away, because
     METTA_EVIDENCE_MUTATION patches the COPIED checker and nothing else
-    [tested 2026-09-07: evidence-mutations; commit=45615fb15d8a1d041e3ce0698d789d4d1392a0eb]
+    [tested 2026-09-25T04:18:23+10:00: evidence-mutations]
   - tracked probes and nested example fixtures reject a nonexistent test
-    [tested: tests/checks/check_evidence_selftest.py; commit=90ba93eb8f6e98ebfefc55416859bf13de6a8427]
+    [tested 2026-09-25T04:18:23+10:00: tests/checks/check_evidence_selftest.py]
   - root build hooks and component shell tests reject a nonexistent test
-    [tested: tests/checks/check_evidence_selftest.py; commit=8ee8fcd4e43a932131909f7c58ad4fbe4dcf8d1d]
+    [tested 2026-09-25T04:18:23+10:00: tests/checks/check_evidence_selftest.py]
+  - on lines committed after the rule a date alone, a placeholder and the
+    fixture's own commit are each refused once and a whole stamp is not, nor
+    a placeholder a string literal holds, nor a legacy tag moved within its
+    file, into another file or by its file's rename; an uncommitted edit, an
+    untracked placeholder and a tag in a class with no rule are each refused,
+    and nothing else written since is reported
+    [tested 2026-09-25T04:18:23+10:00: tests/checks/check_evidence_selftest.py]
+  - a line written since the rule is refused beneath a commit backdated over
+    it, and a component two submodules down has its own commit refused and
+    another repository's passed
+    [tested 2026-09-25T04:18:23+10:00: tests/checks/check_evidence_selftest.py]
+  - a legacy placeholder is counted and RELEASE=1 changes no line of the
+    report, and a placeholder in a file no glob reaches is reported
+    [tested 2026-09-25T04:18:23+10:00: tests/checks/check_evidence_selftest.py]
 Fails when:
   - run against a tree it did not write. It asserts exact line numbers in a
     fixture it generates, and nothing else.
@@ -68,12 +87,17 @@ import os
 import subprocess
 import sys
 import tempfile
+from datetime import datetime, timedelta
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 
 sys.path.insert(0, str(HERE))
-from check_evidence_tags import CLAIM, PLACEHOLDER  # noqa: E402  -- HERE must be on the path first
+from check_evidence_tags import (  # noqa: E402  -- HERE must be on the path first
+    CLAIM,
+    PLACEHOLDER,
+    RULE_INSTANT,
+)
 from evidence_runners import COLLECTORS  # noqa: E402  -- HERE must be on the path first
 from fixture_modules import sibling_closure  # noqa: E402  -- HERE must be on the path first
 from gate_layout import CHECK, TEST  # noqa: E402  -- HERE must be on the path first
@@ -122,9 +146,18 @@ ASSUMED = "assumed"
 SCRATCH = "ai-tmp"
 WHEN = "2026-08-18"
 #: A whole `date -Iseconds` stamp, the time every tag carries since the
-#: obligation-header rule of 2026-09-24T23:27:42+10:00, where WHEN is the date
-#: a tag from before it carries.
+#: obligation-header rule of check_evidence_tags.RULE_INSTANT, where WHEN is
+#: the date a tag from before it carries.
 STAMPED = "2026-09-25T00:10:11+10:00"
+#: The two sides of the rule, derived from the checker's own instant so the
+#: fixture and the rule cannot disagree about where it falls: a day before
+#: it, where every tree this file builds is committed so that each case
+#: written before the rule keeps its expectation, and an hour after it, where
+#: the rule-era cases commit what they plant.
+BEFORE = (datetime.fromisoformat(RULE_INSTANT) - timedelta(days=1)).isoformat()
+AFTER = (datetime.fromisoformat(RULE_INSTANT) + timedelta(hours=1)).isoformat()
+#: The placeholder as a pin spells it, built from its one spelling.
+WORD = f"commit={PLACEHOLDER}"
 
 # (accepted, what the citation names, why it is written this way)
 CITATIONS = (
@@ -442,7 +475,7 @@ def build(root: Path, pytest_anchor: str) -> dict[str, int]:
         component.write_text(content)
     (root / TEST).write_text(TEST_SH)
     # The checker reads the files git tracks or has staged and nothing else, so
-    # every fixture tree is a repository; run() stages whatever a case planted
+    # every fixture tree is a repository; run() commits whatever a case planted
     # after this, and an ignored file stays unread on purpose.
     subprocess.run(["git", "init", "-q"], cwd=root, check=True, capture_output=True)
 
@@ -486,13 +519,37 @@ def build(root: Path, pytest_anchor: str) -> dict[str, int]:
               "%   Future Enhancements: None", "", "fixture_predicate."]
     (root / "engine").mkdir(exist_ok=True)
     (root / "engine/fixture.pl").write_text("\n".join(lines) + "\n")
+    commit(root, BEFORE)
     return at
 
 
-def run(root: Path) -> list[str]:
-    """Run the real checker over one fixture tree and answer its report lines."""
+def git(root: Path, *arguments: str, when: str = BEFORE) -> str:
+    """One git command in a fixture repository, dated `when` if it commits."""
     # unbounded: git over a temporary directory, which returns.
-    subprocess.run(["git", "add", "-A"], cwd=root, check=True, capture_output=True)
+    return subprocess.run(
+        ["git", "-c", "user.name=t", "-c", "user.email=t@t", "-c", "protocol.file.allow=always",
+         *arguments],
+        cwd=root, check=True, capture_output=True, text=True,
+        env={**os.environ, "GIT_AUTHOR_DATE": when, "GIT_COMMITTER_DATE": when},
+    ).stdout.strip()
+
+
+def commit(root: Path, when: str) -> None:
+    """Commit everything planted under `root`, dated `when` as author and committer."""
+    git(root, "add", "-A")
+    git(root, "commit", "-q", "--allow-empty", "-m", f"planted at {when}", when=when)
+
+
+def run(root: Path, when: str | None = BEFORE) -> list[str]:
+    """Run the real checker over one fixture tree and answer its report lines.
+
+    What a case planted is committed first, dated `when`, and a day before the
+    rule by default, so every case written before it keeps its expectation: a
+    line committed then is legacy. None leaves the tree as the case left it,
+    for a case about an uncommitted edit or an untracked file.
+    """
+    if when is not None:
+        commit(root, when)
     finished = subprocess.run(
         [sys.executable, str(root / "tools/checks/check_evidence_tags.py")],
         capture_output=True,
@@ -708,9 +765,9 @@ def tracked_probe_complaints() -> list[str]:
     worth having, which is exactly what the scratch rule asks an author to do
     instead of naming a path that goes with the checkout. So the one directory
     holding those reproductions cannot be the one directory whose own claims
-    nothing reads: four pins in it had to be written by hand, because
-    pin_provenance refuses a placeholder outside the gate's globs, and a
-    citation there going stale would have been nobody's finding.
+    nothing reads: four pins in it had to be written by hand, because the
+    provenance pass of the time refused a placeholder outside the gate's
+    globs, and a citation there going stale would have been nobody's finding.
     """
     complaints = []
     for name in ("extensions/python/benchmarks/probes/probe.py",
@@ -926,29 +983,22 @@ def stamp_complaints() -> list[str]:
 
 
 def commit_pin_complaints() -> list[str]:
-    """A commit= must name a real commit, and WORKTREE must not survive a release.
+    """A commit= must name a real commit, and a legacy WORKTREE is counted and never refused.
 
-    The fixture is a real repository with one commit, so the live object ID is
-    known and the fabricated one differs from it only in its tail: that is the
-    shape the check found in the tree on 2026-08-26, where a citation carried
-    a full object ID sharing eight characters with a real commit and nothing
-    else.
+    The fixture is a real repository whose one commit is dated before the
+    rule, so the live object ID is known and the fabricated one differs from
+    it only in its tail: that is the shape the check found in the tree on
+    2026-08-26, where a citation carried a full object ID sharing eight
+    characters with a real commit and nothing else. Every pin here is on a
+    line written before the rule, so the live one naming its own repository
+    and the placeholder are both legacy, and RELEASE=1, which refused every
+    placeholder until the rule, changes nothing.
     """
     complaints = []
     with tempfile.TemporaryDirectory() as directory:
         root = Path(directory)
         build(root, PYTEST_ANCHOR)
-        for command in (
-            ["git", "init", "-q"],
-            ["git", "add", "-A"],
-            ["git", "-c", "user.name=t", "-c", "user.email=t@t", "commit", "-qm", "fixture"],
-        ):
-            # unbounded: git over a temporary directory, which returns.
-            subprocess.run(command, cwd=root, check=True, capture_output=True)
-        live = subprocess.run(
-            ["git", "rev-parse", "HEAD"],
-            cwd=root, check=True, capture_output=True, text=True,
-        ).stdout.strip()
+        live = git(root, "rev-parse", "HEAD")
         fabricated = live[:8] + ("0" * (len(live) - 8) if live[8] != "0" else "1" * (len(live) - 8))
 
         fixture = root / "engine/fixture.pl"
@@ -957,15 +1007,23 @@ def commit_pin_complaints() -> list[str]:
         planted = [
             f"%   - a live pin [{TAG} {WHEN}: test_collected; commit={live}].",
             f"%   - a dangling pin [{TAG} {WHEN}: test_collected; commit={fabricated}].",
-            f"%   - an unresolved pin [{TAG} {WHEN}: test_collected; commit={PLACEHOLDER}].",
+            f"%   - an unresolved pin [{TAG} {WHEN}: test_collected; {WORD}].",
         ]
         at_live, at_dangling, at_worktree = head + 1, head + 2, head + 3
         fixture.write_text("\n".join(lines[:head] + planted + lines[head:]) + "\n")
+        # And one no glob reaches, which the out-of-glob net reports: nothing
+        # reads the claims of a file that carries it.
+        outside = root / "website/plant.py"
+        outside.parent.mkdir(parents=True)
+        outside.write_text(f"#: A pin no glob reaches [{TAG} {WHEN}: test_collected; {WORD}].\n")
 
         output = run(root)
+        if not any(line.startswith("website/plant.py: 1 pin(s) OUTSIDE") for line in output):
+            complaints.append("a placeholder in a file no glob reaches went unreported")
         for line, what, wanted in (
             (at_live, "a live commit pin", False),
             (at_dangling, "a dangling commit pin", True),
+            (at_worktree, "a legacy placeholder", False),
         ):
             reported = [
                 item for item in output
@@ -975,28 +1033,200 @@ def commit_pin_complaints() -> list[str]:
                 complaints.append(f"accepted {what}, which names no commit in the repository")
             if not wanted and reported:
                 complaints.append(f"rejected {what}: {reported[0]}")
-        if not any(f"commit={PLACEHOLDER} placeholder" in item for item in output):
-            complaints.append(f"the report does not count commit={PLACEHOLDER} placeholders")
+        if not any(f"1 legacy {WORD} placeholder" in item for item in output):
+            complaints.append(f"the report does not count the one legacy {WORD} placeholder: {output[-1]}")
 
         # The fixture plants rejected citations too, so this tree exits 1
-        # either way and the exit code says nothing. The refusal SENTENCE is
-        # what discriminates, and it must appear only under RELEASE=1.
-        refusal = f"still say commit={PLACEHOLDER}"
+        # either way and the exit code says nothing. What discriminates is the
+        # report itself, which RELEASE=1 must leave exactly as it was.
         released = subprocess.run(
             [sys.executable, str(root / "tools/checks/check_evidence_tags.py")],
             cwd=root, capture_output=True, text=True, check=False,
             env={**os.environ, "RELEASE": "1"},
         )
-        if refusal not in released.stdout:
+        if released.stdout.splitlines() != output:
             complaints.append(
-                f"RELEASE=1 accepted a tree with a commit={PLACEHOLDER} placeholder "
-                f"at engine/fixture.pl:{at_worktree}"
+                f"RELEASE=1 changed the report of a tree whose only placeholder is legacy: "
+                f"{sorted(set(released.stdout.splitlines()) ^ set(output))[:2]}"
             )
-        if any(refusal in item for item in output):
-            complaints.append(
-                f"an ordinary run refuses commit={PLACEHOLDER}, which is the "
-                "in-progress spelling and must only fail a release"
-            )
+    return complaints
+
+
+def _findings(output: list[str]) -> dict[str, list[str]]:
+    """The rule-era findings of one report, by the path and line each names; the summary is its last line."""
+    marker = f"written since {RULE_INSTANT}"
+    found: dict[str, list[str]] = {}
+    for line in output[:-1]:
+        if marker in line:
+            found.setdefault(line.split(": ", 1)[0], []).append(line)
+    return found
+
+
+def _held(output: list[str], wanted: dict[str, str]) -> list[str]:
+    """Each wanted line refused once for its reason, and no other line written since reported."""
+    found = _findings(output)
+    complaints = [
+        f"{where} was not refused once for {reason!r}: {found.get(where)!r}"
+        for where, reason in wanted.items()
+        if len(found.get(where, [])) != 1 or reason not in found[where][0]
+    ]
+    complaints.extend(
+        f"reported a line the rule does not reach: {line}"
+        for where, lines in found.items() if where not in wanted for line in lines
+    )
+    return complaints
+
+
+#: What a rule-era finding says of each kind of line, read by _findings' key.
+STAMP_REFUSED = "without a whole `date -Iseconds` stamp"
+PLACEHOLDER_REFUSED = f"{WORD} written since"
+OWN_REFUSED = "a commit of its own repository"
+
+
+def rule_era_complaints() -> list[str]:
+    """A tag or pin on a line written since the rule is held to it, and a legacy line never is.
+
+    One tree, three states. A commit dated before the rule plants the legacy
+    lines, a commit dated after it plants every rule-era shape and carries
+    the legacy ones through a rename and two moves, and then an edit stays
+    uncommitted and a file stays untracked. Every expectation is a finding or
+    its absence on one line, and nothing else written since may be reported:
+    a check that reported every line of a touched file would pass the refused
+    half and fail here.
+    """
+    complaints: list[str] = []
+    filler = [f"% filler line {n}, carrying words enough for git to see it move" for n in range(1, 13)]
+    legacy = f"% a legacy date alone [{TAG} {WHEN}: test_collected], written before the rule"
+    with tempfile.TemporaryDirectory() as directory:
+        root = Path(directory)
+        build(root, PYTEST_ANCHOR)
+        live = git(root, "rev-parse", "HEAD")
+        engine = root / "engine"
+        (engine / "renamed.pl").write_text(legacy + "\n" + "\n".join(filler) + "\n")
+        (engine / "moved_within.pl").write_text("\n".join([*filler[:5], legacy, *filler[5:]]) + "\n")
+        block = ["% a block that moves whole into another file, the legacy tag inside it",
+                 *filler[:2], legacy, *filler[2:4]]
+        (engine / "move_source.pl").write_text("\n".join(["% head of the source", *block,
+                                                          "% tail of the source"]) + "\n")
+        (engine / "edited.pl").write_text(legacy + "\n" + "\n".join(filler) + "\n")
+        commit(root, BEFORE)
+
+        planted = [
+            "% Purpose: tags and pins written since the rule.",
+            f"%   a date alone [{TAG} {WHEN}: test_collected].",
+            f"%   a placeholder [{TAG} {STAMPED}: test_collected; {WORD}].",
+            f"%   the fixture's own commit [{TAG} {STAMPED}: test_collected; commit={live}].",
+            f"%   a whole stamp [{TAG} {STAMPED}: test_collected].",
+            "rule_era_fixture.",
+        ]
+        (engine / "rule_era.pl").write_text("\n".join(planted) + "\n")
+        data = root / "extensions/python/tools/rule_era.py"
+        data.parent.mkdir(parents=True, exist_ok=True)
+        data.write_text(f'"""Purpose: a placeholder written since the rule as data."""\nEMITTED = "{WORD}"\n')
+        (engine / "renamed.pl").rename(engine / "renamed_to.pl")
+        within = (engine / "moved_within.pl").read_text().splitlines()
+        within.append(within.pop(5))
+        (engine / "moved_within.pl").write_text("\n".join(within) + "\n")
+        (engine / "move_source.pl").write_text("% head of the source\n% tail of the source\n")
+        (engine / "move_target.pl").write_text("\n".join(["% head of the target", *block]) + "\n")
+        commit(root, AFTER)
+
+        with (engine / "edited.pl").open("a") as edited:
+            edited.write(f"% an uncommitted date alone [{TAG} {WHEN}: test_collected].\n")
+        (engine / "untracked.pl").write_text(
+            f"% an untracked placeholder [{TAG} {STAMPED}: test_collected; {WORD}].\n")
+        # A class the classifier has no rule for is refused by name, since
+        # whether its tag is a claim cannot be told.
+        (engine / "notes.txt").write_text(f"a tag in a class with no rule [{TAG} {STAMPED}: test_collected].\n")
+        output = run(root, None)
+
+        wanted = {
+            "engine/rule_era.pl:2": STAMP_REFUSED,
+            "engine/rule_era.pl:3": PLACEHOLDER_REFUSED,
+            "engine/rule_era.pl:4": OWN_REFUSED,
+            f"engine/edited.pl:{len(filler) + 2}": STAMP_REFUSED,
+            "engine/untracked.pl:1": PLACEHOLDER_REFUSED,
+            "engine/notes.txt": "has no comment rule",
+        }
+        complaints += _held(output, wanted)
+        # rule_era.pl:3 is a placeholder written since the rule, so it is a
+        # finding and not a legacy placeholder; the tree holds no other.
+        if not any(f"0 legacy {WORD} placeholder" in line for line in output):
+            complaints.append(f"counted a placeholder written since the rule as legacy: {output[-1]}")
+    return complaints
+
+
+def backdated_complaints() -> list[str]:
+    """A line written since the rule is found beneath a commit backdated before it.
+
+    `git log --since` stops at the first commit dated before its date and
+    `git blame --since` blames what is left to that commit, so a backdated
+    commit on top hid the rule-era commit under it from both.
+    """
+    complaints: list[str] = []
+    with tempfile.TemporaryDirectory() as directory:
+        root = Path(directory)
+        build(root, PYTEST_ANCHOR)
+        (root / "engine/rule_era.pl").write_text(
+            f"% Purpose: a plant.\n%   a date alone [{TAG} {WHEN}: test_collected].\n")
+        commit(root, AFTER)
+        (root / "engine/later.pl").write_text("% Purpose: a later file, backdated.\n")
+        commit(root, BEFORE)
+        output = run(root, None)
+        if _held(output, {"engine/rule_era.pl:2": STAMP_REFUSED}):
+            complaints.append("a line written since the rule was hidden by a commit backdated on top of it")
+        if "blamed over its whole history" not in output[-1]:
+            complaints.append(f"the report does not name the repository its dates put out of order: {output[-1]}")
+    return complaints
+
+
+def component_complaints() -> list[str]:
+    """A pin naming a commit of its own repository is refused, and one naming another repository's is not.
+
+    The component sits two submodules down, where the twins repository sits
+    under extensions/python, and fixed-depth globs never reached one there.
+    """
+    complaints: list[str] = []
+    with tempfile.TemporaryDirectory() as directory:
+        scratch = Path(directory)
+        deep = scratch / "deep"
+        deep.mkdir()
+        git(deep, "init", "-q")
+        (deep / "README.md").write_text("A component.\n")
+        commit(deep, BEFORE)
+        sub = scratch / "sub"
+        sub.mkdir()
+        git(sub, "init", "-q")
+        (sub / "README.md").write_text("A component holding one.\n")
+        commit(sub, BEFORE)
+        git(sub, "submodule", "add", "-q", str(deep), "examples/deep")
+        commit(sub, BEFORE)
+        root = scratch / "root"
+        build(root, PYTEST_ANCHOR)
+        superproject = git(root, "rev-parse", "HEAD")
+        git(root, "submodule", "add", "-q", str(sub), "extensions/plant")
+        git(root, "submodule", "update", "--init", "--recursive", "-q")
+        commit(root, BEFORE)
+        inside = root / "extensions/plant/examples/deep"
+        own = git(inside, "rev-parse", "HEAD")
+        (inside / "cross.pl").write_text(
+            f"% the superproject's commit [{TAG} {STAMPED}: a case; commit={superproject}].\n"
+            f"% its own commit [{TAG} {STAMPED}: a case; commit={own}].\n")
+        commit(inside, AFTER)
+        (root / "engine/cross.pl").write_text(
+            f"% the component's commit [{TAG} {STAMPED}: test_collected; commit={own}].\n")
+        commit(root, AFTER)
+        output = run(root, None)
+        # The finding names the component as the repository whose commit it is.
+        complaints += _held(output, {
+            "extensions/plant/examples/deep/cross.pl:2": f"{OWN_REFUSED}, extensions/plant/examples/deep,",
+        })
+        # The claim half resolves a pin in every repository of the checkout,
+        # so the component's commit, cited from the superproject, resolves.
+        complaints.extend(
+            f"a component two submodules down was out of reach: {line}"
+            for line in output if line.startswith("engine/cross.pl:1:") and "does not resolve" in line
+        )
     return complaints
 
 
@@ -1043,6 +1273,9 @@ def main() -> int:
     complaints += scratch_path_complaints()
     complaints += stamp_complaints()
     complaints += commit_pin_complaints()
+    complaints += rule_era_complaints()
+    complaints += backdated_complaints()
+    complaints += component_complaints()
 
     for complaint in complaints:
         print(complaint)
@@ -1056,7 +1289,9 @@ def main() -> int:
         f"probe, native support sources, a nested example fixture, a root build hook, a component shell test "
         f"and a Prolog tool citing tests that are not there, "
         f"a stale copy under an ignored build directory, "
-        f"and a tag's time read whole in every kind"
+        f"a tag's time read whole in every kind, and the stamp rule over a tree "
+        f"with lines written either side of it, one backdated over it, and a "
+        f"component two submodules down"
     )
     return 1 if complaints else 0
 

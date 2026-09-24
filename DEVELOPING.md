@@ -784,28 +784,42 @@ changing it. Keep commits independently buildable. A change is ready only when
 the direct relevant tests and `GATE_ONLY=1 sh tools/check.sh` both pass with the
 intended interpreter.
 
-## Evidence tags and their commit pins
+## Evidence tags and their stamps
 
-A claim in a file's header carries the evidence behind it, and the evidence
-names the repository state that produced it: `[tested: <test name>;
-commit=<object ID>]`. While you are working, write `commit=WORKTREE`. A commit
-cannot contain its own object ID, so the pin is resolved afterwards: commit the
-functional, tested state as A, then resolve every placeholder to A's ID in a
-provenance-only commit B.
-
-Resolve them with the pass, never by hand:
+A claim in a file's header carries the evidence behind it, stamped with the
+time that evidence ran, as `date -Iseconds` prints it at the run:
+`[tested 2026-09-25T00:10:11+10:00: <test name>]`. Run the evidence on the tree
+you are about to commit, write its stamp into the tag, and commit the two
+together. The first commit carrying the stamp is then the tree the evidence
+ran on:
 
 ```sh
-python tests/checks/pin_provenance.py --check          # what is still open
-python tests/checks/pin_provenance.py --commit <A>     # resolve them to A
+snapshot=$(git log --reverse --format=%H -S'<stamp>' -- <file> | head -1)
+git diff --stat "$snapshot" -- <paths the claim rests on>   # what moved since
 ```
 
-It rewrites a placeholder only where the file's own grammar says the text is a
-comment, and prints every occurrence it declined with the reason. A hand sweep
-does not know that difference: one on 2026-08-31 rewrote twelve string
+So a tag names no commit of its own repository, which the commit carrying it
+could not contain, and nothing waits on a second commit: there is no
+`commit=WORKTREE` placeholder and no provenance commit. A commit of another
+repository, an upstream one or another component's, may still be named.
+
+The `evidence` lane holds every line written since the rule,
+`check_evidence_tags.RULE_INSTANT`, to it, in any file git sees in the checkout
+and its components: a tag there without a whole stamp, a `commit=WORKTREE` and
+a pin naming its own repository's commit are each a finding. It dates a line
+with `git blame -M -C` over the working tree, so a legacy tag moved within its
+file, into another file or with its file's rename stays legacy, while an
+uncommitted edit and every line of an untracked file are written since. A
+line written before the rule is legacy: a date alone or a `commit=WORKTREE`
+there stays as it is until its evidence runs again, which stamps it.
+
+Whether a tag or pin sits in prose or in code is decided per file class from
+the file's own grammar, by `tests/checks/evidence_sites.py`: a placeholder a
+string literal holds belongs to code that writes pins, and is not one. A hand
+sweep does not know that difference: one on 2026-08-31 rewrote twelve string
 literals, which made the twin re-pin tool start writing a stale object ID into
-every twin it priced and silently disabled the release check that refuses
-unresolved pins.
+every twin it priced and silently disabled the release check the gate had
+then.
 
 A `fixture=` field names the data a measurement ran on, and a fixture that is
 a SPACE is named by its content: `fixture=space:sha256:<digest>`, the hex
@@ -869,5 +883,3 @@ what the number was measured on, instead of discovering a drifted library
 through a number that no longer reproduces. Write one with `python -m metta
 lock <program.metta> -o <name>.lock`.
 
-`RELEASE=1 python tests/checks/check_evidence_tags.py` is the cut-time check
-that no placeholder survived.
