@@ -178,6 +178,11 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- `tools/check.sh <lane>...` refuses, with exit 2 and the name, any name that
+  selects no lane, directly or as a selector, even beside names that do. Only
+  a request where no name matched used to refuse, so a mistyped lane beside a
+  real one was dropped and the run still reported green. The `lane-selection`
+  lane holds it.
 - `tools/battery.sh run` writes each run's log to a file of its own under
   `ai-tmp/battery-logs/`, opening with the battery's provenance. The log lived
   inside the battery tree, and because `run` takes the lowest free battery,

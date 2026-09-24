@@ -78,6 +78,10 @@
 #          GATE_ONLY=1                skip the REPORT tier
 #          METTA_CHILD_CEILING=3600   seconds any spawn may live (bounded.sh)
 # Guarantees:
+#   - a name the caller gives that selects no lane, directly or as a selector,
+#     refuses the run with exit 2 naming it, even beside names that do select
+#     lanes [tested: tests/shell/test_check_refuses_an_unknown_lane.sh;
+#     commit=WORKTREE].
 #   - door-sync checks every row projection, runs its planted discrimination
 #     tests and executes every declared refusal witness [tested:
 #     test_contract_checks_refuse_missing_coverage_and_unbacked_refusals,
@@ -184,6 +188,9 @@ fi
 CHECK_OWNER=
 CHECK_LIST=0
 if [ "${1:-}" = --list ]; then CHECK_LIST=1; shift; fi
+# The names the caller typed, before any selector expands them; each has to
+# select a lane (the check after the last declaration).
+REQUESTED="$*"
 MATCHED_LANES=
 PYDIR="$HERE/extensions/python"
 # begin generated artifact selection
@@ -200,9 +207,14 @@ for metta_artifact_lane in $GENERATED_ARTIFACT_LANES; do
     esac
 done
 # end generated artifact selection
-# Retain the previous names as selection aliases for the package layer checks.
-case " $WANT " in *" seat-layering "*) WANT="$WANT layering" ;; esac
-case " $WANT " in *" seat-layering-selftest "*) WANT="$WANT layering-selftest" ;; esac
+# Retain the previous names as selection aliases for the package layer checks,
+# as `alias=lane` pairs the expansion here and the selection check both read.
+SELECTION_ALIASES="seat-layering=layering seat-layering-selftest=layering-selftest"
+for selection_alias in $SELECTION_ALIASES; do
+    case " $WANT " in
+        *" ${selection_alias%%=*} "*) WANT="$WANT ${selection_alias#*=}" ;;
+    esac
+done
 FAILED=''
 SKIPPED=''
 # How many lanes run at once. The gate's cost is 231 lanes run strictly one
@@ -623,6 +635,13 @@ run GATE worktree sh -c "cd '$HERE' && sh tests/shell/test_worktree_configuratio
 # git commands and reads nothing of this checkout but the script.
 # Umbrella: component provisioning spans every component the superproject mounts.
 run GATE components sh -c "cd '$HERE' && sh tests/shell/test_components_follow_a_moved_pin.sh"
+
+# Naming lanes is how every session asks for a verdict, and a name that
+# selected nothing was dropped in silence whenever another name matched, so a
+# mistyped lane read as a passed one. The test lists lanes rather than running
+# them, so it reads the declarations and nothing else.
+# Umbrella: lane selection spans every component's check.sh.
+run GATE lane-selection sh -c "cd '$HERE' && sh tests/shell/test_check_refuses_an_unknown_lane.sh"
 
 # build.sh itself, which nothing checked before: it had no `set -e`, resolved
 # its paths against the CALLER's working directory, and ended by cloning
@@ -1491,9 +1510,38 @@ run REPORT llms-coverage "$PY" "$HERE/tests/checks/check_llms_coverage.py"
 # Umbrella: planted omissions compare llms.txt with Python, ext and library inventories.
 run GATE llms-coverage-selftest "$PY" "$HERE/tests/checks/check_llms_coverage_selftest.py"
 
-if [ -n "$WANT" ] && [ -z "$MATCHED_LANES" ]; then
-    echo "check.sh: no selected lanes for ${CHECK_COMPONENT:-the umbrella}: $WANT" >&2
-    exit 2
+# Every name the caller typed has to select a lane, by its own name or as a
+# selector for the lanes it stands for. Only a run where NOTHING matched used to
+# refuse, so a mistyped name beside a real one shrank the run to the real one
+# and still exited 0 under a green summary. The selectors are the generated
+# artifact block's two, satisfied by the lanes its GENERATED_ARTIFACT_LANES
+# names (extensions/python/tools/artifacts.py writes both), and the aliases in
+# SELECTION_ALIASES.
+if [ -n "$REQUESTED" ]; then
+    unmatched=
+    for requested in $REQUESTED; do
+        case $requested in
+            generated-artifacts) satisfied_by=$GENERATED_ARTIFACT_LANES ;;
+            generated-artifacts-selftest)
+                satisfied_by=$(for requested_lane in $GENERATED_ARTIFACT_LANES; do
+                                   printf '%s-selftest ' "$requested_lane"
+                               done) ;;
+            *) satisfied_by=
+               for selection_alias in $SELECTION_ALIASES; do
+                   [ "${selection_alias%%=*}" = "$requested" ] &&
+                       satisfied_by="$satisfied_by ${selection_alias#*=}"
+               done ;;
+        esac
+        requested_found=
+        for requested_lane in $requested $satisfied_by; do
+            case " $MATCHED_LANES " in *" $requested_lane "*) requested_found=yes ;; esac
+        done
+        [ -n "$requested_found" ] || unmatched="$unmatched $requested"
+    done
+    if [ -n "$unmatched" ]; then
+        echo "check.sh: no lane named${unmatched} for ${CHECK_COMPONENT:-the umbrella}" >&2
+        exit 2
+    fi
 fi
 [ "$CHECK_LIST" = 1 ] && exit 0
 
