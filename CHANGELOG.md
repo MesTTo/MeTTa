@@ -178,6 +178,16 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- The twins lane reads its point pins again. Three changes since gate-perf's
+  pins at c7d7244fb moved them unrecorded: d4a365c16's tries (122 twins),
+  d781eab8f's removal-selection trim (103) and the registration service
+  90be572a9 with 4003462fe (49). 142 point twins are re-pinned at the fixed
+  tree 4ff69551e with each twin's steps named beside it, and the band
+  overruns of 02-fib, 05-fibadd, 09-tabling_fib and 02-callquoteevalreduce2
+  rise to their new excess, because the tries change lowered those examples
+  by more than their twins. Two twins, 05-if4 and 02-callquoteevalreduce2,
+  had carried two OVERRUN statements since the petta merge, the lane reading
+  the first while the file ended on the second; each keeps one.
 - A battery reused for a source that lacks one of its directories no longer
   refuses for ever. rsync cannot delete a directory holding something the
   excludes keep, an install link or a component's identity, reports it and
