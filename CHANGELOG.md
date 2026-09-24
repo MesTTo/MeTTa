@@ -210,6 +210,14 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- `examples/ch15-writing-transactions-and-worlds/04-admission_pools.metta`
+  specifies the shipped `space-admission-verdict` in MeTTa, and its chain now
+  walks every capacity row the way it walks the admitted types, refusing at
+  the first limit the pool's count has reached. It tested only the first row,
+  so a pool with two rows, the second tighter, was admitted by the chain and
+  refused by the builtin. A two-row section holds the two to the same verdict,
+  in the example and in its Python twin.
+
 - The C seat's site page no longer links dead pages. It includes
   `extensions/cmetta/README.md` one directory deeper, where the README's relative
   links to `vocabularies.h`, `settings.h` and `llms.txt` resolved to nothing; the

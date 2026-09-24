@@ -134,3 +134,15 @@ no Node test declared a hook. A words-suite case now declares a pre-add judge
 built from the three, in a program that imports `lib_functional`. Against
 HEAD's `WORD_HEADS` that case fails, and against the capitalized heads it
 passes.
+
+### The admission chain
+
+`examples/ch15-writing-transactions-and-worlds/04-admission_pools.metta` is
+the MeTTa specification of `space-admission-verdict`. Its
+`metta-admission-within` tested only the first capacity row, while the builtin
+refuses at the first row the count reaches. The chain now walks its limits the
+way `metta-admission-typed` walks its types. A new section adds a row of 5 and
+then a row of 2 to a pool holding two tickets, and holds the two judges to
+`(Refuse (pool-at-capacity 2))`. Under the first-limit chain that section fails
+with `missing ((Accept))`, `excess ((Refuse (pool-at-capacity 2)))`. The Python
+twin carries the same section.
