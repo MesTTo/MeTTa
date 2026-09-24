@@ -54,6 +54,13 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Changed
 
+- A whole reference publication reads each head's roots from one pass over
+  its sorted face, `group_pairs_by_key/2`, and releases the heads it bound
+  before and no longer holds by ordered difference. Each head used to ask the
+  whole face for its roots, heads times entries steps and four findall calls
+  a head. The heads publish in the same order with the same roots.
+  The six class twins read 136,028 to 269,728 fewer inferences.
+
 - `tools/wasm-host/Dockerfile` links the WebAssembly host with a 4 GiB memory
   maximum, where emscripten's default stops at 2 GiB. At 2 GiB tsmetta refused
   `examples/ch18-performance/18-01-larger-workloads/02-holbenchmark.metta` at

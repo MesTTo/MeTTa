@@ -75,7 +75,8 @@
 %   traversal bounds cycles, including cycles whose maps change names.
 
 :- use_module(library(varnumbers), [varnumbers/2]).
-:- use_module(library(ordsets), [ord_intersection/3]).
+:- use_module(library(ordsets), [ord_intersection/3, ord_subtract/3]).
+:- use_module(library(pairs), [group_pairs_by_key/2, pairs_keys/2]).
 
 :- dynamic metta_reference_row/4, metta_reference_map/3.
 :- dynamic metta_occurrence_grade/4, metta_reference_projection/4.
@@ -564,13 +565,22 @@ metta_reference_publish_face(Space, Module, Face, Faces) :-
     sort(Supports0, Supports),
     support_graph:support_publish(derived(Module, reference_face), Supports, []),
     metta_reference_stabilize_face(Space, Module, Face),
-    findall(Name/Arity,
-            ( member(Name/Arity-_, Face), integer(Arity)
-            ; metta_reference_slot(Module, Name, Arity) ), Keys0),
-    sort(Keys0, Keys),
-    forall(member(Name/Arity, Keys),
-           ( findall(Root, member(Name/Arity-Root, Face), Roots),
-             %A binding whose roots are the ones already recorded stands: the
+    %The face is sorted, so each head's roots lie together and one pass groups
+    %them; a head bound before and absent now is published with none. Asking
+    %the whole face for each head's roots in turn cost heads times entries.
+    %Time: F + K log K + S log S steps for F entries, K heads and S slots.
+    group_pairs_by_key(Face, Groups),
+    findall(Name/Arity-Roots,
+            ( member(Name/Arity-Roots, Groups), integer(Arity) ), Held),
+    pairs_keys(Held, HeldKeys),
+    findall(Name/Arity, metta_reference_slot(Module, Name, Arity), Slots0),
+    sort(Slots0, Slots),
+    ord_subtract(Slots, HeldKeys, Released),
+    findall(Key-[], member(Key, Released), Emptied),
+    append(Held, Emptied, Keyed0),
+    sort(Keyed0, Keyed),
+    forall(member(Name/Arity-Roots, Keyed),
+           ( %A binding whose roots are the ones already recorded stands: the
              %wrapper is the same wrapper, and rebinding it announced the head
              %as changed, which abolished every declared table and forgot every
              %specialization in the process on a refresh that changed nothing.
