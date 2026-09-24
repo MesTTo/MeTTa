@@ -189,6 +189,20 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- The `parity-perf` gate lane compares the two engines in a battery. It looked
+  for the upstream checkout only as `PeTTa-upstream` beside the tree it ran
+  in, and a battery, which `tools/battery.sh` makes under the provisioning
+  tree's `ai-tmp/`, has none there, so every battery run reported the lane
+  `skipped` having compared nothing. It now also looks beside the
+  repository's main checkout, which `git rev-parse --git-common-dir` names
+  from any worktree or battery, and the Jupyter kernel lane reads the same
+  checkout. `METTA_UPSTREAM` still names one outright. Where no checkout is
+  found the lane fails, exit 1, naming every place it looked, where off CI it
+  used to print a skip; `METTA_UPSTREAM_OPTIONAL=1` asks for that skip
+  explicitly and has no effect where `CI=true`. The `parity-fuzz` report lane
+  follows the same rule. `docs/journal/2026-09-24-a-skip-is-a-verdict-about-nothing.md`
+  records why the lane derives the path rather than having batteries link it.
+
 - A function defined at two arities keeps both when one of its equations is
   eta-expanded. With `(= (pj (keep $x)) (Accept))` and then
   `(= (pj (skip $x)) (drop2))`, where `drop2` takes two inputs, `(pj (keep 1))`

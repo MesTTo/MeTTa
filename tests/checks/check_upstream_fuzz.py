@@ -43,8 +43,9 @@ draw rather than on the change. A finding is a Markdown file carrying the
 divergence issue template's own fields, ready to be filed.
 
 Assumes:
-  - a checkout with the sibling upstream at tests/checks/check_upstream_parity's
-    UPSTREAM, which is where its CI-refuses, local-skips rule comes from too.
+  - an upstream checkout at tests/checks/check_upstream_parity's UPSTREAM,
+    which is where its rule for an absent one comes from too: a refusal,
+    unless METTA_UPSTREAM_OPTIONAL=1 asks for a skip outside CI.
   - tests/conformance/petta/HEADS.json was taken from that same commit; when it
     was not, the run says so, because the surface it draws from is that
     commit's.

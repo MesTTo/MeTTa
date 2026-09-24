@@ -50,9 +50,10 @@ Assumes:
     exists; each missing piece is named and skipped, and under
     CI the workflow provides them and this refuses instead
 Guarantees:
-  - METTA_UPSTREAM selects the reference checkout; when unset, the sibling
-    PeTTa-upstream remains the default [tested:
-    check_upstream_parity_selftest.upstream_selection_failures; commit=8ca8a387fc61d0918484b19a1a3baf85b6523043]
+  - the upstream checkout is check_upstream_parity.py's UPSTREAM, so both
+    lanes read the one METTA_UPSTREAM names or, when it is unset, the one found
+    beside the tree or beside the repository's main checkout [tested:
+    check_upstream_parity_selftest.upstream_selection_failures; commit=WORKTREE]
   - the kernel is installed at a pinned commit and started, rather than read
     [tested: tests/checks/check_jupyter_kernel.py; commit=7ba114f280ec3b132658cacb562064d0bac23f41]
   - the fork's launcher runs an upstream `src/main.pl` tree, which is the
@@ -76,8 +77,12 @@ import subprocess
 import sys
 from pathlib import Path
 
+import check_upstream_parity as parity  # the lane beside this file
+
 ROOT = Path(__file__).resolve().parents[2]
-UPSTREAM = Path(os.environ.get("METTA_UPSTREAM", ROOT.parent / "PeTTa-upstream"))
+# One derivation of where upstream is, the parity lane's: a copy of its default
+# here missed the checkout from every battery the way the lane itself did.
+UPSTREAM = parity.UPSTREAM
 PYDIR = ROOT / "extensions" / "python"
 
 #: The kernel, at the commit this was measured against. A moving branch would

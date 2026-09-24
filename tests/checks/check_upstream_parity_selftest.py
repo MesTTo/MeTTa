@@ -46,9 +46,15 @@ Guarantees:
     range still fails, and a null spread beyond its measured resolution is
     explicitly unmeasurable without hiding inference drift [tested:
     check_upstream_parity_selftest.null_range_failures; commit=8ca8a387fc61d0918484b19a1a3baf85b6523043]
-  - both upstream lanes prefer METTA_UPSTREAM to the sibling checkout, including
-    a configured path that is absent [tested: check_upstream_parity_selftest.upstream_selection_failures;
-    commit=8ca8a387fc61d0918484b19a1a3baf85b6523043]
+  - both upstream lanes prefer METTA_UPSTREAM to any sibling checkout, including
+    a configured path that is absent, and read the same derived checkout when it
+    is unset [tested: check_upstream_parity_selftest.upstream_selection_failures;
+    commit=WORKTREE]
+  - a worktree nested inside the main checkout, the shape of every battery,
+    finds the upstream beside the main checkout, a checkout beside the tree
+    itself wins over it, and METTA_UPSTREAM wins over both, each on a planted
+    repository [tested: check_upstream_parity_selftest.upstream_derivation_failures;
+    commit=WORKTREE]
   - a planted engine whose fixed cost exceeds its program run is reported as
     ``negative-net`` by ``measure`` and turns ``verdicts`` red, while the rule
     this file replaced records the same numbers and stays green
@@ -70,12 +76,15 @@ Guarantees:
     on; a cold first touch is discarded rather than counted; and a program
     with no mode at all is reported as having no cost
     [tested: this file is its own gate; commit=2b61fa1947e4de5b02dd8d819ba0e16ec3a07276]
-  - an absent upstream checkout refuses where ``CI=true`` and reports a SKIP
-    elsewhere, exit 125, which the gate names under MEASURED NOTHING rather
-    than reporting as a pass; the skip names the pin, the sibling checkout is
-    AT that pin, and a kernel or container that denies the counter is named
-    with the two knobs that decide it [tested: this file is its own gate;
-    commit=fc990fa3042ee05d931d3928694e89021be32855]
+  - an absent upstream checkout refuses, exit 1, in CI and off it, naming the
+    pin, where it looked and the opt-out; METTA_UPSTREAM_OPTIONAL=1 turns that
+    into a SKIP, exit 125, which the gate names under MEASURED NOTHING rather
+    than reporting as a pass, and has no effect where ``CI=true`` [tested:
+    check_upstream_parity_selftest.upstream_prerequisite_failures;
+    commit=WORKTREE]
+  - the sibling checkout is AT the pin, and a kernel or container that denies
+    the counter is named with the two knobs that decide it [tested: this file
+    is its own gate; commit=fc990fa3042ee05d931d3928694e89021be32855]
 Owns resources: artifact_fixture_failures restores the bytes and timestamps of
   the checkout's original generated artifacts and stamp, including on failure,
   each by a staged sibling renamed over it, so a concurrent reader never loads
@@ -96,6 +105,7 @@ import io
 import json
 import os
 import re
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -630,6 +640,12 @@ def upstream_selection_failures() -> list[str]:
     """Both lanes honor the configured checkout before testing its presence."""
     failures: list[str] = []
     configured = lane.REPO / "ai-tmp" / "ai upstream selection fixture"
+    saved = os.environ.pop("METTA_UPSTREAM", None)
+    try:
+        derived = lane.located(lane.upstream_candidates(lane.REPO))
+    finally:
+        if saved is not None:
+            os.environ["METTA_UPSTREAM"] = saved
     code = (
         "import runpy, sys; from pathlib import Path; "
         "sys.path.insert(0, str(Path(sys.argv[1]).parent)); "
@@ -645,7 +661,7 @@ def upstream_selection_failures() -> list[str]:
                 [sys.executable, "-c", code, str(HERE / script)],
                 capture_output=True, text=True, env=environment, check=False,
             )
-            expected = configured if value is not None else lane.REPO.parent / "PeTTa-upstream"
+            expected = configured if value is not None else derived
             if result.returncode or Path(result.stdout.strip()).resolve() != expected.resolve():
                 failures.append(
                     f"{script} with METTA_UPSTREAM={value!r}: expected {expected}, "
@@ -654,8 +670,68 @@ def upstream_selection_failures() -> list[str]:
     return failures
 
 
+def upstream_derivation_failures() -> list[str]:
+    """A tree nested inside the main checkout finds the upstream beside the main one.
+
+    The shape of every battery and every worktree: a linked worktree whose own
+    parent holds no PeTTa-upstream, where the main checkout's parent does.
+    Planted in a scratch repository, so the answer is the lane's rule and not
+    whatever checkout the machine running this happens to hold. A checkout
+    beside the tree itself still wins, and METTA_UPSTREAM wins over both even
+    when it names nothing.
+    """
+    failures: list[str] = []
+    base = lane.REPO / "ai-tmp" / "ai upstream derivation fixture"
+    main = base / "main"
+    nested = main / "ai-tmp" / "wt" / "ai-tmp" / "battery"
+    beside_main = base / lane.UPSTREAM_SIBLING
+    beside_tree = nested.parent / lane.UPSTREAM_SIBLING
+    named = base / "named and absent"
+    saved = os.environ.pop("METTA_UPSTREAM", None)
+
+    def git(*arguments: str) -> None:
+        subprocess.run(["git", "-C", str(main), *arguments],
+                       capture_output=True, text=True, check=True)
+
+    try:
+        shutil.rmtree(base, ignore_errors=True)
+        main.mkdir(parents=True)
+        git("init", "-q")
+        git("-c", "user.name=selftest", "-c", "user.email=selftest@invalid",
+            "commit", "-q", "--allow-empty", "-m", "fixture")
+        git("worktree", "add", "-q", "--detach", str(nested))
+        (beside_main / "engine").mkdir(parents=True)
+        (beside_main / "engine" / "metta.pl").write_text("% planted\n", encoding="utf-8")
+        found = lane.located(lane.upstream_candidates(nested))
+        if found.resolve() != beside_main.resolve():
+            failures.append(
+                f"a worktree nested in the main checkout found {found}, not the "
+                f"checkout beside the main one, {beside_main}"
+            )
+        (beside_tree / "src").mkdir(parents=True)
+        (beside_tree / "src" / "metta.pl").write_text("% planted\n", encoding="utf-8")
+        found = lane.located(lane.upstream_candidates(nested))
+        if found.resolve() != beside_tree.resolve():
+            failures.append(f"the checkout beside the tree itself lost to {found}")
+        os.environ["METTA_UPSTREAM"] = str(named)
+        found = lane.located(lane.upstream_candidates(nested))
+        if found != named:
+            failures.append(f"METTA_UPSTREAM naming an absent checkout lost to {found}")
+    except (OSError, subprocess.CalledProcessError) as error:
+        failures.append(f"the derivation fixture could not be built: {error}")
+    finally:
+        os.environ.pop("METTA_UPSTREAM", None)
+        if saved is not None:
+            os.environ["METTA_UPSTREAM"] = saved
+        shutil.rmtree(base, ignore_errors=True)
+    return failures
+
+
 def upstream_prerequisite_failures() -> list[str]:
-    """The lane must not be able to pass in CI without measuring.
+    """The lane must not be able to pass without measuring, in CI or anywhere else.
+
+    The one way past an absent checkout is METTA_UPSTREAM_OPTIONAL=1, the
+    operator's explicit opt-out, which skips with 125 and does not reach CI.
 
     Until 2026-09-06 an absent upstream checkout returned 0 everywhere, and the
     workflow never provided one, so the lane ran on every push and measured
@@ -665,33 +741,63 @@ def upstream_prerequisite_failures() -> list[str]:
     """
     failures: list[str] = []
     original_upstream, original_ci = lane.UPSTREAM, os.environ.get("CI")
+    original_optional = os.environ.pop("METTA_UPSTREAM_OPTIONAL", None)
     try:
         lane.UPSTREAM = lane.REPO / "ai-tmp" / "no-upstream-checkout-here"
         os.environ["CI"] = "true"
-        if lane.upstream_prerequisite() != 1:
+        with contextlib.redirect_stderr(io.StringIO()):
+            ci_refused = lane.upstream_prerequisite()
+        if ci_refused != 1:
             failures.append(
                 "an absent upstream checkout did not refuse under CI=true, so "
                 "the lane can pass in CI without measuring"
             )
         os.environ.pop("CI")
-        # 125, the gate's word for a run that says nothing about the tree, not
-        # 0. Off CI a developer who has not cloned upstream should get a
-        # printed skip, and until 2026-09-20 that skip was spelled 0, so the
-        # summary read `GATE parity-perf ok` under the note saying nothing had
-        # been compared. A skip still neither passes nor fails the run.
-        if lane.upstream_prerequisite() != 125:
+        # Off CI too: until 2026-09-24 an absent checkout printed a skip, 125,
+        # there, and no battery found the checkout, so every battery run
+        # carried the lane as `skipped`, a verdict about nothing.
+        refusal = io.StringIO()
+        with contextlib.redirect_stderr(refusal):
+            refused = lane.upstream_prerequisite()
+        if refused != 1:
             failures.append(
-                "an absent upstream checkout did not report a SKIP off CI, so "
-                "the lane reads as having compared something it never saw"
+                f"an absent upstream checkout answered {refused} off CI instead "
+                "of refusing, so a run that measured nothing can pass the gate"
             )
-        #and the skip has to name the pin, or the reader cannot act on it.
-        buffer = io.StringIO()
-        with contextlib.redirect_stdout(buffer):
-            lane.upstream_prerequisite()
-        if lane.UPSTREAM_COMMIT[:7] not in buffer.getvalue():
-            failures.append("the local skip does not name the pinned commit")
+        # and the refusal has to say how to supply one and how to opt out, or
+        # the reader cannot act on it.
+        failures.extend(
+            f"the refusal does not name {needed!r}"
+            for needed in (lane.UPSTREAM_COMMIT, "METTA_UPSTREAM_OPTIONAL=1",
+                           str(lane.UPSTREAM))
+            if needed not in refusal.getvalue()
+        )
+        # The explicit opt-out is the one way to skip: 125, which check.sh
+        # reports as `skipped` under MEASURED NOTHING rather than as a pass.
+        os.environ["METTA_UPSTREAM_OPTIONAL"] = "1"
+        skip = io.StringIO()
+        with contextlib.redirect_stdout(skip):
+            skipped = lane.upstream_prerequisite()
+        if skipped != 125:
+            failures.append(
+                f"METTA_UPSTREAM_OPTIONAL=1 with no checkout answered {skipped}, "
+                "not the skip 125"
+            )
+        if lane.UPSTREAM_COMMIT[:7] not in skip.getvalue():
+            failures.append("the opted-out skip does not name the pinned commit")
+        # and CI cannot opt out.
+        os.environ["CI"] = "true"
+        with contextlib.redirect_stderr(io.StringIO()):
+            if lane.upstream_prerequisite() != 1:
+                failures.append(
+                    "METTA_UPSTREAM_OPTIONAL=1 let an absent checkout pass under "
+                    "CI=true"
+                )
     finally:
         lane.UPSTREAM = original_upstream
+        os.environ.pop("METTA_UPSTREAM_OPTIONAL", None)
+        if original_optional is not None:
+            os.environ["METTA_UPSTREAM_OPTIONAL"] = original_optional
         if original_ci is None:
             os.environ.pop("CI", None)
         else:
@@ -1259,6 +1365,7 @@ def main() -> int:
         *timeout_failures(),
         *null_program_failures(example),
         *upstream_selection_failures(),
+        *upstream_derivation_failures(),
         *upstream_prerequisite_failures(),
         *denied_counter_failures(),
         *null_program_refusal_failures(),

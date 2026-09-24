@@ -263,7 +263,13 @@ python tests/checks/check_upstream_parity.py
 
 Set `METTA_UPSTREAM=/path/to/checkout` to use an existing reference tree.
 The performance and Jupyter kernel lanes use that path when the variable is
-set, including their presence and commit checks.
+set, including their presence and commit checks. Without it they look for
+`PeTTa-upstream` beside the tree they run in and then beside the repository's
+main checkout, so a worktree or a battery finds the checkout cloned beside the
+main one. Where neither holds one the performance lanes fail rather than pass
+having compared nothing; `METTA_UPSTREAM_OPTIONAL=1` turns that failure into a
+skip, which `tools/check.sh` reports as `skipped`, and has no effect where
+`CI=true`.
 
 The script measures both engines over the corpus and compares against the
 committed baseline. `--rebaseline` rewrites the baseline from a fresh

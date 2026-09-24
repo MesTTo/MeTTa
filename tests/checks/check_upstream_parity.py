@@ -94,13 +94,18 @@ Guarantees:
     comparison as unmeasurable; the program's inference check still runs.
     Straddles and overruns print both operands and their difference range
     [tested: check_upstream_parity_selftest.null_range_failures; commit=8ca8a387fc61d0918484b19a1a3baf85b6523043]
-  - METTA_UPSTREAM selects the reference checkout; when unset, the sibling
-    PeTTa-upstream remains the default [tested:
-    check_upstream_parity_selftest.upstream_selection_failures; commit=8ca8a387fc61d0918484b19a1a3baf85b6523043]
-  - the lane cannot pass in CI without measuring: an absent upstream checkout
-    is a refusal where CI=true and a printed skip elsewhere, which is the line
-    check.sh's documentation lane already draws
-    [tested: tests/checks/check_upstream_parity_selftest.py; commit=fc990fa3042ee05d931d3928694e89021be32855].
+  - METTA_UPSTREAM selects the reference checkout; when unset, the lane
+    looks for PeTTa-upstream beside the tree and then beside the repository's
+    main checkout, so a worktree at any depth and a battery find the checkout
+    the main one has [tested:
+    check_upstream_parity_selftest.upstream_selection_failures,
+    check_upstream_parity_selftest.upstream_derivation_failures;
+    commit=WORKTREE]
+  - the lane cannot pass without measuring: an absent upstream checkout is a
+    refusal, exit 1, naming every place it looked; METTA_UPSTREAM_OPTIONAL=1
+    turns it into a printed skip, exit 125, except where CI=true
+    [tested: check_upstream_parity_selftest.upstream_prerequisite_failures;
+    commit=WORKTREE].
   - a kernel or container that will not let this count instructions is named
     with the two knobs that decide it, rather than reported as a parse failure
     [tested: tests/checks/check_upstream_parity_selftest.py; commit=fc990fa3042ee05d931d3928694e89021be32855].
@@ -192,7 +197,54 @@ REPO = HERE.parents[1]
 #2026-08-30, an older upstream in a layout that has no engine/metta.pl, so
 #the existence guard below fired and this lane passed without measuring
 #anything.
-UPSTREAM = pathlib.Path(os.environ.get("METTA_UPSTREAM", REPO.parent / "PeTTa-upstream"))
+UPSTREAM_SIBLING = "PeTTa-upstream"
+
+
+def upstream_candidates(root: pathlib.Path) -> list[pathlib.Path]:
+    """Where the upstream checkout is looked for from the tree at `root`, in order.
+
+    METTA_UPSTREAM alone when the operator names one, present or not, because
+    an operator who says where it is outranks anything inferred. Otherwise
+    beside `root`, then beside the repository's MAIN checkout. A worktree's
+    parent is not the main checkout's parent and a battery's is neither: from
+    ai-tmp/wt-merge/ai-tmp/wt-battery-119 the sibling beside the tree is
+    .../wt-merge/ai-tmp/PeTTa-upstream, which nothing provides, so this lane
+    skipped in every battery [measured 2026-09-24: battery-119 run at
+    19:42 printed "upstream checkout not found at
+    .../wt-merge/ai-tmp/PeTTa-upstream" and the summary read `parity-perf
+    skipped`]. `--git-common-dir` names the main .git from every worktree of
+    the repository, and a battery's git is one (tools/battery.sh,
+    battery_git_identity), so the main checkout's sibling is found from all of
+    them with nothing linked; extensions/python/tools/example_origins.py's
+    upstream_root() answers PeTTa-base the same way.
+    """
+    named = os.environ.get("METTA_UPSTREAM")
+    if named:
+        return [pathlib.Path(named)]
+    looked = [root.parent / UPSTREAM_SIBLING]
+    common = subprocess.run(
+        ["git", "rev-parse", "--path-format=absolute", "--git-common-dir"],
+        cwd=root, capture_output=True, text=True, check=False,
+    )
+    if common.returncode == 0 and common.stdout.strip():
+        beside_main = pathlib.Path(common.stdout.strip()).parent.parent / UPSTREAM_SIBLING
+        if beside_main not in looked:
+            looked.append(beside_main)
+    return looked
+
+
+def holds_engine(checkout: pathlib.Path) -> bool:
+    """Whether a checkout holds an engine this lane can measure."""
+    return any((checkout / d / "metta.pl").exists() for d in ("engine", "src"))
+
+
+def located(candidates: list[pathlib.Path]) -> pathlib.Path:
+    """The first candidate holding an engine, else the first one looked at."""
+    return next((c for c in candidates if holds_engine(c)), candidates[0])
+
+
+UPSTREAM_CANDIDATES = upstream_candidates(REPO)
+UPSTREAM = located(UPSTREAM_CANDIDATES)
 #: The upstream this tree is compared against, and the commit every recorded
 #: upstream number was measured from. PERFORMANCE.md names the same pin, the
 #: workflow checks that commit out beside the repository before the gate, and
@@ -1294,8 +1346,8 @@ def verdicts(baseline: dict, *, remeasure: bool) -> int:
 
 
 def upstream_present() -> bool:
-    """Whether the sibling checkout holds an engine this can measure."""
-    return any((UPSTREAM / d / "metta.pl").exists() for d in ("engine", "src"))
+    """Whether the upstream checkout holds an engine this can measure."""
+    return holds_engine(UPSTREAM)
 
 
 def upstream_head() -> str | None:
@@ -1323,38 +1375,40 @@ def upstream_prerequisite(
 ) -> int | None:
     """None when the comparison can run, or the exit status when it cannot.
 
-    `remedy` is the sentence the LOCAL skip ends on, because the two lanes that
-    call this send a reader somewhere different: this one to the page carrying
-    the numbers, and check_upstream_fuzz to its own lane. The POLICY -- refuse
-    where CI=true, print a skip elsewhere -- is one piece of code on purpose,
-    since two copies of it are two things that can drift into disagreeing about
-    when a missing checkout is allowed to pass.
+    `remedy` is the sentence a refusal or skip ends on, because the two lanes
+    that call this send a reader somewhere different: this one to the page
+    carrying the numbers, and check_upstream_fuzz to its own lane. The POLICY
+    is one piece of code on purpose, since two copies of it are two things that
+    can drift into disagreeing about when a missing checkout is allowed to pass.
+
+    An absent checkout REFUSES, exit 1, wherever the lane runs. It used to
+    refuse only where CI=true and print a skip elsewhere, and a skip is a
+    verdict about nothing: every battery run carried this lane as `skipped`
+    until 2026-09-24, because no battery found the checkout (see
+    upstream_candidates). METTA_UPSTREAM_OPTIONAL=1 is the operator saying so
+    explicitly, and turns the refusal into that skip, 125, which check.sh's
+    run() reports as `skipped` under MEASURED NOTHING rather than as a pass.
+    CI=true refuses whatever it says, since an opt-out that reached CI would
+    let the gate pass there having measured nothing.
     """
     if upstream_present():
         return None
-    absence = f"upstream checkout not found at {UPSTREAM}"
-    if os.environ.get("CI") == "true":
-        print(
-            f"error: {absence}; refusing to pass the parity gate without it. "
-            f"The workflow checks {UPSTREAM_REMOTE} out at "
-            f"{UPSTREAM_COMMIT} beside the repository before this lane runs; "
-            "if that step did not, this lane measured nothing.",
-            file=sys.stderr,
-        )
-        return 1
-    # 125, which is what a printed skip is WORTH to the summary: check.sh's
-    # run() reports it as `skipped` and names the lane under MEASURED NOTHING.
-    # Returning 0 printed this note and then reported `GATE parity-perf ok`,
-    # so off CI the lane read exactly like one that had compared everything
-    # [measured 2026-09-20, the whole-gate run in battery 7]. The CI refusal
-    # above is unchanged, and a skip still neither passes nor fails the gate,
-    # so what changes is only that the reader can see it.
-    print(
-        f"note: {absence}; nothing to compare. Check "
-        f"{UPSTREAM_REMOTE} out at {UPSTREAM_COMMIT[:7]} there to run it; "
-        f"{remedy}"
+    looked = UPSTREAM_CANDIDATES if UPSTREAM in UPSTREAM_CANDIDATES else [UPSTREAM]
+    absence = "upstream checkout not found at " + ", ".join(str(p) for p in looked)
+    supply = (
+        f"Check {UPSTREAM_REMOTE} out at {UPSTREAM_COMMIT} beside the "
+        "repository's main checkout, or name one with METTA_UPSTREAM"
     )
-    return 125
+    optional = os.environ.get("METTA_UPSTREAM_OPTIONAL") == "1"
+    if optional and os.environ.get("CI") != "true":
+        print(f"note: {absence}; METTA_UPSTREAM_OPTIONAL=1 skips the comparison. "
+              f"{supply}; {remedy}")
+        return 125
+    why = ("METTA_UPSTREAM_OPTIONAL does not apply where CI=true" if optional
+           else "METTA_UPSTREAM_OPTIONAL=1 skips it outside CI")
+    print(f"error: {absence}; refusing to pass the parity gate without it "
+          f"({why}). {supply}; {remedy}", file=sys.stderr)
+    return 1
 
 
 def parse_arguments(argv: list[str] | None = None) -> argparse.Namespace:

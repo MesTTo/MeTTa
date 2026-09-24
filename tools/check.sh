@@ -830,8 +830,12 @@ run GATE   petta        sh -c "cd '$HERE' && '$PY' tests/conformance/petta.py --
 # .github/workflows/checks.yml never cloned upstream, so the lane ran on every
 # push and measured nothing there while PERFORMANCE.md said it did. The
 # workflow now checks the pinned upstream out and proves the counter is
-# readable before the gate, and the lane refuses where CI=true, the same line
-# check_docs_site draws below.
+# readable before the gate. Off CI the lane printed a skip, and every battery
+# took it, because the lane looked for the checkout only beside the tree it
+# ran in and a battery's parent holds none: `parity-perf skipped` in every
+# battery run until 2026-09-24. It now also looks beside the repository's
+# main checkout, which a battery's git names, and an absent checkout refuses
+# everywhere unless METTA_UPSTREAM_OPTIONAL=1 asks for the skip outside CI.
 # Umbrella: the upstream and assembled local engines share the conformance corpus and counter harness.
 run_solo GATE   parity-perf  sh -c "cd '$HERE' && '$PY' tests/checks/check_upstream_parity.py"
 
