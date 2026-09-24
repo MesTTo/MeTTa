@@ -6,8 +6,13 @@
 #   location through `git rev-parse --show-toplevel`.
 # Guarantees: after `provision`, the battery tree differs from the source in
 #   nothing outside EXCLUDES, and with BATTERY_KEEP set in nothing outside
-#   EXCLUDES and the uncommitted paths it does not name, which hold HEAD's
-#   content; `verify` exits nonzero and names every drifted path otherwise;
+#   EXCLUDES and the paths it does not name that differ from their
+#   repository's base, which hold the base's content. A repository's base is
+#   its HEAD, except that under BATTERY_KEEP a component no kept path equals,
+#   contains or sits inside has the commit its parent's base records at its
+#   path, and the git of every repository in the battery answers its base
+#   [tested: tools/battery_selftest.sh; commit=WORKTREE]; `verify` exits
+#   nonzero and names every drifted path otherwise;
 #   `run` refuses to start unless `verify` passes, so no command reports a
 #   verdict about an unknown tree, and runs its command with git's search for
 #   a repository stopped at the battery's parent, so no git command in it
@@ -37,9 +42,9 @@
 #   against an engine from another and reported 169 failures against a
 #   4-failure baseline, every one of them an artifact of the mismatch].
 #   A battery's git is the identity battery_git_identity gives it: a linked
-#   worktree of the source's repository, and of each component's, at the
-#   source's HEAD, over the snapshot's files, so git run in a battery answers
-#   about the battery. `run` refuses a battery of a repository that does not,
+#   worktree of the source's repository, and of each component's, at that
+#   repository's base (battery_bases), over the snapshot's files, so git run
+#   in a battery answers about the battery. `run` refuses a battery of a repository that does not,
 #   and stops git's search for a repository at the battery's parent, so a
 #   battery that lost its identity answers nothing instead of handing its
 #   command the enclosing checkout. ai-tmp/battery.provenance names what the
@@ -193,9 +198,11 @@ live under this repository, whatever the source is.
 
 BATTERY_KEEP='<path> ...' restricts the battery to the committed tree plus the
 uncommitted state of those paths, relative to the repository root and allowed
-to reach into a component; every other uncommitted change is put back to HEAD
-in the battery. BATTERY_KEEP= (set to nothing) gives the committed tree alone.
-Pass the same value to verify.
+to reach into a component. A component a kept path equals, contains or sits
+inside is carried at its own HEAD; every other one holds the commit its
+parent's tree pins, so its unpinned commits stay out. Every other uncommitted
+change is put back. BATTERY_KEEP= (set to nothing) gives the committed tree
+alone. Pass the same value to verify.
 
 Makes ai-tmp/wt-battery-<index> a byte-identical snapshot of this working tree
 and runs a gate inside it. 'run' provisions, verifies, then executes, keeping
@@ -382,12 +389,20 @@ battery_git_identity() {
         rm -rf -- "${identity_tree:?}/.git"
         return 0
     }
+    # The commit the identity names: the base battery_bases gives the
+    # repository as $3, or the source's own HEAD. A base the repository does not
+    # hold is a pin nobody fetched, and the refusal names both ways out.
+    identity_want=${3:-$(git -C "$identity_source" rev-parse HEAD)}
+    git -C "$identity_source" cat-file -e "$identity_want^{commit}" 2>/dev/null || {
+        echo "battery: $identity_source does not hold $identity_want, the commit" \
+             "its parent pins; fetch it there, or name the component in BATTERY_KEEP" >&2
+        exit 1
+    }
     identity_common=$(git -C "$identity_source" rev-parse --path-format=absolute \
                           --git-common-dir)
     (
         flock 8
         if [ -e "$identity_tree/.git" ]; then
-            identity_want=$(git -C "$identity_source" rev-parse HEAD 2>/dev/null || echo want)
             identity_have=$(git -C "$identity_tree" rev-parse HEAD 2>/dev/null || echo have)
             [ "$identity_want" = "$identity_have" ] && exit 0
             rm -rf "$identity_tree/.git"
@@ -395,9 +410,10 @@ battery_git_identity() {
         fi
         identity_seed="$identity_tree.gitseed"
         rm -rf "$identity_seed"
-        git -C "$identity_source" worktree add --detach "$identity_seed" HEAD \
+        git -C "$identity_source" worktree add --detach "$identity_seed" "$identity_want" \
             >/dev/null 2>&1 || {
-            echo "battery: cannot give $identity_tree a git identity from $identity_source" >&2
+            echo "battery: cannot give $identity_tree a git identity at $identity_want" \
+                 "from $identity_source" >&2
             exit 1
         }
         mv "$identity_seed/.git" "$identity_tree/.git"
@@ -471,7 +487,12 @@ battery_link_installs() {
         install_target=$install_tree/${install_dir#./}
         [ -d "$install_source" ] || continue
         [ -e "$install_target" ] && continue
-        mkdir -p "$(dirname "$install_target")"
+        # Only into a directory the battery holds. One it lacks is excluded
+        # scratch, where three of wt-merge's five installs sit
+        # (ai-tmp/wasm-libs/seat among them), or a component battery_restrict
+        # dropped because the committed tree has none, and a link would
+        # recreate that component for verify to refuse [measured 2026-09-24].
+        [ -d "$(dirname "$install_target")" ] || continue
         ln -s "$install_source" "$install_target" 2>/dev/null || true
     done
 }
@@ -539,17 +560,17 @@ battery_link_sibling_sources() {
 # tries change sat on disk moved by that change, not by the one being measured
 # [the record, 2026-09-24: batteries 1, 2 and 3, provisioned between 10:10 and
 # 10:55]. Unset, the battery is the whole working tree, as it always was. Set,
-# even to nothing, every uncommitted change git reports in the tree and its
-# components is put back to HEAD in the battery, unless its path equals or sits
-# under one of BATTERY_KEEP's space-separated paths, which are relative to the
-# repository root and may reach into a component. Set to nothing, that is the
-# committed tree alone. The pre-commit framework's staged_files_only asks the
-# same question, whether a check sees only the change it is about, and answers
-# it by stashing everything else in the one working tree; that tree here is
-# shared by sessions still editing it, so this answers it in the copy instead.
-# Ignored files are not uncommitted state and are carried as the snapshot
-# carries them, since build output and installs are the environment a gate
-# reads. A component is carried at its own HEAD, as the snapshot carries it.
+# even to nothing, every path of the tree and its components that differs from
+# its repository's base (battery_bases) is put back to the base in the battery,
+# unless it equals or sits under one of BATTERY_KEEP's space-separated paths,
+# which are relative to the repository root and may reach into a component. Set
+# to nothing, that is the committed tree alone. The pre-commit framework's
+# staged_files_only asks the same question, whether a check sees only the
+# change it is about, and answers it by stashing everything else in the one
+# working tree; that tree here is shared by sessions still editing it, so this
+# answers it in the copy instead. Ignored files are not uncommitted state and
+# are carried as the snapshot carries them, since build output and installs
+# are the environment a gate reads.
 battery_is_kept() {
     for kept_path in $BATTERY_KEEP; do
         kept_path=${kept_path#./}
@@ -559,30 +580,95 @@ battery_is_kept() {
     return 1
 }
 
-# The source's uncommitted state outside BATTERY_KEEP, one line per path:
-# `R <repository> <path>` where HEAD holds the path, so the battery takes HEAD's
-# copy back, modified and deleted files alike, and `X <repository> <path>` where
-# HEAD does not, an untracked file git does not ignore or one added to the index
-# and never committed, so the battery drops it. <repository> is `.` or the
-# component the path belongs to, and <path> is relative to it. A component is
-# listed by its own pass, so the superproject's pass leaves every path under a
-# component out. Read from the SOURCE, whose index git keeps current, rather
-# than from the battery, where the copy has moved every file's mtime and a
-# status would hash the whole tree again. Paths are taken to hold no newline or
-# tab, as battery_component_paths already takes them to hold no space.
+# Whether BATTERY_KEEP carries a component at its own HEAD: a kept path equals
+# it, contains it or sits inside it. A kept edit inside a component was made on
+# top of that HEAD, so holding the component anywhere else would mix two bases.
+battery_component_carried() {
+    battery_is_kept "$1" && return 0
+    for carried_path in $BATTERY_KEEP; do
+        carried_path=${carried_path#./}
+        carried_path=${carried_path%/}
+        case $carried_path in "$1"/*) return 0 ;; esac
+    done
+    return 1
+}
+
+# Each repository's BASE, the commit its battery holds and its git answers, one
+# `<repository> <commit>` line each: the superproject `.` first and every
+# component after its parent, leaving out a component the source has not
+# initialised, which the snapshot cannot hold either. The base is the source's
+# HEAD, except that under BATTERY_KEEP a component battery_component_carried
+# does not carry takes the gitlink its parent's base records at its path, and is
+# listed with no commit when that base records none, since the committed tree
+# then has no such component. That is the committed tree the way `git submodule
+# update --recursive` checks it out, every gitlink read from the parent's
+# checked-out commit, except that the superproject's is its HEAD rather than its
+# index. It was each component's own HEAD until the evidence lane, run on the
+# committed tree, read extensions/node at its unpinned e0874c3 where the
+# superproject pins 2ea06e2e, and failed a Node test title e0874c3 had renamed
+# [the record, i-keep-component-head, at superproject 59c432756].
+battery_bases() {
+    battery_repository_root "$ROOT" || return 0
+    bases_head=$(git -C "$ROOT" rev-parse HEAD)
+    echo ". $bases_head"
+    battery_bases_under "$ROOT" "" "$bases_head"
+}
+
+# $1 is a source repository, $2 its path under ROOT with a trailing slash, and
+# $3 its base. Every name is prefixed, as in battery_git_identity: sh has no
+# locals, and the recursion runs inside the caller's loop.
+battery_bases_under() {
+    [ -f "$1/.gitmodules" ] || return 0
+    git -C "$1" config --file "$1/.gitmodules" \
+        --get-regexp '^submodule\..*\.path$' 2>/dev/null |
+        while read -r _ bases_relative; do
+            bases_path=$2$bases_relative
+            [ -e "$ROOT/$bases_path/.git" ] || continue
+            if [ "${BATTERY_KEEP+set}" != set ] || battery_component_carried "$bases_path"; then
+                bases_commit=$(git -C "$ROOT/$bases_path" rev-parse HEAD)
+            elif [ -n "$3" ]; then
+                bases_commit=$(git -C "$1" ls-tree "$3" -- "$bases_relative" |
+                    while read -r bases_mode _ bases_object _; do
+                        if [ "$bases_mode" = 160000 ]; then echo "$bases_object"; fi
+                    done)
+            else
+                bases_commit=
+            fi
+            echo "$bases_path $bases_commit"
+            battery_bases_under "$ROOT/$bases_path" "$bases_path/" "$bases_commit"
+        done
+}
+
+# The source's state outside BATTERY_KEEP that differs from its repository's
+# base, one line per path: `R <repository> <path>` where the base holds the
+# path, so the battery takes the base's copy back, modified and deleted files
+# alike, and `X <repository> <path>` where it does not, an untracked file git
+# does not ignore or one the base lacks, so the battery drops it. <repository>
+# is `.` or the component the path belongs to, and <path> is relative to it. A
+# component its parent's base does not record is one `X . <component>` line,
+# dropped whole. A component is listed by its own pass, so the superproject's
+# pass leaves every path under a component out. Read from the SOURCE, whose
+# index git keeps current, rather than from the battery, where the copy has
+# moved every file's mtime and a status would hash the whole tree again. Paths
+# are taken to hold no newline or tab, as battery_component_paths already
+# takes them to hold no space.
 battery_uncommitted() {
     uncommitted_root=$1
     uncommitted_components=$(battery_component_paths)
     uncommitted_tab=$(printf '\t')
-    for uncommitted_repository in . $uncommitted_components; do
-        [ -e "$uncommitted_root/$uncommitted_repository/.git" ] || continue
+    battery_bases | while read -r uncommitted_repository uncommitted_base; do
+        if [ -z "$uncommitted_base" ]; then
+            echo "X . $uncommitted_repository"
+            continue
+        fi
         case $uncommitted_repository in
             .) uncommitted_prefix= ;;
             *) uncommitted_prefix=$uncommitted_repository/ ;;
         esac
         {
             git -C "$uncommitted_root/$uncommitted_repository" -c core.quotePath=false \
-                diff --name-status --no-renames --ignore-submodules=all HEAD -- |
+                diff --name-status --no-renames --ignore-submodules=all \
+                "$uncommitted_base" -- |
                 while IFS=$uncommitted_tab read -r uncommitted_status uncommitted_name; do
                     case $uncommitted_status in
                         A) printf 'X %s\n' "$uncommitted_name" ;;
@@ -610,14 +696,15 @@ battery_uncommitted() {
     done
 }
 
-# Puts every uncommitted path outside BATTERY_KEEP back to HEAD in the battery,
-# through the battery's OWN git, so neither the source's index nor its working
-# tree is touched. The paths it put back are listed in ai-tmp/battery.restricted.
+# Puts every path outside BATTERY_KEEP that differs from its repository's base
+# back to the base in the battery, through the battery's OWN git, whose HEAD is
+# that base, so neither the source's index nor its working tree is touched. The
+# paths it put back are listed in ai-tmp/battery.restricted.
 battery_restrict() {
     restrict_tree=$1
     [ "${BATTERY_KEEP+set}" = set ] || return 0
-    for restrict_repository in . $(battery_component_paths); do
-        [ -e "$ROOT/$restrict_repository/.git" ] || continue
+    battery_bases | while read -r restrict_repository restrict_base; do
+        [ -n "$restrict_base" ] || continue
         # Without the battery's own git a component's paths cannot be put back,
         # and verify's check of them would read the enclosing checkout instead.
         [ -e "$restrict_tree/$restrict_repository/.git" ] || {
@@ -639,19 +726,20 @@ battery_restrict() {
     done < "$restrict_tree/ai-tmp/battery.restricted"
 }
 
-# Whether the battery holds HEAD at every path battery_uncommitted lists for the
-# source now: HEAD's copy where HEAD has one, nothing where it has none. Names
-# each path that does not, one per line.
+# Whether the battery holds the base at every path battery_uncommitted lists
+# for the source now: the base's copy where the base has one, nothing where it
+# has none. Names each path that does not, one per line. verify has already
+# checked that each repository's git answers its base, so HEAD here is it.
 battery_restricted_drift() {
     battery_uncommitted "$ROOT" | while read -r drift_kind drift_repository drift_path; do
         case $drift_kind in
             R) GIT_CEILING_DIRECTORIES=$(dirname "$1") \
                git -C "$1/$drift_repository" --literal-pathspecs \
                    diff --quiet HEAD -- "$drift_path" 2>/dev/null ||
-                   echo "$drift_repository/$drift_path differs from HEAD" ;;
+                   echo "$drift_repository/$drift_path differs from its base" ;;
             X) if [ -e "$1/$drift_repository/$drift_path" ] ||
                   [ -L "$1/$drift_repository/$drift_path" ]; then
-                   echo "$drift_repository/$drift_path is not in HEAD and is present"
+                   echo "$drift_repository/$drift_path is not in its base and is present"
                fi ;;
         esac
     done
@@ -689,9 +777,17 @@ provision() {
         printf '%s\n' "$provision_report" >&2
     fi
     # AFTER the snapshot, because the component directories have to exist and
-    # the snapshot is what creates them on a first provision.
+    # the snapshot is what creates them on a first provision. Each identity
+    # names the component's base. One battery_bases lists with no base gets
+    # none, since battery_restrict drops it whole; one it does not list is not
+    # a repository in the source, and battery_git_identity drops whatever
+    # identity an earlier provision left in its copy.
+    provision_bases=$(battery_bases)
     for component in $(battery_component_paths); do
-        battery_git_identity "$ROOT/$component" "$tree/$component"
+        provision_base=$(printf '%s\n' "$provision_bases" |
+                         awk -v path="$component" '$1 == path { print ($2 == "" ? "none" : $2) }')
+        [ "$provision_base" = none ] && continue
+        battery_git_identity "$ROOT/$component" "$tree/$component" "$provision_base"
     done
     battery_restrict "$tree"
     battery_link_installs "$tree"
@@ -703,30 +799,49 @@ provision() {
         echo "taken:    $(date -Is)"
         if [ "${BATTERY_KEEP+set}" = set ]; then
             echo "kept:     ${BATTERY_KEEP:-(nothing)}"
-            echo "note:     the COMMITTED tree and its components' HEADs, plus the"
-            echo "          uncommitted state of the kept paths; the"
-            echo "          $(wc -l < "$tree/ai-tmp/battery.restricted") other uncommitted paths"
-            echo "          were put back to HEAD, listed in ai-tmp/battery.restricted."
+            echo "note:     the COMMITTED tree, each component at the base below, plus"
+            echo "          the uncommitted state of the kept paths; the"
+            echo "          $(wc -l < "$tree/ai-tmp/battery.restricted") other paths that differed from their base"
+            echo "          were put back to it, listed in ai-tmp/battery.restricted."
         else
             echo "note:     a snapshot of the WORKING tree, uncommitted state included."
         fi
-        echo "          git run here answers about this battery's own worktree"
-        echo "          identity at the revision above."
+        printf '%s\n' "$provision_bases" | while read -r provision_repository provision_base; do
+            [ -n "$provision_repository" ] || continue
+            echo "base:     $provision_repository ${provision_base:-(none, so dropped)}"
+        done
+        echo "          git run in each repository here answers its base above."
     } > "$tree/ai-tmp/battery.provenance"
 }
 
 verify() {
     tree=$(tree_for "$1")
     [ -d "$tree" ] || { echo "battery $1 does not exist; provision it first" >&2; exit 1; }
-    # Restricted, the source's uncommitted paths outside the kept ones are held
-    # to HEAD rather than compared with the source, which the battery is meant
-    # to differ from there.
     verify_index=$1
+    # Every repository's git has to answer its base, restricted or not. Files
+    # that match while git names another commit give every lane reading the
+    # tracked set a different tree, the way battery 1 held 01287442c's files
+    # under a git answering cf282de8f [2026-09-22, battery_git_identity above].
+    stray=$(battery_bases | while read -r verify_repository verify_base; do
+                [ -n "$verify_base" ] || continue
+                verify_have=$(GIT_CEILING_DIRECTORIES=$(dirname "$tree") \
+                              git -C "$tree/$verify_repository" rev-parse HEAD 2>/dev/null || true)
+                [ "$verify_have" = "$verify_base" ] ||
+                    echo "$verify_repository answers ${verify_have:-no commit}, not its base $verify_base"
+            done)
+    if [ -n "$stray" ]; then
+        echo "battery $verify_index does not answer git at each repository's base:" >&2
+        echo "$stray" >&2
+        exit 1
+    fi
+    # Restricted, the source's paths outside the kept ones that differ from
+    # their base are held to it rather than compared with the source, which the
+    # battery is meant to differ from there.
     set --
     if [ "${BATTERY_KEEP+set}" = set ]; then
         stray=$(battery_restricted_drift "$tree")
         if [ -n "$stray" ]; then
-            echo "battery $verify_index does not hold HEAD outside BATTERY_KEEP:" >&2
+            echo "battery $verify_index does not hold each repository's base outside BATTERY_KEEP:" >&2
             echo "$stray" >&2
             exit 1
         fi

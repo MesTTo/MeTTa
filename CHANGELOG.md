@@ -178,6 +178,18 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- A battery restricted by `BATTERY_KEEP` holds the committed tree again when a
+  component's own HEAD is ahead of the commit its parent pins. Every component
+  was carried at its own HEAD, so `BATTERY_KEEP=''` read another session's
+  unpinned commits: the evidence lane failed a Node test title that the
+  unpinned `extensions/node` commits had renamed and the pinned one still
+  carries. Each repository in a battery now has a base, the commit its git
+  answers: a component no kept path equals, contains or sits inside takes the
+  gitlink its parent's base records, nested components included, and one that
+  base does not record is dropped. To test a component's unpinned commits, name
+  the component in `BATTERY_KEEP`. `verify` refuses a repository whose git has
+  left its base, restricted or not, `battery.provenance` lists every base, and
+  an install link no longer recreates a directory the battery lacks.
 - engine-bench's boot case reads its pin again. The registration service,
   90be572a9, moved it from 314,099 to 314,278 inferences unrecorded; read at
   the canonical checkout shape on every first-parent tree from d781eab8f on,

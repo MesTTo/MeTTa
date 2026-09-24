@@ -7,8 +7,12 @@
 #   about ITSELF rather than about the checkout it sits inside, and that git
 #   run in one never reaches that checkout; prove a battery re-provisioned
 #   from another source reads that source's installs; prove BATTERY_KEEP
-#   carries the kept paths and holds HEAD at every other uncommitted one, in
-#   the tree and in a component; and prove a run naming no index takes the
+#   carries the kept paths and holds every other path at its repository's
+#   base, in the tree and in a component, a component ahead of its pin held
+#   at the pin with its own components at what the pin records, one the pin
+#   lacks dropped, and one holding a kept path carried at its own HEAD; prove
+#   verify refuses a repository whose git left its base; and prove a run
+#   naming no index takes the
 #   lowest free one and reuses it, and prune removes only what no run holds
 #   and nothing touched within its window.
 # Assumes: tools/battery.sh sits beside this file; a writable ai-tmp/.
@@ -428,6 +432,104 @@ if BATTERY_KEEP='' BATTERY_SOURCE="$FIXTURE/src" bounded sh "$BATTERY" provision
     holds "an empty BATTERY_KEEP gives a nested component's committed tree" comp/inner/e.txt "inner one"
 else
     echo "  FAIL a provision with an empty BATTERY_KEEP refused:"; cat "$FIXTURE/out"
+    failures=$((failures + 1))
+fi
+
+# A component's own HEAD can be ahead of the commit its parent pins, and the
+# committed tree holds the pin: a committed-tree battery once carried
+# extensions/node at its unpinned e0874c3 where the superproject pins
+# 2ea06e2e, and the evidence lane failed a Node test title e0874c3 had renamed
+# [the record, i-keep-component-head, superproject 59c432756]. Here comp moves
+# to c2, which adds g.txt, records inner at i2 and mounts a new component,
+# extra; inner then moves on to i3, which nothing records. The superproject
+# still pins comp at c1, which records inner at i1 and has no extra.
+c1=$(git -C "$FIXTURE/src/comp" rev-parse HEAD)
+i1=$(git -C "$FIXTURE/src/comp/inner" rev-parse HEAD)
+(   cd "$FIXTURE/src/comp/inner" &&
+    printf 'inner later\n' > f.txt && git add f.txt &&
+    git -c user.name=t -c user.email=t@t commit -qm 'inner later' &&
+    mkdir -p ../extra && cd ../extra && git init -q . &&
+    printf 'extra\n' > x.txt && git add x.txt &&
+    git -c user.name=t -c user.email=t@t commit -qm extra &&
+    cd .. &&
+    printf '[submodule "inner"]\n\tpath = inner\n\turl = ./inner\n' > .gitmodules &&
+    printf '[submodule "extra"]\n\tpath = extra\n\turl = ./extra\n' >> .gitmodules &&
+    printf 'comp later\n' > g.txt &&
+    git add g.txt inner extra .gitmodules &&
+    git -c user.name=t -c user.email=t@t commit -qm 'comp later' &&
+    cd inner && printf 'inner latest\n' > i.txt && git add i.txt &&
+    git -c user.name=t -c user.email=t@t commit -qm 'inner latest' ) > "$FIXTURE/out" 2>&1
+c2=$(git -C "$FIXTURE/src/comp" rev-parse HEAD)
+i2=$(git -C "$FIXTURE/src/comp/inner" rev-parse HEAD~1)
+i3=$(git -C "$FIXTURE/src/comp/inner" rev-parse HEAD)
+extra=$(git -C "$FIXTURE/src/comp/extra" rev-parse HEAD)
+answers() {
+    have=$(git -C "$TREE/$2" rev-parse HEAD 2>/dev/null || true)
+    if [ "$have" = "$3" ]; then echo "  ok   $1"; else
+        echo "  FAIL $1: $2 answers '${have:-nothing}', wanted $3"
+        failures=$((failures + 1))
+    fi
+}
+# Provisions and verifies with the named BATTERY_KEEP, or none when unnamed.
+keeping() {
+    if [ $# -eq 0 ]; then
+        BATTERY_SOURCE="$FIXTURE/src" bounded sh "$BATTERY" provision "$INDEX" \
+            > "$FIXTURE/out" 2>&1 &&
+        BATTERY_SOURCE="$FIXTURE/src" bounded sh "$BATTERY" verify "$INDEX" \
+            >> "$FIXTURE/out" 2>&1
+    else
+        BATTERY_KEEP=$1 BATTERY_SOURCE="$FIXTURE/src" bounded sh "$BATTERY" provision "$INDEX" \
+            > "$FIXTURE/out" 2>&1 &&
+        BATTERY_KEEP=$1 BATTERY_SOURCE="$FIXTURE/src" bounded sh "$BATTERY" verify "$INDEX" \
+            >> "$FIXTURE/out" 2>&1
+    fi
+}
+if keeping ''; then
+    answers "the committed tree holds a component ahead of its pin at the pin" comp "$c1"
+    holds "a file the component added after its pin is absent" comp/g.txt absent
+    holds "the component's uncommitted change is put back to the pin" comp/c.txt "comp one"
+    answers "its own component holds the commit the pin records" comp/inner "$i1"
+    holds "a file that component added after that commit is absent" comp/inner/f.txt absent
+    holds "a component the pin does not record is dropped" comp/extra absent
+    git -C "$TREE/comp" update-ref --no-deref HEAD "$c2"
+    if BATTERY_KEEP='' BATTERY_SOURCE="$FIXTURE/src" bounded sh "$BATTERY" verify "$INDEX" \
+           > "$FIXTURE/out" 2>&1; then
+        echo "  FAIL a component whose git left its pin was accepted"
+        failures=$((failures + 1))
+    elif grep -q "comp answers $c2" "$FIXTURE/out"; then
+        echo "  ok   a component whose git left its pin is refused, naming it"
+    else
+        echo "  FAIL a component whose git left its pin was refused without naming it:"
+        cat "$FIXTURE/out"; failures=$((failures + 1))
+    fi
+else
+    echo "  FAIL a committed-tree battery of a component ahead of its pin:"; cat "$FIXTURE/out"
+    failures=$((failures + 1))
+fi
+if keeping comp/c.txt; then
+    answers "a component holding a kept path is carried at its own HEAD" comp "$c2"
+    holds "so its file added after the pin is present" comp/g.txt "comp later"
+    holds "and the kept path is carried" comp/c.txt "comp ours"
+    answers "its own component holds the commit that HEAD records" comp/inner "$i2"
+    holds "a file added after that commit is absent" comp/inner/i.txt absent
+    answers "a component that HEAD records is held there" comp/extra "$extra"
+else
+    echo "  FAIL a battery keeping a path inside a component ahead of its pin:"; cat "$FIXTURE/out"
+    failures=$((failures + 1))
+fi
+if keeping comp; then
+    answers "a component inside a kept one is carried at its own HEAD" comp/inner "$i3"
+    holds "with its uncommitted change" comp/inner/e.txt "inner theirs"
+    holds "and the kept component's untracked file" comp/new.txt "comp stray"
+else
+    echo "  FAIL a battery keeping a whole component ahead of its pin:"; cat "$FIXTURE/out"
+    failures=$((failures + 1))
+fi
+if keeping; then
+    answers "unrestricted, a component is at its own HEAD" comp "$c2"
+    answers "unrestricted, its own component is at its own HEAD" comp/inner "$i3"
+else
+    echo "  FAIL an unrestricted battery of components ahead of their pins:"; cat "$FIXTURE/out"
     failures=$((failures + 1))
 fi
 
