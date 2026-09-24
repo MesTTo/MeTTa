@@ -137,6 +137,15 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- The C seat names the engine's closed value sets through a generated
+  `extensions/cmetta/vocabularies.h`: one enum tag per `(vocabulary ...)` row
+  in `&metta` with members `MT_<VOCABULARY>_<WORD>`, a name table per enum,
+  `mt_<v>_of(word, &member)`, which answers false without writing, and a
+  `mt_vocabularies[]` registry. It comes from the same generator,
+  `extensions/python/tools/vocabgen.py`, that writes PyMeTTa's
+  `metta.vocabularies` and the Node seat's `src/vocabularies.ts`, so the three
+  seats read the rows once, and the vocab-sync lane holds the header to what
+  the generator writes.
 - The twins, benchmarks and engine-bench lanes read their pins again. Every
   commit since the pins had moved them unrecorded: 77 point twins,
   source-load, register-op and the two save-load rows, and engine-bench's
