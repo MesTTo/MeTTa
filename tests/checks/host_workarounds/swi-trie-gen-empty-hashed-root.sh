@@ -2,19 +2,29 @@
 # Purpose: answer whether SWI-Prolog's trie_gen/2 still dies on a trie whose
 #   root trie_delete/3 emptied after it had grown a hashed children table. A
 #   child inserts two keys, deletes both and collects trie_gen/2. Prints
-#   `present` when that child dies of SIGSEGV and `absent` when it answers the
-#   empty list.
+#   `present` when that child dies in trie_gen_raw() and `absent` when it
+#   answers the empty list.
 # Assumes:
 #   - HOST_WORKAROUND_SCRATCH names this run's private writable directory, and
 #     SWIPL the host interpreter
 # Guarantees:
-#   - exit 139 answers present and a clean exit that printed `[]` answers
-#     absent; anything else is a broken reproduction, a trie that still
-#     answers a deleted key included, so the condition cannot pass unexercised
-#     [measured 2026-09-24: present on SWI-Prolog 10.1.14 built with the
-#     ledger's patches, both the 09-16 and the 09-24 builds, while one key
-#     inserted and deleted answers `[]` and two keys with one deleted answer
-#     `[a]`; commit=d4a365c16bdf1801f9839597e56ecfcc8c2b7a0c]
+#   - a child killed by a signal answers present only when its stderr carries
+#     SWI's own report of that crash, `Received fatal signal 11 (segv)` with
+#     `trie_gen_raw()` in the C-stack trace; a clean exit that printed `[]`
+#     answers absent; anything else is a broken reproduction, a trie that
+#     still answers a deleted key included, so the condition cannot pass
+#     unexercised. SWI's crash handler prints that report and then either dies
+#     of the fault again while printing the Prolog stack, exit 139, or
+#     finishes printing it and aborts, exit 134, so the exit status alone does
+#     not tell the defect from another crash; this is a death test in
+#     GoogleTest's sense, the death and the message both asserted [measured
+#     2026-09-24: present on SWI-Prolog 10.1.14 built with the ledger's
+#     patches, the 09-16 and the 09-24 builds, exiting 139 run by hand and
+#     134 under tools/check.sh host-workarounds, both after SWI's report
+#     naming trie_gen_raw(), while one key inserted and deleted answers `[]`
+#     and two keys with one deleted answer `[a]`;
+#     commit=62bcb06e6b80fcca1f3d18b3bd8d17eee1dd7c3a]
+#   [source: https://google.github.io/googletest/advanced.html#death-tests]
 # Owns resources: bounded.sh joins the child; the lane removes the scratch files.
 set -eu
 scratch=${HOST_WORKAROUND_SCRATCH:?}
@@ -37,6 +47,13 @@ case $status in
             cat "$scratch/stdout" "$scratch/stderr" >&2
             exit 1
         fi ;;
-    139) printf 'present\n' ;;
+    134|139)
+        if grep -Fq 'Received fatal signal 11 (segv)' "$scratch/stderr" &&
+            grep -Fq 'trie_gen_raw()' "$scratch/stderr"; then
+            printf 'present\n'
+        else
+            cat "$scratch/stderr" >&2
+            exit "$status"
+        fi ;;
     *) cat "$scratch/stderr" >&2; exit "$status" ;;
 esac

@@ -178,6 +178,12 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- The host-workarounds lane and its selftest pass again. The reproduction for
+  `swi-trie-gen-empty-hashed-root` answered `present` only on exit 139, and
+  under `tools/check.sh` SWI's crash handler finishes its report and aborts,
+  exit 134. A death by either signal now answers `present` when its stderr
+  carries SWI's `Received fatal signal 11 (segv)` report with `trie_gen_raw()`
+  in the C stack, and anything else still reads as a broken reproduction.
 - The twins lane reads its envelopes again. Nineteen envelope twins had left
   the bands observed for them on 0a81c782f and d832d20e8, and each is
   re-observed on the fixed tree 4ff69551e with its move placed on the commits

@@ -1400,7 +1400,11 @@ Defect: a trie node's children become a hash table at the second key. Once
   it, so neither dies.
 Reproduction: tests/checks/host_workarounds/swi-trie-gen-empty-hashed-root.sh,
   a child that inserts `a` and `b`, deletes both and collects `trie_gen/2`;
-  exit 139 answers `present`, a clean exit printing `[]` answers `absent`.
+  a death by signal whose stderr carries SWI's `Received fatal signal 11
+  (segv)` report with `trie_gen_raw()` in its C stack answers `present`
+  (the handler then dies again printing the Prolog stack, exit 139, or
+  finishes and aborts, exit 134), and a clean exit printing `[]` answers
+  `absent`.
 Workaround: no trie the engine enumerates is emptied by `trie_delete/3`;
   engine/metta/reference_refresh.pl builds the pending spaces that stay into
   a fresh trie instead of deleting the consumed ones.
