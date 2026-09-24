@@ -68,8 +68,11 @@ pypi.txt
 # the lane has printed its score.
 .mutmut/
 
-# Lock directory the record tool uses at runtime; the record itself is agenticmind.json.
+# Lock directory the record tool uses at runtime. The record itself is a
+# database in the repository's git directory, shared by every worktree, and
+# agenticmind.json is an older copy of it that nothing writes any more.
 .agenticmind/
+agenticmind.json
 
 # Notes about the tools and environment this repository uses but does not own.
 ai-notes/

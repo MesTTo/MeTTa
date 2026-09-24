@@ -148,8 +148,9 @@ ROOT=$(cd "${BATTERY_SOURCE:-$HOME_TREE}" && pwd)
 # `.agenticmind/` takes the caches' two halves for a reason of its own. It is
 # the reasoning record's lock and session directory for this machine, ignored
 # by git, touched by every write any session makes to the record, and read by
-# no lane; the record itself is the tracked agenticmind.json, which is copied
-# like any tracked file. A copy of the directory is stale as soon as it is
+# no lane; the record itself is a database in the repository's git directory,
+# which every worktree shares, a battery's identity included, rather than a
+# file the snapshot copies. A copy of the directory is stale as soon as it is
 # taken, so `run`'s verify read one lock's new mtime as drift and refused the
 # battery while other sessions were writing the record [measured 2026-09-24:
 # battery 2, `>f..t......` on .agenticmind/locks/99fbbe16….lock].
