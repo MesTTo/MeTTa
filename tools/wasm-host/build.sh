@@ -131,7 +131,8 @@ if [ "${1:-}" = vendor ]; then
         echo "name here where a native host loads a shared object. It also links"
         echo "emscripten's NODEFS, so under Node a program can mount a host directory into"
         echo "the host's file system through \`FS.filesystems.NODEFS\`; a browser never"
-        echo "takes that path."
+        echo "takes that path. Its memory can grow to 4 GiB, all a 32-bit memory"
+        echo "addresses, where emscripten's default maximum is 2 GiB."
         echo
         echo "The data image holds SWI's library and, at /swipl/metta-host.pl, the"
         echo "declaration of the patches this build carries, which the engine checks at every"

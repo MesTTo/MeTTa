@@ -22,7 +22,8 @@
 #     share of its cores;
 #   - LDFLAGS links emscripten's NODEFS beside upstream's stack size, so a
 #     program running the host under Node can mount a host directory into its
-#     file system.
+#     file system, and raises the memory maximum from emscripten's 2 GiB
+#     default to wasm32's 4 GiB.
 # Everything else (the emsdk image, the zlib and pcre2 builds, the cmake
 # flags, ctest) is upstream's, unedited.
 #
@@ -148,7 +149,21 @@ RUN mkdir -p /swipl-devel/build.wasm
 # with `&& :` and the flag lands after it [measured 2026-09-24: a swipl-web.js
 # byte-identical to the image's own; commit=6456b9822f637bf3bd106e001abf862d3d6ab262].
 # The swipl binary ctest runs links NODEFS already, through NODERAWFS.
-ENV LDFLAGS="-s STACK_SIZE=1048576 -lnodefs.js"
+# Ours: MAXIMUM_MEMORY=4GB. Emscripten's default maximum is 2147483648 bytes,
+# half of what a 32-bit memory addresses, because above 2 GiB the JavaScript
+# it generates has to read every pointer as unsigned, which it does only for a
+# build that opts in [source: emscripten.org settings reference,
+# MAXIMUM_MEMORY]; V8 has grown wasm32 memories to 4 GiB since Chrome 83
+# [source: v8.dev/blog/4gb-wasm-memory], which is every Node the seat's
+# engines field admits and the Chromium its browser suite drives; Firefox and
+# WebKit grow one past 2 GiB too [measured 2026-09-24: Chromium 153, Firefox 155
+# and WebKit 26.6 each grew a wasm32 memory to 2,621,440,000 bytes]. At 2 GiB
+# the seat refused examples/ch18-performance/18-01-larger-workloads/
+# 02-holbenchmark.metta at the stack limit with 1.62 GB resident, and at 4 GiB
+# it runs at 2.42 GB [measured 2026-09-24: one link at each maximum, one
+# program per process]. 05-matespacefast beside it, 4.0 GB resident natively,
+# fits neither.
+ENV LDFLAGS="-s STACK_SIZE=1048576 -lnodefs.js -sMAXIMUM_MEMORY=4GB"
 # Ours: SWIPL_PACKAGE_LIST, every packages/*/CMakeLists.txt the context holds,
 # which SWI takes verbatim and still closes over dependencies
 # (cmake/PackageSelection.cmake). LibArchive_LIBRARIES names zlib beside the

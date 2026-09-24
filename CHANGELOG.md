@@ -50,6 +50,15 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Changed
 
+- `tools/wasm-host/Dockerfile` links the WebAssembly host with a 4 GiB memory
+  maximum, where emscripten's default stops at 2 GiB. At 2 GiB tsmetta refused
+  `examples/ch18-performance/18-01-larger-workloads/02-holbenchmark.metta` at
+  the stack limit with 1.62 GB resident, and the 4 GiB link runs it at 2.42 GB.
+  V8 grows a 32-bit memory to 4 GiB in every Node the seat's `engines` field
+  admits and in the Chromium its browser suite drives; Firefox and WebKit grow
+  one past 2 GiB too. `05-matespacefast.metta` beside it, 4.0 GB resident
+  natively, still does not fit.
+
 - `register_prolog(path=...)` with no names refuses a file that is not there
   as `SourceNotFound` ("no Prolog source"), as it already did with names,
   where it read the missing file's declarations first and asked for a
