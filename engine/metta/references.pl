@@ -21,7 +21,7 @@
 %   it publishes what a whole republication would [tested:
 %   reference_deltas:every_step_of_a_row_sequence_publishes_what_a_whole_republication_does,
 %   reference_deltas:a_sampled_row_sequence_publishes_what_a_whole_republication_does;
-%   commit=WORKTREE].
+%   commit=e4b7448d1f1bd98733f1b04c3906aaa42f35ef1a].
 % Guarantees: declaration-only faces carry sorts, constructor arrows and
 %   subsorts without making their subjects callable
 %   [tested: references:constructor_declarations_travel_without_callable_heads;

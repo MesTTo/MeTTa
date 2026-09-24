@@ -7,27 +7,27 @@
 %   as an identical universe whose from rows are all republished whole
 %   [tested: reference_deltas:every_step_of_a_row_sequence_publishes_what_a_whole_republication_does,
 %   reference_deltas:a_sampled_row_sequence_publishes_what_a_whole_republication_does,
-%   reference_deltas:rows_after_the_first_are_published_alone; commit=WORKTREE].
+%   reference_deltas:rows_after_the_first_are_published_alone; commit=e4b7448d1f1bd98733f1b04c3906aaa42f35ef1a].
 % Guarantees: a row after the first is published by itself inside its
 %   transaction and at its completion, whichever way its space's name sorts
 %   against its home's [tested:
 %   reference_deltas:a_row_publishes_alone_whichever_way_its_space_and_home_sort;
-%   commit=WORKTREE].
+%   commit=e4b7448d1f1bd98733f1b04c3906aaa42f35ef1a].
 % Guarantees: a row declared while its space publishes stays owed [tested:
 %   reference_deltas:a_row_declared_while_its_space_publishes_stays_owed;
-%   commit=WORKTREE].
+%   commit=e4b7448d1f1bd98733f1b04c3906aaa42f35ef1a].
 % Guarantees: a drain publishes a space by its rows alone only while no space
 %   its standing rows reach is published in the same drain [tested:
 %   reference_deltas:a_reached_home_in_the_same_drain_sends_the_rows_whole;
-%   commit=WORKTREE].
+%   commit=e4b7448d1f1bd98733f1b04c3906aaa42f35ef1a].
 % Guarantees: a walk reaching a row's node owes its space whole unless the
 %   drain publishing the space raised it [tested:
 %   reference_deltas:a_row_walked_outside_its_drain_owes_its_space_whole;
-%   commit=WORKTREE].
+%   commit=e4b7448d1f1bd98733f1b04c3906aaa42f35ef1a].
 % Assumes: two universes built by the same steps differ only by the names,
 %   modules and row tokens of their spaces, which a snapshot replaces
 %   [source: engine/metta/references.pl:metta_reference_publish_rows/8;
-%   commit=WORKTREE].
+%   commit=e4b7448d1f1bd98733f1b04c3906aaa42f35ef1a].
 % Owns resources: each case releases the spaces it made, retracts the
 %   specializer rows its `adopt` step asserts, and removes the wrappers it
 %   installs.

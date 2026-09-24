@@ -47,7 +47,7 @@
 %   reference_deltas:a_row_publishes_alone_whichever_way_its_space_and_home_sort,
 %   reference_deltas:a_reached_home_in_the_same_drain_sends_the_rows_whole,
 %   reference_deltas:a_row_walked_outside_its_drain_owes_its_space_whole;
-%   commit=WORKTREE].
+%   commit=e4b7448d1f1bd98733f1b04c3906aaa42f35ef1a].
 % Owns resources: the pending faces and each transaction frame's roots are
 %   tries whose handles engine-local SWI global variables hold. Publication
 %   destroys the pending trie it consumed and stores a fresh one holding the
@@ -319,7 +319,7 @@ metta_reference_refresh :-
 %tree before this change and with it in one battery path cost 125,936
 %inferences whole and 70,659 by rows, a row by rows 6,855 for a home bringing
 %no head up to 16,429 for one bringing four, and the program reads 105.5M
-%instructions net of its null where it read 153.5M; commit=WORKTREE].
+%instructions net of its null where it read 153.5M; commit=e4b7448d1f1bd98733f1b04c3906aaa42f35ef1a].
 metta_reference_refresh_now :-
     metta_reference_pending(Pending),
     (   Pending == []

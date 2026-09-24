@@ -57,7 +57,7 @@
 %     it knows, walking only the successors it names, and a dirty node still
 %     answers the value it last stabilized to [tested:
 %     support_graph:a_stated_stabilization_walks_only_the_successors_it_names;
-%     commit=WORKTREE].
+%     commit=e4b7448d1f1bd98733f1b04c3906aaa42f35ef1a].
 %   - Stabilization reuses a clean value and cuts off a second propagation
 %     wave when recomputation is variant-equal [tested:
 %     support_graph:an_unchanged_stabilization_cuts_off_propagation;

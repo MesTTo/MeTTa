@@ -40,7 +40,7 @@
 %     walks only the successors it names, none when the value is unchanged,
 %     and a dirty node still answers the value it last stabilized to [tested:
 %     support_graph:a_stated_stabilization_walks_only_the_successors_it_names;
-%     commit=WORKTREE].
+%     commit=e4b7448d1f1bd98733f1b04c3906aaa42f35ef1a].
 %   - Retiring one compiled RHS preserves its peers, restores it on rollback,
 %     and leaves an empty or already retired form without a memo change
 %     [tested: support_graph:retiring_one_rhs_preserves_its_peer_and_rolls_back,

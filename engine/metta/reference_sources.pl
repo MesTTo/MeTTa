@@ -12,7 +12,7 @@
 %   them, and rows alone extend its origins monotonically or refuse, leaving
 %   the space to be planned whole, when they would withdraw one [tested:
 %   reference_deltas:every_step_of_a_row_sequence_publishes_what_a_whole_republication_does;
-%   commit=WORKTREE].
+%   commit=e4b7448d1f1bd98733f1b04c3906aaa42f35ef1a].
 % Owns resources: metta_reference_source_reader/3 owns exact derived clause
 %   references. Refresh replaces them and home release erases them. Their
 %   transaction state follows the source rows and existing frame reconciliation.
