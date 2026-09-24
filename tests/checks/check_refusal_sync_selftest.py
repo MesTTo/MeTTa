@@ -25,6 +25,7 @@ from __future__ import annotations
 
 import sys
 from pathlib import Path
+from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "extensions" / "python" / "tools"))
@@ -132,13 +133,25 @@ def test_a_duplicate_kind_stops_before_dictionary_projection() -> None:
 
 
 def test_a_drifted_module_is_reported() -> None:
-    """The checked-in table has to be what the rows produce."""
-    text = refusalgen.MODULE.read_text(encoding="utf-8")
-    refusalgen.MODULE.write_text(text + "\n# planted drift\n", encoding="utf-8")
-    try:
+    """The checked-in table has to be what the rows produce.
+
+    The drift is planted in the text the rows render, not in the checked-in
+    file: the lane compares the two, so either side proves it. Writing the file
+    and restoring it in a `finally` raced the refusal-sync lane, which check.sh
+    runs beside this one and which read the planted line as drift of its own
+    [measured 2026-09-25T04:32:29+10:00: refusal-sync failed 5 of 8 runs beside
+    this self-test, and the table differed from its checked-in bytes in 304 of
+    703 polls while it ran], and a run killed before the restore left the tree
+    carrying the line, which is why the evidence gate's mutations patch a copy
+    (docs/journal/2026-09-07-a-citation-of-a-sentence-is-read.md).
+    """
+    render = refusalgen.module_text
+
+    def drifted(joined: list[refusalgen.Row]) -> str:
+        return render(joined) + "\n# planted drift\n"
+
+    with patch.object(refusalgen, "module_text", drifted):
         assert refusalgen.main([]) == 1
-    finally:
-        refusalgen.MODULE.write_text(text, encoding="utf-8")
 
 
 def main() -> int:

@@ -294,6 +294,14 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- The gate's `refusal-sync` lane no longer fails at random beside
+  `refusal-sync-selftest`. The self-test's drift case wrote a line into the
+  checked-in `metta/_errors/refusals.py` and put the file back afterwards, so
+  `refusal-sync`, which the gate runs at the same time, could read the planted
+  line as drift, and a run killed before the restore left the file carrying
+  it. The case now plants the drift in the text the rows render, which the
+  lane compares with the same file, and writes nothing.
+
 - `observe-source` records the errors a program raises, and the exception that
   ends it, as they were raised, whatever other libraries hook exceptions. SWI
   keeps the first answer of `prolog:prolog_exception_hook/5`, and the observer
