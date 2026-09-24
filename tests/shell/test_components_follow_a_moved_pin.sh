@@ -25,6 +25,9 @@ set -eu
 command -v git >/dev/null
 
 project_dir=$(CDPATH= cd -- "$(dirname -- "$0")/../.." && pwd)
+# One spelling of the bound, implemented in bounded.sh, so a killed run leaves
+# no provisioning child behind.
+bounded() { sh "$project_dir/tools/bounded.sh" "$@"; }
 # The gate's scratch when a gate runs this, which tools/check.sh exports as
 # TMPDIR beneath ai-tmp/check-runs and reclaims after a killed run
 # (tests/checks/gate_scratch.sh); ai-tmp when run alone, never /tmp.
@@ -66,14 +69,14 @@ pin() {
 comp="$super/comp"
 
 pin "$first"
-sh "$super/tools/components.sh" > "$fixture/first.out" 2>&1 ||
+bounded sh "$super/tools/components.sh" > "$fixture/first.out" 2>&1 ||
     fail "the first provision refused: $(cat "$fixture/first.out")"
 [ "$(git -C "$comp" rev-parse HEAD)" = "$first" ] || fail "the clone is not at the first pin"
 [ -f "$comp/gone.txt" ] || fail "the first pin's gone.txt is missing"
 printf 'built\n' > "$comp/build.out"
 
 pin "$second"
-sh "$super/tools/components.sh" > "$fixture/second.out" 2>&1 ||
+bounded sh "$super/tools/components.sh" > "$fixture/second.out" 2>&1 ||
     fail "the component did not follow its moved pin: $(cat "$fixture/second.out")"
 [ "$(git -C "$comp" rev-parse HEAD)" = "$second" ] || fail "HEAD is not the moved pin"
 [ "$(cat "$comp/kept.txt")" = two ] || fail "kept.txt does not read the moved pin's content"
@@ -84,7 +87,7 @@ echo "ok   a component follows its moved pin, and untracked output survives"
 
 printf 'mine\n' > "$comp/kept.txt"
 pin "$first"
-if sh "$super/tools/components.sh" > "$fixture/third.out" 2>&1; then
+if bounded sh "$super/tools/components.sh" > "$fixture/third.out" 2>&1; then
     fail "a modified component was moved to another pin"
 fi
 grep -q 'comp has modified tracked files' "$fixture/third.out" ||

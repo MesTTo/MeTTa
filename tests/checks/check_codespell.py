@@ -33,6 +33,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+from bounded_spawn import bounded
+
 
 def marked(root: Path, paths: list[str]) -> list[str]:
     """The tracked files under `paths` a .gitattributes marks vendored or generated.
@@ -65,7 +67,7 @@ def main(arguments: list[str]) -> int:
     command = [sys.executable, "-m", "codespell_lib"]
     if skipped:
         command += ["--skip", ",".join(skipped)]
-    return subprocess.run([*command, *arguments], cwd=root, check=False).returncode
+    return subprocess.run(bounded([*command, *arguments]), cwd=root, check=False).returncode
 
 
 if __name__ == "__main__":
