@@ -24,6 +24,10 @@
 %     deterministic miss [tested:
 %     spaces_cycles:an_open_tail_probe_reads_through_the_head_index;
 %     commit=2b2d6f3e36d259e789ad7d977eebc3623b002970].
+%   - an open read and an open-tail probe answer a space's atoms shortest
+%     first after any number of functors planted ahead of them [tested:
+%     spaces_cycles:native_reads_follow_ascending_arity_wherever_functors_land;
+%     commit=WORKTREE].
 %   - restricted spaces select curated grant profiles and raw calls pass the
 %     sandbox boundary [tested: spaces_restricted_modules;
 %     commit=6a08901f4125c2536f5b4032daac9937f793870f].
@@ -210,6 +214,28 @@ test(an_open_tail_probe_reads_through_the_head_index,
     open_tail_miss_cost(Small, SmallCost),
     open_tail_miss_cost(Large, LargeCost),
     LargeCost == SmallCost.
+
+%Stored longest first, so an order that follows how the storage functors were
+%made reads them longest first, and after 0 to 24 functors planted ahead of
+%them, so an order that follows where they landed in the procedure table's
+%hash moves between plantings. Both the open read and the open-tail probe
+%answer the shortest first every time.
+read_order_answers(Planted, Open, Tail) :-
+    gensym('&plunit_read_order_', Space),
+    forall(between(1, Planted, _),
+           ( gensym(plunit_read_order_functor_, Name), functor(_, Name, 1) )),
+    forall(member(Atom, [[rel, x, y, z], [rel, x, y], [rel, x]]),
+           add_sexp(Space, Atom)),
+    findall(Atom, 'get-atoms'(Space, Atom), Open),
+    findall([rel|Rest], 'get-atoms'(Space, [rel|Rest]), Tail),
+    clear_native_atoms(Space),
+    retractall(native_storage_module_cache(Space, _)).
+
+test(native_reads_follow_ascending_arity_wherever_functors_land) :-
+    forall(between(0, 24, Planted),
+           ( read_order_answers(Planted, Open, Tail),
+             assertion(Open == [[rel, x], [rel, x, y], [rel, x, y, z]]),
+             assertion(Tail == [[rel, x], [rel, x, y], [rel, x, y, z]]) )).
 
 :- end_tests(spaces_cycles).
 

@@ -8,6 +8,11 @@
 % Guarantees: open reads enumerate expressions and scalars in named and
 %   parametric spaces [tested: spaces_tokens:public_and_bulk_writes_preserve_tokens_and_duplicate_bags;
 %   commit=8ca8a387fc61d0918484b19a1a3baf85b6523043].
+% Guarantees: an open read and an open-tail probe meet a space's atoms
+%   shortest first, in insertion order within one length, whatever functors
+%   the process allocated before them (metta_arity_ascending/3) [tested:
+%   spaces_cycles:native_reads_follow_ascending_arity_wherever_functors_land;
+%   commit=WORKTREE].
 % Guarantees: annotated arrow effects reach catalog policy and follow their
 %   declaration lifetime [tested: run_tests(metta_arrow_products); commit=bbb512316280110a747e31c26adfc31e8c5104be].
 % Guarded by: catalog clear acquires '$metta_typing_policy' before
@@ -729,7 +734,7 @@ get_native_atom(Module, [Family|Parameters], Pattern) :-
     Space = [Family|Parameters],
     space_parametric(Space),
     !,
-    current_predicate(Module:'$metta_parametric_atom'/Arity),
+    metta_arity_ascending(Module, '$metta_parametric_atom', Arity),
     Arity >= 2,
     functor(Head, '$metta_parametric_atom', Arity),
     arg(1, Head, Rel),
@@ -742,7 +747,7 @@ get_native_atom(Module, Space, Pattern) :-
     nonvar(Rel),
     \+ is_list(Pattern),
     !,
-    current_predicate(Module:Space/Arity),
+    metta_arity_ascending(Module, Space, Arity),
     Arity >= 2,
     functor(Head, Space, Arity),
     arg(1, Head, Rel),
@@ -752,7 +757,7 @@ get_native_atom(Module, Space, Pattern) :-
 get_native_atom(Module, Space, Pattern) :-
     \+ atomic(Pattern),
     native_storage_functor(Space, Functor),
-    current_predicate(Module:Functor/Arity),
+    metta_arity_ascending(Module, Functor, Arity),
     functor(Head, Functor, Arity),
     clause(Module:Head, true),
     metta_storage_term(Functor, Pattern, _, Head).
@@ -761,3 +766,40 @@ get_native_atom(Module, _, Pattern) :-
 
 get_native_scalar_atom_in(Module, Pattern) :-
     Module:'$metta_native_scalar'(Pattern, _).
+
+%The arities Name has in Module, ascending. current_predicate/1 with the arity
+%open answers in the procedure table's hash order, and that order follows the
+%functor handles the process allocated before Name's, so an open read of a
+%space met its atoms of different lengths in an order that moved whenever any
+%functor was created earlier, anywhere, and a caller stopping at its first
+%answer visited a count that moved with it: point twins read -34 and -50 when
+%a change added predicates to the Python binding and ran none of them, and one
+%tagged program's check read 66 inferences after three functors planted at
+%boot and 44 after five [measured 2026-09-24: child processes on
+%commit=2803a3ecf877ad410ab19a9168e09096eb50ef5a]. MeTTa specifies no order
+%for get-atoms across a space's atoms, and upstream PeTTa's order across
+%arities is the same functor-hash order, its get-atoms walking
+%current_predicate(Space/Arity) [source:
+%PeTTa@43705f5d9ff8958ffe7f0aa6777fb8477f2401f2 src/spaces.pl:69-72]. So one
+%deterministic order breaks no semantics and holds for every caller, the
+%engine's, a library's and a program's once over get-atoms alike. Within an
+%arity the order is still the store's own insertion order.
+%
+%A name with no arity or one has no order to fix, and it is the common case,
+%so it answers from the first solution and one probe for a second: collecting
+%and sorting cost every call about 11 inferences, and a release check asking
+%two modules per unregister moved the register-op bench by 48 per
+%registration [measured 2026-09-24: 204912 to 209712 over 100]. The probe
+%stops at the second solution whichever arity came first, so the count is
+%fixed either way.
+%Time: for a name stored at k arities, at most two current_predicate/1
+%solutions when k <= 1; otherwise those two, k more and a sort of k.
+metta_arity_ascending(Module, Name, Arity) :-
+    current_predicate(Module:Name/First),
+    !,
+    (   \+ ( current_predicate(Module:Name/Other), Other \== First )
+    ->  Arity = First
+    ;   findall(Found, current_predicate(Module:Name/Found), Arities0),
+        msort(Arities0, Arities),
+        member(Arity, Arities)
+    ).

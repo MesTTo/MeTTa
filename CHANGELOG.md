@@ -37,6 +37,16 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Changed
 
+- An open `get-atoms` read of a native space, and the engine's own probes of a
+  space by an atom's head, meet the space's atoms shortest first, in
+  insertion order within one length. The engine took a space's lengths from
+  SWI's procedure table in hash order, and that order followed every functor
+  the process had allocated before, so a caller that stopped at its first
+  answer paid a cost that moved whenever anything anywhere created a
+  functor: point twins moved when a change added predicates it never ran.
+  MeTTa specifies no order across a space's atoms and upstream PeTTa's is the
+  same hash order, so the fixed order changes no meaning.
+
 - Registering MeTTa function names walks the visible predicate table once for
   a batch of thirteen names or more, where it walked only above forty, and
   tests each visible predicate against the batch with a dict lookup where it
