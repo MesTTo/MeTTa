@@ -9,6 +9,12 @@
 %   and retires its frame [tested:
 %   references:an_inference_cut_cannot_abandon_reference_completion;
 %   commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
+% Guarantees: a space set costs the same inferences whatever checkout path its
+%   spaces are named after and lists each once in standard order, and
+%   consuming published spaces leaves pending the ones queued since [tested:
+%   references:a_space_set_costs_the_same_whatever_its_spaces_are_named,
+%   references:consuming_published_spaces_keeps_the_ones_queued_since;
+%   commit=WORKTREE].
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
 :- ensure_loaded('../../../../engine/metta.pl').
@@ -180,7 +186,7 @@ test(a_refresh_that_finds_the_same_roots_announces_nothing,
     reference_space(2, Target), space_module(Target, Module),
     flag(reference_announcements, _, 0),
     setup_call_cleanup(
-        wrap_predicate(spaces:announce_function_changed(Owner, Name),
+        wrap_predicate(spaces:announce_function_changed(Owner, _),
                        reference_announcements, Original,
                        ( ( Owner == Module
                          -> flag(reference_announcements, N, N+1) ; true ),
@@ -243,6 +249,71 @@ reference_binds(Module, Goal, Names) :-
         ( unwrap_predicate(metta_engine:metta_reference_bind(_, _, _, _, _, _),
                            reference_binds),
           nb_delete(reference_binds) )).
+
+% 200 library space names carrying Checkout, as a library space's name carries
+% the path of its file.
+reference_path_spaces(Checkout, Spaces) :-
+    findall(Space,
+            ( between(1, 200, Index),
+              format(atom(Space), '&library:~w/lib/lib_~d/lib.metta#1',
+                     [Checkout, Index]) ),
+            Spaces).
+
+% What adding every space twice costs, the second pass finding each present.
+reference_set_cost(Spaces, Cost, Listed) :-
+    trie_new(Set),
+    statistics(inferences, Before),
+    forall(member(Space, Spaces), metta_engine:metta_reference_set_add(Set, Space)),
+    forall(member(Space, Spaces), metta_engine:metta_reference_set_add(Set, Space)),
+    statistics(inferences, After),
+    Cost is After - Before,
+    metta_engine:metta_reference_set_spaces(Set, Listed),
+    trie_destroy(Set).
+
+%The pending queue and a transaction frame's roots held their spaces in
+%library(nb_set), whose check probed in Prolog from the slot a name hashed to,
+%so the same spaces named after another checkout cost a different number of
+%inferences. The first family is discarded, paying any first use outside both
+%measured windows.
+test(a_space_set_costs_the_same_whatever_its_spaces_are_named) :-
+    reference_path_spaces('/warm', Warm),
+    reference_set_cost(Warm, _, _),
+    reference_path_spaces('/srv/checkout/ai-tmp/wt-battery-104', Near),
+    reference_path_spaces('/srv/checkout/ai-tmp/wt-battery-105', Far),
+    reference_set_cost(Near, NearCost, NearListed),
+    reference_set_cost(Far, FarCost, FarListed),
+    assertion(NearCost == FarCost),
+    sort(Near, NearSorted), assertion(NearListed == NearSorted),
+    sort(Far, FarSorted), assertion(FarListed == FarSorted).
+
+% The queue an earlier test left is set aside and put back.
+reference_pending_set_aside(Saved) :-
+    (   nb_current('$metta_reference_pending', Saved)
+    ->  nb_delete('$metta_reference_pending')
+    ;   Saved = none
+    ).
+reference_pending_restore(Saved) :-
+    (   Saved == none
+    ->  nb_delete('$metta_reference_pending')
+    ;   nb_setval('$metta_reference_pending', Saved)
+    ).
+
+%Publication consumes the batch it read, and a space queued while that batch
+%published, by a stabilization notifying another home, stays for the next one.
+%Emptied, the queue leaves no variable behind, which is what refresh reads as
+%nothing to publish.
+test(consuming_published_spaces_keeps_the_ones_queued_since,
+     [ setup(reference_pending_set_aside(Saved)),
+       cleanup(reference_pending_restore(Saved)) ]) :-
+    trie_new(Pending),
+    nb_setval('$metta_reference_pending', Pending),
+    forall(member(Space, ['&published-a', '&queued-since', '&published-b']),
+           metta_engine:metta_reference_set_add(Pending, Space)),
+    metta_engine:metta_reference_consumed(['&published-a', '&published-b']),
+    metta_engine:metta_reference_pending(Left),
+    assertion(Left == ['&queued-since']),
+    metta_engine:metta_reference_consumed(['&queued-since']),
+    assertion(\+ nb_current('$metta_reference_pending', _)).
 
 test(data_mutations_keep_compiled_clauses_and_retire_only_removed_grades,
      [setup(reference_setup), cleanup(reference_cleanup)]) :-

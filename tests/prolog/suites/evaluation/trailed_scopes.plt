@@ -329,7 +329,7 @@ perform(source_rollback) :-
     catch(filereader:with_source_load(guard_source, '&self',
               plunit_trailed_scopes:rollback_payload), guard_rollback, true).
 perform(reference_finishing) :-
-    empty_nb_set(Roots),
+    trie_new(Roots),
     nb_setval('$metta_reference_frames',[frame(guard_frame,Roots)]),
     metta_engine:metta_reference_finish_frame(guard_frame).
 perform(bridge_depth) :-

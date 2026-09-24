@@ -146,6 +146,21 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   `metta.vocabularies` and the Node seat's `src/vocabularies.ts`, so the three
   seats read the rows once, and the vocab-sync lane holds the header to what
   the generator writes.
+- An inference count no longer depends on where the checkout sits. The
+  support graph's invalidation walk and the reference refresh's pending spaces
+  and transaction roots held their members in SWI's `library(nb_set)`, which
+  probes its hash table in Prolog from the slot a key's hash names, four
+  inferences a step past a taken slot, and a library space's name carries the
+  absolute path of its file. So one program cost a different count in each
+  checkout: `09-class_values`' twin read 3,420 more in one battery than in
+  another whose path differed in one digit, and an envelope observed in one
+  battery could not bound a lane in another. Both use SWI tries now, one
+  foreign call a check: the six class twins and `12-reference_maps` read the
+  same count at three checkout paths, and the boot costs 1,744 fewer
+  inferences. A set that loses members is rebuilt rather than deleted from,
+  because SWI's `trie_gen/2` dies on a trie that `trie_delete/3` emptied
+  (`docs/host-workarounds.md`, `swi-trie-gen-empty-hashed-root`).
+
 - The twins, benchmarks and engine-bench lanes read their pins again. Every
   commit since the pins had moved them unrecorded: 77 point twins,
   source-load, register-op and the two save-load rows, and engine-bench's

@@ -1384,3 +1384,27 @@ Workaround: lib_uuid's MeTTa name recipe composes lib_encoding and lib_crypto ov
 Lifted when: the host produces both UTF-8/NUL vectors. Arbitrary namespace support
   still requires the byte construction unless the host also admits a UUID namespace.
 Record: docs/journal/2026-09-11-a-standard-library-for-a-language.md.
+
+## swi-trie-gen-empty-hashed-root
+Host: SWI-Prolog 10.1.14 as shipped and as patched here (the 09-16 and 09-24
+  builds), and upstream master at d7d2a2bb8f5b (fetched 2026-09-24):
+  `add_choice()` in src/pl-trie.c starts a general enumeration of a hashed
+  children table and ignores what `advanceTableEnum()` returns, and
+  `prune_node()` deletes a pruned key from its parent's table but leaves a
+  root's table in place when the last key goes.
+Defect: a trie node's children become a hash table at the second key. Once
+  `trie_delete/3` has removed every key, the root still points at its empty
+  table, so `trie_gen/2,3` enumerate it, take a child from an enumeration
+  that produced none and die of SIGSEGV dereferencing it. A trie that only
+  ever held one key has no table, and one that still holds a key enumerates
+  it, so neither dies.
+Reproduction: tests/checks/host_workarounds/swi-trie-gen-empty-hashed-root.sh,
+  a child that inserts `a` and `b`, deletes both and collects `trie_gen/2`;
+  exit 139 answers `present`, a clean exit printing `[]` answers `absent`.
+Workaround: no trie the engine enumerates is emptied by `trie_delete/3`;
+  engine/metta/reference_refresh.pl builds the pending spaces that stay into
+  a fresh trie instead of deleting the consumed ones.
+Lifted when: `trie_gen/2` over a trie whose keys `trie_delete/3` removed
+  answers nothing, as `is_leaf_trie_node()` already reads an empty table.
+Record: docs/journal/2026-09-11-the-end-of-wave-battery.md, 2026-09-24, the
+  twins that read the checkout's path.

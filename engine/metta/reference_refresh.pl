@@ -28,9 +28,19 @@
 %   its reconciliation [tested:
 %   references:an_inference_cut_cannot_abandon_reference_completion;
 %   commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
-% Owns resources: pending faces and frame roots are engine-local SWI global
-%   variables. Publication consumes its pending set; completion retires its
-%   frame. host_transaction_on_exit/1 invokes completion after SWI releases its
+% Guarantees: a space set's inference cost does not depend on the spaces'
+%   names, it lists its members once each in standard order, and consuming a
+%   published batch leaves pending the spaces queued since [tested:
+%   references:a_space_set_costs_the_same_whatever_its_spaces_are_named,
+%   references:consuming_published_spaces_keeps_the_ones_queued_since;
+%   commit=WORKTREE].
+% Owns resources: the pending faces and each transaction frame's roots are
+%   tries whose handles engine-local SWI global variables hold. Publication
+%   destroys the pending trie it consumed and stores a fresh one holding the
+%   spaces that stay, or none when none do; completion retires its frame and
+%   destroys the frame's trie; a trie whose handle nothing holds any more is
+%   reclaimed by atom garbage collection.
+%   host_transaction_on_exit/1 invokes completion after SWI releases its
 %   global event mutex [tested: host_transaction_completion; commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
 % Guarded by: with_typing_policy_stable/1 serializes native publication. Maps
 %   run outside that mutex and the support graph mutex; an epoch change retries
@@ -38,7 +48,6 @@
 %   [source: engine/metta/reference_refresh.pl:metta_reference_refresh_now/0;
 %   commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
 
-:- use_module(library(nb_set), [empty_nb_set/1, add_nb_set/2, nb_set_to_list/2]).
 :- use_module(library(ordsets), [ord_subtract/3]).
 :- multifile support_graph:support_invalidation_action/1.
 
@@ -49,31 +58,54 @@ support_graph:support_invalidation_action(derived(Module, reference_face)) :-
     metta_reference_seen_space(Space, Module),
     metta_reference_queue(Space).
 
-% The queue and the frame roots below are stored as copies, never linked: a
-% set linked from inside a findall or a failing branch is reclaimed with that
-% context and reads back as unbound cells. A stored copy is read back by
-% reference, so the sets still grow in place.
+%The pending queue and each transaction frame's roots are sets of spaces, and
+%a set of spaces is a trie. Its handle is an atom, so a global variable holds
+%the set itself rather than a copy of it, and no findall or failing branch can
+%reclaim it, which a set stored as a term had to be copied into the variable
+%to survive. Its membership check is one foreign call, where library(nb_set)
+%probed in Prolog and cost more for a space whose name, the path of its file,
+%hashed onto a taken slot (support_graph.pl's support_invalidate_closure/2
+%measures what that cost).
+metta_reference_set_add(Set, Space) :-
+    (   trie_insert(Set, Space) -> true ; true ).
+
+metta_reference_set_spaces(Set, Spaces) :-
+    findall(Space, trie_gen(Set, Space), Members),
+    sort(Members, Spaces).
+
 metta_reference_queue(Space) :-
     (   nb_current('$metta_reference_pending', Pending)
     ->  true
-    ;   empty_nb_set(Fresh), nb_setval('$metta_reference_pending', Fresh),
-        nb_getval('$metta_reference_pending', Pending)
+    ;   trie_new(Pending), nb_setval('$metta_reference_pending', Pending)
     ),
-    add_nb_set(Space, Pending),
+    metta_reference_set_add(Pending, Space),
     metta_reference_source_queued(Space).
 
 metta_reference_pending(Spaces) :-
-    ( nb_current('$metta_reference_pending', Pending)
-    -> nb_set_to_list(Pending, Spaces)
-    ; Spaces = [] ).
+    (   nb_current('$metta_reference_pending', Pending)
+    ->  metta_reference_set_spaces(Pending, Spaces)
+    ;   Spaces = []
+    ).
 
+% Spaces queued while the consumed ones were being published stay pending, in a
+% set of their own.
+% Workaround: swi-trie-gen-empty-hashed-root - build the spaces that stay into a fresh trie instead of deleting the consumed ones from this one.
+% The next publication enumerates this set, and trie_gen/2 dies of SIGSEGV on
+% a trie that trie_delete/3 emptied of two keys or more.
 metta_reference_consumed(Spaces) :-
     metta_reference_pending(Queued),
     ord_subtract(Queued, Spaces, Remaining),
-    ( Remaining == [] -> nb_delete('$metta_reference_pending')
-    ; empty_nb_set(Pending),
-      forall(member(Space, Remaining), add_nb_set(Space, Pending)),
-      nb_setval('$metta_reference_pending', Pending) ).
+    (   nb_current('$metta_reference_pending', Pending)
+    ->  nb_delete('$metta_reference_pending'),
+        trie_destroy(Pending)
+    ;   true
+    ),
+    (   Remaining == []
+    ->  true
+    ;   trie_new(Fresh),
+        forall(member(Space, Remaining), metta_reference_set_add(Fresh, Space)),
+        nb_setval('$metta_reference_pending', Fresh)
+    ).
 
 %A face event invalidates in one of two ways, and which one is decided by a
 %single question: does the face's stored value carry everything this event
@@ -303,24 +335,22 @@ metta_reference_track_frames(Frame, Spaces) :-
                              system:'$snapshot'/1]),
         \+ metta_reference_finishing(Frame)
     ->  metta_reference_frame_entries(Frames),
-        (   memberchk(frame(Frame, _), Frames)
+        (   memberchk(frame(Frame, Roots), Frames)
         ->  true
-        ;   empty_nb_set(Fresh),
+        ;   trie_new(Roots),
             % Register retirement before publishing an untrailed frame.
             host_transactions:host_transaction_on_exit(
                 metta_engine:metta_reference_finish_frame(Frame)),
-            nb_setval('$metta_reference_frames', [frame(Frame, Fresh)|Frames])
+            nb_setval('$metta_reference_frames', [frame(Frame, Roots)|Frames])
         ),
-        metta_reference_frame_entries(Stored),
-        memberchk(frame(Frame, Roots), Stored),
-        forall(member(Space, Spaces), add_nb_set(Space, Roots))
+        forall(member(Space, Spaces), metta_reference_set_add(Roots, Space))
     ; prolog_frame_attribute(Frame, parent, Parent),
       metta_reference_track_frames(Parent, Spaces) ).
 
 metta_reference_finish_frame(Frame) :-
     metta_reference_frame_entries(Frames),
     (   memberchk(frame(Frame, Roots), Frames)
-    ->  nb_set_to_list(Roots, Spaces),
+    ->  metta_reference_set_spaces(Roots, Spaces),
         % A completion inside a source program or definition batch queues
         % its spaces as a change does; the program's next flush publishes.
         metta_with_trailed_push('$metta_reference_finishing', Frame,
@@ -333,7 +363,8 @@ metta_reference_finish_frame(Frame) :-
         metta_reference_frame_entries(Current),
         selectchk(frame(Frame, _), Current, Remaining),
         ( Remaining == [] -> nb_delete('$metta_reference_frames')
-        ; nb_setval('$metta_reference_frames', Remaining) )
+        ; nb_setval('$metta_reference_frames', Remaining) ),
+        trie_destroy(Roots)
     ;   true
     ).
 

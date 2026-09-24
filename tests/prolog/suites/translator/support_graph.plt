@@ -10,6 +10,10 @@
 %     support_graph:overlapping_roots_invalidate_the_shared_node_once,
 %     support_graph:replacing_supports_detaches_the_old_source;
 %     commit=7ade2b90e2631451fd6ffc23d22dd8c2d4a7a7aa].
+%   - Two graphs of one shape whose modules are named after two checkout
+%     paths cost the same inferences to invalidate [tested:
+%     support_graph:an_invalidation_costs_the_same_whatever_its_nodes_are_named;
+%     commit=WORKTREE].
 %   - Releasing a module removes only that module's retained graph state
 %     across every node shape and either edge endpoint, without pruning a
 %     live cross-module symbol index [tested:
@@ -131,6 +135,37 @@ test(overlapping_roots_invalidate_the_shared_node_once) :-
     support_graph:support_replace(Target, [Old, New]),
     user:support_invalidate_many([Old, New]),
     assertion(user:p36_action_count(target, 1)).
+
+% A root supporting 200 derived nodes whose modules are named after Checkout,
+% the way a library space's module is named after the path of its file.
+p36_named_star(Checkout, [Root|Leaves]) :-
+    atom_concat(Checkout, '/root.metta', RootModule),
+    Root = derived(RootModule, p36_named),
+    findall(derived(Module, p36_named),
+            ( between(1, 200, Index),
+              format(atom(Module), '~w/lib_~d.metta', [Checkout, Index]) ),
+            Leaves),
+    forall(member(Leaf, Leaves), support_graph:support_replace(Leaf, [Root])).
+
+% What invalidating the star's root costs. No invalidation action matches a
+% p36_named node, so the window holds the walk and the dirty marks alone.
+p36_invalidation_cost(Checkout, Cost) :-
+    p36_named_star(Checkout, [Root|Leaves]),
+    statistics(inferences, Before),
+    user:support_invalidate(Root),
+    statistics(inferences, After),
+    Cost is After - Before,
+    forall(member(Node, [Root|Leaves]), user:support_forget(Node)).
+
+%The visited check probed library(nb_set)'s hash table in Prolog, so the same
+%walk over nodes named after a different checkout cost a different number of
+%inferences. The first star is discarded, so a first use of anything the walk
+%reaches is paid outside both measured windows.
+test(an_invalidation_costs_the_same_whatever_its_nodes_are_named) :-
+    p36_invalidation_cost('/warm', _),
+    p36_invalidation_cost('/srv/checkout/ai-tmp/wt-battery-104', Near),
+    p36_invalidation_cost('/srv/checkout/ai-tmp/wt-battery-105', Far),
+    assertion(Near == Far).
 
 test(replacing_supports_detaches_the_old_source) :-
     p36_node(old, Old),

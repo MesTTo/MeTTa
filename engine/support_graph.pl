@@ -47,6 +47,12 @@
 %     support_graph:an_invalidation_cycle_terminates,
 %     support_graph:overlapping_roots_invalidate_the_shared_node_once;
 %     commit=7ade2b90e2631451fd6ffc23d22dd8c2d4a7a7aa].
+%   - An invalidation's inference count is a function of the graph's shape,
+%     not of its nodes' text: the visited check is one trie insertion however
+%     the node's hash collides, so a node named after a different checkout
+%     path costs the same [tested:
+%     support_graph:an_invalidation_costs_the_same_whatever_its_nodes_are_named;
+%     commit=WORKTREE].
 %   - Stabilization reuses a clean value and cuts off a second propagation
 %     wave when recomputation is variant-equal [tested:
 %     support_graph:an_unchanged_stabilization_cuts_off_propagation;
@@ -135,7 +141,6 @@
 :- use_module(library(assoc)).
 :- use_module(library(error)).
 :- use_module(library(lists)).
-:- use_module(library(nb_set)).
 :- use_module(library(pairs)).
 :- use_module(scc, [nodes_arcs_sccs/3]).
 
@@ -750,7 +755,7 @@ support_prune_function_locked(Function) :-
     support_forget_locked(Function).
 support_prune_function_locked(_).
 
-% Invalidation is O(V_delta + E_delta) expected: nb_set gives an expected
+% Invalidation is O(V_delta + E_delta) expected: a trie gives an expected
 % constant-time visited check, and each reachable node and forward edge is
 % inspected once. The closure is fixed before callbacks mutate artifacts.
 support_invalidate(Support) :-
@@ -796,8 +801,32 @@ support_invalidate_many_sorted(Supports) :-
         support_atomic(support_invalidate_many_locked(Supports))).
 
 support_invalidate_many_locked(Supports) :-
-    empty_nb_set(Seen),
-    support_visit_list(Supports, Seen, Affected, []),
+    support_invalidate_closure(Supports, []).
+
+% Mark every node reachable from Roots dirty, then run each one's action, each
+% node once and none of Excluded.
+%
+% The visited set is a trie rather than library(nb_set), so that what an
+% invalidation costs is a function of the graph's shape and not of its nodes'
+% text. nb_set is a closed hash table probed in Prolog: a check whose slot is
+% taken retries from the next one, four inferences a step, and where a node
+% lands is its variant hash, which for a library space's node hashes the
+% absolute path of the file that defined it. So the same program cost a
+% different number of inferences in every checkout: 09-class_values' twin read
+% 3,420 more at ai-tmp/wt-battery-105 than at ai-tmp/wt-battery-104, paths one
+% digit apart, with every call count equal except 855 more probes [measured
+% 2026-09-24: SWI's port-counting profiler over the twin in both batteries of
+% 78cecff40]. A trie answers the same check in one foreign call whatever
+% collides beneath it, and SWI moved distinct/2's seen-set off nb_set and onto
+% one for its overhead [source:
+% https://github.com/SWI-Prolog/swipl-devel/commit/f1551946d1ab64cf07161c79f2760877f5549965].
+% Nodes are acyclic terms of module and function names, which a trie requires.
+support_invalidate_closure(Roots, Excluded) :-
+    setup_call_cleanup(
+        trie_new(Seen),
+        ( maplist(trie_insert(Seen), Excluded),
+          support_visit_list(Roots, Seen, Affected, []) ),
+        trie_destroy(Seen)),
     forall(member(Node, Affected), support_mark_dirty(Node)),
     forall(( member(Node, Affected),
              support_invalidation_action(Node) ),
@@ -819,13 +848,12 @@ support_value_retractall(Node) :-
     retractall(support_value(NodeKey, Node, _)).
 
 support_visit(Node, Seen, Nodes, Tail) :-
-    add_nb_set(Node, Seen, New),
-    (   New == false
-    ->  Nodes = Tail
-    ;   Nodes = [Node|Rest],
+    (   trie_insert(Seen, Node)
+    ->  Nodes = [Node|Rest],
         term_hash(Node, NodeKey),
         findall(Derived, supports(NodeKey, _, Node, Derived), DerivedNodes),
         support_visit_list(DerivedNodes, Seen, Rest, Tail)
+    ;   Nodes = Tail
     ).
 
 support_visit_list([], _, Tail, Tail).
@@ -878,13 +906,7 @@ support_stabilize_locked(Derived, Compute, Value) :-
 support_invalidate_successors_locked(Derived) :-
     term_hash(Derived, DerivedKey),
     findall(Child, supports(DerivedKey, _, Derived, Child), Children),
-    empty_nb_set(Seen),
-    add_nb_set(Derived, Seen),
-    support_visit_list(Children, Seen, Affected, []),
-    forall(member(Node, Affected), support_mark_dirty(Node)),
-    forall(( member(Node, Affected),
-             support_invalidation_action(Node) ),
-           true).
+    support_invalidate_closure(Children, [Derived]).
 
 % Test and engine lifecycle seam. Production callers normally retire one
 % typed node with support_forget/1; a process-wide cache reset owns all nodes.
