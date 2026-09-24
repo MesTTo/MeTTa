@@ -191,3 +191,59 @@ predicate the module has already linked takes the branch.
 
 Suggested fix: one initialiser for both, which is this tree's patch,
 `swi-unlinked-definition-uninitialised.patch`.
+
+### 4. `Prolog.url_properties()` reports a missing size as NaN
+
+`url_properties(url)` in `src/wasm/prolog.js` [line 1094 at 10.1.14, and
+unchanged on master at d7d2a2bb8f5b] parses the size with
+`parseInt(r.headers.get("content-length"))` and then tests
+`if ( ! size instanceof Number ) size = -1;`. That parses as
+`(!size) instanceof Number`, a boolean tested against Number, so it is
+always false and a response without Content-Length reports `size: NaN`
+where -1 was meant. esbuild flags the line as suspicious-boolean-not when it
+bundles the loader.
+
+Reproduction under Node, against a local server that answers HEAD with
+`Transfer-Encoding: chunked` and so sends no Content-Length:
+
+```js
+const server = createServer((req, res) => { res.writeHead(200, { "Transfer-Encoding": "chunked" }); res.end(); });
+await new Promise((ok) => server.listen(0, "127.0.0.1", ok));
+const swipl = await bootHost("extensions/node/_host");   // tools/wasm-host/host.mjs
+const props = await swipl.prolog.url_properties(`http://127.0.0.1:${server.address().port}/x.pl`);
+// props.size is NaN, status 200, last_modified set
+```
+
+Nothing this tree runs reads the value. `library(wasm)`'s one reader of
+`size`, the `http(size, URL, Size)` clause, is compiled out by
+`:- if(true). http(_,_,_) :- !, fail.`, its load hook's `load_options/4` reads
+`status` and `last_modified` alone, and tsmetta never calls
+`url_properties`. Suggested fix: `if ( Number.isNaN(size) ) size = -1;`.
+
+### 5. `expand_file_name/2` copies from a path it has just unterminated
+
+`expand()` in `src/os/pl-glob.c` [the meta-segment branch, lines 697-713 at
+10.1.14, and the same lines on master, whose last change to the file is
+9cb544583d24 of 2026-01-18] builds `path` from the directory being expanded
+and its prefix, and when `path` does not end in `/` it appends one with
+`path[plen++] = '/'`, overwriting the terminating NUL without writing another.
+For every entry the pattern matches it then runs `strcpy(newp, path)`, which
+scans past `plen` into stale stack bytes until it meets a NUL, followed by
+`strcpy(&newp[plen], e->d_name)`, which overwrites from `plen` on. So the
+returned list is right whatever the stale bytes hold. Only two things depend
+on them: how far the first copy runs, and, with no NUL left within the
+buffer, whether `__strcpy_chk` aborts the process.
+
+Reproduction under valgrind, over `d/one/a.txt`, `d/one/b.txt` and
+`d/two/c.txt`: `expand_file_name('d/*/*', L)` reports 3 conditional jumps on
+uninitialised values in `__strcpy_chk` under `pl_expand_file_name2_va`, one
+per entry matched below the first expanded level, while `d/*` and `d/one/*`
+are clean, because a first-level prefix keeps its slash. The lists are right
+in all three. This engine's boot through janus makes 316 such reads, all
+before a twin's measured window: none fall inside it for class_grains or
+reference_maps (measured 2026-09-24 by exiting the same valgrind run just
+before and just after the window), and the code shows they cannot move an
+inference count in any case.
+
+Suggested fix: write `path[plen] = EOS;` after appending the separator, or
+copy the prefix with `memcpy(newp, path, plen)`.
