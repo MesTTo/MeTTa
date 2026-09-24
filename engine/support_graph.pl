@@ -53,6 +53,11 @@
 %     path costs the same [tested:
 %     support_graph:an_invalidation_costs_the_same_whatever_its_nodes_are_named;
 %     commit=d4a365c16bdf1801f9839597e56ecfcc8c2b7a0c].
+%   - A node can be stabilized at a value its publisher computed from a change
+%     it knows, walking only the successors it names, and a dirty node still
+%     answers the value it last stabilized to [tested:
+%     support_graph:a_stated_stabilization_walks_only_the_successors_it_names;
+%     commit=WORKTREE].
 %   - Stabilization reuses a clean value and cuts off a second propagation
 %     wave when recomputation is variant-equal [tested:
 %     support_graph:an_unchanged_stabilization_cuts_off_propagation;
@@ -106,7 +111,9 @@
             support_publish/3,
             support_publish_compiled_form/5,
             support_stabilize/3,
+            support_stabilize_to/3,
             support_retained/2,
+            support_stabilized/2,
             with_support_repairs_deferred/1,
             support_memo_take_change/2,
             support_memo_sccs/2,
@@ -876,6 +883,13 @@ support_retained_locked(Derived, Value) :-
     support_value(DerivedKey, Derived, Stored),
     copy_term(Stored, Value).
 
+% The value a node stabilized last, whether or not a change has dirtied it
+% since: the state a publisher that knows the change applies it to.
+support_stabilized(Derived, Value) :-
+    must_be_support_node(Derived),
+    term_hash(Derived, DerivedKey),
+    support_atomic(support_value(DerivedKey, Derived, Value)).
+
 % Compute is called as call(Compute, FreshValue). A clean retained value is
 % returned without calling it. A changed value invalidates successors; an
 % unchanged one clears this node and performs no second forward walk.
@@ -891,22 +905,40 @@ support_stabilize_locked(Derived, _, Value) :-
     !,
     copy_term(Stored, Value).
 support_stabilize_locked(Derived, Compute, Value) :-
-    term_hash(Derived, DerivedKey),
     call(Compute, Fresh),
+    support_settle_locked(Derived, Fresh, all),
+    copy_term(Fresh, Value).
+
+% Stabilize Derived at Value, which its publisher computed from a change it
+% knows, walking only Moved: the successors that read a part of the value the
+% change moved. support_stabilize/3 cannot know which part a successor reads,
+% so a changed value walks every successor; a publisher that holds the value
+% as a map from keys, and knows the keys it touched, names the successors
+% reading them and the ones reading the whole value, and the rest keep what
+% they read.
+support_stabilize_to(Derived, Value, Moved) :-
+    must_be_support_node(Derived),
+    must_be(list, Moved),
+    maplist(must_be_support_node, Moved),
+    support_atomic(support_settle_locked(Derived, Value, Moved)).
+
+% Store Fresh as Derived's value and clean it. A value variant-equal to the
+% stored one walks nothing; a changed one walks Moved, a list of successors, or
+% all of them.
+support_settle_locked(Derived, Fresh, Moved) :-
+    term_hash(Derived, DerivedKey),
     (   support_value(DerivedKey, Derived, Previous),
         Previous =@= Fresh
     ->  retractall(support_dirty_node(DerivedKey, Derived))
     ;   retractall(support_value(DerivedKey, Derived, _)),
         assertz(support_value(DerivedKey, Derived, Fresh)),
         retractall(support_dirty_node(DerivedKey, Derived)),
-        support_invalidate_successors_locked(Derived)
-    ),
-    copy_term(Fresh, Value).
-
-support_invalidate_successors_locked(Derived) :-
-    term_hash(Derived, DerivedKey),
-    findall(Child, supports(DerivedKey, _, Derived, Child), Children),
-    support_invalidate_closure(Children, [Derived]).
+        (   Moved == all
+        ->  findall(Child, supports(DerivedKey, _, Derived, Child), Children)
+        ;   Children = Moved
+        ),
+        support_invalidate_closure(Children, [Derived])
+    ).
 
 % Test and engine lifecycle seam. Production callers normally retire one
 % typed node with support_forget/1; a process-wide cache reset owns all nodes.

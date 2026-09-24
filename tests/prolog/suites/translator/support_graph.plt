@@ -36,6 +36,11 @@
 %     support_graph:clearing_a_module_preserves_its_consumers_dependencies,
 %     support_graph:clearing_a_module_prunes_only_unused_symbol_indexes;
 %     commit=901a768e17b3ad2559b19d2895a250451a88da99].
+%   - A publisher that knows its change stabilizes a node at its value and
+%     walks only the successors it names, none when the value is unchanged,
+%     and a dirty node still answers the value it last stabilized to [tested:
+%     support_graph:a_stated_stabilization_walks_only_the_successors_it_names;
+%     commit=WORKTREE].
 %   - Retiring one compiled RHS preserves its peers, restores it on rollback,
 %     and leaves an empty or already retired form without a memo change
 %     [tested: support_graph:retiring_one_rhs_preserves_its_peer_and_rolls_back,
@@ -80,6 +85,9 @@ p36_node(cycle_a, derived(p36_test, cycle_a)).
 p36_node(cycle_b, derived(p36_test, cycle_b)).
 p36_node(cutoff, derived(p36_test, cutoff)).
 p36_node(cutoff_child, derived(p36_test, cutoff_child)).
+p36_node(stated, derived(p36_test, stated)).
+p36_node(stated_named, derived(p36_test, stated_named)).
+p36_node(stated_other, derived(p36_test, stated_other)).
 p36_node(other_module, derived(p36_other, target)).
 p36_node(type_dependent, derived(p36_test, type_dependent)).
 p36_node(dispatch_dependent, derived(p36_test, dispatch_dependent)).
@@ -192,6 +200,27 @@ test(an_unchanged_stabilization_cuts_off_propagation) :-
     assertion(user:p36_action_count(cutoff_child, 1)),
     support_graph:support_stabilize(Cutoff, p36_compute(unused), same),
     assertion(user:p36_compute_count(2)).
+
+%A publisher that holds its node's value as a map, and knows which keys its
+%change touched, names the successors reading them; the rest keep what they
+%read, and a value equal to the stored one walks nothing.
+test(a_stated_stabilization_walks_only_the_successors_it_names) :-
+    p36_node(stated, Stated),
+    p36_node(stated_named, Named),
+    p36_node(stated_other, Other),
+    support_graph:support_replace(Named, [Stated]),
+    support_graph:support_replace(Other, [Stated]),
+    support_graph:support_stabilize(Stated, =(one), one),
+    support_graph:support_invalidate_node(Stated),
+    assertion(support_graph:support_stabilized(Stated, one)),
+    assertion(\+ support_graph:support_retained(Stated, _)),
+    retractall(user:p36_action_count(_, _)),
+    support_graph:support_stabilize_to(Stated, two, [Named]),
+    assertion(user:p36_action_count(stated_named, 1)),
+    assertion(\+ user:p36_action_count(stated_other, _)),
+    assertion(support_graph:support_retained(Stated, two)),
+    support_graph:support_stabilize_to(Stated, two, [Named]),
+    assertion(user:p36_action_count(stated_named, 1)).
 
 test(forgetting_a_module_releases_only_its_nodes) :-
     p36_node(base, Base),

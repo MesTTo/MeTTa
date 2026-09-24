@@ -189,6 +189,25 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- A `from` row declared into a space that has published before is published by
+  itself: its row node, the entries it adds to the space's face, the heads
+  those entries reach and the metadata they bring, leaving everything the last
+  publication made. A new row used to republish every row the space held, so n
+  rows cost Θ(n²) row republications. 13-class_decorators.metta reads 105.5M
+  instructions where it read 155.2M, under the parity lane's 147.0M allowance,
+  and the parity baseline records that. A space still republishes whole after
+  any other change, and whenever the rows would withdraw a source origin, a
+  name in it turned internal, a row it owed was rolled back, or a home its
+  standing rows reach is republished in the same drain; which way the space's
+  name sorts against its homes' decides nothing. A metadata row a publication
+  projects is graded as it arrives, as the add door grades any row, where its
+  grade used to wait for the space's next publication.
+  `tests/prolog/suites/spaces/reference_deltas.plt` holds every step of every
+  sequence to what a whole republication publishes. `support_graph` gains
+  `support_stabilize_to/3`, which stabilizes a node at a value its publisher
+  computed and walks only the successors it names, and `support_stabilized/2`,
+  a node's last stabilized value while it is dirty.
+
 - `tools/check.sh` passes shellcheck again. A `# shellcheck disable=`
   directive with `--` prose after it failed to parse, which stopped shellcheck
   there and hid every finding past it. The reason now follows a `#`, the script

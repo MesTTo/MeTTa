@@ -8,6 +8,11 @@
 %   reference_source_origins:declarations_introduce_names_but_nested_declarations_and_equations_are_uses,
 %   reference_source_origins:callable_union_and_withdrawal_use_standing_roots,
 %   reference_source_origins:distinct_origins_refuse_only_the_ambiguous_use; commit=1a8c00f93ae6c63ccabd41d39fed3f967dadd3a9].
+% Guarantees: the plan a space's readers were published from is kept beside
+%   them, and rows alone extend its origins monotonically or refuse, leaving
+%   the space to be planned whole, when they would withdraw one [tested:
+%   reference_deltas:every_step_of_a_row_sequence_publishes_what_a_whole_republication_does;
+%   commit=WORKTREE].
 % Owns resources: metta_reference_source_reader/3 owns exact derived clause
 %   references. Refresh replaces them and home release erases them. Their
 %   transaction state follows the source rows and existing frame reconciliation.
@@ -15,13 +20,21 @@
 %   clause publication. Face and mapper evaluation occur before publication.
 % Decides: bind! remains global; FROM elaborates source uses, never supplied values.
 
-:- use_module(library(assoc), [empty_assoc/1, list_to_assoc/2]).
+:- use_module(library(assoc), [empty_assoc/1, list_to_assoc/2, get_assoc/3,
+                                put_assoc/4, gen_assoc/3]).
 :- use_module(library(pairs), [group_pairs_by_key/2]).
 :- use_module(library(ordsets), [ord_memberchk/2]).
 :- dynamic metta_reference_resolve_source/5, metta_reference_source_reader/3.
+%The plan a space's readers were last published from: its source map and its
+%origins, each name's roots. A publication that owes only new rows extends it
+%(metta_reference_source_plan_rows/6); a whole one replaces it.
+:- dynamic metta_reference_plan/2.
 :- seam:context_reader(metta_reference_source_mapping(Space),
                        '$metta_reference_source_mapping', stack(Space)).
 
+%A plan is source_plan(Map, Origins): Map, each source name's meaning, is what
+%the readers resolve by; Origins, each name's roots, what the meanings and the
+%canonical declarations are derived from.
 metta_reference_source_plan(Space, Face, source_plan(Map, Origins)) :-
     findall(Name,
             ( member(Name/Arity-root(Home, Original, _, _), Face),
@@ -31,13 +44,51 @@ metta_reference_source_plan(Space, Face, source_plan(Map, Origins)) :-
             ( member(Name/declaration-Root, Face),
               Root = root(Home, Original, declaration, []),
               \+ ord_memberchk(Name, Blocked),
-              once(metta_reference_source_constructor(Home, Original)) ), Origins0),
-    sort(Origins0, Origins),
-    group_pairs_by_key(Origins, Groups),
+              once(metta_reference_source_constructor(Home, Original)) ), Roots0),
+    sort(Roots0, Roots),
+    group_pairs_by_key(Roots, Groups),
+    list_to_assoc(Groups, Origins),
     findall(Name-Meaning,
-            ( member(Name-Roots, Groups),
-              metta_reference_source_meaning(Name, Roots, Meaning) ), Pairs),
+            ( member(Name-NameRoots, Groups),
+              metta_reference_source_meaning(Name, NameRoots, Meaning) ), Pairs),
     list_to_assoc(Pairs, Map).
+
+%The plan a face gains from Entries, the entries new rows alone added to it:
+%each declaration-only name among them that nothing in the face blocks gains
+%an origin, and every origin the plan had stands. Blocked is a negation over
+%the whole face, so an entry that blocks a name holding origins withdraws them;
+%this fails then, and the caller plans the face whole. That is the one change
+%here that is not monotone, an antijoin whose delta needs the other side's
+%whole state [source: Budiu, Chajed, McSherry, Ryzhyk, Tannen, "DBSP:
+%Automatic Incremental View Maintenance for Rich Query Languages", PVLDB
+%16(7) 2023, doi 10.14778/3587136.3587137, section 7.5]. A name is blocked by
+%an integer entry among Entries, by one the face already held, which the
+%space's recorded roots name, or by one of the space's own heads; the own
+%heads stand, since a change to them is a face event that plans whole.
+metta_reference_source_plan_rows(Space, Module, source_plan(Map0, Origins0),
+                                 Entries, source_plan(Map, Origins), Added) :-
+    findall(Name, ( member(Name/Arity-_, Entries), integer(Arity) ), Blocking0),
+    sort(Blocking0, Blocking),
+    \+ ( member(Name, Blocking), get_assoc(Name, Origins0, _) ),
+    findall(Name-Root,
+            ( member(Name/declaration-Root, Entries),
+              Root = root(Home, Original, declaration, []),
+              \+ ord_memberchk(Name, Blocking),
+              \+ metta_reference_roots(Module, Name, _, _),
+              \+ metta_reference_local_head(Space, Name, _),
+              once(metta_reference_source_constructor(Home, Original)) ), Added0),
+    sort(Added0, Added),
+    group_pairs_by_key(Added, Groups),
+    foldl(metta_reference_source_origin, Groups, Map0-Origins0, Map-Origins).
+
+metta_reference_source_origin(Name-Roots, Map0-Origins0, Map-Origins) :-
+    ( get_assoc(Name, Origins0, Known) -> true ; Known = [] ),
+    append(Roots, Known, All0), sort(All0, All),
+    put_assoc(Name, Origins0, All, Origins),
+    (   metta_reference_source_meaning(Name, All, Meaning)
+    ->  put_assoc(Name, Map0, Meaning, Map)
+    ;   Map = Map0
+    ).
 
 metta_reference_source_constructor(Home, Original) :-
     metta_reference_type_subject(Row, Original),
@@ -53,10 +104,15 @@ metta_reference_source_meaning(Name, Roots, Meaning) :-
     ; Meaning = ambiguous(Roots) ).
 
 metta_reference_source_metadata_face(Face, source_plan(_, Origins), Metadata) :-
-    findall(Original/declaration-Root,
-            ( member(_-Root, Origins), Root = root(_, Original, _, _) ), Canonical),
+    findall(Entry,
+            ( gen_assoc(_, Origins, Roots),
+              metta_reference_source_canonical(Roots, Entry) ), Canonical),
     append(Face, Canonical, All),
     sort(All, Metadata).
+
+%The declarations an origin's roots project under their own names.
+metta_reference_source_canonical(Roots, Original/declaration-Root) :-
+    member(Root, Roots), Root = root(_, Original, _, _).
 
 % Resolve after extension callbacks. A callback may publish a new FROM row.
 metta_reference_resolve_source(_, _, tokens, Term, Rewritten) :-
@@ -100,19 +156,27 @@ metta_reference_source_queued(Space) :-
           transaction(metta_reference_source_replace(Space,
               [reader(pending, metta_engine, Resolver)|Readers])) )).
 
-metta_reference_publish_source(Space, source_plan(Map, _)) :-
+metta_reference_publish_source(Space, Plan) :-
+    Plan = source_plan(Map, _),
     with_mutex(metta_reference_sources,
         ( empty_assoc(Map)
-        -> transaction(metta_reference_source_replace(Space, []))
+        -> transaction(( metta_reference_source_replace(Space, []),
+                         metta_reference_source_keep(Space, Plan) ))
         ; metta_reference_source_clauses(Space, Readers),
           Resolver = (metta_reference_resolve_source(Space, Origin, Policy, Term, Out) :-
                           !, filereader:source_bound_names(Map, Origin, Policy, Term, Out)),
-          transaction(metta_reference_source_replace(Space,
-              [reader(ready, metta_engine, Resolver)|Readers])) )).
+          transaction(( metta_reference_source_replace(Space,
+                            [reader(ready, metta_engine, Resolver)|Readers]),
+                        metta_reference_source_keep(Space, Plan) )) )).
+
+metta_reference_source_keep(Space, Plan) :-
+    retractall(metta_reference_plan(Space, _)),
+    assertz(metta_reference_plan(Space, Plan)).
 
 metta_reference_source_clear(Space) :-
     with_mutex(metta_reference_sources,
-               transaction(metta_reference_source_replace(Space, []))).
+               transaction(( metta_reference_source_replace(Space, []),
+                             retractall(metta_reference_plan(Space, _)) ))).
 
 metta_reference_source_replace(Space, Clauses) :-
     forall(retract(metta_reference_source_reader(Space, _, Ref)), host_transactions:try_erase(Ref)),

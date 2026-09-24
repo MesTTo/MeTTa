@@ -14,6 +14,14 @@
 %   references:a_committed_from_row_binds_only_the_heads_it_adds,
 %   reference_loading:a_head_bound_before_its_home_settles_rebinds_once_when_it_settles;
 %   commit=b7e3d3bcbcf0539820abd10434e5b7feaebc8999].
+% Guarantees: a publication that owes only from rows publishes their nodes,
+%   their entries into the face and the heads those entries reach, projects
+%   and grades the metadata they bring, and leaves every other head, its node
+%   and the callers resolved through it as the last publication left them, so
+%   it publishes what a whole republication would [tested:
+%   reference_deltas:every_step_of_a_row_sequence_publishes_what_a_whole_republication_does,
+%   reference_deltas:a_sampled_row_sequence_publishes_what_a_whole_republication_does;
+%   commit=WORKTREE].
 % Guarantees: declaration-only faces carry sorts, constructor arrows and
 %   subsorts without making their subjects callable
 %   [tested: references:constructor_declarations_travel_without_callable_heads;
@@ -186,7 +194,7 @@ metta_reference_declare(Space, Term, Token) :-
         metta_reference_validate_selection(Home, Map),
         transaction(( spaces:metta_store_occurrence(Space, Term, Token, _),
                       assertz(metta_reference_row(Space, Token, Home, Map)),
-                      metta_reference_changed(Space) ))
+                      metta_reference_changed(Space, row(Token)) ))
     ;   Term = [internal|Names]
     ->  maplist(must_be(atom), Names),
         transaction(( spaces:metta_store_occurrence(Space, Term, Token, _),
@@ -283,7 +291,46 @@ metta_reference_refresh_grades(Space) :-
     forall(( spaces:metta_space_pair(Space, Row, Token, _),
              metta_reference_row_head(Row, Name),
              metta_reference_internal(Space, Name) ),
-           assertz(metta_occurrence_grade(Space, Token, visibility, 'INTERNAL'))).
+           assertz(metta_occurrence_grade(Space, Token, visibility, 'INTERNAL'))),
+    (   metta_reference_row(Space, _, _, _)
+    ->  metta_reference_graded_names(Space, Names),
+        retractall(metta_reference_graded(Space, _)),
+        assertz(metta_reference_graded(Space, Names))
+    ;   true
+    ).
+
+%A row's grade, the rule the whole-space pass above and the add door's
+%observer apply inline on their hot paths.
+metta_reference_grade_row(Space, Row, Token) :-
+    (   metta_reference_row_head(Row, Name),
+        metta_reference_internal(Space, Name)
+    ->  assertz(metta_occurrence_grade(Space, Token, visibility, 'INTERNAL'))
+    ;   true
+    ).
+
+%Grades are a function of a space's rows and of which names are internal in
+%it. A publication that owes only rows added grades those rows and keeps the
+%rest, which is sound while the internal names stand, since every other row
+%was graded as it arrived: the add door's observer grades the rows it adds
+%(metta_reference_added/3) and a projection is graded as it is projected
+%(metta_reference_project_metadata/2). An internal row and a manifest row
+%change them only through a face event, which makes the publication whole; a
+%specializer registers a name without one, as a copied space does when it
+%adopts its specializations, so the module's specializer names are what a
+%whole grading records, and a space whose names moved since is published
+%whole (metta_reference_owed_rows/4). A space holding no from row at its last
+%whole grading records none, so its first row after it is published whole.
+:- dynamic metta_reference_graded/2.
+
+metta_reference_grade_rows(Space, Tokens) :-
+    forall(( member(Token, Tokens),
+             spaces:metta_space_pair(Space, Row, Token, _) ),
+           metta_reference_grade_row(Space, Row, Token)).
+
+metta_reference_graded_names(Space, Names) :-
+    space_module(Space, Module),
+    findall(Name, specializer:ho_specialization(Module, _, Name), Names0),
+    sort(Names0, Names).
 
 % Data changes a population, not its exported definitions. Retain the ordinary
 % occurrence grade and reserve binding publication for the rows that define it.
@@ -367,15 +414,23 @@ metta_reference_local_face(Space, Visited, Face) :-
     ->  Face = []
     ;   findall(Name/Arity-root(Space, Name, Arity, []),
                 metta_reference_local_head(Space, Name, Arity), Own),
-        findall(Name/Arity-Root,
+        findall(Entry,
                 ( metta_reference_row(Space, Token, Home, Map),
-                  metta_reference_source_face(Space, Home, Visited, Source),
-                  member(Original/Arity-SourceRoot, Source),
-                  metta_reference_names(Space, Token, Map, Original, Names),
-                  member(Target, Names),
-                  metta_reference_target(Target, Arity, SourceRoot, Name, Root) ), Imported),
+                  metta_reference_row_entry(Space, Visited, Token, Home, Map, Entry) ),
+                Imported),
         append(Own, Imported, All), sort(All, Face)
     ).
+
+%An entry one from row contributes to its space's face: each name its map
+%gives a public head of the home, rooted where that head is defined. A face is
+%its own heads and every row's entries, so a row added changes it by exactly
+%this, which is what metta_reference_publish_rows/8 publishes.
+metta_reference_row_entry(Space, Visited, Token, Home, Map, Name/Arity-Root) :-
+    metta_reference_source_face(Space, Home, Visited, Source),
+    member(Original/Arity-SourceRoot, Source),
+    metta_reference_names(Space, Token, Map, Original, Names),
+    member(Target, Names),
+    metta_reference_target(Target, Arity, SourceRoot, Name, Root).
 
 % A self reference aliases the space's own definitions once. Following its
 % imported face would repeatedly apply the same map to its previous aliases.
@@ -553,15 +608,16 @@ metta_reference_retire_rows(Space) :-
                ( retractall(metta_reference_row(Space, Token, _, _)),
                  retractall(metta_reference_map(Token, _, _)),
                  support_graph:support_forget(derived(Module, reference_row(Token))) )),
+        %The grading that follows records the space's names again while it
+        %still holds a row; a space it left without one records none.
+        retractall(metta_reference_graded(Space, _)),
         metta_reference_forget_faces
     ).
 
 metta_reference_publish_face(Space, Module, Face, Faces) :-
-    findall(derived(Module, reference_row(Token)),
+    findall(Node,
             ( metta_reference_row(Space, Token, Home, _),
-              space_module(Home, HomeModule),
-              support_graph:support_publish(derived(Module, reference_row(Token)),
-                  [derived(HomeModule, reference_face)], []) ), Supports0),
+              metta_reference_publish_row_node(Module, Token, Home, Node) ), Supports0),
     sort(Supports0, Supports),
     support_graph:support_publish(derived(Module, reference_face), Supports, []),
     metta_reference_stabilize_face(Space, Module, Face),
@@ -580,43 +636,72 @@ metta_reference_publish_face(Space, Module, Face, Faces) :-
     append(Held, Emptied, Keyed0),
     sort(Keyed0, Keyed),
     forall(member(Name/Arity-Roots, Keyed),
-           ( %A binding whose roots are the ones already recorded stands: the
-             %wrapper is the same wrapper, and rebinding it announced the head
-             %as changed, which abolished every declared table and forgot every
-             %specialization in the process on a refresh that changed nothing.
-             %Such a refresh runs whenever a deferred library function first
-             %compiles, so a space holding one `from` row lost its tables the
-             %first time it asked table-stats [tested:
-             %test_a_reference_refresh_that_changes_nothing_keeps_the_table;
-             %commit=689745c3bb9ef9a36b5427bb3e7289a69da9b71b]. A change in a HOME's definition reaches this
-             %module through its own announcement and the support graph, not
-             %through the refresh, so nothing is lost by standing still.
-             ( metta_reference_roots(Module, Name, Arity, Previous) -> true
-             ; Previous = none ),
-             %The row is read before the key is computed: a head bound inside
-             %a transaction has none, and the key's settledness walk costs
-             %every root a load-state read, which such a head would spend on
-             %every refresh for nothing.
-             (   Roots \== [], Previous =@= Roots,
-                 metta_reference_bound_hash(Module, Name, Arity, Hash),
-                 metta_reference_bound_key(Roots, Hash),
-                 \+ metta_reference_root_home_changed(Space, Roots)
-             ->  true
-             ;   %Forgotten before the rebind, so a cut or an abort anywhere
-                 %inside it leaves no record claiming the binding stands, and
-                 %the completion refresh that follows rebinds it.
-                 metta_reference_bound_forget(Module, Name, Arity),
-                 metta_reference_bind(Space, Module, Name, Arity, Roots, Faces),
-                 metta_reference_bound_record(Module, Name, Arity, Roots),
-                 ( Roots == []
-                 -> support_graph:support_forget(derived(Module, reference(Name, Arity)))
-                 ; support_graph:support_publish(derived(Module, reference(Name, Arity)),
-                       [derived(Module, reference_face)],
-                       [edge(derived(Module, reference(Name, Arity)), function(Module, Name))]) ),
-                 retractall(metta_reference_roots(Module, Name, Arity, _)),
-                 ( Roots == [] -> true
-                 ; assertz(metta_reference_roots(Module, Name, Arity, Roots)) )
-             ) )).
+           metta_reference_publish_key(Space, Module, Name, Arity, Roots, Faces)).
+
+%What a space owes when the only change since its last publication is from
+%rows declared into it: New's row nodes, Face and Public as its face node's
+%value, and Keys, each head the rows reach with its roots. Everything else it
+%published stands, because a face is the union of its own heads and its rows'
+%entries, and the rest of the publication is a view over the face's entries
+%(metta_reference_owed_rows/4 and metta_reference_publication/4 in
+%engine/metta/reference_refresh.pl say when a delta applies and what it is).
+%Moved are the successors that read the face whole: its importers' rows. A
+%head the rows do not reach resolves as it did, so its node, the callers that
+%resolved through it and their tables and specializations are left as they
+%are; a head they reach rebinds and announces itself.
+metta_reference_publish_rows(Space, Module, New, Face, Public, Keys, Moved, Faces) :-
+    FaceNode = derived(Module, reference_face),
+    forall(member(Token-Home, New),
+           ( metta_reference_publish_row_node(Module, Token, Home, Node),
+             support_graph:support_record(FaceNode, Node) )),
+    metta_with_trailed_enumeration('$metta_reference_face_wave', true,
+        support_graph:support_stabilize_to(FaceNode, face(Face, Public), Moved)),
+    forall(member(Name/Arity-Roots, Keys),
+           metta_reference_publish_key(Space, Module, Name, Arity, Roots, Faces)).
+
+%A row's node, which reads its home's face.
+metta_reference_publish_row_node(Module, Token, Home, Node) :-
+    Node = derived(Module, reference_row(Token)),
+    space_module(Home, HomeModule),
+    support_graph:support_publish(Node, [derived(HomeModule, reference_face)], []).
+
+%A binding whose roots are the ones already recorded stands: the wrapper is
+%the same wrapper, and rebinding it announced the head as changed, which
+%abolished every declared table and forgot every specialization in the
+%process on a refresh that changed nothing. Such a refresh runs whenever a
+%deferred library function first compiles, so a space holding one `from` row
+%lost its tables the first time it asked table-stats [tested:
+%test_a_reference_refresh_that_changes_nothing_keeps_the_table;
+%commit=689745c3bb9ef9a36b5427bb3e7289a69da9b71b]. A change in a HOME's
+%definition reaches this module through its own announcement and the support
+%graph, not through the refresh, so nothing is lost by standing still.
+%
+%The row is read before the key is computed: a head bound inside a
+%transaction has none, and the key's settledness walk costs every root a
+%load-state read, which such a head would spend on every refresh for
+%nothing. Forgotten before the rebind, so a cut or an abort anywhere inside it
+%leaves no record claiming the binding stands, and the completion refresh
+%that follows rebinds it.
+metta_reference_publish_key(Space, Module, Name, Arity, Roots, Faces) :-
+    ( metta_reference_roots(Module, Name, Arity, Previous) -> true
+    ; Previous = none ),
+    (   Roots \== [], Previous =@= Roots,
+        metta_reference_bound_hash(Module, Name, Arity, Hash),
+        metta_reference_bound_key(Roots, Hash),
+        \+ metta_reference_root_home_changed(Space, Roots)
+    ->  true
+    ;   metta_reference_bound_forget(Module, Name, Arity),
+        metta_reference_bind(Space, Module, Name, Arity, Roots, Faces),
+        metta_reference_bound_record(Module, Name, Arity, Roots),
+        ( Roots == []
+        -> support_graph:support_forget(derived(Module, reference(Name, Arity)))
+        ; support_graph:support_publish(derived(Module, reference(Name, Arity)),
+              [derived(Module, reference_face)],
+              [edge(derived(Module, reference(Name, Arity)), function(Module, Name))]) ),
+        retractall(metta_reference_roots(Module, Name, Arity, _)),
+        ( Roots == [] -> true
+        ; assertz(metta_reference_roots(Module, Name, Arity, Roots)) )
+    ).
 
 %The wave a MARKED face raises. support_stabilize/3 compares the value computed
 %now against the stored one and walks the face's dependents only when they
@@ -852,17 +937,30 @@ metta_reference_metadata_row(['@doc', Original|Fields], Original, Name,
                              ['@doc', Name|Fields]).
 
 metta_reference_publish_metadata(Space, Face) :-
-    findall(Key-Row, metta_reference_metadata(Space, Face, Key, Row), Rows0),
-    sort(Rows0, Rows),
+    metta_reference_metadata_rows(Space, Face, Rows),
     forall(( metta_reference_projection(Space, Key, Token, Ref),
              \+ memberchk(Key-_, Rows) ),
            ( spaces:metta_remove_occurrence(Space, Token, _),
              retractall(metta_reference_projection(Space, Key, _, Ref)) )),
+    metta_reference_project_metadata(Space, Rows).
+
+%The metadata rows a face's entries project, one per key.
+metta_reference_metadata_rows(Space, Face, Rows) :-
+    findall(Key-Row, metta_reference_metadata(Space, Face, Key, Row), Rows0),
+    sort(Rows0, Rows).
+
+%Each row not yet projected enters the space graded, as a row the add door
+%grades does. A publication adds it inside its own refresh, where the add
+%door's observer leaves it to the refresh, so its grade used to wait for the
+%space's next publication, and a publication of new rows alone would never
+%have given it one.
+metta_reference_project_metadata(Space, Rows) :-
     forall(member(Key-Row, Rows),
            ( metta_reference_projection(Space, Key, _, _) -> true
            ; metta_add_atom(Space, Row, Token, _),
              ( nonvar(Token), spaces:metta_space_pair(Space, Row, Token, Ref)
-             -> assertz(metta_reference_projection(Space, Key, Token, Ref))
+             -> assertz(metta_reference_projection(Space, Key, Token, Ref)),
+                metta_reference_grade_row(Space, Row, Token)
              ; true ) )).
 
 % The released space is the mutation root of its own disappearance: its
@@ -903,6 +1001,10 @@ metta_reference_release(Space) :-
         forall(retract(metta_reference_row(Space, Token, _, _)),
                retractall(metta_reference_map(Token, _, _))),
         retractall(metta_occurrence_grade(Space, _, _, _)),
+        retractall(metta_reference_graded(Space, _)),
+        retractall(metta_reference_owed_whole(Space)),
+        retractall(metta_reference_owed_row(Space, _, _)),
+        retractall(metta_reference_owed_head(Space, _)),
         retractall(metta_reference_projection(Space, _, _, _)),
         findall(Receiver, metta_reference_row(Receiver, _, Space, _), Receivers0),
         sort(Receivers0, Receivers),
