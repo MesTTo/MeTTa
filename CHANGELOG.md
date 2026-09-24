@@ -303,6 +303,12 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- The MORK seat's `mork-bench` lane passes: twenty-four instruction pins are
+  re-taken on the patched swipl the measurement has counted since
+  metta-benchmarking began counting the swipl on its own PATH, which moved
+  fifteen rows 3 to 6 percent down and the native rows about 1 percent up.
+  Inference pins and every other row are unchanged.
+
 - lib_string's vendor manifest carries the current digest of `VENDOR.md`,
   where a stale one failed
   `test_string_native_manifest_covers_the_include_closure`. The manifest is one
