@@ -27,7 +27,7 @@
 #     [measured 2026-09-24: present 3 runs of 3 on SWI-Prolog 10.1.14 built
 #     with the ledger's other patches, absent 3 of 3 with
 #     tests/checks/host_workarounds/swi-unlinked-definition-uninitialised.patch
-#     added, the control clean on both; commit=WORKTREE]
+#     added, the control clean on both; commit=79a48d315c7c2178fdf7979497c80d0d2770913e]
 # Owns resources: bounded.sh joins each child; the lane removes the scratch files.
 set -eu
 scratch=${HOST_WORKAROUND_SCRATCH:?}
