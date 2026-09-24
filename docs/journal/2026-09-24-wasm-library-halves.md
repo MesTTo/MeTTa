@@ -412,7 +412,7 @@ unicode patches edit `packages/clib` and `packages/utf8proc` from the top.
 
 The native host was switched, not rebuilt in place, since a dozen jobs had
 its libswipl mapped. The source tree took both patches, the build tree
-installed into `/home/user/Dev/swipl-patched.2`, with `pl-prologflag.c`
+installed into `swipl-patched.2`, with `pl-prologflag.c`
 touched so the build stamped its own `compiled_at` (Sep 24 2026, 09:57:51),
 and that was declared 26 of 26. `swipl-patched` then became a symlink to the
 moved old tree by one `mv --exchange`, and a symlink to the new one by one
@@ -432,7 +432,7 @@ Build 9 carries 36 patch files, build 6's 26 and ten more, and links the
 WebAssembly host with a 4 GiB memory maximum. It is two hosts built from one
 source stack. The WebAssembly one was compiled at Sep 24 2026, 06:12:34 UTC:
 ctest 58 of 58, 36 of 36 declared. The native one is
-`/home/user/Dev/swipl-patched.5`, compiled at Sep 24 2026, 16:08:19: ctest
+`swipl-patched.5`, compiled at Sep 24 2026, 16:08:19: ctest
 91 of 93, with `pldoc:man_links` and `utf8proc:uts39` failing as they do on
 every build here. Items 6 to 15 of
 docs/journal/2026-09-06-swi-defects-to-report-upstream.md describe all ten for

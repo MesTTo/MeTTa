@@ -1693,7 +1693,7 @@ Patch: tests/checks/host_workarounds/swi-shared-table-waits-for-owner-beneath.pa
     `shared_table`: compiled single-threaded, pl-thread.o differs only in five
     `__LINE__` immediates, each moved by the six guard lines.
   - Verification. The `shared_beneath` unit's 8 tests pass on a threaded
-    build of the full stack. On /home/user/Dev/.venv-pypetta/bin/swipl, the
+    build of the full stack. On .venv-pypetta/bin/swipl, the
     host without this patch, its five refusal tests hang (exit 124 under a
     15-second bound), while the recursion sanity test and the two tests of an
     owner that is waited for pass there too.

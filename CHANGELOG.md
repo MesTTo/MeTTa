@@ -303,6 +303,15 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- Tracked files cite no machine-local absolute path apart from four comment
+  lines of `engine/bench-baseline.json` that their owners restamp from their
+  own runs. The Python twins' re-pin comments, two lines of the Node seat,
+  `docs/host-workarounds.md`, a 2026-09-24 journal entry and a bench re-pin
+  comment named paths under the developer's home directory, which
+  `test_no_tracked_file_cites_an_absolute_workspace_path` refuses. They name
+  the host build `swipl-patched.N`, the source checkout `swipl-devel` and the
+  canonical checkout by its shape.
+
 - The MORK seat's `mork-bench` lane passes: twenty-four instruction pins are
   re-taken on the patched swipl the measurement has counted since
   metta-benchmarking began counting the swipl on its own PATH, which moved
