@@ -294,6 +294,13 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- The Python seat's `object-reclamation` memory curve counts the boxes still
+  alive after a space drops its objects. A dead box's entry waits in a queue
+  until the box table's next operation removes it, and the curve counted the
+  table before any such operation, so it read one retained box for every
+  dropped object and `test_memory_scale_cli_gates_object_reclamation` failed.
+  It now empties that queue first, as the table's own operations do.
+
 - The gate's `refusal-sync` lane no longer fails at random beside
   `refusal-sync-selftest`. The self-test's drift case wrote a line into the
   checked-in `metta/_errors/refusals.py` and put the file back afterwards, so
