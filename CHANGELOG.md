@@ -178,6 +178,11 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- The twins lane reports a pricing declaration a twin assigns twice. Its
+  readers take the first module-level assignment of BUDGET, RUNG, ALLOWANCE,
+  DIVERGENCE or OVERRUN and Python binds the last, so the two OVERRUN
+  statements the petta merge left in 05-if4 and 02-callquoteevalreduce2 had
+  the lane pricing one number while each file ended on another.
 - The twins lane reads its point pins again. Three changes since gate-perf's
   pins at c7d7244fb moved them unrecorded: d4a365c16's tries (122 twins),
   d781eab8f's removal-selection trim (103) and the registration service
