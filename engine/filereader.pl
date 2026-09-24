@@ -1427,10 +1427,10 @@ register_new_funs(NewFunNames) :-
 %about 2P inferences more walked than asked per name while costing fewer
 %instructions [measured 2026-09-24: a port-counting profile of a 25-name
 %batch, 4,969 redos and 4,969 get_dict/3 calls in 10,074 inferences;
-%commit=WORKTREE]. The two return the same list [tested:
+%commit=ae1cc8936b47ae27460caf272475ff2a108fb016]. The two return the same list [tested:
 %registering_a_batch_of_names_answers_what_asking_one_by_one_does,
 %a_visible_predicate_costs_a_large_batch_a_redo_and_a_lookup;
-%commit=WORKTREE].
+%commit=ae1cc8936b47ae27460caf272475ff2a108fb016].
 existing_predicate_arities(Names, NameArities) :-
     length(Names, Count),
     (   Count > 12

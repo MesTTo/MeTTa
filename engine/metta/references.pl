@@ -13,7 +13,7 @@
 %   committed from row rebinds no head the rows before it brought [tested:
 %   references:a_committed_from_row_binds_only_the_heads_it_adds,
 %   reference_loading:a_head_bound_before_its_home_settles_rebinds_once_when_it_settles;
-%   commit=WORKTREE].
+%   commit=b7e3d3bcbcf0539820abd10434e5b7feaebc8999].
 % Guarantees: declaration-only faces carry sorts, constructor arrows and
 %   subsorts without making their subjects callable
 %   [tested: references:constructor_declarations_travel_without_callable_heads;
@@ -97,7 +97,7 @@
 %stands. Recording nothing for an unsettled root instead rebound and announced
 %every head imported from a deferred home on every refresh [tested:
 %reference_loading:a_head_bound_before_its_home_settles_rebinds_once_when_it_settles;
-%commit=WORKTREE].
+%commit=b7e3d3bcbcf0539820abd10434e5b7feaebc8999].
 %
 %Rows, not flag/3: SWI keys a flag on a compound by its principal functor
 %alone [source: swipl-devel V10.1.14 src/pl-rec.c:1970-1982, getKeyEx/2,
@@ -106,7 +106,7 @@
 %a binding stood only when it was the head recorded most recently: a program's
 %Nth `from` row rebound every head the N-1 before it had imported [tested:
 %references:a_committed_from_row_binds_only_the_heads_it_adds;
-%commit=WORKTREE]. Not journaled and not saved, as metta_reference_slot/3 is,
+%commit=b7e3d3bcbcf0539820abd10434e5b7feaebc8999]. Not journaled and not saved, as metta_reference_slot/3 is,
 %for the same reason
 %[tested: references:rollback_restores_native_links_and_nested_rollback_restores_its_parent,
 %references:an_inference_cut_cannot_abandon_reference_completion,
