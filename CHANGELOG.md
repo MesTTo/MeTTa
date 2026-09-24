@@ -210,6 +210,15 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- `02-tilepuzzle.metta` in chapter 22 claims 181440, the 9!/2 boards reachable
+  from the start, where it claimed 181441. Its `bfs_all` seeded the duplicate
+  store through `add-unique-item-or-empty`, which nothing defines, so the call
+  stayed data, the start board never entered `&dup`, and a neighbour put it
+  back on the queue to be dequeued a second time. It now calls
+  `add-unique-or-fail &dup`, as `bfs_loop` does for every other board, and the
+  Python twin moves with it. Upstream PeTTa's `examples/tilepuzzle.metta`
+  makes the same call at line 182; the conformance corpus keeps upstream's
+  file and its 181441.
 - `LimitSize` in `lib_nars` and `lib_pln` answers at every size. At a size of
   0 or below no queue passes its length test, and once the queue was empty
   the lowest-priority item of `()` was `()` itself, so the call recursed on its

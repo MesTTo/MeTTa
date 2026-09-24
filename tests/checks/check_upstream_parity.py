@@ -1049,7 +1049,7 @@ WAIVERS = {
         " while preserving duplicate witnesses and bounded streaming."
     ),
     "examples/ch22-a-reasoner-you-can-serve/22-03-search/02-tilepuzzle.metta": (
-        "OPEN: native candidate enumeration plus 483842 public repra keys"
+        "OPEN: native candidate enumeration plus 483841 public repra keys"
         " in add-unique-or-fail. Omitting only output-template cycle checks"
         " removes 302402 inferences and 70274860 instructions. Omitting"
         " source-journal writes does not reduce instructions, so it is not"
