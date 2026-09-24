@@ -178,6 +178,11 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- engine-bench's boot case reads its pin again. The registration service,
+  90be572a9, moved it from 314,099 to 314,278 inferences unrecorded; read at
+  the canonical checkout shape on every first-parent tree from d781eab8f on,
+  the move is that commit's alone, and the row's instructions stay inside
+  their band.
 - The twins lane reports a pricing declaration a twin assigns twice. Its
   readers take the first module-level assignment of BUDGET, RUNG, ALLOWANCE,
   DIVERGENCE or OVERRUN and Python binds the last, so the two OVERRUN
