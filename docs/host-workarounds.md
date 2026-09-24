@@ -1262,6 +1262,92 @@ Lifted when: SWI-Prolog's `unicode_nfkc_casefold/2` removes default-ignorable
   code points; the patch and the entry go together then.
 Record: docs/journal/2026-09-24-wasm-library-halves.md.
 
+## swi-gc-signal-engineless-thread
+Host: SWI-Prolog 10.1.14 as shipped, and upstream master at d7d2a2bb8f5b
+  (fetched 2026-09-24); `signalGCThread()` in src/pl-thread.c begins with
+  `GET_LD` and reads `truePrologFlag(PLFLAG_GCTHREAD)`, which dereferences
+  the calling thread's engine, NULL on a thread that has none. This tree
+  runs on 10.1.14 built with the patch below.
+Defect: a thread with no Prolog engine may call any function that takes no
+  `term_t` (man/threads.plx, section foreignthread), and `PL_unregister_atom()`,
+  and `PL_erase()` through `freeRecord()`, reach `signalGCThread()` through
+  `considerAGC()` once the unregistered atoms cross the atom-GC margin, so a
+  plain pthread erasing records dies of SIGSEGV there. The C seat met it
+  dropping handles on such threads, and since extensions/cmetta 25def05 it
+  queues those erases for a thread with an engine.
+Reproduction: tests/checks/host_workarounds/swi-gc-signal-engineless-thread.sh,
+  the C corpus job's probe (extensions/cmetta 25def05,
+  tests/swi_engineless_erase_probe.c) compiled against the host under test:
+  twice `agc_margin` records of fresh atoms, erased on a pthread with no
+  engine. Exit 139 answers `present`; a clean exit that erased every record
+  answers `absent`; anything else, an erasing thread that has an engine
+  included, is a broken reproduction. The WebAssembly host has no threads,
+  so it cannot show the defect.
+Patch: tests/checks/host_workarounds/swi-gc-signal-engineless-thread.patch,
+  against swipl-devel V10.1.14 src/pl-thread.c: with no engine,
+  `signalGCThread()` hands the request to a GC thread that is already
+  running, which `gc_running()` finds from `GD` alone, and otherwise leaves
+  it, since `considerAGC()` tests the margin again at every 128th atom
+  created and at every atom whose last registration drops, where a thread
+  with an engine signals. Starting a GC thread stays with engines, because
+  whether to have one is the per-thread `gc_thread` flag an engineless thread
+  has no copy of. A measurement decided the handoff: returning without it,
+  as first proposed, removes the crash and drops the request, and with a GC
+  thread running, 20000 records erased on an engineless thread then left the
+  atom-GC count at 1 for five seconds, 3 runs of 3, where the handoff
+  collected them, 3 of 3.
+  The WebAssembly host carries the patch in its source, where `O_PLMT`
+  compiles the branch out.
+Lifted when: SWI-Prolog as shipped lets a thread with no engine cross the
+  atom-GC margin, so the reproduction prints absent; the patch and the entry
+  go together then.
+Record: docs/journal/2026-09-24-wasm-library-halves.md;
+  docs/journal/2026-09-06-swi-defects-to-report-upstream.md.
+
+## swi-abolish-imported-link-unshared
+Host: SWI-Prolog 10.1.14 as shipped, and upstream master at d7d2a2bb8f5b,
+  whose src/pl-proc.c last changed at ca9227829f75 (2026-09-19);
+  `abolishProcedure()`'s branch commented `imported predicate; remove link`
+  builds the procedure's new definition by hand beside `lookupProcedure()`,
+  which its own comment says it "should be merged with". This tree runs on
+  10.1.14 built with the patch below.
+Defect: the branch's definition differs from `lookupProcedure()`'s in two
+  fields. Its share count stays 0 where `lookupProcedure()` counts the
+  procedure's own reference, so once a second module links it, as
+  `importDefinitionModule()` and `autoImport()` do through
+  `shareDefinition()`, the first of the two procedures `PL_cleanup()`
+  unallocates frees it under the other, whose `unallocProcedure()` then
+  decrements freed memory. And its argument info is allocated without being
+  zeroed, and `createSupervisor()` and `update_primary_index()` read it
+  through `setDefaultSupervisor()`. The engine's own
+  `:- redefine_system_predicate(exists_file(_))` in engine/metta/runtime.pl
+  runs that branch on every boot: consulted from source and loaded through
+  engine/qlf_boot.pl, the engine on 10.1.14 built with the ledger's other
+  patches reads the uninitialised argument info twice, allocated in `abolishProcedure()` under
+  `pl_redefine_system_predicate1_va`.
+Reproduction: tests/checks/host_workarounds/swi-abolish-imported-link-unshared.sh,
+  the C corpus job's host program and redefine.pl under valgrind: user
+  imports system:exists_file/1, redefines it, and probe_m links the new
+  definition, then `PL_cleanup(0)`. The same program without the import,
+  whose redefinition goes through `lookupProcedure()`, must run clean, or the
+  reproduction is broken; an error traced to `abolishProcedure()` answers
+  `present` and a clean run `absent`. On 10.1.14 built with the ledger's
+  other patches the linked run reads 4 errors from 2 contexts, the invalid
+  read and the uninitialised one.
+Patch: tests/checks/host_workarounds/swi-unlinked-definition-uninitialised.patch,
+  against swipl-devel V10.1.14 src/pl-proc.c with
+  swi-concurrent-import-removal-resets-provider.patch applied:
+  `newDefinition()` makes a procedure's own new definition, with its one
+  reference and zeroed argument info, for both `lookupProcedure()` and the
+  link branch. It sorts after that patch because both rewrite the branch.
+  Setting `shared` alone was measured and rejected: the invalid read went and
+  the uninitialised read stayed.
+Lifted when: SWI-Prolog as shipped gives the link branch's definition its
+  reference and zeroed argument info, so the reproduction prints absent; the
+  patch and the entry go together then.
+Record: docs/journal/2026-09-24-wasm-library-halves.md;
+  docs/journal/2026-09-06-swi-defects-to-report-upstream.md.
+
 ## swi-infinite-division-zero-sign
 Host: SWI-Prolog 10.1.13, fc7ef84b949378b729052c3ade79c90ce5416abb;
   src/pl-arith.c:ar_divide computes X/inf as 0.0*sign_f(X)*sign_f(Y).

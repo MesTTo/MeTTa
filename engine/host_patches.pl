@@ -13,6 +13,7 @@ host_patch('swi-empty-indexed-snapshot.patch', '81c284a850e9d67a45f41da0b5f6772b
 host_patch('swi-erased-definition-bypasses-loader.patch', '56bf3f614f408d1bf667e397b7f9d8e08162b38a10636e1eb3fa4baa61499fb2').
 host_patch('swi-file-search-cache-sweep.patch', 'cca21f0871baa9ccd749b1c10e9a8b6fdcc8c7910c2d6494ec1cb72a523165bd').
 host_patch('swi-gc-in-frame-finished-listener-clears-a-live-slot.patch', '9895191655d5d5ea8776aea08811cda4ce6d6be26803994ea8f9aa05dabb30da').
+host_patch('swi-gc-signal-engineless-thread.patch', 'd127f57e851f1af353b986e5f9f25142be0b36a65e73d486dcaf882677b88e09').
 host_patch('swi-libbf-powm-unreduced.patch', '003e372224f7d0a22cf442e053d8b5d9ccf0c18ffa75a5f6fbec2d5d238e14e1').
 host_patch('swi-locale-default-encoding.patch', 'f4a78676056b8fcafa64ab6b4988bddc0f1700afe90b210e94f7676b565d730c').
 host_patch('swi-nested-retract-loses-outer-assert.patch', 'e07802e6a24d839288fb9805424cf583600066f129bfa15e644667902e281550').
@@ -24,6 +25,7 @@ host_patch('swi-transaction-enumerator-repeats-parent.patch', '9a0d35671e46540bd
 host_patch('swi-ugraphs-implicit-append.patch', '91a8a47f2e696d302c106478b62cb37bac925a554bd5bedb7da135bab6498824').
 host_patch('swi-unicode-map-empty-result-aborts.patch', '2e565b5c1cece3200d9310518b6c18aeeef52bee10b147ca47ff7f9146ec5883').
 host_patch('swi-unicode-nfkc-casefold-keeps-ignorables.patch', 'b5ea23b0efc0ad9e6c4bfa8b76c079d17725179574aece2c293d1ef460e99edf').
+host_patch('swi-unlinked-definition-uninitialised.patch', '3d56008f13a666ed917bcc5d78dbce4a923d90d4af7d60f24f5571d397935a49').
 host_patch('swi-uuid-static-half-unlinked.patch', '18c6b3c8c869d1967e4f9b033d04f57b7f649eef84f37f48c74ca10e543e24d5').
 host_patch('swi-wasm-text-nul-truncation.patch', '1d5ea004a7f12f0ab9d78115b4702ec593b7f90cc68f42bffda0d1ca34852405').
 host_patch('swi-wrapper-roundtrip-merges-closures.patch', '7da4db23ff7b999b5e6606299ec0df5b8b723e866c8db57943661a63b446815b').

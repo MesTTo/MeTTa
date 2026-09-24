@@ -153,3 +153,41 @@ The library refuses the first three combinations at compile time with the
 measurement in the message, routes the count restraint through
 `call_delays/2`, releases the monotonic property through the attribute door,
 and compiles `lazy` as written.
+
+## 2026-09-24: both patched here, one found twice, one with a second field
+
+Item 2 above is patched in this tree's host since 2026-09-24,
+`swi-gc-signal-engineless-thread` in docs/host-workarounds.md. The C seat met
+it again erasing dropped handles' records on a plain pthread, and upstream
+master at d7d2a2bb8f5b (fetched 2026-09-24) still reads the flag first. The
+fix went one step past the suggestion above: with no engine,
+`signalGCThread()` hands the request to a GC thread that is already running,
+found through `gc_running()`, which reads only `GD`. Testing `LD` and
+returning alone avoids the crash but drops the request, and with a GC thread
+running, 20000 records erased on an engineless thread then left the atom-GC
+count at 1 for five seconds, where the handoff collected them.
+
+### 3. `abolishProcedure()` builds an import link's replacement by hand, and two fields drifted
+
+The branch of `abolishProcedure()` commented `imported predicate; remove link`
+[`src/pl-proc.c`, 10.1.14 and master at d7d2a2bb8f5b, last changed at
+ca9227829f75] allocates the procedure's new definition and fills it field by
+field beside `lookupProcedure()`, which its own comment says it "should be
+merged with". Two fields differ. `shared` stays 0 where `lookupProcedure()`
+counts the procedure's reference, so once a second module links the
+definition through `shareDefinition()`, the first of the two procedures
+`PL_cleanup()` unallocates frees it under the other, whose
+`unallocProcedure()` then decrements freed memory. And the argument info is
+allocated without being zeroed, and `createSupervisor()` and
+`update_primary_index()` read it through `setDefaultSupervisor()`.
+
+Reproduction, pure SWI, under valgrind: a file that runs
+`:- import(system:exists_file/1).`, `:- redefine_system_predicate(exists_file(_)).`,
+`exists_file(_).` and `probe :- probe_m:exists_file(x).`, consulted by a host
+program that calls `probe/0` and then `PL_cleanup(0)`: 4 errors from 2
+contexts, the invalid read and the uninitialised one, against 0 for the same
+program without the import line. Any `redefine_system_predicate/1` of a
+predicate the module has already linked takes the branch.
+
+Suggested fix: one initialiser for both, which is this tree's patch,
+`swi-unlinked-definition-uninitialised.patch`.

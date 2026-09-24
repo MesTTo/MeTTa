@@ -108,6 +108,19 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- The patched SWI-Prolog carries two more fixes, and the engine requires
+  both. A thread with no Prolog engine died in `signalGCThread()` once the
+  atoms it unregistered, erasing records included, crossed the atom-GC
+  margin: the function read the thread's Prolog flags through its missing
+  engine. It now hands the request to a GC thread that is already running.
+  And the definition SWI makes when a redefinition removes an import link,
+  which the engine's own `redefine_system_predicate(exists_file(_))` does on
+  every boot, counted no reference and left its argument info uninitialised,
+  so `PL_cleanup()` could free it while a second module still linked it. It
+  is now made by the same initialiser as `lookupProcedure()`'s. A native host
+  is rebuilt and redeclared, and the WebAssembly host tsmetta carries
+  declares both (`docs/patched-host.md`).
+
 - `tools/pymetta-host/declare-host.sh declare` reads a host's patches off the
   stack the way `fetch-source.sh` applied them: it copies every file a tree's
   patches name and reverse-applies the patches to the copy, last first.

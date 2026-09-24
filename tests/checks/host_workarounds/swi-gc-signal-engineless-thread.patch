@@ -1,0 +1,21 @@
+diff --git a/src/pl-thread.c b/src/pl-thread.c
+index 71b1357..c996ace 100644
+--- a/src/pl-thread.c
++++ b/src/pl-thread.c
+@@ -7355,6 +7355,16 @@ signalGCThread(int sig)
+ 
+ #ifdef O_PLMT
+   int tid;
++  /* A thread without an engine may call any function that takes no
++     term_t (man/threads.plx, section foreignthread), and
++     PL_unregister_atom() and PL_erase() reach here through considerAGC().
++     It has no flags to read and no engine to signal, so a GC thread that
++     is already running takes the request, and otherwise it waits:
++     considerAGC() tests the margin again at every 128th atom created and
++     at every atom whose last registration is dropped, and a thread with
++     an engine signals from there. */
++  if ( !LD )
++    return (tid = gc_running()) > 0 && signalGCThreadCond(tid, sig);
+   if ( truePrologFlag(PLFLAG_GCTHREAD) &&
+        !GD->bootsession &&
+        (tid = GCthread()) > 0 &&

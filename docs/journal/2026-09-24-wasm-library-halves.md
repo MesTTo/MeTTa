@@ -355,3 +355,73 @@ answered without a Content-Length reports size NaN rather than -1. It is
 still there on swipl-devel master. Patching it changes what every host must
 declare, which this build was asked not to do, so it is left for a later
 one (`i-url-size-nan` in the record).
+
+### Build-6, and two SWI defects the C seat found
+
+Build-6 is the NODEFS recipe built from a fresh clone carrying 26 patches,
+the two below among them: compiled at Sep 24 2026, 00:02:59, ctest 58 of 58,
+26 of 26 declared, and the engine's check passing with the patches it
+requires. Against build-5 it is unchanged where it should be. Its browser
+bundle passes the Chromium suite 24 of 24 with none skipped, the packed
+consumer boots, and the 44 originals give 37 runs and 7 refusals with no
+verdict or count moved. The census and the U+0000 probe print the same
+lines. It adds what it should: packed into tsmetta 692d696, with the
+checkout mounted at its own path through NODEFS and the engine's working
+directory changed into it, 41-compression_lib runs 70 of 70 and
+09-conformance 4 of 4, and 16-the_prolog_rung loses its three relative-path
+failures, keeping only its crypto refusals. With nothing mounted, the TS
+corpus job's `SourceNotFoundError`s come back.
+
+The first defect is item 2 of docs/journal/2026-09-06-swi-defects-to-report-upstream.md,
+met again from the C seat. `signalGCThread()` reads the calling thread's
+Prolog flags before anything else, so a plain pthread whose erases
+unregister atoms past the atom-GC margin dies of SIGSEGV. The C corpus job's
+probe, erasing twice `agc_margin` records on such a thread, died 3 runs of 3.
+The suggested fix, returning when there is no engine, removes the crash and
+drops the request with it. With the GC thread already started by the main
+thread, 20000 records erased on an engineless thread left the atom-GC count
+at 1 for five seconds, 3 of 3. So the patch hands the request to a GC thread
+that is already running, which `gc_running()` finds from `GD` alone, and the
+count reaches 2, 3 of 3. Whether to start a GC thread is the per-thread
+`gc_thread` flag, which an engineless thread has no copy of, so that stays
+with engines.
+
+The second is `abolishProcedure()`'s imported-link branch, which builds the
+procedure's new definition by hand beside `lookupProcedure()`. The C corpus
+job traced an invalid read to its share count of 0. Setting the count alone
+was built and run: the invalid read went, and valgrind still read the
+branch's argument info uninitialised, a second field the two initialisations
+disagree on. The fix is one initialiser, `newDefinition()`, for both. The
+engine meets the branch on every boot: on the host before the patch, both
+the source boot and the qlf boot read that argument info uninitialised,
+allocated in `abolishProcedure()` under the engine's own
+`redefine_system_predicate(exists_file(_))`. With the patch the source boot
+is clean. The qlf boot keeps one unrelated context, 169 reads of a stack
+buffer in `expand_file_name/2` that the host before the patch shows too, on
+the same regeneration path.
+
+That patch rewrites the lines `swi-concurrent-import-removal-resets-provider`
+rewrote, so it sorts after it and is written against its result. The stack
+then broke the declaration. `declare-host.sh` asked each patch alone whether
+it could be reverse-applied, and the earlier patch could not while the later
+one held its context, so the native tree read 25 of 26. It now reads the
+stack as quilt pops a series, last first, on a copy of the files the patches
+name. Rebuilding also showed `fetch-source.sh` could not run twice on one
+clone: it reset only the top tree and `packages/swipy`, while the uuid and
+unicode patches edit `packages/clib` and `packages/utf8proc` from the top.
+
+The native host was switched, not rebuilt in place, since a dozen jobs had
+its libswipl mapped. The source tree took both patches, the build tree
+installed into `/home/user/Dev/swipl-patched.2`, with `pl-prologflag.c`
+touched so the build stamped its own `compiled_at` (Sep 24 2026, 09:57:51),
+and that was declared 26 of 26. `swipl-patched` then became a symlink to the
+moved old tree by one `mv --exchange`, and a symlink to the new one by one
+rename. Both reproductions read present 3 of 3 before the switch and absent 3
+of 3 after it. One consequence: the old tree's launcher finds libswipl
+through a RUNPATH naming the original path, so it now loads the new library
+unless `LD_LIBRARY_PATH` says otherwise.
+
+The two patches land with the requirement. The host-declaration lane
+regenerates `engine/host_patches.pl` from every patch at the top, so carrying
+a patch is requiring it. The change therefore went in with the Node seat's
+advance to build-6, the first commit at which both hosts declare them.
