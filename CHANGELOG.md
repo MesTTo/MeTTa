@@ -303,6 +303,12 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- lib_string's vendor manifest carries the current digest of `VENDOR.md`,
+  where a stale one failed
+  `test_string_native_manifest_covers_the_include_closure`. The manifest is one
+  of the native object's build inputs, so the object is rebuilt once after this
+  change.
+
 - The Python seat's `test_the_c_binding_suite_passes` passes: the C seat's
   suite names its three `mt_register_prolog` fixture files from
   `MT_ENGINE_PATH`, where it named them relative to the working directory and
