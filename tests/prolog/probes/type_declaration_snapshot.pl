@@ -54,11 +54,11 @@ snapshot_declarations(alias, Space, _,
 snapshot_declarations(rule, _, Module,
     with_metta_module(Module,
         'add-typing-rule!'('snapshot-probe-rule', ordinary,
-                           'Number', 'Number', accept, true)),
+                           'Number', 'Number', 'Accept', true)),
     with_metta_module(Module,
         'add-typing-rule!'('snapshot-probe-rule', ordinary,
-                           'Number', 'Number', [refuse,second], true)),
-    snapshot_rules(Module), [accept,[refuse,second]]).
+                           'Number', 'Number', ['Refuse',second], true)),
+    snapshot_rules(Module), ['Accept',['Refuse',second]]).
 
 snapshot_aliases(Space, Declarations) :-
     findall(Type, match_stored(Space, [':','Count',Type], Type, _), Declarations).

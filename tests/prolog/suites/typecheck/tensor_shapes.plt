@@ -135,7 +135,7 @@ test(a_policy_checked_shape_variable_binds_at_the_live_call,
                                (Annotated DLTensor (Shape $dimensions))))
          (= (shape-preserve $x) $x)
          !(add-typing-rule! shape-base ordinary
-           (Annotated DLTensor (Shape $dimensions)) DLTensor accept)", _, Space),
+           (Annotated DLTensor (Shape $dimensions)) DLTensor Accept)", _, Space),
     space_module(Space, Module),
     findall(Value, eval_metta_in_module(Module, ['shape-preserve', Matrix], Value),
             Values),
@@ -151,7 +151,7 @@ test(a_policy_refusal_still_blocks_a_relational_shape_witness,
     process_metta_string(
         "!(add-typing-rule! shape-denied ordinary
            (Annotated DLTensor (Shape (2 3)))
-           (Annotated DLTensor (Shape (2 3))) (refuse blocked))", _, Space),
+           (Annotated DLTensor (Shape (2 3))) (Refuse blocked))", _, Space),
     space_module(Space, Module),
     assertion(\+ has_type_under_policy(Module, Matrix,
                     ['Annotated', 'DLTensor', ['Shape', _]])).

@@ -107,8 +107,8 @@
 %shadow this name like any builtin. Every declared admits type must be
 %carried, the witness reading has-declared-type states above; the
 %verdict names the FIRST violated contract in the general algebra's own
-%words, (refuse (does-not-carry <type>)) or
-%(refuse (pool-at-capacity <limit>)), so the refusal arrives as
+%words, (Refuse (does-not-carry <type>)) or
+%(Refuse (pool-at-capacity <limit>)), so the refusal arrives as
 %metta_add_refused like any handler's. The Atom mask on the atom
 %parameter is a prelude_declaration/2 row in engine/metta/prelude.pl: the
 %pool judges the offered atom as itself [tested: the_sugar_judges_the_offered_atom_as_itself].
@@ -118,7 +118,7 @@
 'space-admission-verdict'(Pool, Atom, Verdict) :-
     (   '$metta_atoms:&metta':'&metta'(admits, Pool, Type, _),
         \+ has_declared_type(Atom, Type)
-    ->  Verdict = [refuse, ['does-not-carry', Type]]
+    ->  Verdict = ['Refuse', ['does-not-carry', Type]]
     ;   '$metta_atoms:&metta':'&metta'(capacity, Pool, Limit, _),
         %A foreign pool's atoms live with its provider, so its count is
         %the enumeration space-atom-count refuses to hide. A native capacity
@@ -133,6 +133,6 @@
             )
         ),
         Count >= Limit
-    ->  Verdict = [refuse, ['pool-at-capacity', Limit]]
-    ;   Verdict = [accept]
+    ->  Verdict = ['Refuse', ['pool-at-capacity', Limit]]
+    ;   Verdict = ['Accept']
     ).

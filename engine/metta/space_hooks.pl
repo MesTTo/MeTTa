@@ -57,17 +57,33 @@
 %into a claimed space consults the handler first, equations and type
 %declarations included, and the handler answers exactly one of
 %
-%    (accept)           the write proceeds with the atom as offered
-%    (accept <atom'>)   the write proceeds with the TRANSFORMED atom.
+%    (Accept)           the write proceeds with the atom as offered
+%    (Accept <atom'>)   the write proceeds with the TRANSFORMED atom.
 %                       The handler's output is the GRANTED form and is
 %                       not re-asked, exactly as a BEFORE trigger's
 %                       modified row does not re-fire the trigger: the
 %                       claimant has decided this request, and a handler
 %                       wanting chained rewriting composes its own
 %                       equations in the body
-%    (refuse <words>)   the write throws, carrying the handler's words
-%    (drop)             the write is silently skipped and the caller
+%    (Refuse <words>)   the write throws, carrying the handler's words
+%    (Drop)             the write is silently skipped and the caller
 %                       sees success, which set semantics needs
+%
+%The verdicts are capitalized constructors, MeTTa's own convention for data
+%and control values (True, Empty, Error). A lowercase head is an APPLICATION
+%wherever a function of that name is in scope: with lib_functional's
+%two-input drop defined, upstream PeTTa answers a written (drop) with
+%(partial drop ()) and eta-expands the equation around it, so a handler
+%whose body answered (drop) stopped covering the atom it was written for
+%[measured 2026-09-24: PeTTa@43705f5d9ff8958ffe7f0aa6777fb8477f2401f2 runs
+%!(drop) to (partial drop ()) and (= (f $x) (drop)) to f/4 beside
+%(= (drop $items $count) ...), and this engine answers both the same].
+%Typing rules (Accept, Defer, (Refuse Reason)) and translator rules
+%((Refuse Reason)) answer in the same vocabulary. A term that is none of the
+%four is refused by name, a lowercase (drop) included
+%[tested: hooks:a_lowercase_verdict_is_refused_naming_the_verdicts,
+%hooks:a_capitalized_verdict_survives_a_library_defining_its_lowercase_head;
+%commit=WORKTREE].
 %
 %The verdict algebra is a PostgreSQL row-level BEFORE trigger's (return
 %NEW, return a modified row, raise, return NULL) and netfilter's
@@ -100,9 +116,9 @@
 %a_second_claimant_for_one_name_is_refused_with_both_named,
 %an_unclaimed_request_is_a_stuck_state_that_says_so].
 %The post-add slot mirrors the pre-add slot with the verdicts read
-%against a LANDED atom: (accept) keeps it, (accept <atom'>) replaces it
+%against a LANDED atom: (Accept) keeps it, (Accept <atom'>) replaces it
 %through the same write path with the replacement granted, (refuse
-%<words>) undoes the write and throws, (drop) removes it silently. A
+%<words>) undoes the write and throws, (Drop) removes it silently. A
 %post handler that errs or sticks also undoes the write first, so an
 %errored hook leaves no atom behind. The event pair stays pure
 %observation beside it: an observer's answer is discarded and the store
@@ -314,8 +330,8 @@ metta_hook_pre_phase(Space, Term, R, Wrapped) :-
                                          Wrapped)
             ;   metta_hook_apply(Verdict, Space, Handler, Term, R, Wrapped)
             )
-        ;   throw(error(metta_hook_stuck(Space, 'pre-add', Handler, Term),
-                        none))
+        ;   metta_hook_invalid_verdict('pre-add', [Handler, Term], Space, Handler,
+                                       Term)
         )
     ;   call(Wrapped)
     ).
@@ -332,9 +348,8 @@ metta_hook_post_phase(Space, Term) :-
     ->  catch(( (   metta_hook_eval(Space, post_add, Handler, Module, Term,
                                     Verdict)
                 ->  metta_hook_post_apply(Verdict, Space, Handler, Term)
-                ;   throw(error(metta_hook_stuck(Space, 'post-add', Handler,
-                                                 Term),
-                                none))
+                ;   metta_hook_invalid_verdict('post-add', [Handler, Term], Space,
+                                               Handler, Term)
                 ) ),
               Ball,
               %The undo must not mask the error: a removal that finds
@@ -355,8 +370,8 @@ metta_hook_wrote_as_offered(Space, Term) :-
     ;   true
     ).
 
-metta_hook_post_apply([accept], _, _, _) :- !.
-metta_hook_post_apply([accept, Term1], Space, _, Term) :- !,
+metta_hook_post_apply(['Accept'], _, _, _) :- !.
+metta_hook_post_apply(['Accept', Term1], Space, _, Term) :- !,
     (   Term1 == Term
     ->  true
     ;   metta_remove_atom(Space, Term, _),
@@ -366,9 +381,9 @@ metta_hook_post_apply([accept, Term1], Space, _, Term) :- !,
         metta_capacity_count_added(Space, Term1)
     ).
 %The refusal's undo is the catch handler's, once for every error path.
-metta_hook_post_apply([refuse, Words], Space, _, Term) :- !,
+metta_hook_post_apply(['Refuse', Words], Space, _, Term) :- !,
     throw(error(metta_add_refused(Space, Term, Words), none)).
-metta_hook_post_apply([drop], Space, _, Term) :- !,
+metta_hook_post_apply(['Drop'], Space, _, Term) :- !,
     metta_remove_atom(Space, Term, _).
 metta_hook_post_apply(Got, Space, Handler, Term) :-
     metta_hook_invalid_verdict('post-add', Got, Space, Handler, Term).
@@ -382,10 +397,10 @@ metta_hook_granted_form(Space, Term) :-
 %write path. A counted accept therefore knows it owns the fact and can update
 %without a second presence probe; the ordinary verdict algebra stays the
 %shared fallback for refusal, drop and malformed answers.
-metta_hook_apply_counted([accept], Space, _, Term, _, Wrapped) :- !,
+metta_hook_apply_counted(['Accept'], Space, _, Term, _, Wrapped) :- !,
     call(Wrapped),
     metta_capacity_count_added_known(Space, Term).
-metta_hook_apply_counted([accept, Term1], Space, _, Term, R, Wrapped) :- !,
+metta_hook_apply_counted(['Accept', Term1], Space, _, Term, R, Wrapped) :- !,
     (   Term1 == Term
     ->  call(Wrapped)
     ;   % Workaround: swi-cleanup-window - a transformed counted write trails its grant.
@@ -396,17 +411,17 @@ metta_hook_apply_counted([accept, Term1], Space, _, Term, R, Wrapped) :- !,
 metta_hook_apply_counted(Verdict, Space, Handler, Term, R, Wrapped) :-
     metta_hook_apply(Verdict, Space, Handler, Term, R, Wrapped).
 
-metta_hook_apply([accept], _, _, _, _, Wrapped) :- !, call(Wrapped).
-metta_hook_apply([accept, Term1], Space, _, Term, R, Wrapped) :- !,
+metta_hook_apply(['Accept'], _, _, _, _, Wrapped) :- !, call(Wrapped).
+metta_hook_apply(['Accept', Term1], Space, _, Term, R, Wrapped) :- !,
     (   Term1 == Term
     ->  call(Wrapped)
     ;   % Workaround: swi-cleanup-window - a transformed write trails its grant.
         metta_with_trailed('$metta_hook_granted', granted(Space, Term1),
                            metta_add_atom(Space, Term1, R))
     ).
-metta_hook_apply([refuse, Words], Space, _, Term, _, _) :- !,
+metta_hook_apply(['Refuse', Words], Space, _, Term, _, _) :- !,
     throw(error(metta_add_refused(Space, Term, Words), none)).
-metta_hook_apply([drop], _, _, _, true, _) :- !.
+metta_hook_apply(['Drop'], _, _, _, true, _) :- !.
 metta_hook_apply(Got, Space, Handler, Term, _, _) :-
     metta_hook_invalid_verdict('pre-add', Got, Space, Handler, Term).
 
@@ -417,9 +432,44 @@ metta_hook_apply(Got, Space, Handler, Term, _, _) :-
 %write, while this cold route leaves accepted writes unchanged.
 %[tested: hooks:an_unclaimed_request_is_a_stuck_state_that_says_so,
 %hooks:a_post_stuck_state_undoes_the_write; commit=0d90e628b1f90c4b4464a2907efcb357d74b13d3]
+%
+%A request the handler leaves unanswered arrives here as its own residual call,
+%because answering nothing leaves the request as written, and so does its
+%partial application to the request. Either is the stuck state unless the
+%claiming module ALSO defines the handler at another arity, and then it is
+%refused naming the verdicts. An equation whose body applies a function to
+%fewer arguments than it takes is extended to take the rest, which is what a
+%lowercase verdict becomes wherever a library defines its head: beside
+%lib_functional's two-input drop, (= (guard (dup $x)) (drop)) defines guard at
+%three inputs. A request no one-input equation covers, (dup 3), then answers
+%nothing, and a handler whose every equation was extended has no one-input call
+%site left, so each request answers the handler's partial application to it.
+%The arity named is the least other one, so the refusal reads the same in every
+%process [tested:
+%hooks:a_lowercase_verdict_beside_a_library_head_is_refused_naming_the_verdicts,
+%hooks:a_post_add_lowercase_verdict_beside_a_library_head_undoes_the_write,
+%hooks:a_handler_whose_every_equation_is_extended_is_refused_naming_the_verdicts;
+%commit=WORKTREE]. It is one predicate rather than a helper beside it because
+%every predicate the engine module adds costs each library registration that
+%walks the visible predicates [measured 2026-09-24: an unused predicate
+%appended to this file moves 01-library's example and twin +2 and
+%37-statistics_lib's +10, the whole of the shift a helper here had caused;
+%command=twin_coverage.py --measure].
 metta_hook_invalid_verdict(Slot, Got, Space, Handler, Term) :-
-    (   Got =@= [Handler, Term]
-    ->  throw(error(metta_hook_stuck(Space, Slot, Handler, Term), none))
+    (   (   Got =@= [Handler, Term]
+        ;   Got = partial(Head, [Arg]), Head == Handler, Arg =@= Term
+        )
+    ->  (   hook_slot_surface(Key, Slot),
+            metta_hook_claim(Space, Key, Handler, Module),
+            aggregate_all(min(Other),
+                          ( current_predicate(Module:Handler/Other),
+                            Other \== 2 ),
+                          Arity)
+        ->  Inputs is Arity - 1,
+            throw(error(metta_hook_handler_arity(Space, Slot, Handler, Term,
+                                                 Inputs), none))
+        ;   throw(error(metta_hook_stuck(Space, Slot, Handler, Term), none))
+        )
     ;   throw(error(metta_hook_bad_verdict(Space, Handler, Term, Got), none))
     ).
 
@@ -467,9 +517,19 @@ prolog:error_message(metta_foreign_space_count(Space)) -->
     [ '~w is a foreign space, so its atoms live with its provider and \c
        counting them is an enumeration there, not a native property read; \c
        ask the provider, or count what a match answers'-[Space] ].
+prolog:error_message(metta_hook_handler_arity(Space, Slot, Handler, Term,
+                                              Inputs)) -->
+    [ 'the ~w hook on ~w is claimed by ~w, which its module also defines \c
+       taking ~w arguments, so ~q reached none of its one-argument equations. \c
+       A body that applies a function to fewer arguments than it takes \c
+       extends its equation to take the rest, which is what a lowercase \c
+       verdict does wherever a library defines its head; a handler answers \c
+       (Accept), (Accept <atom>), (Refuse <words>) or (Drop)'-[Slot, Space,
+                                                               Handler, Inputs,
+                                                               Term] ].
 prolog:error_message(metta_hook_bad_verdict(Space, Handler, Term, Got)) -->
-    [ '~w answered ~q for ~q into ~w, which is none of (accept), \c
-       (accept <atom>), (refuse <words>) or (drop)'-[Handler, Got,
+    [ '~w answered ~q for ~q into ~w, which is none of (Accept), \c
+       (Accept <atom>), (Refuse <words>) or (Drop)'-[Handler, Got,
                                                      Term, Space] ].
 prolog:error_message(metta_hook_cascade(Space, Handler)) -->
     [ 'the pre-add hook ~w on ~w transformed through depth 32: a \c

@@ -58,7 +58,7 @@ test(an_ordinary_type_admits_by_the_reported_type,
 
 test(a_user_rule_reaches_the_answer,
      [setup(context(S)), cleanup(release_quietly(S))]) :-
-    run_in(S, "(: b Bespoke) !(add-typing-rule! widen ordinary String Bespoke accept) !(add-typing-rule! deny ordinary Number Number (refuse denied))", _),
+    run_in(S, "(: b Bespoke) !(add-typing-rule! widen ordinary String Bespoke Accept) !(add-typing-rule! deny ordinary Number Number (Refuse denied))", _),
     assertion(metta_argument_admitted(S, "s", 'Bespoke')),
     assertion(\+ metta_argument_admitted(S, 3, 'Number')).
 

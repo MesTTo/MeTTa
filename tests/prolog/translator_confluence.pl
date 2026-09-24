@@ -60,7 +60,7 @@
 %     is extended conditional critical pairs
 %     [source: Avenhaus and Loria-Saenz, LPAR 1994, and Lucas, JLAMP 2024].
 %
-%     A rule may also DECLINE with its own words, `(refuse Reason)`. That is
+%     A rule may also DECLINE with its own words, `(Refuse Reason)`. That is
 %     one more way for a condition to fail rather than a change of fragment,
 %     and it is the one written where a reader can see it, so the report
 %     counts the rules of the set it is given that can refuse and prints the
@@ -317,12 +317,12 @@ typing_overlap(Entries,
     typing_overlap_kind(OutcomeA, OutcomeB, Kind).
 
 typing_overlap_kind(Left, Right, conditional(refusal)) :-
-    ( Left = [refuse, _] ; Right = [refuse, _] ),
+    ( Left = ['Refuse', _] ; Right = ['Refuse', _] ),
     !.
 typing_overlap_kind(Left, Right, conditional(guarded_defer)) :-
-    ( Left == defer ; Right == defer ),
+    ( Left == 'Defer' ; Right == 'Defer' ),
     !.
-typing_overlap_kind(accept, accept, joined).
+typing_overlap_kind('Accept', 'Accept', joined).
 
 print_typing_family(typing_state(Entries, Overlaps)) :-
     include(typing_entry_tier(user), Entries, User),
@@ -839,7 +839,7 @@ print_decidable_fragment(SpaceRules, PreludeRules) :-
                 decision.~n", [Guarded, Total])
     ).
 
-% A rule can refuse when a `(refuse Reason)` form is reachable in its
+% A rule can refuse when a `(Refuse Reason)` form is reachable in its
 % right-hand side. Read from the rules themselves rather than from the
 % registration, because the equations are what decide it and a registration
 % does not say.
@@ -853,7 +853,7 @@ rule_can_refuse(_ ==> R) :-
     sub_term(Sub, R),
     nonvar(Sub),
     compound(Sub),
-    functor(Sub, refuse, 1),
+    functor(Sub, 'Refuse', 1),
     !.
 
 %%%% The selftest: does the analysis still discriminate? %%%%
@@ -974,7 +974,7 @@ planted_refusing_rule_seen :-
         ( assertz(user:translator_rule('$cfl_guard', [], user)),
           assertz(metta_engine:prelude_equation('$cfl_guard',
                                         ['=', ['$cfl_guard', _],
-                                         [refuse, "planted"]])) ),
+                                         ['Refuse', "planted"]])) ),
         ( compile_time_rules('&self', _, _, _, PreludeRules),
           guarded_rules([], PreludeRules, Guarded, _),
           Guarded >= 1 ),
@@ -1000,9 +1000,9 @@ planted_typing_overlap_seen :-
     setup_call_cleanup(
         ( assertz(type_rules:typing_rule_entry(user, Self, '$typing_refusal_fixture',
                                          ordinary, '%Undefined%', _,
-                                         [refuse, fixture]), RefusalRef),
+                                         ['Refuse', fixture]), RefusalRef),
           assertz(type_rules:typing_rule_entry(user, Self, '$typing_defer_fixture',
-                                         ordinary, '%Undefined%', _, defer),
+                                         ordinary, '%Undefined%', _, 'Defer'),
                   DeferRef) ),
         ( typing_family_state('&self', typing_state(_, Overlaps)),
           member(typing_overlap('$typing_refusal_fixture', user,

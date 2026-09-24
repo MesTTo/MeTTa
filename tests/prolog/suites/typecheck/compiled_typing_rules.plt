@@ -27,7 +27,7 @@ registry_decision(Family, Actual, Expected, Outcome, Name) :-
     type_rules:typing_pattern_openness(Right, RightOpen),
     type_rules:typing_rule_pattern_matches(Actual, Left, LeftOpen),
     type_rules:typing_rule_pattern_matches(Expected, Right, RightOpen),
-    Candidate \== defer,
+    Candidate \== 'Defer',
     !,
     Outcome = Candidate.
 
@@ -65,7 +65,7 @@ test(every_family_preserves_answers_and_bindings) :-
 
 test(a_constrained_outcome_does_not_select_a_later_rule) :-
     forall((type_rules:typing_rule_family(Family), query_pair(Actual, Expected),
-            member(Outcome, [accept, defer, [refuse, reason]])),
+            member(Outcome, ['Accept', 'Defer', ['Refuse', reason]])),
            agrees(Family, Actual, Expected, Outcome, _)).
 
 test(a_rule_name_filters_before_the_decision) :-
@@ -120,10 +120,10 @@ test(expected_user_patterns_keep_normalization_and_first_match,
     metta_add_atom(Space, [':', 'ExpectedAlias', ['Alias', 'TagA']], _),
     with_metta_module(Module,
         ( 'add-typing-rule!'('expected-alias', metatype, _, 'ExpectedAlias',
-                             [refuse, named_reason], _),
+                             ['Refuse', named_reason], _),
           'add-typing-rule!'('expected-shared', metatype, _, [pair, X, X],
-                             defer, _),
-          'add-typing-rule!'('expected-open', widening, _, _, accept, _) )),
+                             'Defer', _),
+          'add-typing-rule!'('expected-open', widening, _, _, 'Accept', _) )),
     forall((type_rules:typing_rule_family(Family), query_type(Expected)),
            expected_agrees(Module, Family, Expected)),
     forall(query_type(Expected), expected_agrees(Module, _, Expected)),

@@ -886,9 +886,9 @@ metatype_argument_admitted(Module, Argument, Expected, Relation) :-
     metatype_of(Argument, Actual),
     typing_rule_decision_resolved(Module, metatype, Actual, Expected,
                          Outcome, _, _),
-    (   Outcome == accept
+    (   Outcome == 'Accept'
     ->  true
-    ;   Outcome = [refuse, _]
+    ;   Outcome = ['Refuse', _]
     ->  fail
     ;   metta_argument_types_in(Module, Argument, Types),
         member(Reported, Types),

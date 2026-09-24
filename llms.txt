@@ -3235,7 +3235,7 @@ type unification, exactly as before the vocabulary existed. The rules are one
 clause per head in `engine/metta/refinements.pl`, and the catalog's
 `(vocabulary refinement ...)` row names the same eleven heads.
 `(add-typing-rule! name family actual expected outcome)` adds a module-scoped
-checker rule; `outcome` is `accept`, `(refuse reason)`, or `defer`, and
+checker rule; `outcome` is `Accept`, `(Refuse reason)`, or `Defer`, and
 `remove-typing-rule!` withdraws it. Families are `ordinary`, `derived`,
 `reporting`, `witness`, `arrow-arity`, `widening`, `declared-widening`, and `metatype`.
 User rules run

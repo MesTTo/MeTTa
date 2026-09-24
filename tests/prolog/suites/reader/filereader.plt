@@ -367,7 +367,7 @@ test(a_failed_source_rule_restores_discharged_contracts,
             ( filereader:process_metta_string(
                   "!(add-typing-rule! plunit-source-rule ordinary \c
                     PLUnitPolicyPayload PLUnitPolicyPayload \c
-                    (refuse source-failed))", _),
+                    (Refuse source-failed))", _),
               assertion(
                   \+ plunit_filereader_source_rollback:
                          source_policy_proof_present),

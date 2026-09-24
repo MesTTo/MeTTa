@@ -1,6 +1,6 @@
 % Purpose: PlUnit coverage for the space-hook mechanism in engine/metta.pl:
 %   (declare-pre-add! <space> <handler>), the one-claimant rule, the
-%   four-verdict algebra (accept, accept-transformed, refuse, drop), the
+%   four-verdict algebra ((Accept), (Accept <atom>), (Refuse <words>), (Drop)), the
 %   stuck state, the batch door's degrade to per-atom adds, the
 %   claim-time compiled fire path, the admits/capacity sugar riding
 %   the same registry through metta_admission_claim/2, and the design
@@ -19,7 +19,7 @@
 %     [tested: an_uncovered_offer_is_stuck_by_answering_nothing;
 %     commit=0d90e628b1f90c4b4464a2907efcb357d74b13d3]
 %   - host writes, running MeTTa add-atom forms, and file loads into a target
-%     space all pass accept, transform, drop, and refuse through the same
+%     space all pass (Accept), a transform, (Drop) and (Refuse) through the same
 %     declared pre-add hook [tested: admission_route_matrix; commit=ce55fe46f26484be4269d06d6b99684d5edc040f]
 %   - the outermost transaction's commit phase leaves every enlisted provider
 %     committed or rolled back and records which of them made their writes
@@ -49,15 +49,43 @@ ensure_hook_guards :-
     ->  true
     ;   assertz(hook_guards_defined),
         metta("
-          (= (hplt-guard (secret $x)) (refuse \"no secrets in this pool\"))
-          (= (hplt-guard (raw $x)) (accept (cooked $x)))
-          (= (hplt-guard (dup $x)) (drop))
-          (= (hplt-guard (plain $x)) (accept))
-          (= (hplt-other-guard (plain $x)) (accept))
+          (= (hplt-guard (secret $x)) (Refuse \"no secrets in this pool\"))
+          (= (hplt-guard (raw $x)) (Accept (cooked $x)))
+          (= (hplt-guard (dup $x)) (Drop))
+          (= (hplt-guard (plain $x)) (Accept))
+          (= (hplt-other-guard (plain $x)) (Accept))
           (= (hplt-wrong $a) 42)
-          (= (hplt-open $a) (accept))
+          (= (hplt-open $a) (Accept))
         ")
     ).
+
+%A handler space holding lib_functional and one hplt-library-guard equation
+%per Pattern-Verdict pair, defined in the order given, claiming
+%&hplt-library-pool's Slot hook, pre-add or post-add, from that space.
+library_hook_program(Space, Slot, Equations) :-
+    with_output_to(string(Defined),
+                   forall(member(Pattern-Verdict, Equations),
+                          format("(= (hplt-library-guard ~w) ~w)~n",
+                                 [Pattern, Verdict]))),
+    format(string(Source),
+           "!(import! (context-space) (library lib_functional))~n~s\c
+            !(declare-~w! &hplt-library-pool hplt-library-guard)~n",
+           [Defined, Slot]),
+    with_output_to(string(_),
+                   filereader:process_metta_string(Source, _, Space)).
+
+library_hook_cleanup(Space) :-
+    metta_undeclare_hook(pre_add, '&hplt-library-pool'),
+    metta_undeclare_hook(post_add, '&hplt-library-pool'),
+    clear_native_atoms('&hplt-library-pool'),
+    catch(metta_release_space(Space), _, true).
+
+%Whether an error's rendered text names every verdict a handler may answer.
+hook_message_names_the_verdicts(Ball) :-
+    phrase(prolog:error_message(Ball), Lines),
+    with_output_to(string(Text), print_message_lines(current_output, '', Lines)),
+    sub_string(Text, _, _, _,
+               "(Accept), (Accept <atom>), (Refuse <words>) or (Drop)").
 
 %Undeclaring is idempotent, so every test space is swept whether or not the
 %test that used it reached its own undeclare. The install flag and wrapper
@@ -180,6 +208,87 @@ test(a_non_verdict_answer_is_a_named_defect,
     catch('add-atom'('&hplt-bad', [x], _), error(Ball, _), true),
     assertion(Ball == metta_hook_bad_verdict('&hplt-bad', 'hplt-wrong',
                                              [x], 42)).
+
+% A handler answering the lowercase (drop) answers no verdict: with no function
+% named drop in scope the answer arrives as the data (drop), and the door that
+% refuses a 42 refuses it too, naming the four verdicts.
+test(a_lowercase_verdict_is_refused_naming_the_verdicts,
+     [ setup(setup_hooks), cleanup(cleanup_hooks) ]) :-
+    metta("(= (hplt-lowercase $a) (drop))"),
+    metta_declare_hook(pre_add, '&hplt-bad', 'hplt-lowercase'),
+    catch('add-atom'('&hplt-bad', [x], _), error(Ball, _), true),
+    assertion(Ball == metta_hook_bad_verdict('&hplt-bad', 'hplt-lowercase',
+                                             [x], [drop])),
+    assertion(hook_message_names_the_verdicts(Ball)),
+    findall(A, 'get-atoms'('&hplt-bad', A), Atoms),
+    assertion(Atoms == []).
+
+% The one-program reproduction of a lowercase verdict meeting a library: the
+% handler's own space imports lib_functional, whose drop takes two inputs. The
+% capitalized (Drop) stays data there and drops the atom; the lowercase (drop)
+% applies the library's function, so its equation is extended to three inputs
+% and the one-argument request is refused naming the verdicts rather than
+% reported as a request no rule covers.
+test(a_capitalized_verdict_survives_a_library_defining_its_lowercase_head,
+     [ setup('new-space'(S)), cleanup(library_hook_cleanup(S)) ]) :-
+    library_hook_program(S, 'pre-add',
+                         ["(dup $x)"-"(Drop)", "(plain $x)"-"(Accept)"]),
+    space_module(S, Module),
+    with_metta_module(Module, findall(R, eval([drop, [a, b, c], 1], R), Dropped)),
+    assertion(Dropped == [[b, c]]),
+    'add-atom'('&hplt-library-pool', [plain, 1], _),
+    'add-atom'('&hplt-library-pool', [dup, 3], _),
+    findall(A, 'get-atoms'('&hplt-library-pool', A), Atoms),
+    assertion(Atoms == [[plain, 1]]).
+
+% With the lowercase verdict, lib_functional's two-input drop extends the
+% (dup $x) equation to three inputs. In either order of definition the (plain
+% $x) equation still admits its request, and (dup 3), which no one-input
+% equation covers, is refused naming the verdicts rather than reported as a
+% request no rule covers.
+test(a_lowercase_verdict_beside_a_library_head_is_refused_naming_the_verdicts,
+     [ forall(member(Equations,
+                     [ ["(dup $x)"-"(drop)", "(plain $x)"-"(Accept)"],
+                       ["(plain $x)"-"(Accept)", "(dup $x)"-"(drop)"] ])),
+       setup('new-space'(S)), cleanup(library_hook_cleanup(S)) ]) :-
+    library_hook_program(S, 'pre-add', Equations),
+    'add-atom'('&hplt-library-pool', [plain, 1], _),
+    catch('add-atom'('&hplt-library-pool', [dup, 3], _), error(Ball, _), true),
+    assertion(Ball == metta_hook_handler_arity('&hplt-library-pool', 'pre-add',
+                                               'hplt-library-guard',
+                                               [dup, 3], 3)),
+    assertion(hook_message_names_the_verdicts(Ball)),
+    findall(A, 'get-atoms'('&hplt-library-pool', A), Atoms),
+    assertion(Atoms == [[plain, 1]]).
+
+% The post phase refuses the same request the same way, and the refusal undoes
+% the write it was asked to revise, as every post-add error does.
+test(a_post_add_lowercase_verdict_beside_a_library_head_undoes_the_write,
+     [ setup('new-space'(S)), cleanup(library_hook_cleanup(S)) ]) :-
+    library_hook_program(S, 'post-add',
+                         ["(dup $x)"-"(drop)", "(plain $x)"-"(Accept)"]),
+    catch('add-atom'('&hplt-library-pool', [dup, 3], _), error(Ball, _), true),
+    assertion(Ball == metta_hook_handler_arity('&hplt-library-pool', 'post-add',
+                                               'hplt-library-guard',
+                                               [dup, 3], 3)),
+    assertion(hook_message_names_the_verdicts(Ball)),
+    findall(A, 'get-atoms'('&hplt-library-pool', A), Atoms),
+    assertion(Atoms == []).
+
+% A handler every equation of which a lowercase verdict extended has no
+% one-input equation left, so its call site is the extended one and each
+% request answers the handler's own partial application; that is refused the
+% same way.
+test(a_handler_whose_every_equation_is_extended_is_refused_naming_the_verdicts,
+     [ setup('new-space'(S)), cleanup(library_hook_cleanup(S)) ]) :-
+    library_hook_program(S, 'pre-add', ["$x"-"(drop)"]),
+    catch('add-atom'('&hplt-library-pool', [plain, 1], _), error(Ball, _), true),
+    assertion(Ball == metta_hook_handler_arity('&hplt-library-pool', 'pre-add',
+                                               'hplt-library-guard',
+                                               [plain, 1], 3)),
+    assertion(hook_message_names_the_verdicts(Ball)),
+    findall(A, 'get-atoms'('&hplt-library-pool', A), Atoms),
+    assertion(Atoms == []).
 
 % The bulk door degrades to per-atom adds for a claimed space, so the
 % handler decides every atom of a batch: the transform applies to each
@@ -366,9 +475,9 @@ test(both_slots_compose_on_an_accepted_atom,
 
 hooks_cf_setup :-
     process_metta_string(
-        "(= (cf-guard (secret $x)) (refuse \"cf says no\"))\n\
-(= (cf-guard (raw $x)) (accept (cooked $x)))\n\
-(= (cf-guard (plain $x)) (accept))", _).
+        "(= (cf-guard (secret $x)) (Refuse \"cf says no\"))\n\
+(= (cf-guard (raw $x)) (Accept (cooked $x)))\n\
+(= (cf-guard (plain $x)) (Accept))", _).
 
 hooks_cf_cleanup :-
     metta_undeclare_hook(pre_add, '&cf-pool'),
@@ -432,7 +541,7 @@ test(an_uncovered_offer_is_stuck_by_answering_nothing) :-
     metta_hook_drop_compiled('&cf-parity', pre_add).
 
 test(an_equation_added_after_the_claim_decides_the_next_fire) :-
-    process_metta_string("(= (cf-flip $a) (accept))", _),
+    process_metta_string("(= (cf-flip $a) (Accept))", _),
     metta_declare_hook(pre_add, '&cf-pool', 'cf-flip'),
     metta_add_atom('&cf-pool', [flip, 1], _),
     %The redefinition goes through the ordinary equation door, whose
@@ -440,7 +549,7 @@ test(an_equation_added_after_the_claim_decides_the_next_fire) :-
     %the new program, not the baked one.
     metta_remove_atom('&self', [=, ['cf-flip', _], _], _),
     process_metta_string(
-        "(= (cf-flip $a) (refuse \"the new program refuses\"))", _),
+        "(= (cf-flip $a) (Refuse \"the new program refuses\"))", _),
     catch(metta_add_atom('&cf-pool', [flip, 2], _), Ball, true),
     nonvar(Ball),
     Ball = error(metta_add_refused('&cf-pool', [flip, 2], _), _),
@@ -478,7 +587,7 @@ test(an_equation_added_after_the_claim_decides_the_next_fire) :-
 test(the_offered_atom_reaches_the_handler_as_itself) :-
     process_metta_string(
         "(= (cf-marker) evaluated)\n\
-(= (cf-typed $a) (accept (saw $a)))", _),
+(= (cf-typed $a) (Accept (saw $a)))", _),
     metta_declare_hook(pre_add, '&cf-pool', 'cf-typed'),
     metta_add_atom('&cf-pool', ['cf-marker'], _),
     (   'get-atoms'('&cf-pool', [saw, ['cf-marker']])
@@ -540,7 +649,7 @@ test(a_standing_user_claim_makes_the_sugar_conflict_loudly,
        throws(error(metta_hook_conflict('&as-mine', 'pre-add', 'as-my-guard',
                                         'space-admission-guard-&as-mine'),
                     _)) ]) :-
-    process_metta_string("(= (as-my-guard $x) (accept))", _),
+    process_metta_string("(= (as-my-guard $x) (Accept))", _),
     metta_declare_hook(pre_add, '&as-mine', 'as-my-guard'),
     metta_admission_claim('&as-mine', '&self').
 
@@ -554,7 +663,7 @@ test(the_sugar_claim_makes_a_user_claim_conflict_loudly,
                                         'space-admission-guard-&as-pool2',
                                         'as-late-guard'), _)) ]) :-
     metta_admission_claim('&as-pool2', '&self'),
-    process_metta_string("(= (as-late-guard $x) (accept))", _),
+    process_metta_string("(= (as-late-guard $x) (Accept))", _),
     metta_declare_hook(pre_add, '&as-pool2', 'as-late-guard').
 
 % The guard equation lands in the DECLARING space, not &self: admission
@@ -763,7 +872,7 @@ test(test_the_hook_vocabulary_matches_the_three_chr_forms,
     % ==> propagation: a post-add handler's body writes a derived atom
     % while the landed atom stays as it landed.
     process_metta_string(
-        "(= (chr-prop $x) (chain (add-atom &chr-derived (saw $x)) $t (accept)))",
+        "(= (chr-prop $x) (chain (add-atom &chr-derived (saw $x)) $t (Accept)))",
         _),
     metta_declare_hook(post_add, '&chr-obs', 'chr-prop'),
     metta_add_atom('&chr-obs', [ev, 1], _),
@@ -772,7 +881,7 @@ test(test_the_hook_vocabulary_matches_the_three_chr_forms,
     % <=> simplification: the transform verdict consumes the incoming
     % atom and produces its replacement, linear consumption stated as a
     % verdict.
-    process_metta_string("(= (chr-simp-rule (raw $x)) (accept (cooked $x)))",
+    process_metta_string("(= (chr-simp-rule (raw $x)) (Accept (cooked $x)))",
                          _),
     metta_declare_hook(pre_add, '&chr-simp', 'chr-simp-rule'),
     metta_add_atom('&chr-simp', [raw, 7], _),
@@ -783,8 +892,8 @@ test(test_the_hook_vocabulary_matches_the_three_chr_forms,
     process_metta_string("(: chr-keep-rule (-> Atom %Undefined%))\n\c
 (= (chr-keep-rule $a)\n\c
    (if (space-contains &chr-keep (blocker))\n\c
-       (refuse (kept-head-blocks $a))\n\c
-       (accept)))", _),
+       (Refuse (kept-head-blocks $a))\n\c
+       (Accept)))", _),
     metta_declare_hook(pre_add, '&chr-keep', 'chr-keep-rule'),
     metta_add_atom('&chr-keep', [free, 1], _),
     assertion(\+ \+ 'get-atoms'('&chr-keep', [free, 1])),
@@ -797,7 +906,7 @@ test(test_the_hook_vocabulary_matches_the_three_chr_forms,
                             E)).
 
 % Set semantics is a rule the space DECLARES, not a property it has:
-% CHR's foo \ foo <=> true, the (drop) verdict's reason for existing.
+% CHR's foo \ foo <=> true, the (Drop) verdict's reason for existing.
 % The presence probe rides the store's own clause indexing, so the rule
 % costs the same however large the set grows [measured 2026-08-21:
 % 57.01 inferences per add at 2,000 held atoms and 57.00 at 10,000
@@ -817,7 +926,7 @@ test(test_set_semantics_is_a_declared_rule_not_a_property_of_the_space,
                  ) )) ]) :-
     process_metta_string("(: set-rule (-> Atom %Undefined%))\n\c
 (= (set-rule $a)\n\c
-   (if (space-contains &set-pool $a) (drop) (accept)))", _),
+   (if (space-contains &set-pool $a) (Drop) (Accept)))", _),
     metta_declare_hook(pre_add, '&set-pool', 'set-rule'),
     metta_add_atom('&set-pool', [item, 1], _),
     metta_add_atom('&set-pool', [item, 1], _),
@@ -900,8 +1009,8 @@ test(test_the_threadpool_bound_is_one_simpagation_rule,
     process_metta_string("(: tp-bound (-> Atom %Undefined%))\n\c
 (= (tp-bound $s)\n\c
    (if (< (space-atom-count &tp2-pool) 2)\n\c
-       (accept)\n\c
-       (refuse (pool-at-capacity 2))))", _),
+       (Accept)\n\c
+       (Refuse (pool-at-capacity 2))))", _),
     metta_declare_hook(pre_add, '&tp2-pool', 'tp-bound'),
     metta_add_atom('&tp2-pool', '&tp2-w1', _),
     metta_add_atom('&tp2-pool', '&tp2-w2', _),

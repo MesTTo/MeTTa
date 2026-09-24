@@ -14,6 +14,14 @@ Source: `extensions/python/metta/__init__.py`.
 
 The entries below reproduce the source signatures and docstrings.
 
+## `Accept`
+
+```python
+def Accept(atom: Any = _OMITTED) -> Expression:
+```
+
+> Build a hook verdict that keeps, or with an atom replaces, the atom.
+
 ## `Answer`
 
 ```python
@@ -1307,6 +1315,14 @@ def __str__(self) -> str:
 ```
 
 > `library lib_memo: sha256:aa… locked, sha256:bb… here`.
+
+## `Drop`
+
+```python
+def Drop() -> Expression:
+```
+
+> Build a hook verdict that silently skips, or removes, the atom.
 
 ## `Expression`
 
@@ -4801,6 +4817,14 @@ class NotReducible(Exception):
 > A deterministic operation that raises NotReducible makes the call fail rather
 > than error, which is how a semi-deterministic MeTTa function says no. A
 > generator operation needs no signal: yielding nothing already is one.
+
+## `Refuse`
+
+```python
+def Refuse(words: Any) -> Expression:
+```
+
+> Build a hook verdict that rejects a write with the handler's words.
 
 ## `Rows`
 
@@ -10190,14 +10214,6 @@ def metatype(self) -> str:
 
 No docstring is defined.
 
-## `accept`
-
-```python
-def accept(atom: Any = _OMITTED) -> Expression:
-```
-
-> Build a pre-add verdict that keeps or replaces the offered atom.
-
 ## `add`
 
 ```python
@@ -10399,14 +10415,6 @@ def doc(atom: Any) -> Atom:
 > for a subject ``get-type`` cannot answer.
 >
 > Runs against the default context's self space.
-
-## `drop`
-
-```python
-def drop() -> Expression:
-```
-
-> Build a pre-add verdict that silently skips the offered atom.
 
 ## `engine`
 
@@ -11010,14 +11018,6 @@ def reads(fn: Callable | None = None, /, **options: Any) -> Any:
 > the mechanism and this line shows the surface.
 >
 > Runs against the default context's self space.
-
-## `refuse`
-
-```python
-def refuse(words: Any) -> Expression:
-```
-
-> Build a pre-add verdict that rejects a write with the judge's words.
 
 ## `registered`
 

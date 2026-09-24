@@ -198,14 +198,14 @@ metta_union_admits(Base, Value, Expected) :-
 %refusal instead names the row that refused, and its tier is `user` because
 %engine/type_rules.pl ships no rule whose outcome is a refusal, so a refused
 %alternative can only have been refused by a rule a program registered.
-typing_union_decision(Module, Family, Actual, Expected, accept,
+typing_union_decision(Module, Family, Actual, Expected, 'Accept',
                       'typing-union-membership', shipped) :-
     typing_union_accepts(Module, Family, Actual, Expected).
-typing_union_decision(Module, Family, Actual, Expected, [refuse, Reason],
+typing_union_decision(Module, Family, Actual, Expected, ['Refuse', Reason],
                       Name, user) :-
     \+ typing_union_accepts(Module, Family, Actual, Expected),
     typing_union_refusal(Module, Family, Actual, Expected, Reason, Name).
-typing_union_decision(Module, Family, Actual, Expected, defer, none, none) :-
+typing_union_decision(Module, Family, Actual, Expected, 'Defer', none, none) :-
     \+ typing_union_accepts(Module, Family, Actual, Expected),
     \+ typing_union_refusal(Module, Family, Actual, Expected, _, _).
 

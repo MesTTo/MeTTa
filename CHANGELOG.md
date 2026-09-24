@@ -54,6 +54,27 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Changed
 
+- Hook verdicts, typing-rule outcomes and translator-rule refusals are
+  capitalized constructors, as MeTTa's other data and control values are
+  (`True`, `Empty`, `Error`). A pre-add or post-add handler answers `(Accept)`,
+  `(Accept <atom>)`, `(Refuse <words>)` or `(Drop)`; an `add-typing-rule!`
+  outcome is `Accept`, `(Refuse <reason>)` or `Defer`; and a translator rule
+  refuses with `(Refuse <reason>)`. The lowercase spellings were calls wherever
+  a library defined the head. With lib_functional imported, whose `drop` takes
+  two inputs, a judge's `(= (guard (dup $x)) (drop))` was extended to take
+  three, as upstream PeTTa at 43705f5 extends it, so the handler stopped
+  answering the one-argument request it was written for. A handler answer
+  outside the four verdicts is refused naming them. A handler that its module
+  also defines at another arity is refused with `metta_hook_handler_arity`,
+  which names that arity and says how a lowercase verdict produced it, where
+  the pre-add and post-add paths used to report a stuck state.
+  `add-typing-rule!` refuses a lowercase outcome with
+  `domain_error(typing_rule_outcome, ...)` naming the three outcomes. The
+  shipped `space-admission-verdict` answers the capitalized verdicts. The
+  Python seat's builders are `Accept`, `Refuse` and `Drop` in place of
+  `accept`, `refuse` and `drop`, and a compiled body spells them the same way;
+  the Node seat's builders of those names build the capitalized heads.
+
 - A whole reference publication reads each head's roots from one pass over
   its sorted face, `group_pairs_by_key/2`, and releases the heads it bound
   before and no longer holds by ordered difference. Each head used to ask the

@@ -420,7 +420,7 @@ invalid_arrow_splice(Type) :-
 %over every candidate type chain with a length/2 on each.
 %
 %Only a USER rule can refuse here. The one shipped arrow-arity rule is
-%typing-arrow-arity-exact, `(Same, Same, accept)`, which accepts an exact
+%typing-arrow-arity-exact, `(Same, Same, 'Accept')`, which accepts an exact
 %match and defers everything else, and arrow-arity does not fall through to
 %widening the way ordinary, derived and reporting do
 %[source: engine/type_rules.pl, typing_rule_entry/7 and

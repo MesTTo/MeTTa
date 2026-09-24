@@ -72,7 +72,7 @@ test(a_user_rule_that_names_no_refusal_leaves_the_ordinary_one,
     answers_in(M, [concrete, "s"], Before),
     assertion(Before == [Refusal]),
     run_in(S, "!(add-typing-rule! plunit-scope-elsewhere ordinary \c
-               Bespoke Bespoke (refuse denied))", [true]),
+               Bespoke Bespoke (Refuse denied))", [true]),
     answers_in(M, [concrete, "s"], After),
     assertion(After == [Refusal]).
 
@@ -83,7 +83,7 @@ test(a_named_refusal_replaces_the_ordinary_one_for_its_own_pair,
     answers_in(M, [held, b], Accepted),
     assertion(Accepted == [[kept, b]]),
     run_in(S, "!(add-typing-rule! plunit-scope-own ordinary \c
-               Bespoke Bespoke (refuse denied))", [true]),
+               Bespoke Bespoke (Refuse denied))", [true]),
     answers_in(M, [held, b], Refused),
     assertion(Refused == [['Error', [held, b],
                            ['BadArgType', 1, 'Bespoke', 'Bespoke',
@@ -95,6 +95,21 @@ test(a_named_refusal_replaces_the_ordinary_one_for_its_own_pair,
     answers_in(M, [concrete, "s"], Beside),
     assertion(Beside == [Ordinary]).
 
+%The outcomes are the capitalized constructors the space hooks and translator
+%rules answer in, so each lowercase spelling is refused by name and registers
+%nothing.
+test(a_lowercase_outcome_is_refused_naming_the_outcomes,
+     [setup(context(S, M)), cleanup(release_quietly(S))]) :-
+    forall(member(Lowercase, [accept, defer, [refuse, denied]]),
+           ( with_metta_module(M,
+                 catch('add-typing-rule!'('plunit-scope-lowercase', ordinary,
+                                          'Bespoke', 'Bespoke', Lowercase, _),
+                       error(Ball, context(_, Remedy)), true)),
+             assertion(Ball == domain_error(typing_rule_outcome, Lowercase)),
+             assertion(Remedy == 'use Accept, (Refuse Reason), or Defer') )),
+    assertion(\+ raw_registered_typing_rule(user, M, 'plunit-scope-lowercase',
+                                            _, _, _, _)).
+
 %%%%%%%%%% One module: which lives a rule reaches %%%%%%%%%%
 
 test(a_released_space_retires_the_typing_rules_declared_in_it,
@@ -102,7 +117,7 @@ test(a_released_space_retires_the_typing_rules_declared_in_it,
       cleanup(release_quietly('&plunit-typing-scope-release'))]) :-
     Space = '&plunit-typing-scope-release',
     run_in(Space, "!(add-typing-rule! plunit-scope-released ordinary \c
-                   Bespoke Bespoke (refuse denied))", [true]),
+                   Bespoke Bespoke (Refuse denied))", [true]),
     assertion(raw_registered_typing_rule(user, M, 'plunit-scope-released',
                                          _, _, _, _)),
     metta_release_space(Space),
@@ -117,7 +132,7 @@ test(the_next_life_of_a_released_module_answers_the_ordinary_refusal,
       cleanup(release_quietly('&plunit-typing-scope-reuse'))]) :-
     Space = '&plunit-typing-scope-reuse',
     run_in(Space, "!(add-typing-rule! plunit-scope-reused ordinary \c
-                   Bespoke Bespoke (refuse denied))", [true]),
+                   Bespoke Bespoke (Refuse denied))", [true]),
     metta_release_space(Space),
     space_module(Space, Second),
     assertion(Second == First),

@@ -435,14 +435,14 @@ runs all of it.
 ### Declining a match, out loud
 
 A rule head says which shape the rule rewrites. Whether the match it got is one
-the rewrite can honour is a different question, and `(refuse Reason)` is the
+the rewrite can honour is a different question, and `(Refuse Reason)` is the
 answer to it:
 
 ```metta
 (: strength (-> Atom Atom %Undefined%))
 (= (strength (dose $n) (unit mg))
    (if (> $n 1000)
-       (refuse "a dose above 1000 is not a milligram strength")
+       (Refuse "a dose above 1000 is not a milligram strength")
        (noeval (mg $n))))
 (= (strength (dose $n) (unit mg))
    (noeval (grams (/ $n 1000))))

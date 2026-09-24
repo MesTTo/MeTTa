@@ -253,7 +253,7 @@ test(a_typing_policy_change_reinstates_its_named_refusal,
      [setup(setup_points(S)), cleanup(metta_release_space(S))]) :-
     evaluate_in(S, ['read-point'], [3]),
     run_in(S, "!(add-typing-rule! reject-number ordinary Number Number
-                 (refuse no-numbers))", _),
+                 (Refuse no-numbers))", _),
     evaluate_in(S, ['read-point'], Changed),
     assertion(Changed = [['Error', ['Point', 3, 4],
                          ['BadArgType', 1, 'Number', 'Number',

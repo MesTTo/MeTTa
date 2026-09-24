@@ -2674,7 +2674,7 @@ test(a_static_parameter_proof_yields_to_a_later_typing_rule,
     once(tlc_static_parameter_proof(DefaultBody)),
     process_metta_string(
         "!(add-typing-rule! tlc-deny-payload ordinary TLCPayload TLCPayload \c
-          (refuse changed-policy))", _),
+          (Refuse changed-policy))", _),
     tlc_forward_body(CheckedBody),
     assertion(\+ tlc_static_parameter_proof(CheckedBody)),
     term_string(CheckedBody, CheckedText),
@@ -2732,7 +2732,7 @@ test(a_stale_transaction_keeps_the_dynamic_contract,
         ( thread_get_message(Ready, ready),
           process_metta_string(
               "!(add-typing-rule! tlc-deny-payload ordinary TLCPayload \c
-                TLCPayload (refuse changed-policy))", _),
+                TLCPayload (Refuse changed-policy))", _),
           thread_send_message(Continue, continue),
           thread_get_message(Result, Body),
           thread_join(Thread, true),
@@ -2806,7 +2806,7 @@ test(a_runnable_intrinsic_shortcut_yields_to_a_later_policy,
         translator:type_check_goal(1, 'Number', Outcome = dynamic, Goal)),
     process_metta_string(
         "!(add-typing-rule! tlc-deny-payload ordinary Number Number \c
-          (refuse changed-policy))", _),
+          (Refuse changed-policy))", _),
     call(Goal),
     assertion(Outcome == dynamic).
 

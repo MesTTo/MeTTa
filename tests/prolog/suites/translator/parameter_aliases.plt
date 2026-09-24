@@ -96,7 +96,7 @@ test(changing_the_callee_contract_retains_its_new_refusal,
 test(changing_the_typing_policy_retires_alias_shortcuts,
      [setup(setup_aliases(S)), cleanup(metta_release_space(S))]) :-
     evaluate_in(S, ['chain-parcel', ['Parcel', 3]], [3]),
-    run_in(S, "!(add-typing-rule! deny-parcel ordinary Parcel Parcel (refuse denied))", [true]),
+    run_in(S, "!(add-typing-rule! deny-parcel ordinary Parcel Parcel (Refuse denied))", [true]),
     evaluate_in(S, ['chain-parcel', ['Parcel', 3]], Changed),
     evaluate_in(S, ['direct-parcel', ['Parcel', 3]], Direct),
     assertion(Changed = [['Error', _, _]]),

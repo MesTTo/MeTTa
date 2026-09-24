@@ -56,7 +56,7 @@
 %     of in translator_rule_override/2
 %     [tested: test_overriding_a_protected_name_is_refused_with_the_name;
 %     commit=9330b5d7ebf607e34a85be950bb226fce65f45c0].
-%   - a rule body answering (refuse Reason) DECLINES: the call carries on down
+%   - a rule body answering (Refuse Reason) DECLINES: the call carries on down
 %     the dispatch chain and the words are recorded and published into &metta
 %     [tested: test_a_translator_rule_can_decline_with_its_own_words;
 %     commit=9330b5d7ebf607e34a85be950bb226fce65f45c0].
@@ -802,14 +802,14 @@ install_inverse_equation(Source, Space, Equation) :-
 %does not happen [source: uwplse/tensat, src/rewrites.rs, the Applier
 %implementation for CheckApply, read 2026-08-21]. The same shape is already
 %here twice, as seam:foreign_refuse/2 for a space and as
-%engine/type_rules.pl's [refuse, Reason] outcome for a typing rule; this is
+%engine/type_rules.pl's ['Refuse', Reason] outcome for a typing rule; this is
 %the third rule family to get it and it is spelled the same way.
 %
 %A declined call carries on down the dispatch chain exactly as a call whose
 %head the rule did not match, and a rule with more equations tries the next
 %one, because the decline is a FAILURE at the point the rule was called.
 %
-%The `(refuse Reason)` shape is tested inline at the one place a rule's
+%The `(Refuse Reason)` shape is tested inline at the one place a rule's
 %expansion arrives, so a rule that does not refuse pays nothing for the
 %channel.
 %

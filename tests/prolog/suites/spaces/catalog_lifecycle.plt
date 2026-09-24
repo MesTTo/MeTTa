@@ -177,7 +177,7 @@ test(withdrawing_the_ownership_row_stops_the_retirement,
 
 test(release_retires_the_live_hook_claim_as_well_as_its_reflection,
      [cleanup((clean_life('&catalog-hooks'), clean_life('&catalog-judge')))]) :-
-    metta_add_atom('&catalog-judge', [=, ['life-judge', _], [accept]], _),
+    metta_add_atom('&catalog-judge', [=, ['life-judge', _], ['Accept']], _),
     space_module('&catalog-judge', Module),
     with_metta_module(Module,
         ( 'declare-pre-add!'('&catalog-hooks', 'life-judge', []),

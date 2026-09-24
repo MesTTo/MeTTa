@@ -115,7 +115,7 @@ metta_refined_union_admits(Module, Value, Expected) :-
 metta_refined_value_admits(Module, Actual, Value, Expected) :-
     (   type_rules:decisive_typing_rule(user, Module, ordinary, Actual,
                                        Expected, Decision, _)
-    ->  Decision == accept
+    ->  Decision == 'Accept'
     ;   metta_refined_type(Expected, Base, Constraints)
     ->  (   metta_refined_declared_match_in(Module, Actual, Expected)
         ;   metta_refined_value_admits(Module, Actual, Value, Base),

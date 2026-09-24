@@ -384,7 +384,7 @@ test(a_user_metatype_rule_is_not_bypassed) :-
     ( call(Admitted0) -> true ; throw(shape_test_should_admit_a_symbol) ),
     setup_call_cleanup(
         user:'add-typing-rule!'('plunit-refuse-symbol', metatype,
-                                'Symbol', 'Symbol', [refuse, 'plunit refusal'],
+                                'Symbol', 'Symbol', ['Refuse', 'plunit refusal'],
                                 _),
         ( \+ type_rules:typing_policy_is_default(Module),
           \+ user:check_argument_type_under_policy(sym, 'Symbol', metatype) ),
@@ -3631,7 +3631,7 @@ test(a_second_declaration_for_one_name_is_refused,
 test(a_decline_records_its_reason_and_the_call_it_declined,
      [ setup(process_metta_string("(: p2b-guarded (-> Atom %Undefined%))
 (= (p2b-guarded (over $n))
-   (if (> $n 10) (refuse \"over ten\") (noeval (kept $n))))
+   (if (> $n 10) (Refuse \"over ten\") (noeval (kept $n))))
 (= (p2b-guarded $x) (noeval (noeval (p2b-guarded $x))))", _)),
        cleanup(( 'remove-translator-rule!'('p2b-guarded', _),
                  retractall(translator_rule_refusal('p2b-guarded', _, _)) )) ]) :-

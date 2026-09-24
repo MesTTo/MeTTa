@@ -333,7 +333,7 @@ test(fixed_builtin_mask_selection_remains_independent_of_arity_policy,
     space_module(S, M),
     with_metta_module(M,
         once(translator:builtin_argument_mask('new-space', [S, x], Before, Out))),
-    run_in(S, "!(add-typing-rule! deny-two arrow-arity 2 2 (refuse two-denied))", _),
+    run_in(S, "!(add-typing-rule! deny-two arrow-arity 2 2 (Refuse two-denied))", _),
     with_metta_module(M,
         once(translator:builtin_argument_mask('new-space', [S, x], After, Result))),
     assertion(After-Result == Before-Out).

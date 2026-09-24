@@ -1118,7 +1118,7 @@ translator_rule_type_chain(HV, RuleModule, TypeChain) :-
 %every report [tested: test_an_answerless_translator_rule_body_behaves_as_ruled;
 %commit=4465fc492071932eab0b2818a4ccd46f01f0d6aa].
 %
-%A rule that DECLINES with `(refuse Reason)` below is that same condition
+%A rule that DECLINES with `(Refuse Reason)` below is that same condition
 %failing in the rule's own words rather than a different kind of rule. The
 %words are published into &metta and the call falls through exactly as a body
 %with no answer does, which is why the report COUNTS the rules that can refuse:
@@ -1247,7 +1247,7 @@ apply_translator_rule_dl(HV, Declarations, RuleModule,
     %c))))` with the rewrite blocked at compile time still answered `(twin
     %(a b c) (a b c))` because the same equation ran at run time, so the
     %orientation decided nothing.
-    (   Expansion = [refuse, Reason], nonvar(Reason)
+    (   Expansion = ['Refuse', Reason], nonvar(Reason)
     ->  note_translator_rule_refusal(HV, Values, Reason),
         fail
     ;   true

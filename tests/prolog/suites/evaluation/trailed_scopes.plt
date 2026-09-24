@@ -335,14 +335,14 @@ perform(reference_finishing) :-
 perform(bridge_depth) :-
     snapshot(metta_engine:metta_bridge_descend([insert,'&self',[guard_payload]])).
 perform(counted_hook) :-
-    snapshot(metta_engine:metta_hook_apply_counted([accept,[guard_rewritten]],
+    snapshot(metta_engine:metta_hook_apply_counted(['Accept',[guard_rewritten]],
         '&self',guard_handler,[guard_original],true,true)).
 perform(ordinary_hook) :-
-    snapshot(metta_engine:metta_hook_apply([accept,[guard_rewritten]],
+    snapshot(metta_engine:metta_hook_apply(['Accept',[guard_rewritten]],
         '&self',guard_handler,[guard_original],true,true)).
 perform(post_hook) :-
     snapshot((metta_add_atom('&self',[guard_original],true),
-              metta_engine:metta_hook_post_apply([accept,[guard_rewritten]],
+              metta_engine:metta_hook_post_apply(['Accept',[guard_rewritten]],
                   '&self',guard_handler,[guard_original]))).
 perform(foreign_selector) :-
     catch(spaces:metta_remove_occurrence('&guard-token-provider',t(guard,1),true),
