@@ -995,7 +995,9 @@ run GATE package-backings-selftest "$PY" "$HERE/tests/checks/check_package_backi
 # into the tree it had just copied and the moved directory mtime read as
 # drift. Four A/B comparisons were invalid before this existed; the last
 # reported 169 failures against a 4-failure baseline purely because a battery
-# ran one revision's Python tree against another revision's engine.
+# ran one revision's Python tree against another revision's engine. It also
+# proves that git run in a battery never reaches the enclosing checkout, and
+# that BATTERY_KEEP holds HEAD at every uncommitted path it does not name.
 # Umbrella: workspace snapshots must preserve every component and their source identity.
 run GATE battery-selftest sh "$HERE/tools/battery_selftest.sh"
 

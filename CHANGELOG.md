@@ -131,6 +131,28 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- A battery can no longer hand a git command to the checkout it sits inside.
+  At 11:06:03 on 2026-09-24 a `git reset --hard HEAD` meant for battery 33
+  reverted every uncommitted file in wt-merge, the reasoning record included,
+  because battery 33 had lost its own `.git` in a provisioning race and git
+  walked up to the enclosing checkout. `tools/battery.sh` now makes a
+  repository's battery identity under one lock per repository, writes the
+  worktree's back-link itself instead of running `git worktree repair` (which,
+  run in the main worktree, rewrites every linked worktree's gitfile and is how
+  one provision broke another's seed), and refuses to provision rather than
+  leave a repository's battery without an identity. `run` also refuses a
+  battery that does not answer git about itself, and runs its command with
+  `GIT_CEILING_DIRECTORIES` at the battery's parent, so a git command there
+  that finds no repository says so instead of reaching the enclosing tree. A
+  battery of a directory that only sits inside a repository no longer gets an
+  identity of that enclosing repository.
+- `BATTERY_KEEP='<path> ...'` restricts a battery to the committed tree plus the
+  uncommitted state of the named paths, which may reach into a component;
+  every other uncommitted change, in the tree or a component, is put back to
+  HEAD in the battery and listed in `ai-tmp/battery.restricted`, and verify
+  holds those paths to HEAD. `BATTERY_KEEP=''` gives the committed tree alone.
+  Several sessions edit one working tree, and a plain battery carried every
+  session's uncommitted work into every verdict.
 - The Python seat's early-exit questions cost the same and answer the same
   in every process. Whether a tagged program can answer a query now asks its
   three tagged shapes by key rather than reading atoms until the first

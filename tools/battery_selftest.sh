@@ -4,8 +4,11 @@
 #   refusal that names it; prove it can CLEAR what a previous run left,
 #   including a git repository a fixture wrote and a cache inside a directory
 #   the source does not have; prove a provisioned battery answers `git`
-#   about ITSELF rather than about the checkout it sits inside; and prove a
-#   battery re-provisioned from another source reads that source's installs.
+#   about ITSELF rather than about the checkout it sits inside, and that git
+#   run in one never reaches that checkout; prove a battery re-provisioned
+#   from another source reads that source's installs; and prove BATTERY_KEEP
+#   carries the kept paths and holds HEAD at every other uncommitted one, in
+#   the tree and in a component.
 # Assumes: tools/battery.sh sits beside this file; a writable ai-tmp/.
 # Guarantees: exits nonzero if any planted drift goes unreported, or if
 #   anything the snapshot leaves out on purpose is reported as drift: scratch,
@@ -109,6 +112,24 @@ fi
 exec 8>&-
 BATTERY_SOURCE="$FIXTURE/src" bounded sh "$BATTERY" provision "$INDEX"
 expect "a battery whose claim was released" 0
+
+# A command run in a battery must never reach the checkout the battery sits
+# inside through git. This source is not a repository, so the battery has no
+# .git of its own, and before the discovery ceiling git walked up and answered
+# about the enclosing checkout, which is how a `git reset --hard HEAD` meant
+# for a battery reverted every uncommitted file in wt-merge [2026-09-24 11:06].
+home=$(cd "$HERE/.." && git rev-parse --show-toplevel)
+BATTERY_SOURCE="$FIXTURE/src" bounded sh "$BATTERY" run "$INDEX" -- \
+    sh -c 'git rev-parse --show-toplevel' > "$FIXTURE/out" 2>&1 || true
+if grep -qxF "$home" "$TREE/ai-tmp/battery-$INDEX.log"; then
+    echo "  FAIL git in a battery reached the enclosing checkout $home"
+    failures=$((failures + 1))
+elif [ -e "$TREE/.git" ]; then
+    echo "  FAIL a battery of a directory that is not a repository's top was given a git identity"
+    failures=$((failures + 1))
+else
+    echo "  ok   git in a battery stops at the battery instead of reaching the enclosing checkout"
+fi
 
 # A compiled Prolog artifact is a cache whose copy is wrong rather than stale:
 # SWI loads a .qlf found outside the directory it was compiled in as moved and
@@ -317,6 +338,82 @@ if [ -e "$TREE/component/ai-battery-9" ]; then
     failures=$((failures + 1))
 else
     echo "  ok   a component's own battery stayed out of the snapshot"
+fi
+
+# BATTERY_KEEP restricts a battery to what is committed plus the named paths,
+# so a verdict about one session's change does not also carry another's. The
+# source here and a component inside it each hold a kept change and an unkept
+# modification, deletion and untracked file; the battery must carry the kept
+# ones and hold HEAD at every other.
+(   mkdir -p "$FIXTURE/src/comp" && cd "$FIXTURE/src/comp" && git init -q . &&
+    printf 'comp one\n' > c.txt && printf 'comp two\n' > d.txt && git add c.txt d.txt &&
+    git -c user.name=t -c user.email=t@t commit -qm comp ) > "$FIXTURE/out" 2>&1
+(   cd "$FIXTURE/src" &&
+    printf '[submodule "comp"]\n\tpath = comp\n\turl = ./comp\n' > .gitmodules &&
+    git add .gitmodules comp top.txt package &&
+    git -c user.name=t -c user.email=t@t commit -qm component ) > "$FIXTURE/out" 2>&1
+printf 'ours\n' > "$FIXTURE/src/top.txt"
+printf 'theirs\n' > "$FIXTURE/src/package/mid.txt"
+rm "$FIXTURE/src/package/inner/deep.txt"
+printf 'stray\n' > "$FIXTURE/src/package/stray.txt"
+printf 'comp ours\n' > "$FIXTURE/src/comp/c.txt"
+printf 'comp theirs\n' > "$FIXTURE/src/comp/d.txt"
+printf 'comp stray\n' > "$FIXTURE/src/comp/new.txt"
+holds() {
+    if [ "$3" = absent ]; then
+        [ ! -e "$TREE/$2" ] && echo "  ok   $1" ||
+            { echo "  FAIL $1: $2 is present"; failures=$((failures + 1)); }
+    elif [ "$(cat "$TREE/$2" 2>/dev/null)" = "$3" ]; then
+        echo "  ok   $1"
+    else
+        echo "  FAIL $1: $2 reads '$(cat "$TREE/$2" 2>/dev/null)', wanted '$3'"
+        failures=$((failures + 1))
+    fi
+}
+restricted() {
+    BATTERY_KEEP="top.txt comp/c.txt" BATTERY_SOURCE="$FIXTURE/src" bounded sh "$BATTERY" "$@"
+}
+if restricted provision "$INDEX" > "$FIXTURE/out" 2>&1; then
+    holds "a kept change is carried" top.txt ours
+    holds "an unkept modification is put back to HEAD" package/mid.txt two
+    holds "an unkept deletion is put back" package/inner/deep.txt three
+    holds "an unkept untracked file is dropped" package/stray.txt absent
+    holds "a kept change inside a component is carried" comp/c.txt "comp ours"
+    holds "an unkept change inside a component is put back" comp/d.txt "comp two"
+    holds "an unkept untracked file inside a component is dropped" comp/new.txt absent
+    if restricted verify "$INDEX" > "$FIXTURE/out" 2>&1; then
+        echo "  ok   a restricted battery verifies against HEAD plus its kept paths"
+    else
+        echo "  FAIL a restricted battery did not verify:"; cat "$FIXTURE/out"
+        failures=$((failures + 1))
+    fi
+    if BATTERY_SOURCE="$FIXTURE/src" bounded sh "$BATTERY" verify "$INDEX" > "$FIXTURE/out" 2>&1; then
+        echo "  FAIL an unrestricted verify accepted a battery that differs from the working tree"
+        failures=$((failures + 1))
+    else
+        echo "  ok   an unrestricted verify refuses a restricted battery"
+    fi
+    printf 'tampered\n' > "$TREE/package/mid.txt"
+    if restricted verify "$INDEX" > "$FIXTURE/out" 2>&1; then
+        echo "  FAIL a restricted path that no longer holds HEAD was accepted"
+        failures=$((failures + 1))
+    elif grep -q 'package/mid.txt' "$FIXTURE/out"; then
+        echo "  ok   a restricted path that no longer holds HEAD is refused, naming it"
+    else
+        echo "  FAIL a tampered restricted path was refused without naming it:"; cat "$FIXTURE/out"
+        failures=$((failures + 1))
+    fi
+else
+    echo "  FAIL a restricted provision refused:"; cat "$FIXTURE/out"
+    failures=$((failures + 1))
+fi
+if BATTERY_KEEP='' BATTERY_SOURCE="$FIXTURE/src" bounded sh "$BATTERY" provision "$INDEX" \
+       > "$FIXTURE/out" 2>&1; then
+    holds "an empty BATTERY_KEEP gives the committed tree" top.txt one
+    holds "an empty BATTERY_KEEP gives a component's committed tree" comp/c.txt "comp one"
+else
+    echo "  FAIL a provision with an empty BATTERY_KEEP refused:"; cat "$FIXTURE/out"
+    failures=$((failures + 1))
 fi
 
 rm -rf "$TREE"
