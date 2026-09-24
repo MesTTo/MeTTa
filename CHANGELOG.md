@@ -210,6 +210,13 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- The Python twin of `04-matespace2.metta` in chapter 22 says what the program
+  runs. It said `(superpose (collapse (match ...)))` gave each round a snapshot
+  of the space. superpose takes a written argument as its list of branches, so
+  the symbol `collapse` is the first branch and a term the rules grow like any
+  other, and the match starts only after that branch's whole continuation has
+  finished. The 1,297,533 the example counts is the final match's answers
+  summed over the 798 branches that reach it, over a space of 2,869 atoms.
 - `02-tilepuzzle.metta` in chapter 22 claims 181440, the 9!/2 boards reachable
   from the start, where it claimed 181441. Its `bfs_all` seeded the duplicate
   store through `add-unique-item-or-empty`, which nothing defines, so the call
