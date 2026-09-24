@@ -1,0 +1,14 @@
+diff --git a/boot/tabling.pl b/boot/tabling.pl
+index 8b66b43..9a90f2d 100644
+--- a/boot/tabling.pl
++++ b/boot/tabling.pl
+@@ -554,6 +554,9 @@ finished_leader(OldCurrent, Catcher, Fresh, Wrapper) :-
+     ;   Catcher = exception(_)
+     ->  Fresh = fresh(SCC, _),
+         '$tbl_table_discard_all'(SCC)
++    ;   Catcher == !                            % our frames were discarded,
++    ->  Fresh = fresh(SCC, _),                 % as when the engine running
++        '$tbl_table_discard_all'(SCC)          % the leader is destroyed
+     ;   print_message(error, tabling(unexpected_result(Wrapper, Catcher)))
+     ).
+ 

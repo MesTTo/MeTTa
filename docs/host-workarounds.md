@@ -47,6 +47,12 @@ source, so it needs no site, its reproduction must answer `absent`, and
 fails naming the patch to rebuild with. The reproduction still describes the
 defect as shipped, so a fresh environment learns what its host must carry.
 
+A patch is carried, which makes it a boot requirement, only where the engine,
+one of its seats or a shipped library meets the defect, or where a carried
+patch is written on top of it, and the entry says which. A defect nothing
+here meets has no entry even when a host carries its fix; the journal of
+defects to report upstream records it.
+
 ## janus-callback-exception-leak
 Host: janus-swi 1.5.3 (janus/janus.c `check_error`, the same code at upstream
   packages-swipy master b0356a162, 2026-07-28, and in swipl-devel V10.1.14's
@@ -1408,7 +1414,373 @@ Reproduction: tests/checks/host_workarounds/swi-trie-gen-empty-hashed-root.sh,
 Workaround: no trie the engine enumerates is emptied by `trie_delete/3`;
   engine/metta/reference_refresh.pl builds the pending spaces that stay into
   a fresh trie instead of deleting the consumed ones.
+Patch: tests/checks/host_workarounds/swi-trie-gen-empty-hashed-root.patch,
+  against swipl-devel V10.1.14 src/pl-trie.c: when `advanceTableEnum()` finds
+  nothing, `add_choice()` frees the enumerator and pops the choice, the way
+  its `var_mask` branch pops one on failure, rather than following a child
+  from an enumeration that produced none (built from a copy of swipl-devel,
+  19 of 19 of SWI's suites pass, among them tabling and eleven XSB suites).
+  Carried though nothing here meets the defect, since the site builds a fresh
+  trie: the hosts this tree ships, the native host and WebAssembly build 9,
+  were built with the patch, and the host-workarounds lane fails a
+  Workaround-only entry once its host no longer shows the defect. So the entry
+  names the patch those hosts carry rather than a host being rebuilt to take a
+  real fix back out, and the requirement it adds is one every shipped host
+  already meets. The site keeps its fresh trie, which a patched host does not
+  need and does not mind.
 Lifted when: `trie_gen/2` over a trie whose keys `trie_delete/3` removed
   answers nothing, as `is_leaf_trie_node()` already reads an empty table.
 Record: docs/journal/2026-09-11-the-end-of-wave-battery.md, 2026-09-24, the
   twins that read the checkout's path.
+
+## swi-halt-passes-created-thread
+Host: SWI-Prolog 10.1.14 as shipped and as patched here up to the 09-24
+  build 6 hosts, and upstream master at d7d2a2bb8f5b (fetched 2026-09-24):
+  `exitPrologThreads()` in src/pl-thread.c, `start_thread()` and
+  `pl_thread_create()` beside it.
+Defect: halt stops the threads it finds, and a thread `thread_create/3` has
+  marked `PL_THREAD_CREATED` that `start_thread()` has not yet marked
+  `PL_THREAD_RUNNING` is not one of them. `exitPrologThreads()` joins the
+  finished threads and signals the running ones, and a created one falls to
+  `default: break;`: it is neither signalled nor counted, and it then runs its
+  goal while `PL_cleanup()` frees the module tables its `callProlog()` looks
+  the goal up in. It cannot be signalled anyway: `PL_thread_raise()` wants the
+  `LD_MAGIC` `initialise_thread()` sets last. A C host that creates eight
+  detached threads and calls `PL_cleanup(0)` dies 16 runs of 20, and through
+  the C seat lib_thread's `(after 30 ...)`, cancelled at once, then `mt_close`
+  died 2 runs of 10 (extensions/cmetta 697eff4,
+  `make runtime-halt-created-thread`).
+Reproduction: tests/checks/host_workarounds/swi-halt-passes-created-thread.sh,
+  the C seat's probe run twenty times; `present` when a run dies of SIGSEGV or
+  at an assertion, `absent` when all twenty halt.
+Patch: tests/checks/host_workarounds/swi-halt-passes-created-thread.patch,
+  against swipl-devel V10.1.14 src/pl-thread.c. `exitPrologThreads()` reads a
+  created thread's status again under `L_THREAD` and, while it is still
+  created, sets its `exit_requested` and counts it for the wait;
+  `start_thread()` reads `exit_requested` under the same lock as it marks
+  itself running and, when halt asked, leaves through the cleanup handler
+  without calling its goal, and `freePrologThread()` posts the semaphore the
+  count waits for. A creation that straddles the start of halt is closed the
+  same way: `pl_thread_create()` repeats its halt test under `L_THREAD` where
+  it marks the thread created, and `exitPrologThreads()` takes `L_THREAD` once
+  before its scan, so a thread either became created before the scan or its
+  creation refuses. The code is inside `O_PLMT`, which the WebAssembly build
+  does not define, so that build compiles none of it and has no Prolog threads
+  to stop.
+  Carried because the C seat meets the defect: its `mt_close()` died after a
+  lib_thread timer, as the Defect says.
+Lifted when: halt waits for, or cancels, a thread that is still being
+  created.
+Record: docs/journal/2026-09-24-wasm-library-halves.md, build 9.
+
+## swi-engine-query-offers-foreign-yield
+Host: SWI-Prolog 10.1.14 as shipped and as patched here up to the 09-24
+  build 6 hosts, and upstream master at d7d2a2bb8f5b: `$engine_create` in
+  src/pl-thread.c, `'$can_yield'` in src/pl-pro.c, `PL_can_yield()` in
+  src/pl-wam.c and the foreign-yield check in `I_FEXITNDET`, src/pl-vmi.c.
+Defect: `engine_create/3` opens its engine's query with `PL_Q_ALLOW_YIELD`
+  so that `engine_yield/1` works, and the same flag is all `'$can_yield'` and
+  the foreign-yield check read. So inside an engine `'$can_yield'` succeeds,
+  though the query's opener, `engine_next/2`, takes `engine_yield/1`'s code
+  alone: a foreign yield (`PL_yield_address()`, which `'$await'/2` uses) there
+  returns `PL_S_YIELD` to it, and its default branch raises in the engine's
+  context without restoring the caller's. Natively the process dies of
+  SIGSEGV; on the WebAssembly host library(wasm)'s `sleep/1`, whose
+  `is_async/0` is `'$can_yield'`, awaited a promise inside every tsmetta job
+  and the process aborted once the JavaScript bridge could evaluate the call.
+Reproduction: tests/checks/host_workarounds/swi-engine-query-offers-foreign-yield.sh,
+  a C host with a foreign predicate that yields once; after two controls in a
+  query opened with `PL_Q_ALLOW_YIELD`, `present` when `'$can_yield'`
+  succeeds inside an engine, when the yield there is not refused, or when the
+  process dies there.
+Patch: tests/checks/host_workarounds/swi-engine-query-offers-foreign-yield.patch,
+  against swipl-devel V10.1.14 src/SWI-Prolog.h, src/pl-thread.c,
+  src/pl-wam.c, src/pl-pro.c and src/pl-vmi.c. `engine_create/3` marks its
+  query with a kernel-only flag, `PL_Q_INTERACTOR`, beside the kernel's own
+  `PL_Q_DETERMINISTIC` and `PL_Q_EXCEPT_THREAD_EXIT`; one test,
+  `takes_foreign_yield()` in src/pl-wam.c, reads `PL_Q_ALLOW_YIELD` without
+  it, and `PL_can_yield()`, `'$can_yield'` (now `PL_can_yield()` itself) and
+  the foreign-yield check all ask it. A foreign yield inside an engine is
+  then refused where it is made, with the existing `permission_error(yield,
+  ...)`, the way Lua refuses a yield across a C call boundary, and
+  library(wasm) falls back to `system:sleep/1` inside a job.
+  Carried because the Node seat meets the defect: `(sleep N)` aborted every
+  tsmetta job once the bridge could evaluate the call.
+Lifted when: `'$can_yield'` fails inside an `engine_create/3` engine, or
+  `engine_next/2` passes a foreign yield up to a caller that can take it.
+Record: docs/journal/2026-09-24-wasm-library-halves.md, build 9.
+
+## swi-wasm-js-bridge-assumes-window
+Host: SWI-Prolog 10.1.14's WebAssembly build as shipped, and upstream master
+  at d7d2a2bb8f5b: `eval_chain()` inside `prolog_js_call()` in
+  src/wasm/prolog.js, which the link prepends to swipl-web.js and through
+  which library(wasm)'s `:=/2` evaluates every chain.
+Defect: `eval_chain()` begins `obj = obj||window`, so a chain with no
+  receiver starts from `window`, and Node and Web Workers have none: every
+  such `:=/2` call raises `ReferenceError: window is not defined` before it
+  looks at the chain, a chain that starts with `prolog` included. So
+  library(wasm)'s own `sleep/1` failed on its asynchronous path under Node.
+Reproduction: tests/checks/host_workarounds/swi-wasm-js-bridge-assumes-window.sh,
+  `X := 'Math'.max(1, 2)` goal-expanded as a compiled clause is, through the
+  WebAssembly host the tree vendors (`extensions/node/_host`, or
+  `WASM_HOST_DIR`); `present` when it raises the missing window, `absent`
+  when it answers 2.
+Patch: tests/checks/host_workarounds/swi-wasm-js-bridge-assumes-window.patch,
+  against swipl-devel V10.1.14 src/wasm/prolog.js: the default receiver is
+  `globalThis`, which is `window` in a page, `self` in a worker and `global`
+  in Node. A native build never compiles the file.
+  Carried because the Node seat meets the defect: `(sleep N)` under Node
+  raised the missing window.
+Lifted when: `eval_chain()` defaults to `globalThis`.
+Record: docs/journal/2026-09-24-wasm-library-halves.md, build 9.
+
+## swi-heap-refusal-reported-as-stack-limit
+Host: SWI-Prolog 10.1.14 as shipped and as patched here up to the 09-24
+  build 6 hosts: `grow_stacks()` in src/pl-gc.c and `outOfStack()` in
+  src/pl-alloc.c.
+Defect: when `stack_realloc()` fails, `grow_stacks()` returns the stack's own
+  overflow code, the code a stack at its limit returns, so the process reads
+  `Stack limit (...) exceeded` while the stack is far inside its limit and the
+  resource that ran out is memory. With the address space capped at 1 GB and
+  an 8 GB stack limit a list build is refused with `resource_error(stack)` at
+  a `globalused` of 524,287 KB; on the WebAssembly host, whose heap is bounded
+  by the module's memory maximum, the refusal lands at the same depth whatever
+  the stack limit is (measured 2026-09-24 through the Node seat: depth
+  136,116).
+Reproduction: tests/checks/host_workarounds/swi-heap-refusal-reported-as-stack-limit.sh,
+  that list build under `ulimit -v 1000000` with an 8 GB stack limit;
+  `present` when it is refused as `resource_error(stack)`, `absent` when as
+  `resource_error(no_memory)`.
+Patch: tests/checks/host_workarounds/swi-heap-refusal-reported-as-stack-limit.patch,
+  against swipl-devel V10.1.14 src/pl-incl.h, src/pl-gc.c and src/pl-alloc.c.
+  `grow_stacks()` keeps its codes and records, per thread in `pl_stacks_t`,
+  that its last growth failed in `malloc()`, clearing the record at every
+  growth it attempts; `outOfStack()`, the one path that can raise with no heap
+  left because it writes its ball into the spare stacks, then names
+  `no_memory`, SWI's own term for that resource, in place of `stack`, and
+  consumes the record. Returning `MEMORY_OVERFLOW` instead, so
+  `raiseStackOverflow()` would raise `ERR_NOMEM`, was built first and
+  measured: `PL_error()` builds its ball on the global stack the heap had just
+  refused, asks the heap again, and recurses until the C stack overflows.
+  Carried because the Node seat meets the defect, measured as the Defect says.
+Lifted when: a stack the heap refuses to grow is reported as memory.
+Record: docs/journal/2026-09-24-wasm-library-halves.md, build 9.
+
+## swi-destroyed-leader-keeps-shared-table
+Host: SWI-Prolog 10.1.14 as shipped and as patched here, and upstream master
+  (boot/tabling.pl fetched 2026-09-24): `finished_leader/4` in
+  boot/tabling.pl, the cleanup of the `setup_call_catcher_cleanup/4` that runs
+  a tabled leader, discards the leader's component for `exception(_)` and
+  prints `tabling(unexpected_result(...))` for anything else but `exit` and
+  `fail`. This tree runs on 10.1.14 built with the patch below.
+Defect: destroying an engine suspended inside a tabled leader discards its
+  frames, so the cleanup receives `!`. It prints the message and skips
+  `'$tbl_table_discard_all'/1`. The component is freed with the engine, but a
+  shared table still names the dead engine as its owner and still points at
+  its worklist. On a threaded host the next claim either waits on
+  `GD->tabling.cvar` forever (a claimant with another thread id, as the main
+  engine) or takes the table for its own and reads the freed worklist (an
+  engine attached as the dead one's id: SIGSEGV in `unify_table_status()`,
+  exit 139). A host without threads, whose tables are private, prints the
+  message on every destroyed tabling job.
+Reproduction: tests/checks/host_workarounds/swi-destroyed-leader-keeps-shared-table.sh,
+  an engine yields inside `p/1` (`table p/1 as shared`), is destroyed, and the
+  main engine then calls `p/1` under a 20-second bound. Exit 134 or 139, the
+  bound, or the unexpected-catcher message answers `present`; exit 0
+  printing `answers [a,b]` answers `absent`.
+Patch: tests/checks/host_workarounds/swi-destroyed-leader-keeps-shared-table.patch,
+  against swipl-devel V10.1.14 boot/tabling.pl: `finished_leader/4` treats `!`
+  as it treats an exception and discards the component with
+  `'$tbl_table_discard_all'/1`, which resets each incomplete table to fresh
+  and releases it. `run_leader/5` is deterministic and completes or merges
+  the component before it exits, so `!` reaches the cleanup only when the
+  leader's frames are discarded from outside; a merged component is left
+  alone by `'$tbl_table_discard_all'/1` itself. Live on every host.
+  Carried because the Node seat meets the defect: every tsmetta job destroyed
+  inside a tabled leader printed the message.
+Lifted when: SWI-Prolog as shipped discards a leader's component when its
+  frames are discarded, so the reproduction prints absent; the patch and the
+  entry go together then.
+Record: docs/journal/2026-09-24-wasm-library-halves.md, build 9; the
+  record's c-tabling-destroy-segv.
+
+## swi-reeval-prepare-writes-past-its-arguments
+Host: SWI-Prolog 10.1.14 as shipped and as patched here, threaded builds:
+  `'$tbl_reeval_prepare'/2` in src/pl-tabling.c claims a shared table with a
+  clause reference, and when the claim comes back with the table complete it
+  returns `PL_unify_atom(A3, cref)`.
+Defect: the predicate has two arguments, so A3 is a term reference past them
+  in the foreign frame. When the thread it waited for re-evaluated the table,
+  the call writes the table's clause there and succeeds with its Variant
+  unbound. Its contract is to fail then, as the check below it does for a
+  table re-evaluated before the call ("someone else re-evaluated it"). With
+  swi-threadless-shared-table-private-per-engine, whose `reeval_node/1` reads
+  the answer as either `M:Variant` or `wait(Owner)`, an unbound answer would
+  take the wait branch on a threaded host. A public call forced into the same
+  window answered correctly, so user code may not reach it.
+Reproduction: tests/checks/host_workarounds/swi-reeval-prepare-writes-past-its-arguments.pl,
+  a second thread starts re-evaluating an incremental shared table and tells
+  main, which calls `'$tbl_reeval_prepare'/2` on it and waits. Success with
+  the argument unbound answers `present`; failure answers `absent`, both with
+  the table then answering `[1,2]`; a host without threads answers `broken`.
+Patch: tests/checks/host_workarounds/swi-reeval-prepare-writes-past-its-arguments.patch,
+  against swipl-devel V10.1.14 src/pl-tabling.c, with a
+  `prepare_after_another_thread_reevaluated` test in the `shared_reeval` unit
+  of tests/tabling/test_shared_units.pl. The threaded branch claims with no
+  clause reference and falls through to the falsecount check, which fails
+  for a table the other thread re-evaluated and prepares one that still
+  needs it, as the branch the threadless patch adds already does. Without
+  threads the branch compiles away: single-threaded, pl-tabling.o differs
+  only in one `__LINE__` immediate.
+  Carried because swi-threadless-shared-table-private-per-engine, which the
+  Node seat needs, is written on top of this patch and does not apply without
+  it; nothing here has been seen to meet this defect itself.
+Lifted when: SWI-Prolog as shipped fails `'$tbl_reeval_prepare'/2` for a
+  table another thread re-evaluated, so the reproduction prints absent; the
+  patch and the entry go together then.
+Record: docs/journal/2026-09-24-wasm-library-halves.md, build 9; the
+  record's i-reeval-prepare-a3 and a-reeval-prepare-fix.
+
+## swi-shared-table-waits-for-owner-beneath
+Host: SWI-Prolog 10.1.14 as shipped and as patched here, threaded builds:
+  `claim_answer_table()` in src/pl-tabling.c waits on `GD->tabling.cvar` for
+  whichever thread or engine owns an incomplete shared table, and
+  `is_deadlock()` finds only cycles of threads each waiting for a table.
+Defect: an owner can be suspended beneath its claimant on one OS thread.
+  Engine 1, completing a shared table, runs a second engine through
+  engine_next/2 or engine_post/3, and the second engine asks for the same
+  variant. It waits for engine 1, which runs again only once the second
+  engine returns, and engine 1 waits for no table, so nothing sees a cycle
+  and the process hangs. The Python seat reaches it by re-entrance: a Python
+  op that Prolog calls while one engine completes a table pulls a lazy view
+  of the same call. Its `callback` and `callback-incremental` variants hang
+  with the main thread in pthread_cond_timedwait under claim_answer_table,
+  under '$tbl_variant_table'/6, under pl_engine_next2_va, under janus
+  swipl_apply_once, under py_call3 from engine 1 (superproject
+  ai-tmp/ai-pc/tabling/evidence/ai-st-gdb.log).
+Reproduction: tests/checks/host_workarounds/swi-shared-table-waits-for-owner-beneath.sh,
+  engine 1 completes p/1 (`table p/1 as shared`), whose first clause asks for
+  p/1 from a second engine it holds in engine_next/2, under a 20-second
+  bound. The bound answers `present`; exit 0 printing the permission error
+  for `user:p(_)` answers `absent`; a host without threads answers `broken`.
+Patch: tests/checks/host_workarounds/swi-shared-table-waits-for-owner-beneath.patch,
+  against swipl-devel V10.1.14 src/pl-thread.c, pl-tabling.c, pl-global.h and
+  ATOMS, with a `shared_beneath` unit in tests/tabling/test_shared_units.pl:
+  - `interactor_post_answer_nolock()`, which runs an engine for engine_next/2
+    and engine_post/2,3, records the calling engine in the callee's new
+    `LD->thread.caller` for as long as the nested `PL_next_solution()` runs.
+  - `claim_answer_table()` walks that chain before it registers as waiting.
+    An owner found there raises
+    `error(permission_error(wait, shared_table, Variant), context('$tbl_variant_table'/6, Message))`,
+    printed as "No permission to wait shared_table `user:p(_)' (the thread or
+    engine completing this table is suspended beneath this call on the same
+    OS thread)". Variant is the table's variant, the culprit the threadless
+    patch's refusal names too. It raises instead of throwing `deadlock`,
+    which restart_tabling/3 would retry forever. The owner's leader receives
+    the exception and discards its component, so the table is fresh again.
+  - Scope. `claim_answer_table()` is the only caller of
+    `wait_for_table_to_complete()`, so every threaded wait for a table
+    meets the check: `get_answer_table()` for variant, abstract and moded
+    tables, and `'$tbl_reeval_prepare_top'/2`, `'$tbl_reeval_prepare'/2` and
+    `'$tbl_reeval_wait'/2` for re-evaluation. The unit tests a first call and
+    a re-evaluation. An owner on another OS thread, or one suspended
+    beneath nothing (an engine that yielded while it owned the table), is
+    waited for as before. An engine switched to with `PL_set_engine()` from C
+    records no caller, and a claim there waits as before. The check costs one
+    step per engine suspended beneath the claimant, on the waiting path only.
+  - Builds without threads. The caller link and the check are under
+    `O_PLMT`, so the one change there is one more builtin atom,
+    `shared_table`: compiled single-threaded, pl-thread.o differs only in five
+    `__LINE__` immediates, each moved by the six guard lines.
+  - Verification. The `shared_beneath` unit's 8 tests pass on a threaded
+    build of the full stack. On /home/user/Dev/.venv-pypetta/bin/swipl, the
+    host without this patch, its five refusal tests hang (exit 124 under a
+    15-second bound), while the recursion sanity test and the two tests of an
+    owner that is waited for pass there too.
+  Carried because the Python seat meets the defect, as the Defect says.
+Lifted when: SWI-Prolog as shipped refuses or otherwise resolves a claim
+  whose owner is suspended beneath the claimant, so the reproduction prints
+  absent; the patch and the entry go together then.
+Record: docs/journal/2026-09-24-wasm-library-halves.md, build 9; the
+  record's a-tabling-owner-beneath and i-same-thread-engines-shared-table.
+
+## swi-threadless-shared-table-private-per-engine
+Host: SWI-Prolog 10.1.14's WebAssembly build as shipped, and any build
+  without threads: `get_answer_table()` in src/pl-tabling.c sets
+  `shared = false` for every table unless `O_PLMT`, and the shared variant
+  table, its node pool and table ownership (`trie.tid`,
+  `claim_answer_table()`) exist only under `O_PLMT`.
+Defect: a table declared `as shared` is private to each engine, so two engines
+  asking it evaluate it twice and a table dies with the engine that filled it.
+  The Node seat runs every ask in an engine of its own, so a table never
+  outlives its ask and `table-stats` from another ask reads `(tables 0)`.
+Reproduction: tests/checks/host_workarounds/swi-threadless-shared-table-private-per-engine.sh,
+  two engines each ask `p/1` (`table p/1 as shared`) through the WebAssembly
+  host the tree vendors (`extensions/node/_host`, or `WASM_HOST_DIR`); both
+  answering `[a,b,c]` with the body run twice answers `present`, run once
+  `absent`.
+Patch: tests/checks/host_workarounds/swi-threadless-shared-table-private-per-engine.patch,
+  against swipl-devel V10.1.14 src/pl-tabling.c, pl-trie.h, pl-trie.c,
+  pl-global.h, pl-init.h, pl-init.c and os/pl-prologflag.c, and
+  boot/tabling.pl, with tests/tabling/test_engine_shared.pl:
+  - C. The shared variant table, its node pool, table ownership, waiting and
+    deadlock detection, `shared_table_space` and the nondeterministic
+    `'$tbl_variant_table'/1` move from `O_PLMT` to `O_ENGINES`. Only the
+    blocking stays under `O_PLMT`: the mutex, the condition variable and
+    `wait_for_table_to_complete()`.
+  - Owners. An engine's thread id belongs to its attachment, and the engines
+    of a threadless build all run attached as one id. So the owner there is
+    the engine's own tabling id, `tbl_engine_id()`, which is reused through a
+    free list so the waiting array stays bounded by the number of live
+    engines.
+  - Claims. A claim that meets a table another engine owns leaves the owner
+    in `LD->tabling.claim_wait`, stays registered as waiting (the edge
+    `is_deadlock()` follows) and answers `wait(Owner)`. That answer comes from
+    `'$tbl_variant_table'/6`, `'$tbl_abstract_table'/6`,
+    `'$tbl_moded_variant_table'/6`, `'$tbl_existing_variant_table'/5`,
+    `'$tbl_table_status'/2,4`, `'$tbl_reeval_prepare_top'/2`,
+    `'$tbl_reeval_prepare'/2` and `'$tbl_reeval_wait'/2`.
+  - Destroyed owners. An engine destroyed while it owns tables hands them
+    back (`release_engine_tables()`), with a walk of the shared variant table
+    only when its owned count is nonzero.
+  - A moded shared table answers from its trie rather than a compiled clause,
+    which a threaded host's `trie_gen/2` refuses with type_error(trie).
+  - Re-evaluation. `'$tbl_reeval_prepare_top'/2` answers a complete shared
+    table's compiled clause, as the threaded branch does, and a moded one
+    its trie. So a re-evaluating call counts one call to a completed table
+    on both hosts, where a private table counts two, because its trie is
+    read through `trie_gen_compiled/2`. Answering the trie for every shared
+    table (the 13:51 and 15:06 patches) made builds 7 and 8 count
+    complete-call 3 where a threaded host counts 2 in
+    examples/ch18-performance/18-02-memoisation-and-tabling/12-tabling_statistics.metta.
+  - boot/tabling.pl. Every claimant retries after `tabling_wait/2`, which
+    calls the multifile `prolog:tabling_wait/1` hook with `owner(Owner)` and
+    raises `permission_error(wait, shared_table, Goal)` where no hook
+    suspends the engine. `deadlock_backoff/1` replaces the `sleep/1` of
+    `restart_tabling/3`, `restart_abstract_tabling/3` and `retry_reeval/2`,
+    calling the hook with `restart` when threads are false.
+  - Order. This patch applies after swi-reeval-prepare-writes-past-its-arguments
+    and swi-shared-table-waits-for-owner-beneath. The first makes the threaded
+    branch of `'$tbl_reeval_prepare'/2` the claim this patch's threadless
+    branch makes, so the two share it and only the `claim_wait` answer is
+    threadless. The second's owner check and helpers sit in the region this
+    patch widens from `O_PLMT` to `O_ENGINES`, so it wraps them in
+    `#ifdef O_PLMT`.
+  - Threaded builds. pl-tabling.o has the same 18,991 lines of `objdump -d`
+    and the same strings, differing only in 68 `__LINE__` immediates. Its boot
+    file gains branches a threaded build never takes, now that
+    `'$tbl_reeval_prepare'/2` never succeeds with its answer unbound.
+  - Verification. SWI's tabling suite passes on both builds, counted as the
+    tests plunit reports passed: 214 on a single-threaded build, 50 of them in
+    test_engine_shared.pl (a randomised engine scheduler port of
+    test_shared1.pl's deadlock and abolish test among them), and 174 threaded,
+    the unpatched stack's 165 plus the 8 of
+    swi-shared-table-waits-for-owner-beneath and the 1 of
+    swi-reeval-prepare-writes-past-its-arguments.
+  Carried because the Node seat meets the defect: a tsmetta table never
+  outlived the ask that filled it.
+Lifted when: SWI-Prolog shares `as shared` tables between the engines of a
+  build without threads, so the reproduction prints absent; the patch and the
+  entry go together then.
+Record: docs/journal/2026-09-24-wasm-library-halves.md, build 9; the
+  record's a-tabling-park, c-tabling-tid-per-attachment and c-yield-refusal-wrong.

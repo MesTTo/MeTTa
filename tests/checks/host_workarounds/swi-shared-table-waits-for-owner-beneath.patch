@@ -1,0 +1,282 @@
+diff --git a/src/ATOMS b/src/ATOMS
+index 812a020..a6ed829 100644
+--- a/src/ATOMS
++++ b/src/ATOMS
+@@ -798,6 +798,7 @@ A setup_call_catcher_cleanup "setup_call_catcher_cleanup"
+ A shared		"shared"
+ A shared_object		"shared_object"
+ A shared_object_handle	"shared_object_handle"
++A shared_table		"shared_table"
+ A shared_table_space	"shared_table_space"
+ A shell			"shell"
+ A shift_time		"shift_time"
+diff --git a/src/pl-global.h b/src/pl-global.h
+index fa92e65..3c6dc99 100644
+--- a/src/pl-global.h
++++ b/src/pl-global.h
+@@ -812,6 +812,7 @@ struct PL_local_data
+     alert_channel alert;		/* How to alert the thread */
+     double child_cputime;		/* Time of completed children */
+     uint64_t child_inferences;		/* Inferences in children */
++    struct PL_local_data *caller;	/* Engine whose engine_next/2 runs me */
+ #endif
+   } thread;
+ #endif
+diff --git a/src/pl-tabling.c b/src/pl-tabling.c
+index 1b057b7..92982b1 100644
+--- a/src/pl-tabling.c
++++ b/src/pl-tabling.c
+@@ -9062,7 +9062,9 @@ Claim ownership for an answer table if the table is incomplete/invalid:
+   - Else
+     - If the table is incomplete, someone else is completing it
+       (otherwise we were the owner).  Either throw a `deadlock`
+-      exception or wait.
++      exception or wait, unless the owner is suspended beneath us
++      on our own OS thread: then raise a permission error, as the
++      owner only runs again once we return.
+     - If the table needs work (fresh, invalid), try to claim it.
+     - If the table is complete, return its compiled trie.  As
+       we are in a locked region we can do so safely.
+@@ -9072,6 +9074,45 @@ there is a single mutex. Future versions could  use an array of these to
+ reduce contention.
+ - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
+ 
++/* True when the thread or engine tid is suspended beneath this engine on
++ * its OS thread: it holds this engine, directly or through other engines,
++ * in engine_next/2 or engine_post/2,3, which record it as the caller for
++ * as long as the nested run lasts.  It runs again only once this engine
++ * returns, so waiting for a table it owns never ends, and is_deadlock()
++ * cannot see that, because the owner waits for no table.  Engines
++ * switched with PL_set_engine() from C record no caller, and a claim
++ * there waits as before.
++ * Time: one step per engine suspended beneath this one on its OS thread.
++ */
++
++#define owner_suspended_beneath(tid) LDFUNC(owner_suspended_beneath, tid)
++static bool
++owner_suspended_beneath(DECL_LD int tid)
++{ for(const PL_local_data_t *ld = LD->thread.caller; ld; ld = ld->thread.caller)
++  { if ( ld->thread.info->pl_tid == tid )
++      return true;
++  }
++
++  return false;
++}
++
++#define owner_beneath_error(atrie) LDFUNC(owner_beneath_error, atrie)
++static int
++owner_beneath_error(DECL_LD trie *atrie)
++{ term_t variant;
++
++  DEBUG(MSG_TABLING_SHARED,
++	print_answer_table(atrie, "owner %d is suspended beneath us",
++			   atrie->tid));
++
++  return ( (variant=PL_new_term_ref()) &&
++	   unify_trie_term(atrie->data.variant, NULL, variant) &&
++	   PL_error(NULL, 0,
++		    "the thread or engine completing this table is "
++		    "suspended beneath this call on the same OS thread",
++		    ERR_PERMISSION, ATOM_wait, ATOM_shared_table, variant) );
++}
++
+ static int
+ claim_answer_table(DECL_LD trie *atrie, atom_t *clrefp, int flags)
+ { if ( ison(atrie, TRIE_ISSHARED) && !(flags&AT_NOCLAIM) )
+@@ -9082,7 +9123,11 @@ claim_answer_table(DECL_LD trie *atrie, atom_t *clrefp, int flags)
+     { LOCK_SHARED_TABLE(atrie);
+     retry_shared:
+       if ( atrie->tid )
+-      { register_waiting(mytid, atrie);
++      { if ( owner_suspended_beneath(atrie->tid) )
++	{ UNLOCK_SHARED_TABLE(atrie);
++	  return owner_beneath_error(atrie);
++	}
++	register_waiting(mytid, atrie);
+ 	if ( is_deadlock(atrie) )
+ 	{ term_t ex;
+ 
+diff --git a/src/pl-thread.c b/src/pl-thread.c
+index 2d670d0..980a5fb 100644
+--- a/src/pl-thread.c
++++ b/src/pl-thread.c
+@@ -4305,7 +4305,13 @@ interactor_post_answer_nolock(DECL_LD thread_handle *th,
+       break; /* WITH_LD is a for() statement and can be broken out of */
+ 
+     copy_debug_mode(LD, me);
++#ifdef O_PLMT
++    LD->thread.caller = me;		/* see owner_suspended_beneath() */
++#endif
+     int rc = PL_next_solution(th->interactor.query);
++#ifdef O_PLMT
++    LD->thread.caller = NULL;
++#endif
+ 
+     switch( rc )
+     { case PL_S_TRUE:
+diff --git a/tests/tabling/test_shared_units.pl b/tests/tabling/test_shared_units.pl
+index b17330f..a99b049 100644
+--- a/tests/tabling/test_shared_units.pl
++++ b/tests/tabling/test_shared_units.pl
+@@ -47,7 +47,8 @@
+ :- use_module(library(time)).
+ 
+ test_shared_units :-
+-    run_tests([ shared_reeval
++    run_tests([ shared_reeval,
++                shared_beneath
+               ]).
+ 
+ :- begin_tests(shared_reeval,
+@@ -108,6 +109,151 @@ test(prepare_after_another_thread_reevaluated, Xs == [1,2]) :-
+ 
+ :- end_tests(shared_reeval).
+ 
++% A shared table's owner can be suspended beneath its claimant on one OS
++% thread: it holds the claimant, directly or through other engines, in
++% engine_next/2 and runs again only once the claimant returns.  Such a
++% claim raises a permission error rather than wait forever.  An owner on
++% another OS thread, or one suspended beneath nothing, is waited for.
++
++:- begin_tests(shared_beneath,
++               [ condition(current_prolog_flag(threads, true))
++               ]).
++
++:- table sb/1 as shared.
++:- dynamic sb_depth/1.
++
++% sb/1 asks for itself from an engine sb_depth/1 engines beneath the one
++% completing it; depth 0 is the ordinary recursive call.
++sb(X) :-
++    sb_depth(Depth),
++    beneath(Depth, sb(_)),
++    X = 1.
++sb(2).
++
++beneath(0, Goal) :-
++    !,
++    forall(Goal, true).
++beneath(Depth, Goal) :-
++    Depth1 is Depth-1,
++    in_engine(true, beneath(Depth1, Goal), _).
++
++in_engine(Template, Goal, Answer) :-
++    engine_create(Template, Goal, Engine),
++    call_cleanup(engine_next(Engine, Answer), engine_destroy(Engine)).
++
++sb_answers(Depth, Xs) :-
++    setup_call_cleanup(
++        asserta(sb_depth(Depth), Ref),
++        findall(X, sb(X), Xs0),
++        erase(Ref)),
++    msort(Xs0, Xs).
++
++% Goal raises the permission error for the table of Variant.
++refused(Goal, Variant) :-
++    catch(Goal,
++          error(permission_error(wait, shared_table, _:Variant), _),
++          true),
++    nonvar(Variant).
++
++test(recursion_in_the_owner, Xs == [1,2]) :-
++    abolish_all_tables,
++    sb_answers(0, Xs).
++test(an_owner_thread_beneath, Variant =@= sb(_)) :-
++    abolish_all_tables,
++    refused(sb_answers(1, _), Variant).
++test(an_owner_engine_beneath, Variant =@= sb(_)) :-
++    abolish_all_tables,
++    refused(in_engine(Xs, sb_answers(1, Xs), _), Variant).
++test(an_owner_three_engines_beneath, Variant =@= sb(_)) :-
++    abolish_all_tables,
++    refused(sb_answers(3, _), Variant).
++test(a_refused_table_is_fresh_again, Xs == [1,2]) :-
++    abolish_all_tables,
++    refused(sb_answers(1, _), _),
++    sb_answers(0, Xs).
++
++:- table sw/1 as shared.
++
++sw(X) :-
++    thread_send_message(sw_events, owning),
++    thread_get_message(sw_gate, open),
++    X = 1.
++sw(2).
++
++test(an_owner_on_another_thread_is_waited_for, Xs == [1,2]) :-
++    abolish_all_tables,
++    setup_call_cleanup(
++        ( message_queue_create(_, [alias(sw_events)]),
++          message_queue_create(_, [alias(sw_gate)]) ),
++        ( thread_create(findall(X, sw(X), _), Owner),
++          thread_get_message(sw_events, owning),
++          thread_create(( thread_get_message(sw_events, claiming),
++                          sleep(0.05),
++                          thread_send_message(sw_gate, open) ),
++                        Opener),
++          in_engine(Ys, ( thread_send_message(sw_events, claiming),
++                          findall(Y, sw(Y), Ys) ),
++                    Xs0),
++          thread_join(Owner),
++          thread_join(Opener) ),
++        ( message_queue_destroy(sw_events),
++          message_queue_destroy(sw_gate) )),
++    msort(Xs0, Xs).
++
++:- table sy/1 as shared.
++
++sy(X) :-
++    engine_yield(owning),
++    X = 1.
++sy(2).
++
++test(a_yielded_owner_is_waited_for, Xs == [1,2]) :-
++    abolish_all_tables,
++    engine_create(Ys, findall(Y, sy(Y), Ys), Owner),
++    setup_call_cleanup(
++        message_queue_create(Events),
++        ( engine_next(Owner, owning),
++          thread_create(( thread_get_message(Events, claiming),
++                          sleep(0.05),
++                          engine_next(Owner, _) ),
++                        Resumer),
++          in_engine(Zs, ( thread_send_message(Events, claiming),
++                          findall(Z, sy(Z), Zs) ),
++                    Xs0),
++          thread_join(Resumer) ),
++        ( message_queue_destroy(Events),
++          engine_destroy(Owner) )),
++    msort(Xs0, Xs).
++
++:- table si/1 as (incremental,shared).
++:- dynamic si_d/1 as incremental.
++:- dynamic si_depth/1.
++
++si(X) :-
++    si_d(X).
++si(X) :-
++    si_depth(Depth),
++    beneath(Depth, si(_)),
++    X = 0.
++
++si_answers(Depth, Xs) :-
++    setup_call_cleanup(
++        asserta(si_depth(Depth), Ref),
++        findall(X, si(X), Xs0),
++        erase(Ref)),
++    msort(Xs0, Xs).
++
++test(a_reevaluating_owner_beneath, Variant =@= si(_)) :-
++    abolish_all_tables,
++    retractall(si_d(_)),
++    assertz(si_d(1)),
++    si_answers(0, [0,1]),
++    assertz(si_d(2)),
++    refused(si_answers(1, _), Variant),
++    retractall(si_d(_)).
++
++:- end_tests(shared_beneath).
++
+ :- else.                                % no library(time) or no threads.
+ 
+ test_shared_units.

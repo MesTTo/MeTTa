@@ -1,0 +1,22 @@
+diff --git a/src/pl-trie.c b/src/pl-trie.c
+--- a/src/pl-trie.c
++++ b/src/pl-trie.c
+@@ -2312,7 +2312,17 @@ add_choice(DECL_LD trie_gen_state *state,
+ 	ch->table_enum = newTableEnumWP(children.hash->table);
+ 	table_key_t tk;
+ 	table_value_t tv;
+-	advanceTableEnum(ch->table_enum, &tk, &tv);
++	/* A root keeps its hashed children table when trie_delete/3 prunes
++	   its last key (prune_node() destroys every other node that empties),
++	   and is_leaf_trie_node() reads such a table as no children. An
++	   enumeration that finds nothing to enumerate is that: no choice,
++	   popped as the var_mask branch above pops one, rather than a child
++	   read from an enumerator that produced none. */
++	if ( !advanceTableEnum(ch->table_enum, &tk, &tv) )
++	{ freeTableEnum(ch->table_enum);
++	  state->choicepoints.top = (char*)ch;
++	  return NULL;
++	}
+ 	ch->key   = tk;
+ 	ch->child = val2ptr(tv);
+ 	break;

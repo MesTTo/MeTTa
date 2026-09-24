@@ -1,0 +1,82 @@
+diff --git a/src/SWI-Prolog.h b/src/SWI-Prolog.h
+index 58ba412..d781ab5 100644
+--- a/src/SWI-Prolog.h
++++ b/src/SWI-Prolog.h
+@@ -415,6 +415,7 @@ PL_EXPORT(const atom_t) *_PL_atoms(void); /* base of reserved (meta-)atoms */
+ #ifdef PL_KERNEL
+ #define PL_Q_DETERMINISTIC	0x1000	/* call was deterministic */
+ #define PL_Q_EXCEPT_THREAD_EXIT	0x2000	/* Handles unwind(thread_exit(Term)) */
++#define PL_Q_INTERACTOR		0x4000	/* engine_create(): I_YIELD only */
+ #endif
+ 
+ 					/* PL_Q_EXT_STATUS return codes */
+diff --git a/src/pl-pro.c b/src/pl-pro.c
+index 9c49f47..b15af4b 100644
+--- a/src/pl-pro.c
++++ b/src/pl-pro.c
+@@ -460,9 +460,7 @@ PRED_IMPL("$call_no_catch", 1, call_no_catch, PL_FA_TRANSPARENT)
+ 
+ static
+ PRED_IMPL("$can_yield", 0, can_yield, 0)
+-{ PRED_LD
+-
+-  return !!ison(LD->query, PL_Q_ALLOW_YIELD);
++{ return PL_can_yield();
+ }
+ 
+ /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+diff --git a/src/pl-thread.c b/src/pl-thread.c
+index 2d670d0..78618b7 100644
+--- a/src/pl-thread.c
++++ b/src/pl-thread.c
+@@ -4143,6 +4143,7 @@ PRED_IMPL("$engine_create", 3, engine_create, 0)
+       { th->interactor.query = PL_open_query(NULL,
+ 					     PL_Q_CATCH_EXCEPTION|
+ 					     PL_Q_ALLOW_YIELD|
++					     PL_Q_INTERACTOR|
+ 					     PL_Q_EXT_STATUS,
+ 					     pred, th->interactor.argv+1);
+ 	PL_set_engine(me, NULL);
+diff --git a/src/pl-vmi.c b/src/pl-vmi.c
+index 2c54cfa..f738868 100644
+--- a/src/pl-vmi.c
++++ b/src/pl-vmi.c
+@@ -4679,7 +4679,7 @@ VMH(I_FEXITNDET, 1, (foreign_t), (rc))
+ 	  THROW_EXCEPTION;
+ 
+ 	QF = QueryFromQid(QID);
+-	if ( !(QF->flags&PL_Q_ALLOW_YIELD) )
++	if ( !takes_foreign_yield(QF) )
+ 	{ PL_error(NULL, 0, "not an async query", ERR_PERMISSION_YIELD);
+ 	  THROW_EXCEPTION;
+ 	}
+diff --git a/src/pl-wam.c b/src/pl-wam.c
+index c8bb996..5adcc1a 100644
+--- a/src/pl-wam.c
++++ b/src/pl-wam.c
+@@ -3224,6 +3224,16 @@ PL_current_query(void)
+   return 0;
+ }
+ 
++/* A foreign yield (PL_yield_address()) makes PL_next_solution() return
++   PL_S_YIELD to whoever opened the query.  engine_create() opens its
++   query with PL_Q_ALLOW_YIELD for engine_yield/1 (I_YIELD), but
++   engine_next() takes no other yield, so that query is marked
++   PL_Q_INTERACTOR and cannot yield to foreign code. */
++static inline bool
++takes_foreign_yield(const QueryFrame qf)
++{ return ison(qf, PL_Q_ALLOW_YIELD) && !ison(qf, PL_Q_INTERACTOR);
++}
++
+ bool
+ PL_can_yield(void)
+ { GET_LD
+@@ -3231,7 +3241,7 @@ PL_can_yield(void)
+   return ( HAS_LD &&
+ 	   LD->query &&
+ 	   LD->query->magic == QID_MAGIC &&
+-	   ison(LD->query, PL_Q_ALLOW_YIELD) );
++	   takes_foreign_yield(LD->query) );
+ }
+ 
+ PL_engine_t

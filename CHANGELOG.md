@@ -210,6 +210,25 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- The engine requires nine more SWI-Prolog patches, which tsmetta's
+  WebAssembly host, now build 9, and the native patched host both carry. Under
+  Node `(sleep N)` works: library(wasm)'s JavaScript bridge started a call with
+  no receiver from `window`, which Node lacks, and once that was fixed the
+  promise it awaited inside tsmetta's engine aborted the process. A stack the
+  heap cannot grow is refused as `resource_error(no_memory)` ("Not enough
+  resources: no_memory"), where it read "Stack limit (1.0Gb) exceeded" at the
+  same depth whatever the limit was. A table declared `as shared` is shared
+  between tsmetta's engines instead of being private to each ask. A Python
+  function that Prolog calls while an engine completes a shared table, and
+  that pulls a lazy view of the same call, now gets
+  `permission_error(wait, shared_table, ...)` naming the table, where the
+  process hung. Natively, halt no longer lets a thread that is still starting
+  run its goal while cleanup frees what the goal needs, which crashed the C
+  seat. An engine destroyed inside a tabled leader no longer leaves its shared
+  tables to an owner that is gone, which hung or crashed the next call.
+  `trie_gen/2` over a trie that `trie_delete/3` emptied no longer crashes. A
+  host without the patches is refused at boot, as for every required patch.
+
 - The `pylint` lane passes on the weak-table entry `_WeakEntry.__new__` in
   `metta/_atoms/model.py`. astroid cannot infer `weakref.ref`, so pylint
   checked `super().__new__(cls, referent, callback)` against

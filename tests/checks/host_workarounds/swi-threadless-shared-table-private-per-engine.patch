@@ -1,0 +1,1386 @@
+diff --git a/boot/tabling.pl b/boot/tabling.pl
+index 9a90f2d..3534e9d 100644
+--- a/boot/tabling.pl
++++ b/boot/tabling.pl
+@@ -380,6 +380,9 @@ start_tabling_2(Closure, Wrapper, Worker, Trie, Status, Skeleton) :-
+               restart_tabling(Closure, Wrapper, Worker))
+     ;   Status == invalid
+     ->  reeval(Trie, Wrapper, Skeleton)
++    ;   Status = wait(Owner)                    % see tabling_wait/2
++    ->  tabling_wait(owner(Owner), Wrapper),
++        start_tabling(Closure, Wrapper, Worker)
+     ;   % = run_follower, but never fresh and Status is a worklist
+         shift_for_copy(call_info(Skeleton, Status))
+     ).
+@@ -398,24 +401,73 @@ create_table(Trie, Fresh, Skeleton, Wrapper, Worker) :-
+ 
+ %!  restart_tabling(+Closure, +Wrapper, +Worker)
+ %
+-%   We were aborted due to a  deadlock.   Simply  retry. We sleep a very
+-%   tiny amount to give the thread against  which we have deadlocked the
+-%   opportunity to grab our table. Without, it is common that we re-grab
+-%   the table within our time slice  and   before  the kernel managed to
+-%   wakeup the other thread.
++%   We were aborted due to a  deadlock.   Simply  retry, after letting
++%   the other side grab our table first (deadlock_backoff/1).
+ 
+ restart_tabling(Closure, Wrapper, Worker) :-
+     tdebug(user_goal(Wrapper, Goal)),
+     tdebug(deadlock, 'Deadlock running ~p; retrying', [Goal]),
+-    sleep(0.000001),
++    deadlock_backoff(Wrapper),
+     start_tabling(Closure, Wrapper, Worker).
+ 
+ restart_abstract_tabling(Closure, Wrapper, Worker) :-
+     tdebug(user_goal(Wrapper, Goal)),
+     tdebug(deadlock, 'Deadlock running ~p; retrying', [Goal]),
+-    sleep(0.000001),
++    deadlock_backoff(Wrapper),
+     start_abstract_tabling(Closure, Wrapper, Worker).
+ 
++%!  deadlock_backoff(+Goal)
++%
++%   We gave up our component to break a deadlock; give the thread or
++%   engine we deadlocked with the opportunity to grab our table.  A
++%   thread sleeps a very tiny amount: without, it is common that we
++%   re-grab the table within our time slice and before the kernel
++%   managed to wakeup the other thread.  An engine of a build without
++%   threads cannot sleep that opportunity into existence, because the
++%   other engine only runs once this one hands the thread back, so it
++%   suspends through tabling_wait/2.
++
++deadlock_backoff(Goal) :-
++    (   current_prolog_flag(threads, true)
++    ->  sleep(0.000001)
++    ;   tabling_wait(restart, Goal)
++    ).
++
++%!  tabling_wait(+Reason, +Goal)
++%
++%   Suspend an engine of a build without threads that cannot go on with
++%   the shared table Goal needs.  A thread in that position blocks until
++%   the owner completes the table; an engine cannot, because the owner
++%   only makes progress once this engine hands the thread back.  Reason
++%   is owner(Owner) when the engine with tabling id Owner is completing
++%   or re-evaluating the table, and `restart` after this engine gave up
++%   its own tables to break a deadlock.  The embedding host defines
++%   prolog:tabling_wait/1 to suspend this engine until other engines
++%   made progress, after which the caller claims the table again.  Where
++%   no hook suspends the engine, this raises a permission error rather
++%   than use the table incomplete or compute a private copy of it.
++
++:- multifile
++    prolog:tabling_wait/1.
++
++tabling_wait(Reason, Goal) :-
++    (   prolog:tabling_wait(Reason)
++    ->  true
++    ;   tabling_wait_refused(Reason, Message),
++        throw(error(permission_error(wait, shared_table, Goal),
++                    context(tabling_wait/2, Message)))
++    ).
++
++tabling_wait_refused(owner(Owner), Message) :-
++    format(string(Message),
++           'engine ~w is completing this shared table and nothing \c
++            suspended this engine to wait for it (prolog:tabling_wait/1)',
++           [Owner]).
++tabling_wait_refused(restart,
++                     'this engine gave up its tables to break a deadlock \c
++                      and nothing suspended it to let the other engine go \c
++                      first (prolog:tabling_wait/1)').
++
+ %!  start_subsumptive_tabling(:Closure, :Wrapper, :Implementation)
+ %
+ %   (*) We should __not__ use  trie_gen_compiled/2   here  as  this will
+@@ -433,6 +485,9 @@ start_subsumptive_tabling(Closure, Wrapper, Worker) :-
+         ;   Status == invalid
+         ->  reeval(Trie, Wrapper, Skeleton),
+             trie_gen_compiled(Trie, Skeleton)
++        ;   Status = wait(Owner)                % see tabling_wait/2
++        ->  tabling_wait(owner(Owner), Wrapper),
++            start_subsumptive_tabling(Closure, Wrapper, Worker)
+         ;   shift_for_copy(call_info(Skeleton, Status))
+         )
+     ;   more_general_table(Wrapper, ATrie),
+@@ -444,6 +499,9 @@ start_subsumptive_tabling(Closure, Wrapper, Worker) :-
+         ->  reeval(ATrie, GenWrapper, GenSkeleton),
+             Wrapper = GenWrapper,
+             '$tbl_answer_update_dl'(ATrie, GenSkeleton)
++        ;   Status = wait(Owner)                % see tabling_wait/2
++        ->  tabling_wait(owner(Owner), Wrapper),
++            start_subsumptive_tabling(Closure, Wrapper, Worker)
+         ;   wrapper_skeleton(GenWrapper, GenSkeleton, Wrapper, Skeleton),
+             shift_for_copy(call_info(GenSkeleton, Skeleton, Status)),
+             unify_subsumptive(Skeleton, GenSkeleton)
+@@ -494,6 +552,9 @@ start_abstract_tabling(Closure, Wrapper, Worker) :-
+         reeval(ATrie, GenWrapper, GenSkeleton),
+         Wrapper = GenWrapper,
+         '$tbl_answer_update_dl'(ATrie, Skeleton)
++    ;   Status = wait(Owner)                    % see tabling_wait/2
++    ->  tabling_wait(owner(Owner), Wrapper),
++        start_abstract_tabling(Closure, Wrapper, Worker)
+     ;   shift_for_copy(call_info(GenSkeleton, Skeleton, Status)),
+         unify_subsumptive(Skeleton, GenSkeleton)
+     ).
+@@ -666,6 +727,9 @@ start_moded_tabling(Closure, Wrapper, Worker, WrapperNoModes, ModeArgs) :-
+         ;   start_moded_tabling_2(Closure, Wrapper, Worker, ModeArgs,
+                                   Trie, Status, Skeleton)
+         )
++    ;   Status = wait(Owner)                    % see tabling_wait/2
++    ->  tabling_wait(owner(Owner), Wrapper),
++        start_moded_tabling(Closure, Wrapper, Worker, WrapperNoModes, ModeArgs)
+     ;   start_moded_tabling_2(Closure, Wrapper, Worker, ModeArgs,
+                               Trie, Status, Skeleton)
+     ).
+@@ -856,15 +920,19 @@ tnot(Goal0) :-
+     '$tnot_implementation'(Goal0, Goal),        % verifies Goal is tabled
+     (   '$tbl_existing_variant_table'(_, Goal, Trie, Status, Skeleton),
+         Status \== invalid
+-    ->  '$idg_add_edge'(Trie),
+-        (   '$tbl_answer_dl'(Trie, _, true)
+-        ->  fail
+-        ;   '$tbl_answer_dl'(Trie, _, _)
+-        ->  tdebug(tnot, 'tnot: adding ~p to delay list', [Goal]),
+-            add_delay(Trie)
+-        ;   Status == complete
+-        ->  true
+-        ;   negation_suspend(Goal, Skeleton, Status)
++    ->  (   Status = wait(Owner)                % see tabling_wait/2
++        ->  tabling_wait(owner(Owner), Goal),
++            tnot(Goal0)
++        ;   '$idg_add_edge'(Trie),
++            (   '$tbl_answer_dl'(Trie, _, true)
++            ->  fail
++            ;   '$tbl_answer_dl'(Trie, _, _)
++            ->  tdebug(tnot, 'tnot: adding ~p to delay list', [Goal]),
++                add_delay(Trie)
++            ;   Status == complete
++            ->  true
++            ;   negation_suspend(Goal, Skeleton, Status)
++            )
+         )
+     ;   tdebug(tnot, 'tnot: ~p: fresh', [Goal]),
+         (   '$wrapped_implementation'(Goal, table, Implementation), % see (*)
+@@ -1865,7 +1933,7 @@ reeval(ATrie, Goal, Return) :-
+ retry_reeval(ATrie, Goal) :-
+     '$tbl_reeval_abandon'(ATrie),
+     tdebug(deadlock, 'Deadlock re-evaluating ~p; retrying', [ATrie]),
+-    sleep(0.000001),
++    deadlock_backoff(Goal),
+     call(Goal).
+ 
+ try_reeval(ATrie, Goal, Return) :-
+@@ -1891,7 +1959,11 @@ do_reeval(ATrie, Goal, Return) :-
+         Goal = M:Goal0,
+         moded_gen_answer(ATrie, Return, ModeArgs)
+     ;   nonvar(Clause)                       % complete
+-    ->  trie_gen_compiled(Clause, Return)
++    ->  (   Clause = wait(Owner)             % see tabling_wait/2
++        ->  tabling_wait(owner(Owner), Goal),
++            do_reeval(ATrie, Goal, Return)
++        ;   trie_gen_compiled(Clause, Return)
++        )
+     ;   call(Goal)                           % actually re-evaluate
+     ).
+ 
+@@ -2005,18 +2077,25 @@ is_invalid(ATrie) :-
+ %   it is valid or it is a lazy table that has invalid dependencies.
+ 
+ reeval_node(ATrie) :-
+-    '$tbl_reeval_prepare'(ATrie, M:Variant),
+-    !,
+-    M:'$table_mode'(Goal0, Variant, _Moded),
+-    Goal = M:Goal0,
+-    tdebug(reeval, 'Re-evaluating ~p', [Goal]),
+-    (   '$idg_reset_current',
+-        setup_call_cleanup(
+-            nb_setval('$tbl_reeval', true),
+-            ignore(Goal),                    % assumes local scheduling
+-            nb_delete('$tbl_reeval')),
+-        fail
+-    ;   tdebug(reeval, 'Re-evaluated ~p', [Goal])
++    '$tbl_reeval_prepare'(ATrie, Prepared),
++    (   Prepared = wait(Owner)               % see tabling_wait/2
++    ->  !,
++        atrie_goal(ATrie, Waiting),
++        tabling_wait(owner(Owner), Waiting),
++        reeval_node(ATrie)
++    ;   Prepared = M:Variant,
++        !,
++        M:'$table_mode'(Goal0, Variant, _Moded),
++        Goal = M:Goal0,
++        tdebug(reeval, 'Re-evaluating ~p', [Goal]),
++        (   '$idg_reset_current',
++            setup_call_cleanup(
++                nb_setval('$tbl_reeval', true),
++                ignore(Goal),                % assumes local scheduling
++                nb_delete('$tbl_reeval')),
++            fail
++        ;   tdebug(reeval, 'Re-evaluated ~p', [Goal])
++        )
+     ).
+ reeval_node(ATrie) :-
+     '$mono_reeval_prepare'(ATrie, Size),
+diff --git a/src/os/pl-prologflag.c b/src/os/pl-prologflag.c
+index 8982e1c..2eab62d 100644
+--- a/src/os/pl-prologflag.c
++++ b/src/os/pl-prologflag.c
+@@ -1338,7 +1338,7 @@ set_flag_value(DECL_LD prolog_flag *f, Module m, atom_t k, term_t value)
+ 	else
+ 	  LD->tabling.node_pool->limit = (size_t)i;
+       }
+-#ifdef O_PLMT
++#ifdef O_ENGINES
+       else if ( k == ATOM_shared_table_space )
+       { if ( i < 0 || i > SIZE_MAX )
+ 	  return PL_representation_error("size_t"),NULL;
+@@ -2379,7 +2379,7 @@ initPrologFlags(void)
+   setPrologFlag("agc_close_streams", FT_BOOL, false, PLFLAG_AGC_CLOSE_STREAMS);
+ #endif
+   setPrologFlag("table_space", FT_INTEGER, (intptr_t)GD->options.tableSpace);
+-#ifdef O_PLMT
++#ifdef O_ENGINES
+   setPrologFlag("shared_table_space", FT_INTEGER, (intptr_t)GD->options.sharedTableSpace);
+ #endif
+   setPrologFlag("stack_limit", FT_INTEGER, (intptr_t)LD->stacks.limit);
+diff --git a/src/pl-global.h b/src/pl-global.h
+index 3c6dc99..b1cad49 100644
+--- a/src/pl-global.h
++++ b/src/pl-global.h
+@@ -179,17 +179,27 @@ struct PL_global_data
+   { TableWP	modules;		/* atom --> module */
+   } tables;
+ 
+-#if O_PLMT
++#ifdef O_ENGINES
+   struct				/* Shared table data */
+   { struct trie *variant_table;		/* Variant --> table */
+     alloc_pool *node_pool;		/* Node allocation pool for tries */
++#ifdef O_PLMT
+     counting_mutex  mutex;		/* Sync completion */
+ #ifdef __WINDOWS__
+     CONDITION_VARIABLE cvar;
+ #else
+     pthread_cond_t cvar;
++#endif
+ #endif
+     struct trie_array *waiting;		/* thread --> trie we are waiting for */
++#ifndef O_PLMT
++    struct
++    { int	highest;		/* highest engine id handed out */
++      int      *free;			/* ids of destroyed engines */
++      int	free_count;		/* entries in free */
++      int	free_size;		/* allocated entries in free */
++    } engine_ids;			/* see tbl_engine_id() */
++#endif
+   } tabling;
+ #endif
+ 
+@@ -698,6 +708,11 @@ struct PL_local_data
+     unsigned int flags;			/* Global flags (TF_*) */
+     term_t delay_list;			/* Global delay list */
+     term_t idg_current;			/* Current node in IDG (trie symbol) */
++#if defined(O_ENGINES) && !defined(O_PLMT)
++    int engine_id;			/* this engine as a table owner, or 0 */
++    int owned;				/* shared tables this engine owns */
++    int claim_wait;			/* owner the last claim must wait for */
++#endif
+     struct
+     { atom_t max_table_subgoal_size_action;
+       size_t max_table_subgoal_size;
+diff --git a/src/pl-init.c b/src/pl-init.c
+index 1fcd26e..b45ad6b 100644
+--- a/src/pl-init.c
++++ b/src/pl-init.c
+@@ -973,7 +973,7 @@ initDefaults(void)
+   systemDefaults.arch		    = PLARCH;
+   systemDefaults.stack_limit	    = DEFSTACKLIMIT;
+   systemDefaults.table_space	    = DEFTABLE;
+-#ifdef O_PLMT
++#ifdef O_ENGINES
+   systemDefaults.shared_table_space = DEFTABLE;
+ #endif
+   systemDefaults.goal		    = NULL;
+@@ -1073,7 +1073,7 @@ static void
+ initDefaultOptions(void)
+ { GD->options.stackLimit       = systemDefaults.stack_limit;
+   GD->options.tableSpace       = systemDefaults.table_space;
+-#ifdef O_PLMT
++#ifdef O_ENGINES
+   GD->options.sharedTableSpace = systemDefaults.shared_table_space;
+ #endif
+   setStringP(&GD->options.compileOut, "a.out");
+@@ -1217,7 +1217,7 @@ parseCommandLineOptions(int argc0, char **argv0, char **argvleft)
+ 	  return -1;
+ 
+ 	GD->options.tableSpace = size;
+-#ifdef O_PLMT
++#ifdef O_ENGINES
+       } else if ( (optval=is_longopt(s, "shared_table_space")) )
+       { size_t size = memarea_limit(optval);
+ 
+diff --git a/src/pl-init.h b/src/pl-init.h
+index 87e333e..5e21165 100644
+--- a/src/pl-init.h
++++ b/src/pl-init.h
+@@ -48,7 +48,7 @@ typedef struct
+   char   *startup;			/* default user startup file */
+   size_t  stack_limit;			/* default stack limit (bytes) */
+   size_t  table_space;			/* default table space (bytes) */
+-#ifdef O_PLMT
++#ifdef O_ENGINES
+   size_t  shared_table_space;		/* default space for shared tables */
+ #endif
+   char   *goal;				/* default initialisation goal */
+@@ -66,7 +66,7 @@ typedef struct opt_list
+ typedef struct
+ { size_t	stackLimit;		/* Total stack limit */
+   size_t	tableSpace;		/* table space */
+-#ifdef O_PLMT
++#ifdef O_ENGINES
+   size_t	sharedTableSpace;	/* table space for shared tables */
+ #endif
+   opt_list     *goals;			/* initialization goals */
+diff --git a/src/pl-tabling.c b/src/pl-tabling.c
+index 92982b1..cf3b075 100644
+--- a/src/pl-tabling.c
++++ b/src/pl-tabling.c
+@@ -170,7 +170,7 @@ static int	simplify_answer(worklist *wl, trie_node *answer, int truth);
+ static bool	table_is_incomplete(trie *trie);
+ static int	idg_add_edge(trie *atrie, trie *ctrie);
+ static int	idg_set_current_wl(term_t wlref);
+-#ifdef O_PLMT
++#ifdef O_ENGINES
+ static int	claim_answer_table(trie *atrie, atom_t *clrefp,
+ 				   int flags);
+ #endif
+@@ -220,21 +220,52 @@ static int	find_dep(idg_mdep *mdep, term_t dep, idg_mdep **found);
+ #define IDG_CHANGED_MONO	0x0002		/* Monotonic node change */
+ #define IDG_PROPAGATE_FORCE	0x0004		/* See (**) */
+ 
++/* Tables are shared between the engines that evaluate them: threads in a
++ * threaded build, and in a build without threads (the WebAssembly one)
++ * engines, which run one at a time as coroutines on the one thread.  A
++ * thread that meets a table another thread is completing waits on
++ * GD->tabling.cvar.  An engine cannot, because the owner only makes
++ * progress once the claimant hands the thread back, so there the claim
++ * leaves the owner in LD->tabling.claim_wait and the claimant answers
++ * wait(Owner) to Prolog, whose tabling_wait/2 (boot/tabling.pl) suspends
++ * it through the host's prolog:tabling_wait/1 hook and claims again.
++ *
++ * An owner is a thread id in a threaded build.  An engine's thread id
++ * belongs to its attachment rather than to the engine, and the engines of
++ * a build without threads all run attached as the same id, so there an
++ * owner is the engine's own tabling id, tbl_engine_id().
++ */
++
+ #ifdef O_PLMT
+ #define	LOCK_SHARED_TABLE(t)	countingMutexLock(&GD->tabling.mutex);
+ #define	UNLOCK_SHARED_TABLE(t)	countingMutexUnlock(&GD->tabling.mutex);
++#define TBL_SELF()		PL_thread_self()
++#define TBL_BROADCAST()		cv_broadcast(&GD->tabling.cvar)
++#elif defined(O_ENGINES)
++#define	LOCK_SHARED_TABLE(t)	(void)0;
++#define	UNLOCK_SHARED_TABLE(t)	(void)0;
++#define TBL_SELF()		tbl_engine_id()
++#define TBL_BROADCAST()		(void)0
++static int	tbl_engine_id(void);
++#endif
+ 
++#ifdef O_ENGINES
+ static inline void
+ drop_trie(trie *atrie)
+ {
+ #ifdef O_DEBUG
+-  int mytid = PL_thread_self();
++  int mytid = TBL_SELF();
+   assert(mytid == atrie->tid);
+   int rc = COMPARE_AND_SWAP_INT(&atrie->tid, mytid, 0);
+   assert(rc);
+ #else
+   atrie->tid = 0;
+ #endif
++#ifndef O_PLMT
++  { GET_LD
++    LD->tabling.owned--;
++  }
++#endif
+ }
+ 
+ static inline void
+@@ -246,34 +277,44 @@ take_trie(trie *atrie, int tid)
+ #else
+   atrie->tid = tid;
+ #endif
++#ifndef O_PLMT
++  { GET_LD
++    LD->tabling.owned++;
++  }
++#endif
+ }
+ 
+ #define COMPLETE_WORKLIST(__trie, __code) \
+ 	do \
+ 	{ LOCK_SHARED_TABLE(__trie); \
+ 	  if ( __trie->tid ) \
+-	  { DEBUG(0, assert(__trie->tid == PL_thread_self())); \
++	  { DEBUG(0, assert(__trie->tid == TBL_SELF())); \
+ 	  } else \
+-	  { take_trie(__trie, PL_thread_self()); \
++	  { take_trie(__trie, TBL_SELF()); \
+ 	  } \
+ 	  __code; \
+ 	  drop_trie(__trie); \
+-	  cv_broadcast(&GD->tabling.cvar); \
++	  TBL_BROADCAST(); \
+ 	  UNLOCK_SHARED_TABLE(__trie); \
+ 	} while(0)
+ 
++#ifdef O_PLMT
+ static int	wait_for_table_to_complete(trie *atrie);
++#else
++static trie    *thread_waits_for_trie(int tid);
++static void	release_engine_tables(PL_local_data_t *ld);
++#endif
+ static int	table_needs_work(trie *atrie);
+ static void	register_waiting(int tid, trie *atrie);
+ static void	unregister_waiting(int tid, trie *atrie);
+ static int	is_deadlock(trie *atrie);
+ 
+-#else /*O_PLMT*/
++#else /*O_ENGINES*/
+ 
+ #define COMPLETE_WORKLIST(__trie, __code) \
+ 	do { __code; } while(0)
+ 
+-#endif /*O_PLMT*/
++#endif /*O_ENGINES*/
+ 
+ 
+ 		 /*******************************
+@@ -2225,7 +2266,7 @@ variant_table(DECL_LD bool shared)
+ { trie **tp;
+   alloc_pool *pool;
+ 
+-#ifdef O_PLMT
++#ifdef O_ENGINES
+   if ( shared )
+   { tp   = &GD->tabling.variant_table;
+     if ( !(pool = GD->tabling.node_pool) )
+@@ -2471,7 +2512,7 @@ get_answer_table(DECL_LD Definition def, term_t t, term_t ret, atom_t *clrefp,
+   bool shared;
+   size_abstract sa = {.from_depth = 2, .size = (size_t)-1};
+ 
+-#ifdef O_PLMT
++#ifdef O_ENGINES
+   if ( (flags & AT_SCOPE_MASK) )
+   { shared = !!(flags&AT_SHARED);
+   } else
+@@ -2527,7 +2568,7 @@ retry:
+     { atrie = symbol_trie(word2atom(node->value));
+     } else if ( (flags&AT_CREATE) )
+     { atom_t symb;
+-#ifdef O_PLMT
++#ifdef O_ENGINES
+       alloc_pool *pool = (shared ? GD->tabling.node_pool
+ 				 : LD->tabling.node_pool);
+ #else
+@@ -2542,7 +2583,7 @@ retry:
+       atrie->data.variant = node;
+       symb = trie_symbol(atrie);
+ 
+-#ifdef O_PLMT
++#ifdef O_ENGINES
+       if ( shared )
+       { set(atrie, TRIE_ISSHARED);
+ 	if ( COMPARE_AND_SWAP_WORD(&node->value, 0, symb) )
+@@ -2564,7 +2605,7 @@ retry:
+       return NULL;
+     }
+ 
+-#ifdef O_PLMT
++#ifdef O_ENGINES
+     if ( !claim_answer_table(atrie, clrefp, flags) )
+     { discardBuffer(&vars);
+       return NULL;
+@@ -2610,6 +2651,9 @@ void
+ clearThreadTablingData(PL_local_data_t *ld)
+ { reset_global_worklist(ld->tabling.component);
+   reset_newly_created_worklists(ld->tabling.component, WLFS_KEEP_COMPLETE);
++#if defined(O_ENGINES) && !defined(O_PLMT)
++  release_engine_tables(ld);
++#endif
+   clear_variant_table(&ld->tabling.variant_table);
+ }
+ 
+@@ -3219,6 +3263,24 @@ unify_fresh(DECL_LD term_t t, trie *atrie, Definition def, int create)
+ }
+ 
+ 
++#if defined(O_ENGINES) && !defined(O_PLMT)
++/* A claim that met a table another engine owns left that engine's id in
++ * LD->tabling.claim_wait; answer wait(Owner) and clear it, so the next
++ * claim starts from no owner.
++ */
++
++#define unify_claim_wait(t) LDFUNC(unify_claim_wait, t)
++static int
++unify_claim_wait(DECL_LD term_t t)
++{ int owner = LD->tabling.claim_wait;
++
++  LD->tabling.claim_wait = 0;
++  return PL_unify_term(t, PL_FUNCTOR, PL_new_functor(ATOM_wait, 1),
++			    PL_INT, owner);
++}
++#endif
++
++
+ #define complete_or_invalid_status(atrie, create) \
+ 	LDFUNC(complete_or_invalid_status, atrie, create)
+ static atom_t
+@@ -3280,7 +3342,14 @@ unify_table_status(DECL_LD term_t t, trie *trie, Definition def, int create)
+   { worklist *wl = trie->data.worklist;
+ 
+     if ( WL_IS_WORKLIST(wl) )
+-    { if ( create && wl->component != LD->tabling.component )
++    {
++#if defined(O_ENGINES) && !defined(O_PLMT)
++      if ( ison(trie, TRIE_ISSHARED) && trie->tid && trie->tid != TBL_SELF() )
++      { LD->tabling.claim_wait = trie->tid;	/* another engine's worklist */
++	return unify_claim_wait(t);
++      }
++#endif
++      if ( create && wl->component != LD->tabling.component )
+       { DEBUG(MSG_TABLING_WORK,
+ 	      Sdprintf("Merging into %p (current = %p)\n",
+ 		       wl->component, LD->tabling.component));
+@@ -3467,8 +3536,8 @@ abolish_table(trie *atrie)
+ 
+     if ( is_variant_trie(vtrie) )
+     {
+-#ifdef O_PLMT
+-      int mytid = PL_thread_self();
++#ifdef O_ENGINES
++      int mytid = TBL_SELF();
+ 
+       if ( ison(atrie, TRIE_ISSHARED) )
+       { LOCK_SHARED_TABLE(atrie);
+@@ -3481,7 +3550,7 @@ abolish_table(trie *atrie)
+ 	{ if ( !delayed_destroy_table(atrie) )
+ 	  { reset_answer_table(atrie, false);
+ 	    drop_trie(atrie);
+-	    cv_broadcast(&GD->tabling.cvar);
++	    TBL_BROADCAST();
+ 	  }
+ 	} else
+ 	{ set(atrie, TRIE_ABOLISH_ON_COMPLETE);
+@@ -3585,7 +3654,7 @@ PRED_IMPL("$tbl_wkl_add_answer", 4, tbl_wkl_add_answer, 0)
+     size_abstract sa = {.from_depth = 2};
+     int rc;
+ 
+-#ifdef O_PLMT
++#ifdef O_ENGINES
+     DEBUG(0, assert(isoff(wl->table, TRIE_ISSHARED) || wl->table->tid));
+ #endif
+ 
+@@ -4555,8 +4624,18 @@ tbl_variant_table(DECL_LD term_t closure, term_t variant, term_t Trie,
+ 
+   get_closure_predicate(closure, &def);
+ 
++#if defined(O_ENGINES) && !defined(O_PLMT)
++					/* a moded table answers from its trie */
++  if ( (atrie=get_answer_table(def, variant, ret,
++			       (flags&AT_MODED) ? NULL : &clref, flags)) )
++  { if ( LD->tabling.claim_wait )
++      return ( PL_unify_atomic(Trie, atrie->symbol) &&
++	       unify_claim_wait(status) );
++#else
+   if ( (atrie=get_answer_table(def, variant, ret, &clref, flags)) )
+-  { if ( !idg_init_variant(atrie, def, variant)  ||
++  {
++#endif
++    if ( !idg_init_variant(atrie, def, variant)  ||
+ 	 !idg_add_edge(atrie, NULL) )
+       return false;
+ 
+@@ -4627,7 +4706,13 @@ PRED_IMPL("$tbl_existing_variant_table", 5, tbl_existing_variant_table, 0)
+   get_closure_predicate(A1, &def);
+ 
+   if ( (trie=get_answer_table(def, A2, A5, &clref, false)) )
+-  { return ( PL_unify_atomic(A3, trie->symbol) &&
++  {
++#if defined(O_ENGINES) && !defined(O_PLMT)
++    if ( LD->tabling.claim_wait )
++      return ( PL_unify_atomic(A3, trie->symbol) &&
++	       unify_claim_wait(A4) );
++#endif
++    return ( PL_unify_atomic(A3, trie->symbol) &&
+ 	     unify_table_status(A4, trie, def, true) );
+   }
+ 
+@@ -4650,7 +4735,7 @@ PRED_IMPL("$tbl_local_variant_table", 1, tbl_local_variant_table, 0)
+ static
+ PRED_IMPL("$tbl_global_variant_table", 1, tbl_global_variant_table, 0)
+ {
+-#ifdef O_PLMT
++#ifdef O_ENGINES
+   PRED_LD
+   trie *trie = GD->tabling.variant_table;
+ 
+@@ -4673,7 +4758,7 @@ PRED_IMPL("$tbl_global_variant_table", 1, tbl_global_variant_table, 0)
+  *  there is no global table.
+  */
+ 
+-#ifdef O_PLMT
++#ifdef O_ENGINES
+ static
+ PRED_IMPL("$tbl_variant_table", 1, tbl_variant_table, PL_FA_NONDETERMINISTIC)
+ { PRED_LD
+@@ -7056,9 +7141,9 @@ idg_changed_loop(DECL_LD idg_propagate_state *state, int flags)
+ 	if ( fc == 0 )
+ 	{ n->force_reeval = false;
+ 
+-#ifdef O_PLMT
++#ifdef O_ENGINES
+ 	  if ( ison(n->atrie, TRIE_ISSHARED) && n->atrie->tid )
+-	  { if ( n->atrie->tid == PL_thread_self() ) /* See (*) */
++	  { if ( n->atrie->tid == TBL_SELF() ) /* See (*) */
+ 	      COMPLETE_WORKLIST(n->atrie, (void)0);
+ 	    else
+ 	      Sdprintf("IDG falsecount propagation re-validated a table "
+@@ -8228,8 +8313,8 @@ table_status_reeval_wait(DECL_LD trie *atrie)
+     { return ATOM_monotonic;
+     } else
+     {
+-#ifdef O_PLMT
+-      int tid = PL_thread_self();
++#ifdef O_ENGINES
++      int tid = TBL_SELF();
+ 
+       if ( atrie->tid == tid )			/* remain owner */
+       { return table_status(atrie);
+@@ -8238,6 +8323,10 @@ table_status_reeval_wait(DECL_LD trie *atrie)
+ 
+ 	if ( !claim_answer_table(atrie, NULL, 0) )
+ 	  return false;				/* deadlock */
++#ifndef O_PLMT
++	if ( LD->tabling.claim_wait )		/* another engine owns it */
++	  return ATOM_wait;
++#endif
+ 
+ 	status = table_status(atrie);
+ 	COMPLETE_WORKLIST(atrie, (void)0);
+@@ -8262,7 +8351,13 @@ PRED_IMPL("$tbl_reeval_wait", 2, tbl_reeval_wait, 0)
+ 
+   if ( get_trie(A1, &atrie) &&
+        (status=table_status_reeval_wait(atrie)) )
++  {
++#if defined(O_ENGINES) && !defined(O_PLMT)
++    if ( status == ATOM_wait )
++      return unify_claim_wait(A2);
++#endif
+     return PL_unify_atom(A2, status);
++  }
+ 
+   return false;
+ }
+@@ -8347,14 +8442,30 @@ PRED_IMPL("$tbl_reeval_prepare_top", 2, tbl_reeval_prepare_top, 0)
+   if ( get_trie(A1, &atrie) )
+   { idg_node *idg = atrie->data.IDG;
+ 
+-#ifdef O_PLMT
++#ifdef O_ENGINES
+     if ( ison(atrie, TRIE_ISSHARED) )
+-    { atom_t cref = 0;
++    {
++#ifdef O_PLMT
++      atom_t cref = 0;
+ 
+       if ( !claim_answer_table(atrie, &cref, 0) )
+ 	return false;				/* deadlock */
+       if ( cref )
+ 	return PL_unify_atom(A2, cref);
++#else
++      atom_t cref = 0;
++
++      /* A complete table answers its compiled clause, as above, so a
++	 re-evaluating call counts one call to a completed table here as
++	 there; a moded one answers from its trie below, which
++	 moded_gen_answer/3 reads. */
++      if ( !claim_answer_table(atrie, ison(atrie, TRIE_ISMAP) ? NULL : &cref, 0) )
++	return false;				/* deadlock */
++      if ( LD->tabling.claim_wait )		/* another engine owns it */
++	return unify_claim_wait(A2);
++      if ( cref )
++	return PL_unify_atom(A2, cref);
++#endif
+     }
+ #endif
+ 
+@@ -8389,10 +8500,15 @@ PRED_IMPL("$tbl_reeval_prepare", 2, tbl_reeval_prepare, 0)
+     if ( idg->monotonic && !idg->force_reeval )
+       return false;
+ 
+-#ifdef O_PLMT
+-    if ( ison(atrie, TRIE_ISSHARED) &&		/* a valid table fails below */
+-	 !claim_answer_table(atrie, NULL, 0) )
+-      return false;				/* deadlock */
++#ifdef O_ENGINES
++    if ( ison(atrie, TRIE_ISSHARED) )		/* a valid table fails below */
++    { if ( !claim_answer_table(atrie, NULL, 0) )
++	return false;				/* deadlock */
++#ifndef O_PLMT
++      if ( LD->tabling.claim_wait )		/* another engine owns it */
++	return unify_claim_wait(A2);
++#endif
++    }
+ #endif
+ 
+     if ( idg->falsecount == 0 )			/* someone else re-evaluated it */
+@@ -9035,7 +9151,7 @@ tbl_pred_tripwire(Definition def, atom_t action, atom_t wire)
+ 		 *	    CONCURRENCY		*
+ 		 *******************************/
+ 
+-#if O_PLMT
++#ifdef O_ENGINES
+ 
+ static int
+ table_needs_work(trie *atrie)
+@@ -9072,8 +9188,15 @@ Claim ownership for an answer table if the table is incomplete/invalid:
+ Note that this code uses  a   mutex/condition  variable  pair. Currently
+ there is a single mutex. Future versions could  use an array of these to
+ reduce contention.
++
++A build without threads cannot wait: the owner is an engine that runs
++only once the claimant hands the thread back.  The claim leaves the owner
++in LD->tabling.claim_wait for the caller to answer wait(Owner), and stays
++registered as waiting, which is the edge is_deadlock() follows, until this
++engine claims again or is destroyed.
+ - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
+ 
++#ifdef O_PLMT
+ /* True when the thread or engine tid is suspended beneath this engine on
+  * its OS thread: it holds this engine, directly or through other engines,
+  * in engine_next/2 or engine_post/2,3, which record it as the caller for
+@@ -9112,21 +9235,29 @@ owner_beneath_error(DECL_LD trie *atrie)
+ 		    "suspended beneath this call on the same OS thread",
+ 		    ERR_PERMISSION, ATOM_wait, ATOM_shared_table, variant) );
+ }
++#endif /*O_PLMT*/
+ 
+ static int
+ claim_answer_table(DECL_LD trie *atrie, atom_t *clrefp, int flags)
+ { if ( ison(atrie, TRIE_ISSHARED) && !(flags&AT_NOCLAIM) )
+-  { int mytid = PL_thread_self();
++  { int mytid = TBL_SELF();
+     volatile atom_t clref = 0;
+ 
++#ifndef O_PLMT
++    if ( thread_waits_for_trie(mytid) )	/* claiming again after a wait */
++      unregister_waiting(mytid, NULL);
++#endif
+     if ( atrie->tid != mytid )
+     { LOCK_SHARED_TABLE(atrie);
+     retry_shared:
+       if ( atrie->tid )
+-      { if ( owner_suspended_beneath(atrie->tid) )
++      {
++#ifdef O_PLMT
++	if ( owner_suspended_beneath(atrie->tid) )
+ 	{ UNLOCK_SHARED_TABLE(atrie);
+ 	  return owner_beneath_error(atrie);
+ 	}
++#endif
+ 	register_waiting(mytid, atrie);
+ 	if ( is_deadlock(atrie) )
+ 	{ term_t ex;
+@@ -9141,6 +9272,7 @@ claim_answer_table(DECL_LD trie *atrie, atom_t *clrefp, int flags)
+ 	  return false;
+ 	}
+ 	TRIE_STAT_INC(atrie, wait);
++#ifdef O_PLMT
+ 	if ( !wait_for_table_to_complete(atrie) )
+ 	{ UNLOCK_SHARED_TABLE(atrie);
+ 	  return false;
+@@ -9153,12 +9285,21 @@ claim_answer_table(DECL_LD trie *atrie, atom_t *clrefp, int flags)
+ 	} else
+ 	{ goto complete;
+ 	}
++#else
++	DEBUG(MSG_TABLING_SHARED,
++	      print_answer_table(atrie, "waiting for engine %d", atrie->tid));
++	LD->tabling.claim_wait = atrie->tid;
++	return true;
++#endif
+       } else if ( table_needs_work(atrie) )
+       { DEBUG(MSG_TABLING_SHARED,
+ 	      print_answer_table(atrie, "claiming"));
+ 	take_trie(atrie, mytid);
+       } else					/* complete and valid */
+-      { complete:
++      {
++#ifdef O_PLMT
++      complete:
++#endif
+ 	if ( clrefp )
+ 	{ if ( !(clref=atrie->clause) )
+ 	  { Procedure proc = ((flags&AT_MODED)
+@@ -9313,6 +9454,7 @@ is_deadlock(trie *atrie)
+ }
+ 
+ 
++#ifdef O_PLMT
+ static int
+ wait_for_table_to_complete(trie *atrie)
+ { DEBUG(MSG_TABLING_SHARED,
+@@ -9335,7 +9477,102 @@ wait_for_table_to_complete(trie *atrie)
+ 
+   return true;
+ }
++
++#else /*O_PLMT*/
++
++/* Table owners in a build without threads are engine ids (see the comment
++ * above COMPLETE_WORKLIST).  An engine takes an id at its first claim and
++ * returns it when it is destroyed, so the ids in use are bounded by the
++ * number of engines alive at once, and so is GD->tabling.waiting, which
++ * is indexed by them.  Id 0 means no owner.
++ */
++
++static int
++tbl_engine_id(void)
++{ GET_LD
++
++  if ( !LD->tabling.engine_id )
++  { if ( GD->tabling.engine_ids.free_count > 0 )
++      LD->tabling.engine_id =
++	GD->tabling.engine_ids.free[--GD->tabling.engine_ids.free_count];
++    else
++      LD->tabling.engine_id = ++GD->tabling.engine_ids.highest;
++  }
++
++  return LD->tabling.engine_id;
++}
++
++static void
++free_engine_id(int id)
++{ if ( GD->tabling.engine_ids.free_count == GD->tabling.engine_ids.free_size )
++  { int size = ( GD->tabling.engine_ids.free_size
++		 ? GD->tabling.engine_ids.free_size*2 : 16 );
++
++    GD->tabling.engine_ids.free =
++      PL_realloc(GD->tabling.engine_ids.free, size*sizeof(int));
++    GD->tabling.engine_ids.free_size = size;
++  }
++  GD->tabling.engine_ids.free[GD->tabling.engine_ids.free_count++] = id;
++}
++
++/* An engine destroyed while it owns shared tables, as when the host drops
++ * a job suspended inside a tabled evaluation, hands them back: one under
++ * re-evaluation invalid again and any other incomplete one fresh, so the
++ * next claimant evaluates it rather than waiting for an id a later engine
++ * will be given.  finished_leader/4 in boot/tabling.pl discards the
++ * component as the engine's frames go; this is what it cannot reach.
++ * Visiting the shared variant table costs one step per shared variant,
++ * and happens only for an engine that dies owning a table.
++ */
++
++static void *
++abandon_engine_table(trie_node *node, void *ctx)
++{ int id = (int)(intptr_t)ctx;
++
++  if ( node->value )
++  { trie *atrie = symbol_trie(word2atom(node->value));
++
++    if ( atrie->tid == id )
++    { idg_node *n = atrie->data.IDG;
++      worklist *wl = atrie->data.worklist;
++
++      DEBUG(MSG_TABLING_SHARED,
++	    print_answer_table(atrie, "abandoned by engine %d", id));
++      if ( n && n->reevaluating )
++      { if ( WL_IS_WORKLIST(wl) )
++	{ atrie->data.worklist = NULL;
++	  free_worklist(wl);
++	}
++	reset_reevaluation(atrie);		/* releases it */
++      } else
++      { if ( table_is_incomplete(atrie) )
++	  reset_answer_table(atrie, false);
++	drop_trie(atrie);
++      }
++    }
++  }
++
++  return NULL;
++}
++
++static void
++release_engine_tables(PL_local_data_t *ld)
++{ int id = ld->tabling.engine_id;
++
++  if ( id )
++  { if ( thread_waits_for_trie(id) )
++      unregister_waiting(id, NULL);
++    if ( ld->tabling.owned > 0 && GD->tabling.variant_table )
++      map_trie_node(&GD->tabling.variant_table->root,
++		    abandon_engine_table, (void*)(intptr_t)id);
++    ld->tabling.engine_id = 0;
++    ld->tabling.owned = 0;
++    ld->tabling.claim_wait = 0;
++    free_engine_id(id);
++  }
++}
+ #endif /*O_PLMT*/
++#endif /*O_ENGINES*/
+ 
+ 
+ 		 /*******************************
+@@ -9398,11 +9635,13 @@ void
+ cleanupTabling(void)
+ { memset(fast_ret_functor, 0, sizeof(fast_ret_functor));
+ 
+-#ifdef O_PLMT
++#ifdef O_ENGINES
+   clear_variant_table(&GD->tabling.variant_table);
+ 
++#ifdef O_PLMT
+   deleteSimpleMutex(&GD->tabling.mutex);
+   cv_destroy(&GD->tabling.cvar);
++#endif
+ 
+   if ( GD->tabling.node_pool )
+   { free_alloc_pool(GD->tabling.node_pool);
+@@ -9413,6 +9652,13 @@ cleanupTabling(void)
+   { free_trie_array(GD->tabling.waiting);
+     GD->tabling.waiting = NULL;
+   }
++#ifndef O_PLMT
++  if ( GD->tabling.engine_ids.free )
++  { PL_free(GD->tabling.engine_ids.free);
++    GD->tabling.engine_ids.free = NULL;
++    GD->tabling.engine_ids.free_count = GD->tabling.engine_ids.free_size = 0;
++  }
++#endif
+ #endif
+ }
+ 
+@@ -9439,7 +9685,7 @@ BeginPredDefs(tabling)
+   PRED_DEF("$tbl_abstract_table",       6, tbl_abstract_table,       0)
+   PRED_DEF("$tbl_existing_variant_table", 5, tbl_existing_variant_table, 0)
+   PRED_DEF("$tbl_moded_variant_table",	6, tbl_moded_variant_table,  0)
+-#ifdef O_PLMT
++#ifdef O_ENGINES
+   PRED_DEF("$tbl_variant_table",        1, tbl_variant_table,	  NDET)
+ #else
+   PRED_DEF("$tbl_variant_table",        1, tbl_local_variant_table,  0)
+diff --git a/src/pl-trie.c b/src/pl-trie.c
+index 7030652..0c0b6bf 100644
+--- a/src/pl-trie.c
++++ b/src/pl-trie.c
+@@ -2701,7 +2701,7 @@ PRED_IMPL("$trie_property", 2, trie_property, 0)
+       { return PL_unify_int64(arg, trie->stats.lookups);
+       } else if ( name == ATOM_gen_call_count)
+       { return PL_unify_int64(arg, trie->stats.gen_call);
+-#ifdef O_PLMT
++#ifdef O_ENGINES
+       } else if ( name == ATOM_wait )
+       { return PL_unify_int64(arg, trie->stats.wait);
+       } else if ( name == ATOM_deadlock )
+diff --git a/src/pl-trie.h b/src/pl-trie.h
+index 277e562..b75c5be 100644
+--- a/src/pl-trie.h
++++ b/src/pl-trie.h
+@@ -111,8 +111,8 @@ typedef struct trie
+   unsigned int		node_count;	/* # nodes */
+   unsigned int		value_count;	/* # nodes with a value */
+   unsigned int		flags;		/* misc flags */
+-#ifdef O_PLMT
+-  int			tid;		/* thread id doing completion or re-evaluation */
++#ifdef O_ENGINES
++  int			tid;		/* thread or engine doing completion or re-evaluation */
+ #endif
+   trie_node		root;		/* the root node */
+   indirect_table       *indirects;	/* indirect values */
+@@ -123,7 +123,7 @@ typedef struct trie
+   struct
+   { uint64_t		lookups;	/* trie_lookup */
+     uint64_t		gen_call;	/* trie_gen calls */
+-#ifdef O_PLMT
++#ifdef O_ENGINES
+     unsigned int	deadlock;	/* times involved in a deadlock */
+     unsigned int	wait;		/* times waited for */
+ #endif
+diff --git a/tests/tabling/test_engine_shared.pl b/tests/tabling/test_engine_shared.pl
+new file mode 100644
+index 0000000..6604a1e
+--- /dev/null
++++ b/tests/tabling/test_engine_shared.pl
+@@ -0,0 +1,366 @@
++/*  Part of SWI-Prolog
++
++    Shared tables between the engines of a build without threads.
++
++    Redistribution and use in source and binary forms, with or without
++    modification, are permitted provided that the conditions of the
++    SWI-Prolog license (BSD-2) are met.
++*/
++
++:- module(test_engine_shared,
++          [ test_engine_shared/0
++          ]).
++
++/** <module> Shared tables between the engines of a build without threads
++
++A build without threads runs its engines one at a time on one thread, so
++an engine that meets a shared table another engine is completing cannot
++block as a thread does: the owner only runs once the claimant hands the
++thread back.  '$tbl_variant_table'/6 and its siblings answer wait(Owner)
++and tabling_wait/2 calls prolog:tabling_wait/1.  This file plays the
++embedding host: its hook yields tabling_wait(Reason) to whoever runs the
++engine, and schedule/3 resumes a parked engine once another one made
++progress, as the host's scheduler does.  The randomised case is
++test_shared1.pl's deadlock and abolish test with engines for threads and
++a yield where it sleeps.
++
++A threaded build is skipped: its claimant blocks on a condition variable,
++which an engine sharing the owner's thread never gets to signal.
++*/
++
++:- if(\+ current_prolog_flag(threads, true)).
++
++:- use_module(library(plunit)).
++:- use_module(library(lists)).
++:- use_module(library(apply)).
++:- use_module(library(random)).
++
++test_engine_shared :-
++    run_tests([ engine_shared ]).
++
++:- multifile
++    prolog:tabling_wait/1.
++
++prolog:tabling_wait(Reason) :-
++    engine_self(_),
++    engine_yield(tabling_wait(Reason)).
++
++%!  step
++%
++%   A suspension point inside a tabled evaluation, as a host operation
++%   awaiting a promise is: an engine yields `step`, the main engine runs
++%   on.
++
++step :-
++    (   engine_self(_)
++    ->  engine_yield(step)
++    ;   true
++    ).
++
++:- table p/1 as shared.
++
++p(X) :-
++    flag(p_runs, N, N+1),
++    step,
++    member(X, [a,b,c]).
++
++:- table (pp/1, qq/1) as shared.
++
++max(10).
++
++pp(Y) :- step, qq(X), max(Max), X < Max, Y is X+1.
++pp(0).
++qq(Y) :- step, pp(X), max(Max), X < Max, Y is X+1.
++qq(0).
++
++:- dynamic d/1 as incremental.
++:- table r/1 as (incremental, shared).
++
++r(X) :-
++    flag(r_runs, N, N+1),
++    d(X),
++    step.
++
++%   d/1 is written here rather than in a test body, which plunit runs in
++%   the unit's own module.
++
++set_d(Xs) :-
++    retractall(d(_)),
++    forall(member(X, Xs), assertz(d(X))).
++
++add_d(X) :-
++    assertz(d(X)).
++
++%   Here too: table_statistics/3 qualifies its variant with the module
++%   it is called from, and r/1's table belongs to this one.
++
++r_complete_calls(N) :-
++    table_statistics(r(_), complete_call, N).
++
++:- table t/0 as shared.
++
++t :- step, fail.
++
++:- table m(_, max) as shared.
++
++m(a, X) :- step, member(X, [1,3,2]).
++
++fresh_p :-
++    abolish_all_tables,
++    flag(p_runs, _, 0).
++
++runs(Flag, N) :-
++    flag(Flag, N, N).
++
++%!  drain(+Engine, -Answer) is det.
++%
++%   Run Engine past its step/0 yields until it answers.  Answer is the
++%   tabling_wait(Reason) event if the engine parks instead.
++
++drain(E, Answer) :-
++    engine_next(E, Event),
++    (   Event == step
++    ->  drain(E, Answer)
++    ;   Answer = Event
++    ).
++
++sorted_answers(E, Sorted) :-
++    drain(E, Answers),
++    msort(Answers, Sorted).
++
++%!  schedule(+Engines, +Options, -Answers) is det.
++%
++%   Run Engines, each a findall/3 that answers a list, until all have
++%   answered.  An engine that yields tabling_wait(owner(_)) is parked
++%   until another engine makes progress, which is any event other than a
++%   wait, and tabling_wait(restart) wakes the parked ones as it parks
++%   itself, because it just gave its tables up.  When nothing is left
++%   runnable, every parked engine is woken.  Answers is in the order of
++%   Engines, with `destroyed` for an engine the schedule destroyed.
++%   Options:
++%
++%     - random(true)
++%       Pick the next engine at random rather than round robin.
++%     - destroy(P)
++%       Destroy the engine just stepped with probability P.
++%     - abolish(P)
++%       Call abolish_all_tables/0 from the main engine with probability P
++%       before each step.
++%     - budget(N)
++%       Fail after N steps rather than loop.
++
++schedule(Es, Options, Answers) :-
++    findall(E-runnable, member(E, Es), States0),
++    option(budget(Budget), Options, 100000),
++    schedule_(States0, Options, Budget, States),
++    maplist(state_answer(States), Es, Answers).
++
++state_answer(States, E, Answer) :-
++    memberchk(E-State, States),
++    (   State = done(Answer)
++    ->  true
++    ;   Answer = State
++    ).
++
++schedule_(States, _, _, States) :-
++    \+ ( member(_-S, States), (S == runnable ; S == parked) ),
++    !.
++schedule_(States0, Options, Budget, States) :-
++    Budget > 0,
++    Budget1 is Budget - 1,
++    (   include([_-S]>>(S == runnable), States0, Runnable),
++        Runnable \== []
++    ->  States1 = States0
++    ;   maplist(wake, States0, States1),
++        include([_-S]>>(S == runnable), States1, Runnable)
++    ),
++    pick(Runnable, Options, E-_),
++    maybe_abolish(Options),
++    engine_next_reified(E, Event),
++    event_state(Event, State, Progress),
++    set_state(States1, E, State, States2),
++    (   Progress == true
++    ->  maplist(wake, States2, States3)
++    ;   States3 = States2
++    ),
++    maybe_destroy(E, State, Options, States3, States4),
++    schedule_(States4, Options, Budget1, States).
++
++pick(Runnable, Options, Pick) :-
++    (   option(random(true), Options)
++    ->  random_member(Pick, Runnable)
++    ;   Runnable = [Pick|_]
++    ).
++
++maybe_abolish(Options) :-
++    (   option(abolish(P), Options),
++        maybe(P)
++    ->  abolish_all_tables
++    ;   true
++    ).
++
++maybe_destroy(E, State, Options, States0, States) :-
++    (   State \= done(_),
++        option(destroy(P), Options),
++        maybe(P)
++    ->  engine_destroy(E),
++        set_state(States0, E, done(destroyed), States)
++    ;   States = States0
++    ).
++
++event_state(the(step), runnable, true) :- !.
++event_state(the(tabling_wait(owner(_))), parked, false) :- !.
++event_state(the(tabling_wait(restart)), parked, true) :- !.
++event_state(the(Answers), done(Answers), true) :- !.
++event_state(no, done(no), true).
++event_state(throw(Error), _, _) :-
++    throw(Error).
++
++wake(E-parked, E-runnable) :- !.
++wake(State, State).
++
++set_state([], _, _, []).
++set_state([E0-S0|T0], E, S, [E0-S1|T]) :-
++    (   E0 == E
++    ->  S1 = S
++    ;   S1 = S0
++    ),
++    set_state(T0, E, S, T).
++
++findall_engine(Template, Goal, E) :-
++    engine_create(L, findall(Template, Goal, L), E).
++
++:- begin_tests(engine_shared, [sto(rational_trees)]).
++
++test(one_table_for_every_engine, Runs == 1) :-
++    fresh_p,
++    findall_engine(X, p(X), A),
++    sorted_answers(A, [a,b,c]),
++    findall_engine(Y, p(Y), B),
++    sorted_answers(B, [a,b,c]),
++    runs(p_runs, Runs).
++
++test(a_claimant_waits_for_the_owner, [As, Bs, Runs] == [[a,b,c], [a,b,c], 1]) :-
++    fresh_p,
++    findall_engine(X, p(X), A),
++    engine_next(A, step),                       % A owns p's incomplete table
++    findall_engine(Y, p(Y), B),
++    engine_next(B, tabling_wait(owner(_))),     % B parks
++    sorted_answers(A, As),
++    sorted_answers(B, Bs),
++    runs(p_runs, Runs).
++
++test(nothing_suspends_the_main_engine,
++     error(permission_error(wait, shared_table, _))) :-
++    fresh_p,
++    findall_engine(X, p(X), A),
++    engine_next(A, step),
++    call_cleanup(p(_), engine_destroy(A)).
++
++test(a_destroyed_owner_hands_the_table_back, [Bs, Runs] == [[a,b,c], 2]) :-
++    fresh_p,
++    findall_engine(X, p(X), A),
++    engine_next(A, step),
++    findall_engine(Y, p(Y), B),
++    engine_next(B, tabling_wait(owner(_))),
++    engine_destroy(A),
++    sorted_answers(B, Bs),
++    runs(p_runs, Runs).
++
++test(a_table_abolished_while_owned_goes_on_completion,
++     [As, Bs, Runs] == [[a,b,c], [a,b,c], 2]) :-
++    fresh_p,
++    findall_engine(X, p(X), A),
++    engine_next(A, step),
++    abolish_all_tables,
++    sorted_answers(A, As),
++    findall_engine(Y, p(Y), B),
++    sorted_answers(B, Bs),
++    runs(p_runs, Runs).
++
++test(a_deadlock_between_engines_resolves, Answers == [L, L]) :-
++    abolish_all_tables,
++    numlist(0, 10, L),
++    findall_engine(X, pp(X), A),
++    findall_engine(Y, qq(Y), B),
++    schedule([A, B], [], Answers0),
++    maplist(msort, Answers0, Answers).
++
++test(a_reevaluating_owner_is_waited_for, [As, Bs, Runs] == [[1,2], [1,2], 2]) :-
++    abolish_all_tables,
++    set_d([1]),
++    flag(r_runs, _, 0),
++    findall_engine(X0, r(X0), E0),
++    sorted_answers(E0, [1]),
++    add_d(2),                                   % invalidates r/1
++    findall_engine(X1, r(X1), A),
++    engine_next(A, step),                       % A re-evaluates r/1
++    findall_engine(Y, r(Y), B),
++    engine_next(B, tabling_wait(owner(_))),
++    sorted_answers(A, As),
++    sorted_answers(B, Bs),
++    runs(r_runs, Runs).
++
++% A threaded host counts a re-evaluating call as one call to a completed
++% table, where a private table counts two: its re-evaluated table answers
++% from the trie rather than from the clause the completion compiled.  The
++% counter keeps what earlier tests counted, so this reads its steps.
++test(a_reevaluation_counts_one_completed_call, Steps == [1, 1, 1]) :-
++    abolish_all_tables,
++    set_d([1]),
++    r_complete_calls(C0),
++    findall(X0, r(X0), _),
++    r_complete_calls(C1),
++    add_d(2),                                   % invalidates r/1
++    findall(X1, r(X1), _),                      % re-evaluates it
++    r_complete_calls(C2),
++    findall(X2, r(X2), _),
++    r_complete_calls(C3),
++    maplist([A-B, D]>>(D is A-B), [C1-C0, C2-C1, C3-C2], Steps).
++test(tnot_waits_for_the_owner, [As, Bs] == [[], [true]]) :-
++    abolish_all_tables,
++    findall_engine(x, t, A),
++    engine_next(A, step),
++    findall_engine(R, (tnot(t) -> R = true ; R = false), B),
++    engine_next(B, tabling_wait(owner(_))),
++    drain(A, As),
++    drain(B, Bs).
++
++test(a_moded_table_is_shared, [As, Bs, M] == [[3], [3], 3]) :-
++    abolish_all_tables,
++    findall_engine(X, m(a, X), A),
++    engine_next(A, step),
++    findall_engine(Y, m(a, Y), B),
++    engine_next(B, tabling_wait(owner(_))),
++    drain(A, As),
++    drain(B, Bs),
++    m(a, M).                                    % complete: answers from its trie
++
++test(random_interleavings, forall(between(1, 40, Seed))) :-
++    set_random(seed(Seed)),
++    abolish_all_tables,
++    numlist(0, 10, L),
++    random_between(2, 5, N),
++    length(Es, N),
++    maplist(random_engine, Es),
++    schedule(Es, [random(true), destroy(0.02), abolish(0.05)], Answers),
++    forall(member(Answer, Answers),
++           (   Answer == destroyed
++           ->  true
++           ;   msort(Answer, Sorted),
++               assertion(Sorted == L)
++           )).
++
++random_engine(E) :-
++    (   maybe
++    ->  findall_engine(X, pp(X), E)
++    ;   findall_engine(X, qq(X), E)
++    ).
++
++:- end_tests(engine_shared).
++
++:- else.
++
++test_engine_shared.
++
++:- endif.

@@ -1,0 +1,64 @@
+diff --git a/src/pl-tabling.c b/src/pl-tabling.c
+index b4554f9..1b057b7 100644
+--- a/src/pl-tabling.c
++++ b/src/pl-tabling.c
+@@ -8390,14 +8390,9 @@ PRED_IMPL("$tbl_reeval_prepare", 2, tbl_reeval_prepare, 0)
+       return false;
+ 
+ #ifdef O_PLMT
+-    if ( ison(atrie, TRIE_ISSHARED) )
+-    { atom_t cref = 0;
+-
+-      if ( !claim_answer_table(atrie, &cref, 0) )
+-	return false;				/* deadlock */
+-      if ( cref )
+-	return PL_unify_atom(A3, cref);
+-    }
++    if ( ison(atrie, TRIE_ISSHARED) &&		/* a valid table fails below */
++	 !claim_answer_table(atrie, NULL, 0) )
++      return false;				/* deadlock */
+ #endif
+ 
+     if ( idg->falsecount == 0 )			/* someone else re-evaluated it */
+diff --git a/tests/tabling/test_shared_units.pl b/tests/tabling/test_shared_units.pl
+index 6d5835e..b17330f 100644
+--- a/tests/tabling/test_shared_units.pl
++++ b/tests/tabling/test_shared_units.pl
+@@ -75,6 +75,37 @@ test(propagate_falsecount) :-
+     thread_create(call_with_time_limit(1, ps([1])), Id),
+     thread_join(Id).
+ 
++% '$tbl_reeval_prepare'/2 waits for a thread that is re-evaluating the
++% table, and then fails, as that thread re-evaluated it, rather than
++% succeed with Variant unbound.
++:- table sr/1 as (incremental,shared).
++:- dynamic sr_d/1 as incremental.
++
++sr(X) :-
++    (   nb_current(sr_signal, Queue)
++    ->  thread_send_message(Queue, reevaluating),
++        sleep(0.2)
++    ;   true
++    ),
++    sr_d(X).
++
++test(prepare_after_another_thread_reevaluated, Xs == [1,2]) :-
++    retractall(sr_d(_)),
++    assertz(sr_d(1)),
++    findall(X, sr(X), _),
++    once(( current_table(_:Variant, ATrie), Variant = sr(_) )),
++    assertz(sr_d(2)),
++    message_queue_create(Queue),
++    thread_create(( b_setval(sr_signal, Queue), findall(X, sr(X), _) ),
++                  Reevaluator),
++    thread_get_message(Queue, reevaluating),
++    assertion(\+ '$tbl_reeval_prepare'(ATrie, _)),
++    thread_join(Reevaluator),
++    message_queue_destroy(Queue),
++    findall(X, sr(X), Xs0),
++    msort(Xs0, Xs),
++    retractall(sr_d(_)).
++
+ :- end_tests(shared_reeval).
+ 
+ :- else.                                % no library(time) or no threads.

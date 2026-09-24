@@ -425,3 +425,233 @@ The two patches land with the requirement. The host-declaration lane
 regenerates `engine/host_patches.pl` from every patch at the top, so carrying
 a patch is requiring it. The change therefore went in with the Node seat's
 advance to build-6, the first commit at which both hosts declare them.
+
+### Build 9: ten more patches, and a 4 GiB memory
+
+Build 9 carries 36 patch files, build 6's 26 and ten more, and links the
+WebAssembly host with a 4 GiB memory maximum. It is two hosts built from one
+source stack. The WebAssembly one was compiled at Sep 24 2026, 06:12:34 UTC:
+ctest 58 of 58, 36 of 36 declared. The native one is
+`/home/user/Dev/swipl-patched.5`, compiled at Sep 24 2026, 16:08:19: ctest
+91 of 93, with `pldoc:man_links` and `utf8proc:uts39` failing as they do on
+every build here. Items 6 to 15 of
+docs/journal/2026-09-06-swi-defects-to-report-upstream.md describe all ten for
+upstream. Nine are carried here as `Patch:` entries in
+docs/host-workarounds.md, each with its reproduction, and the engine requires
+them at boot. The alarm scheduler's is built into both hosts and not carried,
+below. Every native reproduction carried answers present on the build-6 host
+and absent 3 of 3 on `.5`. The two WebAssembly ones answer present on build 6
+and absent on build 9.
+
+A patch is carried only where the engine, one of its seats or a shipped
+library meets its defect, or where a carried patch is written on top of it,
+and each entry now says which: the C seat for the halt patch, the Python seat
+for the owner-beneath one, and the Node seat for the engine-query, window,
+heap, destroyed-leader and threadless ones. Two carried patches meet no defect
+of the engine's own. The reeval-prepare patch is carried because the
+threadless patch is written on top of it and of the owner-beneath patch, and
+applied to the pinned source without either it fails in `src/pl-tabling.c`.
+The trie patch is the other, below. The rule follows from this engine's being
+replaced by one in Rust: a host patch earns its keep by a defect the engine
+meets, not by one it could.
+
+Builds 7 and 8 came first, and neither landed. Build 7 carried 34 files, two
+of them the TypeScript corpus work's first tabling pair, and was vendored as
+node a9e3b4b. That work then replaced its pair with four patches. Two of the
+four are new, and native `.3` answers present to both, so build 8 and native
+`.4` were made from the 36, and build 8 was vendored as node 579cdd2. Build 8
+then read `(complete-call 3)` where a threaded host reads 2, and the
+threadless patch was corrected (below), so build 9 and `.5` are build 8 and
+`.4` made again with the corrected patch. Build 9 was vendored as node
+9e693bd, which the superproject has pinned since b988bd2bc. The vendoring of
+build 7 also missed a step every earlier host had:
+`sh extensions/node/bench.sh --update`, which stamps
+`benchmarks/baseline.json` with the host's digest. So node-bench refused on
+counter-configuration drift from a9e3b4b until build 8's vendoring re-stamped
+it, and build 9's re-stamps it again.
+
+The trie patch, `swi-trie-gen-empty-hashed-root`, is the qlf-halves work's,
+and the one carried patch whose defect nothing here meets:
+engine/metta/reference_refresh.pl builds a fresh trie instead of emptying
+one. Its entry keeps that `Workaround:` site beside the new `Patch:` field.
+Both hosts were built with the patch, and the host-workarounds lane fails a
+Workaround-only entry once its host no longer shows the defect: on `.5` the
+reproduction answers absent, and the lane asked to lift the site at
+engine/metta/reference_refresh.pl:179. So the entry names the patch the hosts
+carry rather than a host being rebuilt to take a real fix back out, and the
+requirement it adds is one every shipped host already meets.
+
+#### Halt and a thread being created
+
+The C seat's corpus found that halt passes over a thread `thread_create/3`
+has marked created and `start_thread()` has not yet marked running
+(extensions/cmetta 697eff4, `make runtime-halt-created-thread`). Upstream
+master at d7d2a2bb8f5b has the same `default: break;` in
+`exitPrologThreads()`, so there was no upstream fix to take. The C probe,
+eight detached threads and an immediate `PL_cleanup(0)`, died 3 runs of 3
+on the build-6 host (each run is twenty processes). The patch counts a
+created thread and tells it to leave before it runs its goal. It also closes
+the window where a creation straddles the start of halt, by repeating the
+halt test under `L_THREAD`.
+
+On the WebAssembly host the question does not arise. `exitPrologThreads()`,
+`start_thread()` and the rest are inside `O_PLMT`, which that build leaves
+undefined (`build.wasm/src/config.h` holds `#undef O_PLMT`), so none of it is
+compiled. The `threads` flag there is false and `thread_create/3` does not
+exist, so there is no thread to be created during halt. Carrying the patch
+in that tree changes nothing it builds.
+
+#### Sleep under Node
+
+`(sleep 0.01)` failed in every tsmetta job, for two reasons, and fixing the
+first exposed the second.
+
+library(wasm)'s `sleep/1` asks `is_async/0`, which is `'$can_yield'`, and
+takes the asynchronous path when it succeeds: it builds a promise with
+`X := prolog.promise_sleep(S)` and awaits it. `prolog.js`'s `eval_chain()`
+starts a chain with no receiver from `window`, which Node does not have, so
+the call raised `ReferenceError: window is not defined` before looking at the
+chain (`swi-wasm-js-bridge-assumes-window`, fixed by `globalThis`).
+
+With the chain evaluating, the await ran, and inside an engine it aborted the
+process. `engine_create/3` opens its query with `PL_Q_ALLOW_YIELD` so that
+`engine_yield/1` works, and that flag is all `'$can_yield'` and the foreign
+yield check read, so a foreign yield inside an engine is let through to
+`engine_next/2`, which handles only `engine_yield/1`'s code. Its default
+branch raises without restoring the caller's engine. Natively the same C
+probe dies of SIGSEGV. The patch (`swi-engine-query-offers-foreign-yield`)
+marks an engine's query with a kernel-only `PL_Q_INTERACTOR` flag and makes
+one test, `takes_foreign_yield()`, the thing every yield check asks. Inside
+an engine `'$can_yield'` then fails, library(wasm) falls back to
+`system:sleep/1`, and a foreign yield there is refused with the existing
+permission error. Lua refuses a yield across a C call boundary the same way.
+Through the seat on build 9, `(sleep 0.01)` answers in 15 ms and
+`(sleep 0.25)` in 252 ms, and the next form answers.
+
+#### 2 GiB and 4 GiB
+
+At 2 GiB, emscripten's default maximum, the Node seat refused ch18's
+02-holbenchmark at the stack limit with 1.55 GiB resident, and the corpus's
+upto3 at 1.54 GiB. At 4 GiB build 9 runs them at 2.32 GiB and 2.27 GiB.
+Above 2 GiB emscripten's JavaScript has to read pointers as unsigned, which
+it does only for a build that asks, and V8 has grown a wasm32 memory to
+4 GiB since Chrome 83. Here Chromium 153, Firefox 155 and WebKit 26.6 each
+grew one past 2 GiB, to 2,621,440,000 bytes. The Chromium suite passes 24 of 24
+on build 9 as on build 8.
+
+05-matespacefast does not fit either way. Natively it peaks at 3.83 GiB
+resident. On the 4 GiB link it hits "Stack limit (1.0Gb) exceeded" with
+1.66 GiB resident, and with the stack limit raised to 3.5 GB the heap refuses
+a growth first, with 1.56 GiB resident.
+
+#### A refused heap reported as a stack limit
+
+That last refusal used to read "Stack limit (1.0Gb) exceeded", at the same
+depth whatever the limit was. When `stack_realloc()` fails, `grow_stacks()`
+returns the stack's own overflow code, the one a stack at its limit returns,
+so the message names the wrong resource. Natively the same shows under
+`ulimit -v 1000000` with an 8 GB stack limit: the refusal comes at a
+`globalused` of 524,287 KB.
+
+The first patch returned `MEMORY_OVERFLOW` so that `raiseStackOverflow()`
+would raise `ERR_NOMEM`, and it crashed. `PL_error()` builds its ball on the
+global stack the heap had just refused, asks the heap again, and under gdb
+recursed through `PL_copy_term_ref()` and `growStacks()` until the C stack
+overflowed. The patch that landed (`swi-heap-refusal-reported-as-stack-limit`)
+keeps the codes. `grow_stacks()` records per thread that its last growth
+failed in `malloc()`, and `outOfStack()`, the one path that can raise with no
+heap left because it writes its ball into the spare stacks, names
+`no_memory` then. The WebAssembly message now reads "Not enough resources:
+no_memory".
+
+#### The alarm scheduler
+
+Build 7's native ctest hung for forty minutes in `swipl:engines`. The core
+had the main thread in `PL_cleanup()`, then library(time)'s `cleanup()`,
+then `pthread_mutex_lock()`, and no scheduler thread left: `alarm_loop()`
+returns with its mutex held when it sees the stop flag, and `cleanup()`
+signals it once per pending alarm before taking that mutex itself. Twenty
+processes that each install a thousand far alarms and halt reproduce it in
+each of three runs on the build-6 host and in none of three on `.5`
+(`swi-alarm-scheduler-exits-holding-lock`). The WebAssembly build compiles
+none of it, because packages/clib/CMakeLists.txt declares the time plugin
+only off emscripten and with threads, and library(time) is absent there.
+
+The engine never meets it, so the patch is built into `.5` and not carried.
+A program that exits inside a max-time bound halts through `halt/1`, which
+unwinds `call_with_time_limit/2`'s cleanup and removes the alarm before
+`cleanup()` runs: twenty runs of `!(pragma! max-time 30)` then `!(exit! 0)`
+all exited on `.2`. So it has no ledger entry and no requirement, and item 11
+of the upstream list records it.
+
+#### Shared tables between engines
+
+The TypeScript corpus work brought four tabling patches.
+
+- A leader destroyed inside its engine left its shared tables owned by the
+  dead engine. Natively that hangs or crashes the next claim, and without
+  threads it prints `tabling(unexpected_result(...))` on every destroyed job
+  (`swi-destroyed-leader-keeps-shared-table`).
+- In a threaded build `'$tbl_reeval_prepare'/2` unified a clause reference
+  past its two arguments after waiting for a thread that re-evaluated the
+  table, and succeeded where it should fail
+  (`swi-reeval-prepare-writes-past-its-arguments`).
+- A claim whose owner is suspended beneath it on the same OS thread waited
+  for ever, because the owner runs again only once the claimant returns
+  (`swi-shared-table-waits-for-owner-beneath`). The claim now walks the chain
+  of engines suspended beneath it and raises
+  `permission_error(wait, shared_table, Variant)` when it finds the owner.
+- Without threads, a table declared `as shared` was private to each engine,
+  so a table never outlived the tsmetta ask that filled it
+  (`swi-threadless-shared-table-private-per-engine`). The patch, regenerated
+  over the two above, moves the shared variant table and table ownership
+  from `O_PLMT` to `O_ENGINES`. An engine that meets a table another engine
+  owns then suspends through `prolog:tabling_wait/1`, and where no hook is
+  defined it raises `permission_error(wait, shared_table, Goal)`.
+
+The third is the one the Python seat met. The provider-carry work's
+reproduction, ai-tmp/ai-pc/tabling/same-thread.py, has a Python op that
+Prolog calls while one engine completes a shared table, and that op pulls a
+lazy view of the same call. Its `callback` and `callback-incremental`
+variants hung on the build-6 host. On `.5`, through janus, both raise the
+permission error 0.37 s into the run, naming
+`'$metta_exec:&pyspace_1':reach(n0,_,_)` and saying the engine completing it
+is suspended beneath the call on the same OS thread. The private and
+other-variant callbacks, and the plain collapse, complete as before.
+
+#### One completed call per re-evaluation
+
+Build 8 carried an earlier form of the threadless patch, and on Node it read
+`(complete-call 3)` in
+examples/ch18-performance/18-02-memoisation-and-tabling/12-tabling_statistics.metta,
+which expects 2. Pure SWI shows the difference. For a table declared
+`(incremental,shared)`, `table_statistics/3` reads `complete_call` as 1, 1,
+2, 3 across call, assert, call and call on `.2`, `.4` and `.5`, and as 1, 1,
+3, 4 on build 8. That form's threadless branch of
+`'$tbl_reeval_prepare_top'/2` claimed a complete table without its compiled
+clause and answered the table's trie, which is a private table's path, so
+`trie_gen_compiled/2` counted one more completed call per re-evaluation. The
+corrected patch claims with a clause reference, as the threaded branch does,
+except for a moded table, which still answers its trie for
+`moded_gen_answer/3`. Build 9 reads 1, 1, 2, 3, and 12-tabling_statistics
+passes on it, where build 8 fails its last form with `(complete-call 3)`.
+
+On a threaded build the threadless patch compiles to the same instructions
+apart from `__LINE__` immediates: `.5`'s `libswipl.so` differs from `.4`'s in
+one instruction, a line number 8 lines on, the lines the corrected branch
+grew by. Its boot file gains branches a threaded build never takes. Without
+threads, the four patches together differ from the source build 7 was made
+from in the re-evaluation count above, and otherwise in `__LINE__`
+immediates and one builtin atom, `shared_table`. The threadless patch creates
+`tests/tabling/test_engine_shared.pl`, and `fetch-source.sh` then refused it
+on a clone it had already patched: `pristine_tree` reset tracked files and
+left the created one. It now also removes untracked files that are not
+ignored (5a05a59e9).
+
+#### One recorded, not patched
+
+An answer holding a compound named `[]`, which SWI-7's block syntax builds,
+leaves `type_error(atom, [])` pending in `prolog.js`'s `toJSON()`, and the
+next query from JavaScript fails with it once. Nothing this engine sends
+across the bridge has that shape, so it is item 16 of the upstream list and
+not a patch.

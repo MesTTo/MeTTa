@@ -1,0 +1,13 @@
+diff --git a/src/wasm/prolog.js b/src/wasm/prolog.js
+index 98eb1e3..506821a 100644
+--- a/src/wasm/prolog.js
++++ b/src/wasm/prolog.js
+@@ -2393,7 +2393,7 @@ function prolog_js_call(request, result)
+ { const prolog = Module.prolog;
+ 
+   function eval_chain(ar, obj)
+-  { obj = obj||window;
++  { obj = obj||globalThis;	/* window in a page, self in a worker, global in Node */
+ 
+     function eval_one(obj, fname, args)
+     { if ( args.length == 0 )

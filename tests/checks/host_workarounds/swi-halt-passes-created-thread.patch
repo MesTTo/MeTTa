@@ -1,0 +1,99 @@
+diff --git a/src/pl-thread.c b/src/pl-thread.c
+index 78618b7..f294528 100644
+--- a/src/pl-thread.c
++++ b/src/pl-thread.c
+@@ -1101,7 +1101,10 @@ honoured.  The approach is as follows:
+     - If the thread already stopped, join it
+     - If it is running and has a cancel function, call this.
+     - Else send abort/0 using the thread signal API.
+-  - For both last cases, count the number of threads we signalled.
++    - If thread_create() started it but start_thread() has not yet
++      marked it running, it cannot take a signal yet: ask it to exit
++      and let start_thread() see that when it marks itself running.
++  - For all but the first case, count the number of threads we signalled.
+   - Now wait for them to die for at most a second (turn this into a
+     flag?) by:
+     - Setting up a semaphore because semaphores are signal-safe
+@@ -1165,6 +1168,14 @@ exitPrologThreads(void)
+ 
+   sem_init(sem_canceled_ptr, USYNC_THREAD, 0);
+ 
++  /* thread_create() tests GD->halt.cleaning again under L_THREAD as it
++     marks a thread PL_THREAD_CREATED.  Taking L_THREAD once here orders
++     every such test after our PL_cleanup() changed GD->halt.cleaning, so
++     a thread either became CREATED before this point, and the loop below
++     sees it, or its thread_create() refuses. */
++  PL_LOCK(L_THREAD);
++  PL_UNLOCK(L_THREAD);
++
+   for(i=1; i<= GD->thread.highest_id; i++)
+   { PL_thread_info_t *info = GD->thread.threads[i];
+ 
+@@ -1182,6 +1193,24 @@ exitPrologThreads(void)
+ 
+ 	  break;
+ 	}
++	case PL_THREAD_CREATED:
++	{ int status;
++
++	  /* PL_thread_raise() needs the LD_MAGIC initialise_thread() sets,
++	     so a CREATED thread cannot be signalled.  start_thread() reads
++	     exit_requested under L_THREAD as it marks itself RUNNING, so it
++	     either reads it here and exits without calling its goal, which
++	     posts sem_canceled, or it is RUNNING and is signalled below. */
++	  PL_LOCK(L_THREAD);
++	  if ( (status=info->status) == PL_THREAD_CREATED )
++	  { info->thread_data->thread.exit_requested = EXIT_REQ_PROCESS;
++	    canceled++;
++	  }
++	  PL_UNLOCK(L_THREAD);
++	  if ( status != PL_THREAD_RUNNING )
++	    break;
++	}
++	/*FALLTHROUGH*/
+ 	case PL_THREAD_RUNNING:
+ 	{ if ( !info->is_engine )
+ 	  { info->thread_data->thread.exit_requested = EXIT_REQ_PROCESS;
+@@ -2186,7 +2215,10 @@ start_thread(void *closure)
+     CStackSize();
+     PL_LOCK(L_THREAD);
+     info->status = PL_THREAD_RUNNING;
++    bool halting = (LD->thread.exit_requested == EXIT_REQ_PROCESS);
+     PL_UNLOCK(L_THREAD);
++    if ( halting )		/* exitPrologThreads() found us CREATED and */
++      goto out;			/* awaits the sem_post freePrologThread() does */
+ 
+     thread_handle *th;
+     if ( info->symbol &&
+@@ -2243,6 +2275,7 @@ start_thread(void *closure)
+     }
+ 
+     set_thread_completion(info, rval, ex);
++  out:
+     pthread_cleanup_pop(1);
+   }
+ 
+@@ -2524,11 +2557,19 @@ pl_thread_create(term_t goal, term_t id, term_t options)
+   }
+   if ( rc == 0 )
+   { PL_LOCK(L_THREAD);
+-    info->status = PL_THREAD_CREATED;
+-    assert(info->goal);
+-    func = "pthread_create";
+-    rc = pthread_create(&info->tid, &pattr, start_thread, info);
++    if ( GD->halt.cleaning == CLN_NORMAL ) /* again, under L_THREAD: see */
++    { info->status = PL_THREAD_CREATED;    /* exitPrologThreads() */
++      assert(info->goal);
++      func = "pthread_create";
++      rc = pthread_create(&info->tid, &pattr, start_thread, info);
++    } else
++    { rc = -1;
++    }
+     PL_UNLOCK(L_THREAD);
++    if ( rc == -1 )
++      PL_error(NULL, 0, "threading disabled",
++	       ERR_PERMISSION,
++	       ATOM_create, ATOM_thread, goal);
+   }
+   pthread_attr_destroy(&pattr);
+   if ( rc != 0 )
