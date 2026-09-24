@@ -137,6 +137,14 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- `tools/battery.sh` reads every component's own `.gitmodules`, not only the
+  superproject's, so a component's own components get an identity, a
+  protected `.git` and `BATTERY_KEEP`'s restriction. The seat's twins
+  repository, `extensions/python/examples/language-feature-examples`, is
+  declared only in the seat's `.gitmodules`, so under `BATTERY_KEEP=''` a
+  battery still carried another session's five uncommitted twins while the seat
+  code they needed was put back to HEAD, and the twins lane failed on imports
+  the committed tree does not have.
 - The C seat names the engine's closed value sets through a generated
   `extensions/cmetta/vocabularies.h`: one enum tag per `(vocabulary ...)` row
   in `&metta` with members `MT_<VOCABULARY>_<WORD>`, a name table per enum,

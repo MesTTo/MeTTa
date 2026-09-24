@@ -326,12 +326,26 @@ battery_git_identity() {
 }
 
 # Read from .gitmodules rather than from `git submodule`, so it answers before
-# anything is initialised and needs no work tree of its own.
+# anything is initialised and needs no work tree of its own. Every component's
+# own .gitmodules is read too, parents before children, because a component
+# can mount one of its own: the seat's twins repository,
+# extensions/python/examples/language-feature-examples, is declared only in
+# the seat's .gitmodules, and reading the superproject's alone left it with no
+# identity, no protected .git and its uncommitted edits outside BATTERY_KEEP's
+# reach [the record, 2026-09-24: battery 121 carried another session's five
+# uncommitted twins under BATTERY_KEEP='']. Paths are relative to ROOT.
 battery_component_paths() {
-    [ -f "$ROOT/.gitmodules" ] || return 0
-    git -C "$ROOT" config --file "$ROOT/.gitmodules" \
+    battery_components_under "$ROOT" ""
+}
+
+battery_components_under() {
+    [ -f "$1/.gitmodules" ] || return 0
+    git -C "$1" config --file "$1/.gitmodules" \
         --get-regexp '^submodule\..*\.path$' 2>/dev/null |
-        while read -r _ component; do printf '%s\n' "$component"; done
+        while read -r _ component; do
+            printf '%s\n' "$2$component"
+            battery_components_under "$1/$component" "$2$component/"
+        done
 }
 
 # An install directory is EXCLUDED from the snapshot, which keeps a battery's

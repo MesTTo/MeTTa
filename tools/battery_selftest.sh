@@ -345,8 +345,15 @@ fi
 # source here and a component inside it each hold a kept change and an unkept
 # modification, deletion and untracked file; the battery must carry the kept
 # ones and hold HEAD at every other.
-(   mkdir -p "$FIXTURE/src/comp" && cd "$FIXTURE/src/comp" && git init -q . &&
-    printf 'comp one\n' > c.txt && printf 'comp two\n' > d.txt && git add c.txt d.txt &&
+# The component mounts a repository of its own, as the seat mounts its twins,
+# declared only in the component's .gitmodules.
+(   mkdir -p "$FIXTURE/src/comp/inner" && cd "$FIXTURE/src/comp/inner" && git init -q . &&
+    printf 'inner one\n' > e.txt && git add e.txt &&
+    git -c user.name=t -c user.email=t@t commit -qm inner &&
+    cd .. && git init -q . &&
+    printf 'comp one\n' > c.txt && printf 'comp two\n' > d.txt &&
+    printf '[submodule "inner"]\n\tpath = inner\n\turl = ./inner\n' > .gitmodules &&
+    git add c.txt d.txt .gitmodules inner &&
     git -c user.name=t -c user.email=t@t commit -qm comp ) > "$FIXTURE/out" 2>&1
 (   cd "$FIXTURE/src" &&
     printf '[submodule "comp"]\n\tpath = comp\n\turl = ./comp\n' > .gitmodules &&
@@ -359,6 +366,7 @@ printf 'stray\n' > "$FIXTURE/src/package/stray.txt"
 printf 'comp ours\n' > "$FIXTURE/src/comp/c.txt"
 printf 'comp theirs\n' > "$FIXTURE/src/comp/d.txt"
 printf 'comp stray\n' > "$FIXTURE/src/comp/new.txt"
+printf 'inner theirs\n' > "$FIXTURE/src/comp/inner/e.txt"
 holds() {
     if [ "$3" = absent ]; then
         [ ! -e "$TREE/$2" ] && echo "  ok   $1" ||
@@ -381,6 +389,7 @@ if restricted provision "$INDEX" > "$FIXTURE/out" 2>&1; then
     holds "a kept change inside a component is carried" comp/c.txt "comp ours"
     holds "an unkept change inside a component is put back" comp/d.txt "comp two"
     holds "an unkept untracked file inside a component is dropped" comp/new.txt absent
+    holds "an unkept change inside a component's own component is put back" comp/inner/e.txt "inner one"
     if restricted verify "$INDEX" > "$FIXTURE/out" 2>&1; then
         echo "  ok   a restricted battery verifies against HEAD plus its kept paths"
     else
@@ -411,6 +420,7 @@ if BATTERY_KEEP='' BATTERY_SOURCE="$FIXTURE/src" bounded sh "$BATTERY" provision
        > "$FIXTURE/out" 2>&1; then
     holds "an empty BATTERY_KEEP gives the committed tree" top.txt one
     holds "an empty BATTERY_KEEP gives a component's committed tree" comp/c.txt "comp one"
+    holds "an empty BATTERY_KEEP gives a nested component's committed tree" comp/inner/e.txt "inner one"
 else
     echo "  FAIL a provision with an empty BATTERY_KEEP refused:"; cat "$FIXTURE/out"
     failures=$((failures + 1))
