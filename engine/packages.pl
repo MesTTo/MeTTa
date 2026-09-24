@@ -12,7 +12,7 @@
 % packages:a_plain_import_is_read_from_its_manifest,
 % packages:a_computed_row_is_answered_only_in_a_home,
 % packages:a_home_loading_in_the_background_answers_once_loaded,
-% packages:a_subject_resolves_or_refuses_by_name; commit=WORKTREE].
+% packages:a_subject_resolves_or_refuses_by_name; commit=b5eb39acdd6ac5908900d75f7318acf2b90d2422].
 % Assumes: the engine sequences requires first and bounds normalisation.
 % [source: engine/metta/interop.pl:metta_perform_package_rows/2; commit=561cfeaa23b27fc84f86a9bcccf6ccf8b9d2e73f].
 % Guarantees: local boot validation precedes effects; receipts belong to the

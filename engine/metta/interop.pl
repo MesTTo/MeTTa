@@ -17,7 +17,7 @@
 %   retired from every space but that path's own library home, so an importer
 %   holds no `(package ...)` atom and no callable `(package ...)` equation
 %   [tested: packages:a_manifest_row_does_not_reach_the_importing_space;
-%   commit=WORKTREE].
+%   commit=d6e09995c40e18c295e626e7a7cb3486b9a3f4bd].
 %
 % Purpose: import Prolog predicates and MeTTa sources while preserving module and source-lifecycle boundaries
 % Guarantees: process Prolog registrations and declared arrows belong to their
