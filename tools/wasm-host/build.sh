@@ -147,8 +147,8 @@ fi
 mkdir -p "$OUT"
 DEST=$SRC sh "$ROOT/tools/pymetta-host/fetch-source.sh"
 
-# fetch-source.sh resets the tracked tree and leaves untracked files, so the
-# package is removed and staged whole each time rather than updated.
+# fetch-source.sh resets the tree it fetched, untracked files included, and the
+# package is removed and staged whole here each time rather than updated.
 PACKAGE=$SRC/packages/metta
 rm -rf "$PACKAGE"
 mkdir -p "$PACKAGE/lib"

@@ -114,6 +114,23 @@ git -C "$WORK/stack" apply "$WORK/reach.patch" 2>/dev/null || {
     printf '  a patch reaching into a submodule did not apply again after pristine_tree\n'
     failures=$((failures + 1)); }
 
+# A patch that CREATES a file applies again too: the reset puts tracked files
+# back and leaves an untracked one, which git apply then refuses as already
+# there, so the removal of untracked files is what makes the re-run work.
+cat > "$WORK/create.patch" <<'PATCH'
+--- /dev/null
++++ b/created/by-patch.txt
+@@ -0,0 +1 @@
++created
+PATCH
+git -C "$WORK/stack" apply "$WORK/create.patch"
+pristine_tree "$WORK/stack"
+[ ! -e "$WORK/stack/created/by-patch.txt" ] || {
+    printf '  pristine_tree left the file a patch created\n'; failures=$((failures + 1)); }
+git -C "$WORK/stack" apply "$WORK/create.patch" 2>/dev/null || {
+    printf '  a patch that creates a file did not apply again after pristine_tree\n'
+    failures=$((failures + 1)); }
+
 rm -rf "$WORK"
-printf 'fetch-selftest: %s defect(s) over 7 cases\n' "$failures"
+printf 'fetch-selftest: %s defect(s) over 8 cases\n' "$failures"
 [ "$failures" -eq 0 ]

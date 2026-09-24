@@ -169,6 +169,15 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- `tools/pymetta-host/fetch-source.sh` can be rerun on a clone where a patch
+  created a file. Its reset put every tracked file back and left untracked
+  ones, so a patch that adds a file, as
+  `swi-threadless-shared-table-private-per-engine.patch` adds
+  `tests/tabling/test_engine_shared.pl`, was refused as already there on the
+  second run. The reset now also removes untracked files that git does not
+  ignore, in the top tree and every submodule, so swipl-devel's ignored
+  `build` directories survive it.
+
 - `tools/run.sh` starts swipl under the stack ceiling the Python and C seats
   boot under, 8,000,000,000 bytes, where it passed its own `8g`. The ceiling
   and the variable that replaces it come from `tools/settings.sh`, which

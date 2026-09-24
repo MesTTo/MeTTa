@@ -34,8 +34,13 @@
 #     the submodule is refused rather than patched in the wrong place
 #     [tested: tools/pymetta-host/fetch_selftest.sh; commit=WORKTREE]
 #   - pristine_tree SRC puts every tracked file of SRC and of each of its
-#     submodules, at any depth, back at its checked-out commit, so a second
-#     application of the patches meets the tree the first did. Every submodule
+#     submodules, at any depth, back at its checked-out commit and removes
+#     every untracked file git does not ignore, so a second application of the
+#     patches meets the tree the first did. The removal is for a patch that
+#     creates a file, as swi-threadless-shared-table-private-per-engine.patch
+#     creates tests/tabling/test_engine_shared.pl: a reset leaves the file,
+#     and the next application refuses it as already there [tested:
+#     tools/pymetta-host/fetch_selftest.sh; commit=WORKTREE]. Every submodule
 #     rather than the ones a patch is filed under, because a patch at the top
 #     reaches into a submodule's files too: resetting the top tree and
 #     packages/swipy alone left swi-unicode-map-empty-result-aborts.patch
@@ -46,7 +51,9 @@
 
 pristine_tree() {
     git -C "$1" checkout --quiet --force -- . &&
-    git -C "$1" submodule --quiet foreach --recursive 'git checkout --quiet --force -- .'
+    git -C "$1" clean --quiet --force -d &&
+    git -C "$1" submodule --quiet foreach --recursive \
+        'git checkout --quiet --force -- . && git clean --quiet --force -d'
 }
 
 every_patch() {
