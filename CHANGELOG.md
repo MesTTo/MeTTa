@@ -137,6 +137,16 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- The twins, benchmarks and engine-bench lanes read their pins again. Every
+  commit since the pins had moved them unrecorded: 77 point twins,
+  source-load, register-op and the two save-load rows, and engine-bench's
+  boot and parse-prolog are re-pinned at HEAD's reading, each with the steps
+  from its old pin placed on the commits that made them. engine-bench also
+  refused every case, because b5eb39acd rewrote `tests/data/prelude-spec.metta`,
+  a workload whose digest it checks; the digest is re-stamped. The twins'
+  envelopes are left for one re-observation after the next reference-refresh
+  change lands.
+
 - An absent Prolog source named by a relative path is refused as the source
   not found, naming the path, on the WebAssembly host as natively.
   `metta_load_source/2` handed SWI's loader any text it could not resolve,
