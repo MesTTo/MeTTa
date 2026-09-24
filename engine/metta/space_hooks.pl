@@ -83,7 +83,7 @@
 %four is refused by name, a lowercase (drop) included
 %[tested: hooks:a_lowercase_verdict_is_refused_naming_the_verdicts,
 %hooks:a_capitalized_verdict_survives_a_library_defining_its_lowercase_head;
-%commit=WORKTREE].
+%commit=5bae989dfe8735448d575856e72f735bb2043e24].
 %
 %The verdict algebra is a PostgreSQL row-level BEFORE trigger's (return
 %NEW, return a modified row, raise, return NULL) and netfilter's
@@ -449,7 +449,7 @@ metta_hook_apply(Got, Space, Handler, Term, _, _) :-
 %hooks:a_lowercase_verdict_beside_a_library_head_is_refused_naming_the_verdicts,
 %hooks:a_post_add_lowercase_verdict_beside_a_library_head_undoes_the_write,
 %hooks:a_handler_whose_every_equation_is_extended_is_refused_naming_the_verdicts;
-%commit=WORKTREE]. It is one predicate rather than a helper beside it because
+%commit=5bae989dfe8735448d575856e72f735bb2043e24]. It is one predicate rather than a helper beside it because
 %every predicate the engine module adds costs each library registration that
 %walks the visible predicates [measured 2026-09-24: an unused predicate
 %appended to this file moves 01-library's example and twin +2 and

@@ -229,7 +229,7 @@ typing_rule_family(metatype).
 %library defines a function of that name, so accept, defer and (refuse Reason)
 %are outcomes no longer and add-typing-rule! refuses them by name
 %[tested: typing_rule_scope:a_lowercase_outcome_is_refused_naming_the_outcomes;
-%commit=WORKTREE].
+%commit=5bae989dfe8735448d575856e72f735bb2043e24].
 valid_typing_rule_outcome('Accept').
 valid_typing_rule_outcome('Defer').
 valid_typing_rule_outcome(['Refuse', Reason]) :- nonvar(Reason).
