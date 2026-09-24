@@ -23,7 +23,7 @@
 #     134 under tools/check.sh host-workarounds, both after SWI's report
 #     naming trie_gen_raw(), while one key inserted and deleted answers `[]`
 #     and two keys with one deleted answer `[a]`;
-#     commit=62bcb06e6b80fcca1f3d18b3bd8d17eee1dd7c3a]
+#     commit=62bcb06e607abcd689780d693c304953e807213e]
 #   [source: https://google.github.io/googletest/advanced.html#death-tests]
 # Owns resources: bounded.sh joins the child; the lane removes the scratch files.
 set -eu
