@@ -17,7 +17,8 @@
 #   `run` refuses to start unless `verify` passes, so no command reports a
 #   verdict about an unknown tree, copies again for as long as the source
 #   changes under the copy and refuses when two copies find the same drift
-#   [tested: tools/battery_selftest.sh; commit=WORKTREE], and runs its command
+#   [tested: tools/battery_selftest.sh;
+#   commit=a3068216b3a9db4fbe887a5054388ab9bfdee8c3], and runs its command
 #   with git's search for
 #   a repository stopped at the battery's parent, so no git command in it
 #   reaches the checkout the battery sits inside. `run` naming no index takes
