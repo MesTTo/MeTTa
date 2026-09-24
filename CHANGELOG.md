@@ -294,6 +294,14 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- `test_observation_restores_the_cost_of_ordinary_successful_execution`
+  takes its baseline after `lib_observe` and the libraries it requires have
+  loaded, so it measures the observation alone. Run first in its process it
+  read 3158 against 3154: loading lib_observe loads lib_import, whose
+  variable-head `seam:foreign_space/1` clause every later ask enters, 7
+  inferences an ask before and 9 after, and the evaluation asks twice. The
+  observation itself restores the cost exactly.
+
 - `test_aio_structural_surface_behaves` copies the space it built rather than
   the process's `&self`, whose rows depend on what earlier tests in the worker
   imported. After `test_statistics_lib.py` had loaded lib_statistics there,
