@@ -1633,6 +1633,10 @@ kind(metta_typed_dispatch_applies/2, host_service).
 %guarded loads in engine/metta.pl, and the forms that rest on an absent
 %capability refuse by name from the same table.
 kind(metta_platform/4, host_service).
+%Which capability a declared door rests on. A door of an absent capability
+%reduces, to the refusal, so a host saying what a program cannot run here
+%asks this beside the census rather than asking whether a call reduces.
+kind(metta_capability_door/2, host_service).
 
 %The post-commit stream's five services. Transaction owners open and finish
 %frames; a provider whose own durable channel reports a committed change may

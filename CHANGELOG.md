@@ -54,6 +54,21 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Changed
 
+- Every `py-*` door, `py-call`, `py-atom`, `py-dot`, `py-list`, `py-tuple`,
+  `py-dict`, `py-iter` and `py-iter-once`, refuses with the platform refusal
+  naming the python capability wherever no Python seat is loaded: under
+  tsmetta, and in an engine booted without the `extensions` token. Each call
+  used to answer itself unreduced, so
+  `(if-error (catch (py-call (math.floor 2.5))) no yes)` answered `yes`, and
+  lib_torch's `(torch-zeros 3)` answered `(py-call (torch.zeros 3))` on a
+  build with no Python. The standard library declares the capability and its
+  doors in one row, `(capability python (extension python) ... (py-call ...))`,
+  so the census lists python beside the platform's own capabilities and
+  `metta_capability_door/2` says which capability a door belongs to. Where the
+  seat is loaded, in the Python seat and in the C seat, which passes the
+  token, the doors are the seat's own and answer as before, and a seat that
+  loads without one of its declared doors is refused at boot.
+
 - `twin_coverage.py --repin` stamps each re-pin and divergence paragraph it
   writes with the time that twin's measurement started, as `date -Iseconds`
   prints it, and writes no commit pin:

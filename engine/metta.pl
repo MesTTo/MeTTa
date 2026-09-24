@@ -18,6 +18,15 @@
 %   - metta_operation_parameters/4 exposes the joint argument types and
 %     origins used by constructor compilation and runtime admission
 %     [tested: translator_constructors, engine_layering; commit=2398951d3272ad02b2c2d7b1e2b610c8e332c1f5].
+%   - a capability the standard library declares,
+%     (capability Name (extension Seat) Costs (Door ...)), is a census row
+%     present exactly when Seat loaded. Where it did not, each declared door
+%     is a builtin refusing with the platform refusal that names Name; where
+%     it did, the seat's own definitions answer, and boot refuses a seat that
+%     loaded without one of its doors
+%     [tested 2026-09-25T03:31:22+10:00:
+%     platform_capabilities_reduced:a_door_no_seat_implements_refuses_by_name,
+%     platform_capabilities:the_census_agrees_with_what_resolves].
 %   - broken extension entries raise through loading_loudly/1 with their
 %     diagnostic instead of allowing boot to report success
 %     [tested: tests/shell/test_packaged_cli.sh; commit=8ee8fcd4e43a932131909f7c58ad4fbe4dcf8d1d].
@@ -566,6 +575,7 @@
             import_prolog_function/2,
             import_prolog_functions/2,
             import_when/4,
+            metta_capability_door/2,
             metta_enlist_foreign/1,
             metta_ensure_source_observation/0,
             metta_extension_controls/2,
@@ -1285,6 +1295,13 @@ guard_arithmetic_goal_expansion_clause(Ref) :-
 %names are the PLATFORM's, and deliberately not the restricted-space grants of
 %engine/spaces/lifecycle.pl (file, process, network), which answer the other
 %question: whether a space is ALLOWED to do something this build can do.
+%
+%Dynamic because the standard library adds rows at boot, one per capability it
+%declares, whose requirement is a SEAT rather than a platform library
+%(install_declared_capability/1). An added row is a clause like these, so a
+%lookup by name stays deterministic under first-argument indexing, where a rule
+%clause beside the facts left a choice point behind every one.
+:- dynamic metta_platform_capability/3.
 metta_platform_capability(concurrency, library(thread),
                           '(hyperpose ...), and lib_thread\'s par-map, spawn, \c
                            await, channels, pools and blocking take-atom; \c
@@ -1417,6 +1434,15 @@ metta_platform_capability('fast-cache', [library(fastrw), library(memfile)],
                            and parses it, which is what a load without a \c
                            cache does anyway, so nothing else changes').
 
+%!  metta_capability_door(?Capability, ?Door) is nondet.
+%
+%   Door is a head the standard library declares as resting on Capability,
+%   whether or not this build implements it. Where the capability is absent
+%   the door reduces, to the refusal, so reducing no longer says a call runs:
+%   a host that says what a program cannot run here asks this with
+%   metta_platform/4.
+:- dynamic metta_capability_door/2.
+
 %What the platform is missing: one answer per absent capability, and none for
 %a present one, so a form resting on a present capability pays one failing
 %call on a dynamic predicate with no clause for that capability.
@@ -1485,7 +1511,8 @@ metta_platform_key(Capability, Key) :-
     atom_concat('$metta_platform ', Capability, Key).
 
 %A read decides by whether every library the row names resolves, the answer a
-%load of it would give.
+%load of it would give, and a declared row's extension(Seat) by whether that
+%seat loaded, the answer its doors give.
 metta_platform_decide(Capability, Key, Status) :-
     with_mutex('$metta_platform_census',
                (   get_flag(Key, Verdict),
@@ -1493,12 +1520,17 @@ metta_platform_decide(Capability, Key, Status) :-
                ->  Status = Verdict
                ;   metta_platform_capability(Capability, Requires, _),
                    (   forall(metta_platform_spec(Requires, Spec),
-                              exists_source(Spec))
+                              metta_platform_spec_present(Spec))
                    ->  Status = present
                    ;   Status = absent
                    ),
                    metta_platform_conclude(Capability, Status)
                )).
+
+metta_platform_spec_present(extension(Seat)) :- !,
+    metta_extension_loaded(Seat).
+metta_platform_spec_present(Spec) :-
+    exists_source(Spec).
 
 %Held under the census mutex, and the only place a verdict changes. A present
 %verdict retires the reading clause after the flag says present, and an
@@ -1666,8 +1698,20 @@ prolog:error_message(metta_platform_vanished(Capability, Requires)) -->
        process; restart it.'-[Capability, Requires, Requires] ].
 prolog:error_message(metta_platform_required(Form, Capability, Requires,
                                              Costs)) -->
-    [ '~w is refused: this build does not have the ~w capability, because ~w \c
-       is absent. What that costs: ~w.'-[Form, Capability, Requires, Costs] ].
+    { metta_platform_absence(Requires, Absence) },
+    [ '~w is refused: this build does not have the ~w capability, because ~w. \c
+       What that costs: ~w.'-[Form, Capability, Absence, Costs] ].
+
+%Why the requirement is not met, in the words that clear it. A seat is
+%explained by the seat loader's own diagnosis, which already says whether the
+%seat's needs failed, this boot read no seat, or no such seat exists, and ends
+%in the remedy.
+metta_platform_absence(extension(Seat), Text) :- !,
+    metta_extension_cause(Seat, Cause),
+    metta_extension_cause_text([Seat], Seat, Cause, Why),
+    format(atom(Text), 'extension ~w is not loaded: ~w', [Seat, Why]).
+metta_platform_absence(Requires, Text) :-
+    format(atom(Text), '~w is absent', [Requires]).
 
 %library(thread), for concurrent_and/3 under (hyperpose ...).
 :- metta_platform_load(concurrency).
@@ -2755,6 +2799,10 @@ load_builtin_type_surface :-
     %program's do.
     forall(member(parsed(expression, _, [cost, Witness|Fields]), Forms),
            ensure_shipped_cost_row([cost, Witness|Fields], _)),
+    %And its (capability ...) rows, after the (: ...) rows because a door's
+    %arities are its types'.
+    forall(member(parsed(expression, _, [capability|Row]), Forms),
+           install_declared_capability(Row)),
     %Derived from the surface just loaded rather than by a separate
     %initialization, because two initialization/1 goals do not reliably order
     %against each other and an empty index is a silent loss: a constructor like
@@ -2785,6 +2833,109 @@ ensure_shipped_cost_row(Row, _) :-
     throw(error(domain_error(cost_row, Row),
                 context(ensure_shipped_cost_row/2,
                         'a cost row names a call, as in (cost (nrev $n) quadratic)'))).
+
+%A capability the standard library declares: a set of DOORS, heads the
+%language has whose implementation a seat installs, with the seat that
+%installs them and what a build without it loses:
+%
+%   (capability Name (extension Seat) "what its absence costs" (Door ...))
+%
+%It is a census row like the platform's own, present exactly when Seat
+%loaded. Where Seat did not load, every door nothing else implements is
+%defined here to refuse by name, so a call never answers itself: before
+%this, a door with no definition was an ordinary expression, and on the
+%WebAssembly host (py-call (torch.zeros 1)) answered itself, (if-error (catch
+%(py-call (torch.zeros 1))) no yes) answered yes, and lib_torch's
+%(torch-zeros 3) answered (py-call (torch.zeros 3)), so a program concluded
+%a library was available on a build with no Python [measured 2026-09-25T02:01:57+10:00:
+%one m.run ask per form through the Node seat on WebAssembly build 9].
+%
+%The standard library is the home because the doors are the LANGUAGE's, the
+%same file declares their types, and it is there on every host, where a seat's
+%own declarations are not: the Node runtime ships no Python seat at all. What
+%a seat installs stays the seat's, through seam:extension_builtin/2, and a
+%seat that loaded without one of its declared doors is half present, which
+%raises here rather than leaving that door to answer itself.
+%
+%A refusing door is registered the way a seat's is, in user, the seat tier,
+%and at the oracleIO floor metta_builtin_effect/2 gives a builtin with no
+%reviewed class, so no specializer folds the refusal into a load: importing a
+%library written over the doors succeeds and only a call refuses. The seats
+%load before the standard library's surface, so this is decided once per boot
+%with every seat already known.
+install_declared_capability([Name, [extension, Seat], Costs, Doors]) :-
+    atom(Name), atom(Seat), is_list(Doors), text_to_string(Costs, _),
+    !,
+    atom_string(CostsAtom, Costs),
+    (   metta_platform_capability(Name, _, _)
+    ->  true
+    ;   assertz(metta_platform_capability(Name, extension(Seat), CostsAtom))
+    ),
+    forall(member(Door, Doors),
+           (   metta_capability_door(Name, Door)
+           ->  true
+           ;   assertz(metta_capability_door(Name, Door))
+           )),
+    metta_platform_reading(Name),
+    (   metta_extension_loaded(Seat)
+    ->  forall(member(Door, Doors), require_seat_door(Name, Seat, Door))
+    ;   forall(member(Door, Doors), install_refusing_door(Name, Door))
+    ).
+install_declared_capability(Row) :-
+    throw(error(domain_error(capability_row, [capability|Row]),
+                context(install_declared_capability/1,
+                        'a capability row is (capability Name (extension \c
+                         Seat) "what its absence costs" (Door ...))'))).
+
+require_seat_door(Name, Seat, Door) :-
+    (   declared_door_implemented(Door)
+    ->  true
+    ;   throw(error(metta_capability_door_missing(Name, Seat, Door),
+                    context(install_declared_capability/1, _)))
+    ).
+
+declared_door_implemented(Door) :-
+    (   seam:extension_builtin(Door, _)
+    ->  true
+    ;   builtin_implementation(Door/_, _)
+    ).
+
+%One clause per arity the door's types give, each the census's own refusal,
+%so a seat's absence reads the same whichever door it is met through.
+install_refusing_door(_, Door) :-
+    declared_door_implemented(Door),
+    !.
+install_refusing_door(Name, Door) :-
+    findall(PrologArity,
+            ( seam:builtin_type_declaration(Door, ['->'|Parts]),
+              length(Parts, PrologArity) ),
+            Found),
+    sort(Found, Arities),
+    (   Arities == []
+    ->  throw(error(metta_capability_door_untyped(Name, Door),
+                    context(install_declared_capability/1, _)))
+    ;   true
+    ),
+    format(atom(Form), '(~w ...)', [Door]),
+    metta_engine_module(Engine),
+    forall(member(Arity, Arities),
+           ( functor(Head, Door, Arity),
+             ( clause(user:Head, _) -> true
+             ; assertz(user:(Head :- Engine:metta_require_platform(Form, Name)))
+             ) )),
+    register_builtin_fun(Door),
+    forall(member(Arity, Arities),
+           ( Declared is Arity - 1,
+             register_builtin_implementation(Door/Declared, prolog(user)) )).
+
+:- multifile prolog:error_message//1.
+prolog:error_message(metta_capability_door_missing(Name, Seat, Door)) -->
+    [ 'extension ~w loaded without ~w, a door of the ~w capability the \c
+       standard library declares, so the capability is half present'-
+      [Seat, Door, Name] ].
+prolog:error_message(metta_capability_door_untyped(Name, Door)) -->
+    [ '~w is a door of the ~w capability and the standard library gives it \c
+       no type, so its arity is unknown'-[Door, Name] ].
 
 %%%%%%%%%% The engine's prelude %%%%%%%%%%
 %

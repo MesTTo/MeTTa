@@ -14,6 +14,9 @@
 %   - the census is published as a host_service and exported, so a binding
 %     reads it through the declared surface
 %     [tested: the_census_is_a_published_host_service]
+%   - a seat that loaded without one of the doors the standard library
+%     declares for its capability is refused naming the door
+%     [tested 2026-09-25T03:31:22+10:00: a_seat_loaded_without_a_declared_door_is_refused]
 %   - each guard point the newer rows added refuses by name with its
 %     capability planted absent, and the guards that sit inside a branch leave
 %     the other branch alone [tested:
@@ -29,10 +32,11 @@
 %   - on a build without the five WebAssembly libraries the engine loads
 %     without writing one ERROR line, still evaluates, and every form that
 %     rests on an absent capability refuses by name
-%     [tested 2026-09-25T01:29:03+10:00: the_engine_boots_silently_without_the_five_libraries,
+%     [tested 2026-09-25T03:31:22+10:00: the_engine_boots_silently_without_the_five_libraries,
 %     a_reduced_build_still_evaluates,
 %     a_bounded_form_refuses_by_name_when_deadlines_are_absent,
 %     a_pragma_bound_refuses_by_name_when_deadlines_are_absent,
+%     a_door_no_seat_implements_refuses_by_name,
 %     hyperpose_refuses_by_name_when_concurrency_is_absent,
 %     a_library_that_declares_an_absent_capability_never_loads,
 %     git_import_refuses_by_name_when_subprocess_is_absent,
@@ -93,6 +97,23 @@ unplant_absent_name(Name, Capability) :-
     metta_engine_module(Engine),
     retractall(Engine:metta_platform_absent_name(Name, Capability)).
 
+%A seat marked loaded in the engine's module, as its control file marks it,
+%and everything a declared capability row installs taken out again: the row,
+%its doors, its reading clause and any verdict a read recorded.
+plant_loaded_seat(Seat) :-
+    metta_engine_module(Engine),
+    assertz(Engine:metta_extension_loaded(Seat)).
+
+unplant_declared_capability(Capability, Seat) :-
+    metta_engine_module(Engine),
+    retractall(Engine:metta_extension_loaded(Seat)),
+    retractall(Engine:metta_platform_capability(Capability, _, _)),
+    retractall(Engine:metta_capability_door(Capability, _)),
+    ignore(retract(Engine:(metta_platform_absent(Capability) :-
+                               metta_platform_status(Capability, absent)))),
+    atom_concat('$metta_platform ', Capability, Key),
+    set_flag(Key, 0).
+
 :- begin_tests(platform_capabilities).
 
 test(the_census_agrees_with_what_resolves) :-
@@ -102,15 +123,16 @@ test(the_census_agrees_with_what_resolves) :-
     assertion(Rows \== []),
     forall(metta_platform(Capability, Status, Requires, Costs),
            ( assertion(( forall(census_spec(Requires, Spec),
-                                exists_source(Spec))
+                                census_spec_present(Spec))
                        -> Status == present
                        ;  Status == absent )),
              assertion(( atom(Costs), Costs \== '' )) )),
     % The nine the engine's own loads rest on, named so a row that
-    % disappears is a decision rather than a silence.
+    % disappears is a decision rather than a silence, and the one the
+    % standard library declares for the py-* doors.
     forall(member(Named, [concurrency, deadlines, subprocess, regex,
                           'compressed-sources', json, crypto, redis,
-                          'fast-cache']),
+                          'fast-cache', python]),
            assertion(memberchk(Named-_, Rows))).
 
 % A row names one library or a list of them; both have to resolve for the
@@ -120,6 +142,12 @@ census_spec(Requires, Spec) :-
     ->  member(Spec, Requires)
     ;   Spec = Requires
     ).
+
+% A declared row names a seat instead, present when that seat loaded.
+census_spec_present(extension(Seat)) :- !,
+    metta_extension_loaded(Seat).
+census_spec_present(Spec) :-
+    exists_source(Spec).
 
 % Nothing was lost on THIS platform, so the name index the import door reads
 % is empty here. A row in it on a full build would mean a census load asked
@@ -159,6 +187,22 @@ test(a_planted_absence_names_its_cost_in_the_message,
     forall(member(Fragment, ["git-import!", "subprocess", "library(process)",
                              "starts a program"]),
            assertion(sub_string(Text, _, _, _, Fragment))).
+
+% A seat that loaded without one of the doors the standard library declares
+% for it is half present, and boot refuses naming the door rather than
+% leaving that door to answer itself.
+test(a_seat_loaded_without_a_declared_door_is_refused,
+     [ setup(plant_loaded_seat(plunit_probe_seat)),
+       cleanup(unplant_declared_capability(plunit_probe_capability,
+                                           plunit_probe_seat)),
+       throws(error(metta_capability_door_missing(plunit_probe_capability,
+                                                  plunit_probe_seat,
+                                                  plunit_probe_door), _)) ]) :-
+    metta_engine_module(Engine),
+    Engine:install_declared_capability([plunit_probe_capability,
+                                        [extension, plunit_probe_seat],
+                                        "a probe's absence",
+                                        [plunit_probe_door]]).
 
 test(metta_requires_refuses_a_capability_the_engine_does_not_declare,
      [ throws(error(existence_error(metta_platform_capability,
@@ -385,6 +429,14 @@ test(a_pragma_bound_refuses_by_name_when_deadlines_are_absent,
     % refusing with the pragma's message
     reduced_line("answer after-pragma ", Line),
     assertion(sub_string(Line, _, _, _, "3")).
+
+test(a_door_no_seat_implements_refuses_by_name,
+     [condition(reduced_platform_buildable)]) :-
+    refusal_names("py-call", ["(py-call ...)", "python",
+                              "extension python is not loaded"]),
+    % a catch sees the refusal as an error, where an unreduced call was a value
+    reduced_line("answer py-catch ", Line),
+    assertion(sub_string(Line, _, _, _, "'$metta_answer'(no,")).
 
 test(hyperpose_refuses_by_name_when_concurrency_is_absent,
      [condition(reduced_platform_buildable)]) :-

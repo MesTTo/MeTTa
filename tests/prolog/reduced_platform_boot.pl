@@ -172,7 +172,13 @@ reduced_platform_report :-
     %had to run last.
     refusal(pragma, "!(pragma! max-time 5)"),
     refusal('with-pragma', "!(with-pragma! ((max-time 5)) (+ 1 2))"),
-    answer('after-pragma', "!(+ 1 2)").
+    answer('after-pragma', "!(+ 1 2)"),
+    %A door the standard library declares and no seat implements: this child
+    %reads no seat, so the py-* doors refuse naming the python capability
+    %rather than answering themselves, and a program catching the refusal
+    %sees an error.
+    capability_probe(python, 'py-call', "!(py-call (math.floor 2.5))"),
+    answer('py-catch', "!(if-error (catch (py-call (math.floor 2.5))) no yes)").
 
 %A fixture the parent wrote beside the farms, as an absolute path.
 child_fixture(Name, Path) :-

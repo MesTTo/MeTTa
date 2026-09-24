@@ -9,7 +9,7 @@ beside its definitions.
 
 | library | names | documented |
 |---|---|---|
-| lib_builtin_types | 195 | 0 |
+| lib_builtin_types | 196 | 0 |
 | lib_cli | 4 | 4 |
 | lib_combinatorics | 14 | 14 |
 | lib_compression | 8 | 8 |
