@@ -17,9 +17,9 @@ Assumes: run from the workspace root, which the paths are relative to, with
 Guarantees:
   - a typo in a file no .gitattributes marks fails the run, tracked or not,
     and a typo in a vendored or generated one does not
-    [tested: tests/checks/check_codespell_selftest.py; commit=WORKTREE]
+    [tested: tests/checks/check_codespell_selftest.py; commit=34cf7afa2d9e225c90db50cc34efd852e9f79394]
   - outside a git repository nothing is marked and every path is read
-    [tested: tests/checks/check_codespell_selftest.py; commit=WORKTREE]
+    [tested: tests/checks/check_codespell_selftest.py; commit=34cf7afa2d9e225c90db50cc34efd852e9f79394]
 Fails when: git itself is missing, which it reports rather than reading less.
 Open Obligations:
   To Do: None

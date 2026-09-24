@@ -11,9 +11,9 @@ Assumes: git and codespell_lib importable by this interpreter; a writable ai-tmp
 Guarantees:
   - a typo in a tracked file and in an untracked one, neither marked, is
     reported, and a typo in a linguist-vendored file and in a
-    linguist-generated one is not [tested: this file; commit=WORKTREE]
+    linguist-generated one is not [tested: this file; commit=34cf7afa2d9e225c90db50cc34efd852e9f79394]
   - the same fixture without git reports all four
-    [tested: this file; commit=WORKTREE]
+    [tested: this file; commit=34cf7afa2d9e225c90db50cc34efd852e9f79394]
 Fails when: run against a tree it did not write. It asserts on its own fixture.
 Open Obligations:
   To Do: None
