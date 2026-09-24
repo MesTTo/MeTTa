@@ -24,15 +24,15 @@
 # Guarantees:
 #   - every_patch prints each *.patch under PATCHES, at any depth, one per
 #     line in byte order, so every consumer walks one list in one order
-#     [tested: tools/pymetta-host/fetch_selftest.sh; commit=WORKTREE]
+#     [tested: tools/pymetta-host/fetch_selftest.sh; commit=c4054cea8e7156ba91ed70eacc67bf9750e1b6c4]
 #   - patch_tree PATCH prints the patch's tree relative to swipl-devel: an
 #     empty line for a patch at the top, packages/swipy for one under
 #     packages/swipy/ [tested: tools/pymetta-host/fetch_selftest.sh;
-#     commit=WORKTREE]
+#     commit=c4054cea8e7156ba91ed70eacc67bf9750e1b6c4]
 #   - patch_root SRC PATCH prints SRC joined with that tree, and returns 1
 #     printing nothing when SRC has no such directory, so a tree that lacks
 #     the submodule is refused rather than patched in the wrong place
-#     [tested: tools/pymetta-host/fetch_selftest.sh; commit=WORKTREE]
+#     [tested: tools/pymetta-host/fetch_selftest.sh; commit=f2822e2aec654cdb9cdb3ea43899322f9a6770b5]
 #   - pristine_tree SRC puts every tracked file of SRC and of each of its
 #     submodules, at any depth, back at its checked-out commit and removes
 #     every untracked file git does not ignore, so a second application of the
@@ -40,7 +40,7 @@
 #     creates a file, as swi-threadless-shared-table-private-per-engine.patch
 #     creates tests/tabling/test_engine_shared.pl: a reset leaves the file,
 #     and the next application refuses it as already there [tested:
-#     tools/pymetta-host/fetch_selftest.sh; commit=WORKTREE]. Every submodule
+#     tools/pymetta-host/fetch_selftest.sh; commit=5a05a59e92852a6e805b121153b65daff7378159]. Every submodule
 #     rather than the ones a patch is filed under, because a patch at the top
 #     reaches into a submodule's files too: resetting the top tree and
 #     packages/swipy alone left swi-unicode-map-empty-result-aborts.patch
