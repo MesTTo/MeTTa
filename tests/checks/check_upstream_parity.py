@@ -530,7 +530,7 @@ def null_shape(example: pathlib.Path) -> tuple[int, int]:
 RUNS = 3
 EXTRA_RUNS = 4
 #: Processes run and thrown away before the first counted one. Three corpus
-#: rows write a cache on their first touch in a tree and read it afterwards --
+#: rows wrote a cache on their first touch in a tree and read it afterwards --
 #: the git-import fixture cache, a Python `__pycache__`, an import receipt --
 #: so run one disagreed with runs two and three and the row came back
 #: `nondeterministic` on a fresh checkout while reading one inference count six
@@ -540,6 +540,11 @@ EXTRA_RUNS = 4
 #: One discarded run is the ordinary answer to that, and it is what the
 #: baseline's own fixture line has always assumed by saying the tree was
 #: warmed.
+#: The git-import fixture has not been one of them since it made and cleared
+#: its directories in child processes: its example reads 34,218 whether an
+#: earlier run left them or not [measured 2026-09-25T05:07:21+10:00: one fresh
+#: process a reading; command=python extensions/python/tools/twin_coverage.py
+#: --measure --rounds 1]. The other two still need the discarded run.
 WARMUP_RUNS = 1
 #: How far two processes running the same program may sit apart and still be
 #: called the same measurement. 0.1% clears the 0.025% that 120 ordinary

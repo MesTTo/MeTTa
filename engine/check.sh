@@ -132,6 +132,12 @@ run GATE spec-differential-selftest "$PY" "$HERE/tests/checks/check_specializati
 # realised: a listed lane cannot rot, an unlisted suite can, and does.
 run GATE git-dependency sh -c "cd '$HERE' && sh tests/shell/test_git_dependency.sh"
 run GATE git-import     sh -c "cd '$HERE' && sh tests/shell/test_git_import.sh"
+# The corpus example that builds its own git remote, run three at a time. One
+# gate runs it in three lanes at once over one ./repos: the shell and examples
+# lanes each run the whole corpus, and the twins lane runs its Python twin. Its
+# fixture used to delete a repository another run was still building or
+# importing, and those runs failed in git.
+run GATE git-import-example sh -c "cd '$HERE' && sh tests/shell/test_git_import_example_serializes.sh"
 run GATE loader-threads sh -c "cd '$HERE' && sh tests/shell/test_loader_concurrency.sh"
 
 # The engine measured with no host in the process. Every other benchmark in

@@ -303,6 +303,15 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- The git-import example's fixture takes a lock beside the repository it
+  builds and holds it until the process exits, and makes and clears its
+  directories in child processes. The shell, examples and twins lanes run the
+  example at once over one `./repos`, and a run could delete the repository
+  another run was still building or importing: 5 of 6 runs failed when three
+  ran together. Its cost no longer depends on what an earlier run left there,
+  which had added 1,484 inferences, so its twin pins one count rather than an
+  envelope. The `git-import-example` lane runs it three at a time.
+
 - Tracked files cite no machine-local absolute path apart from four comment
   lines of `engine/bench-baseline.json` that their owners restamp from their
   own runs. The Python twins' re-pin comments, two lines of the Node seat,
