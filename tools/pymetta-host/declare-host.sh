@@ -56,11 +56,14 @@
 #     commit=WORKTREE]
 #   - `require` refuses two patches with one file name in different trees,
 #     since the name is the key a declaration and a requirement share
-#   - `declare` lists a patch exactly when `git apply --reverse --check`
-#     succeeds for it in the tree patch-root.sh routes it to, so a patch the
-#     tree lacks is absent from the declaration and the requirement holding
-#     it names it
-#     [tested: tests/checks/check_host_declaration.py; commit=WORKTREE]
+#   - `declare` lists a patch exactly when it comes off the stack of patches
+#     to the tree patch-root.sh routes it to: every file those patches name
+#     is copied, and the patches are reverse-applied to the copy last first,
+#     so each is checked against the tree as it stood right after it was
+#     applied and a patch another one builds on still reads as carried. A
+#     patch the tree lacks is absent from the declaration and the
+#     requirement holding it names it
+#     [tested: tests/checks/check_host_declaration_selftest.py; commit=WORKTREE]
 #   - `declare` records the one line the identity command prints, run with
 #     SWI_HOME_DIR unset so the answer is that build's own: HOME/bin/<arch>/swipl
 #     reporting its compiled_at, or the command after --built-by. It refuses,
@@ -162,15 +165,46 @@ HEADER
             echo "% here and every patch it requires is listed with the same sha256."
             printf "host_build('%s').\n" "$BUILT"
         } > "$OUT.$$"
+        # Whether the tree carries a patch is read off its stack the way
+        # fetch-source.sh put the stack on, as quilt pops a series: every file
+        # a tree's patches name is copied, and the patches come off the copy
+        # last first, so each is reverse-applied to the tree as it stood right
+        # after it was applied. Asked of each patch alone, `git apply --reverse
+        # --check` refuses one whose hunk context a later patch rewrites,
+        # though it is applied [measured 2026-09-24: /home/user/Dev/swipl-devel
+        # read 25 of 26, missing swi-concurrent-import-removal-resets-provider,
+        # beneath swi-unlinked-definition-uninitialised].
+        mkdir -p "$ROOT/ai-tmp"
+        STACK=$(mktemp -d "$ROOT/ai-tmp/declare-host.XXXXXX")
+        trap 'rm -rf "$STACK"' EXIT
+        off=' '
+        for patch in $(every_patch | LC_ALL=C sort -r); do
+            tree=$(patch_tree "$patch")
+            copy=$STACK/tree$(printf '%s' "$tree" | tr '/' '_')
+            root=$(patch_root "$SRC" "$patch") || continue
+            if [ ! -d "$copy" ]; then
+                git init --quiet "$copy"
+                for named in $(every_patch); do
+                    [ "$(patch_tree "$named")" = "$tree" ] || continue
+                    for path in $(sed -n 's|^--- a/||p; s|^+++ b/||p' "$named"); do
+                        [ -f "$root/$path" ] || continue
+                        mkdir -p "$copy/$(dirname "$path")"
+                        cp "$root/$path" "$copy/$path"
+                    done
+                done
+            fi
+            if git -C "$copy" apply --reverse "$patch" 2>/dev/null; then
+                off="$off$(basename "$patch") "
+            fi
+        done
         carried=0; missing=''
         for patch in $(every_patch); do
-            if root=$(patch_root "$SRC" "$patch") &&
-               git -c safe.directory='*' -C "$root" apply --reverse --check "$patch" 2>/dev/null; then
-                fact "$patch" >> "$OUT.$$"
-                carried=$((carried + 1))
-            else
-                missing="$missing $(basename "$patch" .patch)"
-            fi
+            case $off in
+                *" $(basename "$patch") "*)
+                    fact "$patch" >> "$OUT.$$"
+                    carried=$((carried + 1)) ;;
+                *) missing="$missing $(basename "$patch" .patch)" ;;
+            esac
         done
         mv "$OUT.$$" "$OUT"
         total=$(every_patch | wc -l)

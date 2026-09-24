@@ -108,6 +108,12 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- `tools/pymetta-host/declare-host.sh declare` reads a host's patches off the
+  stack the way `fetch-source.sh` applied them: it copies every file a tree's
+  patches name and reverse-applies the patches to the copy, last first.
+  Checked one at a time, a patch whose hunk context a later patch rewrites
+  read as missing although it was applied.
+
 - `tools/pymetta-host/fetch-source.sh` can be rerun on an existing clone. It
   reset the top tree and `packages/swipy` before applying the patches, while
   the uuid and unicode patches edit `packages/clib` and `packages/utf8proc`

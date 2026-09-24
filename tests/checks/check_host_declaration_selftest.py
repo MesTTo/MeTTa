@@ -14,7 +14,9 @@ Guarantees:
     home's launcher and lists each patch with the sha256 of its file, a patch
     under packages/swipy/ applied in that nested repository included; with no
     launcher it refuses and writes nothing; over a tree lacking one patch it
-    exits 1 and omits exactly that one; `require TREE` lists exactly the
+    exits 1 and omits exactly that one; a patch whose hunk context a later
+    patch rewrites is declared, since the stack is read last first;
+    `require TREE` lists exactly the
     patches under TREE in name order under that tree's module header, and
     refuses two patches sharing a name [tested: this file; commit=WORKTREE]
   - `declare --built-by COMMAND...` binds a home with no launcher, the shape
@@ -47,6 +49,11 @@ ROOT = Path(__file__).resolve().parents[2]
 PATCH_A = "--- a/one.txt\n+++ b/one.txt\n@@ -1 +1 @@\n-one\n+one patched\n"
 PATCH_B = "--- a/two.txt\n+++ b/two.txt\n@@ -1 +1 @@\n-two\n+two patched\n"
 PATCH_C = "--- a/three.txt\n+++ b/three.txt\n@@ -1 +1 @@\n-three\n+three patched\n"
+# A stacked pair: the second patch changes the line the first holds as its
+# trailing context, so the first can no longer be reverse-applied on its own.
+STACK_BASE = "--- a/stack.txt\n+++ b/stack.txt\n@@ -1,3 +1,3 @@\n alpha\n-beta\n+beta patched\n gamma\n"
+STACK_ON = ("--- a/stack.txt\n+++ b/stack.txt\n@@ -1,3 +1,3 @@\n alpha\n beta patched\n"
+            "-gamma\n+gamma patched\n")
 NESTED = "packages/swipy"
 
 
@@ -206,6 +213,27 @@ def case_declare_fails_closed(work: Path) -> list[str]:
     return out
 
 
+def case_declare_reads_a_stacked_patch(work: Path) -> list[str]:
+    """A patch whose hunk context a later patch rewrites is declared, as it is applied."""
+    layout = plant(work)
+    patches = layout / "tests/checks/host_workarounds"
+    (patches / "c-base.patch").write_text(STACK_BASE)
+    (patches / "d-on-base.patch").write_text(STACK_ON)
+    tree = source(work, "a.patch", "b.patch")
+    (tree / "stack.txt").write_text("alpha\nbeta\ngamma\n")
+    for name in ("c-base.patch", "d-on-base.patch"):
+        run("git", "apply", str(patches / name), cwd=tree)
+    home = planted_home(work)
+    ran = run("sh", "tools/pymetta-host/declare-host.sh", "declare", str(tree), str(home), cwd=layout)
+    text = (home / "metta-host.pl").read_text() if (home / "metta-host.pl").exists() else ""
+    out = []
+    if ran.returncode != 0:
+        out.append(f"a tree carrying a stacked pair exited {ran.returncode}: {ran.stderr.strip()}")
+    out.extend(f"the declaration lacks {fact(layout, name)}"
+               for name in ("c-base.patch", "d-on-base.patch") if fact(layout, name) not in text)
+    return out
+
+
 def case_require_lists_every_patch(work: Path) -> list[str]:
     """The require mode lists the top-level patches in name order under the engine's module."""
     layout = plant(work)
@@ -308,6 +336,7 @@ CASES: list[Callable[[Path], list[str]]] = [
     case_declare_built_by_names_the_build,
     case_declare_built_by_fails_closed,
     case_declare_fails_closed,
+    case_declare_reads_a_stacked_patch,
     case_declare_refuses_a_home_without_a_launcher,
     case_require_lists_every_patch,
     case_declare_applies_a_nested_patch_in_its_own_tree,
