@@ -53,7 +53,7 @@ Guarantees:
   - the upstream checkout is check_upstream_parity.py's UPSTREAM, so both
     lanes read the one METTA_UPSTREAM names or, when it is unset, the one found
     beside the tree or beside the repository's main checkout [tested:
-    check_upstream_parity_selftest.upstream_selection_failures; commit=WORKTREE]
+    check_upstream_parity_selftest.upstream_selection_failures; commit=2b1d45b347027f0290a86315ccc770f3dac08851]
   - the kernel is installed at a pinned commit and started, rather than read
     [tested: tests/checks/check_jupyter_kernel.py; commit=7ba114f280ec3b132658cacb562064d0bac23f41]
   - the fork's launcher runs an upstream `src/main.pl` tree, which is the

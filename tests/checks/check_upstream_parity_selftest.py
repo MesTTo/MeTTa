@@ -39,7 +39,7 @@ Guarantees:
   - restoring the borrowed artifacts never changes the bytes a process that
     already holds one reads, because each is staged beside its path and
     renamed over it [tested: check_upstream_parity_selftest.held_reader_failures;
-    commit=WORKTREE]
+    commit=53d961f2e0f7788df2892dc173f90a09023a5a03]
   - every active waiver remains visible while its separate measurement verdict
     is preserved [tested: parity-perf-selftest; commit=8ca8a387fc61d0918484b19a1a3baf85b6523043]
   - null extrema bound the compared difference, an overrun beyond the whole
@@ -49,12 +49,12 @@ Guarantees:
   - both upstream lanes prefer METTA_UPSTREAM to any sibling checkout, including
     a configured path that is absent, and read the same derived checkout when it
     is unset [tested: check_upstream_parity_selftest.upstream_selection_failures;
-    commit=WORKTREE]
+    commit=2b1d45b347027f0290a86315ccc770f3dac08851]
   - a worktree nested inside the main checkout, the shape of every battery,
     finds the upstream beside the main checkout, a checkout beside the tree
     itself wins over it, and METTA_UPSTREAM wins over both, each on a planted
     repository [tested: check_upstream_parity_selftest.upstream_derivation_failures;
-    commit=WORKTREE]
+    commit=2b1d45b347027f0290a86315ccc770f3dac08851]
   - a planted engine whose fixed cost exceeds its program run is reported as
     ``negative-net`` by ``measure`` and turns ``verdicts`` red, while the rule
     this file replaced records the same numbers and stays green
@@ -81,7 +81,7 @@ Guarantees:
     into a SKIP, exit 125, which the gate names under MEASURED NOTHING rather
     than reporting as a pass, and has no effect where ``CI=true`` [tested:
     check_upstream_parity_selftest.upstream_prerequisite_failures;
-    commit=WORKTREE]
+    commit=2b1d45b347027f0290a86315ccc770f3dac08851]
   - the sibling checkout is AT the pin, and a kernel or container that denies
     the counter is named with the two knobs that decide it [tested: this file
     is its own gate; commit=fc990fa3042ee05d931d3928694e89021be32855]
@@ -1297,14 +1297,14 @@ def restore_by_rename(path: Path, metadata: os.stat_result, data: bytes) -> None
     boots of 150 finished and printed their marker [measured 2026-09-23: six
     looping qlf_load_engine boots in one battery beside a loop rewriting every
     engine and lib .qlf, once with write_bytes and once with this function;
-    commit=WORKTREE]. This fixture is the only in-place writer of that set, and
+    commit=53d961f2e0f7788df2892dc173f90a09023a5a03]. This fixture is the only in-place writer of that set, and
     the gate carried the same abort twice while it ran: a qlf_compile_argument
     child in loadPredicate's fatalError and the Python process running
     EXTENDING.md fence 27 in outOfCore [measured 2026-09-23: coredumpctl info
-    102659 and 101786; commit=WORKTREE]. A sibling temporary renamed over the
+    102659 and 101786; commit=53d961f2e0f7788df2892dc173f90a09023a5a03]. A sibling temporary renamed over the
     path is what SWI's own '$install_staged_file' does, so a reader sees the
     old file or the restored one and never a partial [tested:
-    check_upstream_parity_selftest.held_reader_failures; commit=WORKTREE].
+    check_upstream_parity_selftest.held_reader_failures; commit=53d961f2e0f7788df2892dc173f90a09023a5a03].
     """
     fd, name = tempfile.mkstemp(dir=path.parent, prefix=f".{path.name}.")
     staged = Path(name)

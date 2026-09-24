@@ -100,12 +100,12 @@ Guarantees:
     the main one has [tested:
     check_upstream_parity_selftest.upstream_selection_failures,
     check_upstream_parity_selftest.upstream_derivation_failures;
-    commit=WORKTREE]
+    commit=2b1d45b347027f0290a86315ccc770f3dac08851]
   - the lane cannot pass without measuring: an absent upstream checkout is a
     refusal, exit 1, naming every place it looked; METTA_UPSTREAM_OPTIONAL=1
     turns it into a printed skip, exit 125, except where CI=true
     [tested: check_upstream_parity_selftest.upstream_prerequisite_failures;
-    commit=WORKTREE].
+    commit=2b1d45b347027f0290a86315ccc770f3dac08851].
   - a kernel or container that will not let this count instructions is named
     with the two knobs that decide it, rather than reported as a parse failure
     [tested: tests/checks/check_upstream_parity_selftest.py; commit=fc990fa3042ee05d931d3928694e89021be32855].
