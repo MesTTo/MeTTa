@@ -9,6 +9,10 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- The C seat turns a C array of values into an expression with `mt_array(count,
+  values)`, converting each element as `mt_atom_of` converts one value and
+  reading the element type from the array, so a bool array answers `True` and
+  `False`; `mt_arrayv` is its variadic form.
 - Registering Prolog as MeTTa functions is one engine service every host
   crosses once, `metta_register_prolog(Origin, Names, Registered)`, so
   PyMeTTa's `register_prolog` and tsmetta's `registerProlog` run one sequence
