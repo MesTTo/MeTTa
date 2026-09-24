@@ -108,6 +108,21 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- A `from` row binds the heads it brings and rebinds none of the heads the
+  rows before it brought. What a head's last bind realised was kept in one
+  flag for every head, since SWI keys `flag/3` on a compound by its principal
+  functor alone, so a binding stood only when its head was the one recorded
+  most recently; and the add door announced each `from` row again after its
+  own transaction's completion had published it. The record is now one row
+  per head, keyed by the head's roots and whether each root's home had
+  settled, so a head bound before its lazy home settles stands until the home
+  settles and then rebinds once. A binding that stands keeps its support node
+  and roots row, and the row is read before its key is computed, so a head
+  bound inside a transaction, which records none, pays for no key.
+  13-class_decorators.metta, whose seven `from` rows carried the whole of its
+  excess over pinned upstream, falls from 254,967,121 instructions and 283,829
+  inferences to 160,529,023 and 171,291.
+
 - The patched SWI-Prolog carries two more fixes, and the engine requires
   both. A thread with no Prolog engine died in `signalGCThread()` once the
   atoms it unregistered, erasing records included, crossed the atom-GC

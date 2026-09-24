@@ -192,6 +192,58 @@ test(a_refresh_that_finds_the_same_roots_announces_nothing,
         unwrap_predicate(spaces:announce_function_changed(_, _),
                          reference_announcements)).
 
+%A committed from row binds each head it adds twice, provisionally inside the
+%declaration's transaction and finally at its completion, and rebinds no head
+%the rows before it brought, however many there were. The last bind of every
+%head was recorded in ONE flag, since SWI keys a flag on a compound by its
+%principal functor alone, so a binding stood only when it was the head
+%recorded most recently; and the add door's observer announced the row a
+%third time after its completion. The Nth row therefore rebound every head of
+%the N-1 before it, three times over [measured 2026-09-24:
+%13-class_decorators.metta's seven from rows cost 250,586 inferences, the
+%seventh 47,632 and the first 14,117;
+%commit=9631a37428d627563ab5207c415446fba7206e9a].
+test(a_committed_from_row_binds_only_the_heads_it_adds,
+     [forall(member(Count, [1, 4, 16])),
+      setup(reference_setup), cleanup(reference_cleanup)]) :-
+    reference_space(1, Target), space_module(Target, Module),
+    forall(between(1, Count, Index),
+           ( reference_bind_home(Index, Home),
+             metta_add_atom(Target, [from, Home], _) )),
+    Last is Count+1, reference_bind_home(Last, Final),
+    reference_binds(Module, metta_add_atom(Target, [from, Final], _), Bound),
+    atom_concat('reference-bind-', Last, Added),
+    assertion(Bound == [Added, Added]),
+    forall(between(1, Last, Index),
+           ( atom_concat('reference-bind-', Index, Name),
+             reference_answers(1, [Name], Bag), assertion(Bag == [Index]) )).
+
+%A fresh home defining (reference-bind-Index) as Index, released with the
+%fixture's own spaces.
+reference_bind_home(Index, Home) :-
+    gensym('&reference-bind-home-', Home), space_module(Home, _),
+    nb_getval(reference_test_spaces, Spaces),
+    append(Spaces, [Home], Grown), nb_setval(reference_test_spaces, Grown),
+    atom_concat('reference-bind-', Index, Name),
+    metta_add_atom(Home, [=, [Name], Index], _).
+
+%The heads metta_reference_bind/6 binds in Module while Goal runs, as a sorted
+%list that keeps repeats, so a head bound twice reads twice.
+reference_binds(Module, Goal, Names) :-
+    nb_setval(reference_binds, []),
+    setup_call_cleanup(
+        wrap_predicate(metta_engine:metta_reference_bind(_, Owner, Name, _, _, _),
+                       reference_binds, Original,
+                       ( ( Owner == Module
+                         -> nb_getval(reference_binds, Before),
+                            nb_setval(reference_binds, [Name|Before])
+                         ; true ),
+                         call(Original) )),
+        ( call(Goal), nb_getval(reference_binds, Bound), msort(Bound, Names) ),
+        ( unwrap_predicate(metta_engine:metta_reference_bind(_, _, _, _, _, _),
+                           reference_binds),
+          nb_delete(reference_binds) )).
+
 test(data_mutations_keep_compiled_clauses_and_retire_only_removed_grades,
      [setup(reference_setup), cleanup(reference_cleanup)]) :-
     reference_add(3, [=, ['reference-callee'], true]), reference_from(1, 3),

@@ -7,6 +7,13 @@
 %   callable bindings keep their compiled clauses
 %   [tested: references:data_mutations_keep_compiled_clauses_and_retire_only_removed_grades;
 %   commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
+% Guarantees: a refresh binds a head again only when its roots, their homes'
+%   settledness or a root home's definitions changed, or when it holds no
+%   recorded binding, which a bind inside a transaction never leaves, so a
+%   committed from row rebinds no head the rows before it brought [tested:
+%   references:a_committed_from_row_binds_only_the_heads_it_adds,
+%   reference_loading:a_head_bound_before_its_home_settles_rebinds_once_when_it_settles;
+%   commit=WORKTREE].
 % Guarantees: declaration-only faces carry sorts, constructor arrows and
 %   subsorts without making their subjects callable
 %   [tested: references:constructor_declarations_travel_without_callable_heads;
@@ -73,36 +80,66 @@
 :- dynamic metta_reference_row/4, metta_reference_map/3.
 :- dynamic metta_occurrence_grade/4, metta_reference_projection/4.
 :- dynamic metta_reference_roots/4, metta_reference_seen_space/2.
-%The roots the LAST bind of a head realised, as a variant hash in a flag,
-%which is the one store a transaction does not roll back: an import or a
-%wrapper is not transactional where a clause and a dynamic fact are, so a
-%rebind made inside a rolled-back transaction leaves the predicate as the
-%rebind left it while any asserted record of it reverts. The flag keeps
-%pointing at the rolled-back binding, the recomputed face differs from it,
-%and the rebind runs. Zero is "not recorded": a bind made while a lazy home
-%was still loading, or its function still deferred, registered no arity and
-%must be redone once the home settles, so it records nothing
+%What the LAST bind of a head realised, as a variant hash of its roots and of
+%whether each root's home had settled, one row per head in a store that a
+%transaction does not roll back: an import or a wrapper is not transactional
+%where a clause and a dynamic fact are, so a rebind made inside a rolled-back
+%transaction leaves the predicate as the rebind left it while any journaled
+%record of it reverts. The row keeps pointing at the rolled-back binding, the
+%recomputed face differs from it, and the rebind runs. No row is "not
+%recorded".
+%
+%Settledness is part of the key because a bind made while a lazy home was
+%still loading, or its function still deferred, registered no arity and must
+%be redone once the home settles: the settling event walks the face
+%(metta_reference_face_changed/1), the next refresh computes the settled key,
+%and the key differs. Until then a refresh finds the same key and the binding
+%stands. Recording nothing for an unsettled root instead rebound and announced
+%every head imported from a deferred home on every refresh [tested:
+%reference_loading:a_head_bound_before_its_home_settles_rebinds_once_when_it_settles;
+%commit=WORKTREE].
+%
+%Rows, not flag/3: SWI keys a flag on a compound by its principal functor
+%alone [source: swipl-devel V10.1.14 src/pl-rec.c:1970-1982, getKeyEx/2,
+%which flag/3 in src/pl-flag.c calls], so metta_reference_bound(M, N, A) was
+%ONE flag for every head in every module, each record overwrote the last, and
+%a binding stood only when it was the head recorded most recently: a program's
+%Nth `from` row rebound every head the N-1 before it had imported [tested:
+%references:a_committed_from_row_binds_only_the_heads_it_adds;
+%commit=WORKTREE]. Not journaled and not saved, as metta_reference_slot/3 is,
+%for the same reason
 %[tested: references:rollback_restores_native_links_and_nested_rollback_restores_its_parent,
 %references:an_inference_cut_cannot_abandon_reference_completion,
 %extensions/python/tests/ch20_extending_the_engine/test_reference_patterns.py::test_patterned_references_load_lazily_and_report_their_source].
+:- dynamic metta_reference_bound/4.
+:- volatile metta_reference_bound/4.
+:- '$notransact'(metta_reference_bound/4).
+
 metta_reference_bound_hash(Module, Name, Arity, Hash) :-
-    flag(metta_reference_bound(Module, Name, Arity), Hash, Hash).
+    metta_reference_bound(Module, Name, Arity, Hash), !.
 
 %A bind inside a transaction is provisional: the frame it runs in may be cut
 %or rolled back, and the completion refresh that follows the frame is what
 %makes the binding final, so it records nothing and that refresh rebinds once.
+%Its one caller forgot the head's row before the bind, so this adds the head's
+%only row.
 metta_reference_bound_record(Module, Name, Arity, Roots) :-
     (   Roots \== [],
-        \+ current_transaction(_),
-        forall(member(root(Home, Original, _, _), Roots),
-               \+ metta_reference_unsettled(Home, Original))
-    ->  variant_hash(Roots, Hash)
-    ;   Hash = 0
-    ),
-    flag(metta_reference_bound(Module, Name, Arity), _, Hash).
+        \+ current_transaction(_)
+    ->  metta_reference_bound_key(Roots, Hash),
+        assertz(metta_reference_bound(Module, Name, Arity, Hash))
+    ;   true
+    ).
+
+metta_reference_bound_key(Roots, Hash) :-
+    findall(Settled,
+            ( member(root(Home, Original, _, _), Roots),
+              ( metta_reference_unsettled(Home, Original) -> Settled = false
+              ; Settled = true ) ), States),
+    variant_hash(Roots-States, Hash).
 
 metta_reference_bound_forget(Module, Name, Arity) :-
-    flag(metta_reference_bound(Module, Name, Arity), _, 0).
+    retractall(metta_reference_bound(Module, Name, Arity, _)).
 
 %A root whose home is one of the spaces this drain is refreshing may have new
 %definitions behind the same roots, and its importers' callers recompile
@@ -250,12 +287,22 @@ metta_reference_refresh_grades(Space) :-
 % Data changes a population, not its exported definitions. Retain the ordinary
 % occurrence grade and reserve binding publication for the rows that define it.
 metta_reference_interface_row([=, _, _]).
-metta_reference_interface_row([from|_]).
-metta_reference_interface_row([internal|_]).
+metta_reference_interface_row(Row) :- metta_reference_declaration_row(Row).
 metta_reference_interface_row(Row) :- metta_reference_metadata_row(Row, _, _, _).
 
+%The rows metta_add_atom/4 hands to metta_reference_declare/3, which stores
+%each and announces the change inside its own transaction, so the add door's
+%observer has nothing left to announce: a second metta_reference_changed/1
+%after the completion refresh republished a face nothing had changed, a third
+%refresh for every from row. The write door tests the same two heads inline in
+%its first clause, which is the hottest write path in the engine.
+metta_reference_declaration_row([from|_]).
+metta_reference_declaration_row([internal|_]).
+
 metta_reference_added(Space, Row, Token) :-
-    (   \+ \+ metta_reference_interface_row(Row)
+    (   \+ \+ metta_reference_declaration_row(Row)
+    ->  true
+    ;   \+ \+ metta_reference_interface_row(Row)
     ->  metta_reference_changed(Space)
     ;   metta_reference_row_head(Row, Name), metta_reference_internal(Space, Name)
     ->  assertz(metta_occurrence_grade(Space, Token, visibility, 'INTERNAL'))
@@ -536,9 +583,13 @@ metta_reference_publish_face(Space, Module, Face, Faces) :-
              %through the refresh, so nothing is lost by standing still.
              ( metta_reference_roots(Module, Name, Arity, Previous) -> true
              ; Previous = none ),
+             %The row is read before the key is computed: a head bound inside
+             %a transaction has none, and the key's settledness walk costs
+             %every root a load-state read, which such a head would spend on
+             %every refresh for nothing.
              (   Roots \== [], Previous =@= Roots,
-                 variant_hash(Roots, Hash),
                  metta_reference_bound_hash(Module, Name, Arity, Hash),
+                 metta_reference_bound_key(Roots, Hash),
                  \+ metta_reference_root_home_changed(Space, Roots)
              ->  true
              ;   %Forgotten before the rebind, so a cut or an abort anywhere
@@ -546,16 +597,16 @@ metta_reference_publish_face(Space, Module, Face, Faces) :-
                  %the completion refresh that follows rebinds it.
                  metta_reference_bound_forget(Module, Name, Arity),
                  metta_reference_bind(Space, Module, Name, Arity, Roots, Faces),
-                 metta_reference_bound_record(Module, Name, Arity, Roots)
-             ),
-             ( Roots == []
-             -> support_graph:support_forget(derived(Module, reference(Name, Arity)))
-             ; support_graph:support_publish(derived(Module, reference(Name, Arity)),
-                   [derived(Module, reference_face)],
-                   [edge(derived(Module, reference(Name, Arity)), function(Module, Name))]) ),
-             retractall(metta_reference_roots(Module, Name, Arity, _)),
-             ( Roots == [] -> true
-             ; assertz(metta_reference_roots(Module, Name, Arity, Roots)) ) )).
+                 metta_reference_bound_record(Module, Name, Arity, Roots),
+                 ( Roots == []
+                 -> support_graph:support_forget(derived(Module, reference(Name, Arity)))
+                 ; support_graph:support_publish(derived(Module, reference(Name, Arity)),
+                       [derived(Module, reference_face)],
+                       [edge(derived(Module, reference(Name, Arity)), function(Module, Name))]) ),
+                 retractall(metta_reference_roots(Module, Name, Arity, _)),
+                 ( Roots == [] -> true
+                 ; assertz(metta_reference_roots(Module, Name, Arity, Roots)) )
+             ) )).
 
 %The wave a MARKED face raises. support_stabilize/3 compares the value computed
 %now against the stored one and walks the face's dependents only when they
@@ -900,8 +951,7 @@ metta_reference_retired_module(Space, Module) :-
              metta_reference_bound_forget(Other, Name, Arity) )),
     forall(metta_reference_slot(Module, Name, Arity),
            metta_reference_retire_binding(Module, Name, Arity, preserve)),
-    forall(metta_reference_roots(Module, Name, Arity, _),
-           metta_reference_bound_forget(Module, Name, Arity)),
+    retractall(metta_reference_bound(Module, _, _, _)),
     retractall(metta_reference_roots(Module, _, _, _)),
     support_graph:support_forget(derived(Module, reference_face)),
     forall(( member(Name, Demanded), \+ metta_reference_demanded_elsewhere(Name) ),

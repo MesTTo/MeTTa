@@ -78,6 +78,42 @@ test(lazy_keeps_equations_deferred_until_the_first_call_including_self,
     loading_answers(A, ['loading-value', 41], [42]),
     assertion(\+ spaces:deferred_metta_function('loading-value', _, Home, _, _, _)).
 
+%A head bound while its lazy home still defers the function stands on every
+%refresh until the first call settles it, and is then bound again, once: the
+%unsettled bind registered no arity, settling walks the home's face, and the
+%key the next refresh computes carries the settled root. An unsettled root
+%used to record nothing, so every refresh rebound and announced the head
+%until it settled.
+test(a_head_bound_before_its_home_settles_rebinds_once_when_it_settles,
+     [setup(loading_setup("(= (loading-value $x) (+ $x 1))\n")),
+      cleanup(loading_cleanup)]) :-
+    loading_fixture(Path, Home, A, _), loading_option(A, load, lazy),
+    space_module(A, Module),
+    metta_add_atom(A, [from, Path], _),
+    assertion(spaces:deferred_metta_function('loading-value', _, Home, _, _, _)),
+    loading_binds(Module, metta_engine:metta_reference_changed(A), Standing),
+    assertion(Standing == []),
+    loading_binds(Module, loading_answers(A, ['loading-value', 41], [42]), Settled),
+    assertion(Settled == ['loading-value']),
+    assertion(\+ spaces:deferred_metta_function('loading-value', _, Home, _, _, _)).
+
+%The heads metta_reference_bind/6 binds in Module while Goal runs, sorted with
+%repeats kept.
+loading_binds(Module, Goal, Names) :-
+    nb_setval(reference_loading_binds, []),
+    setup_call_cleanup(
+        wrap_predicate(metta_engine:metta_reference_bind(_, Owner, Name, _, _, _),
+                       reference_loading_binds, Original,
+                       ( ( Owner == Module
+                         -> nb_getval(reference_loading_binds, Before),
+                            nb_setval(reference_loading_binds, [Name|Before])
+                         ; true ),
+                         call(Original) )),
+        ( call(Goal), nb_getval(reference_loading_binds, Bound), msort(Bound, Names) ),
+        ( unwrap_predicate(metta_engine:metta_reference_bind(_, _, _, _, _, _),
+                           reference_loading_binds),
+          nb_delete(reference_loading_binds) )).
+
 test(lazy_aliases_and_a_union_force_the_defining_head,
      [setup(loading_setup("(= (loading-value) source)\n")), cleanup(loading_cleanup)]) :-
     loading_fixture(Path, Home, A, B), loading_option(A, load, lazy),
