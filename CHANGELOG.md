@@ -294,6 +294,13 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- `test_aio_structural_surface_behaves` copies the space it built rather than
+  the process's `&self`, whose rows depend on what earlier tests in the worker
+  imported. After `test_statistics_lib.py` had loaded lib_statistics there,
+  the copy and `&self` each gained generated rows the other lacked and the test
+  failed. The engine behaviour behind the difference is queued as its own
+  correctness fix.
+
 - The gate's `door-order` lane passes again. The Python seat's door-order
   table, `metta/doors/_orders.py`, was generated before three of its rows
   moved, and regenerating it at each of the 32 seat commits that touched
