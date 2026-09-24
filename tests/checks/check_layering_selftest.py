@@ -9,11 +9,17 @@ naming a library it does not declare, a member absent from the resolver's
 sources and a source naming no member, a member missing its own parts, and a
 seam point naming an extra nobody declares.
 
-Assumes: a writable ai-tmp/ in this repository.
+Assumes: a writable ai-tmp/ in this repository; and `metta._roots._MOUNTS`
+  names every directory whose presence makes an ancestor the workspace, the
+  set the planted `_workspace.py` walks up to [source:
+  extensions/python/metta/_roots.py:62, extensions/python/_workspace.py:57;
+  commit=WORKTREE].
 Guarantees:
-  - a clean fixture workspace is clean [tested: this file; commit=94057a0f073c0fab0a35c42beff2c324d8a0addd]
+  - a clean fixture workspace is clean, its planted helper reaching the
+    fixture's own `ext/` rather than the enclosing repository's [tested: this
+    file; commit=WORKTREE]
   - each of the seven planted crossings is reported, and the report names what
-    to do instead [tested: this file; commit=94057a0f073c0fab0a35c42beff2c324d8a0addd]
+    to do instead [tested: this file; commit=WORKTREE]
 Fails when: run against a tree it did not write. It asserts on its own fixture.
 Open Obligations:
   To Do: None
@@ -112,6 +118,16 @@ def _plant(scratch: Path) -> Path:
     member = scratch / "ext" / "metta-solars"
     (member / "tests").mkdir(parents=True)
     core.mkdir(parents=True)
+    # The planted `_workspace.py` takes the nearest ancestor holding every
+    # directory `metta._roots._MOUNTS` names as its workspace, so a fixture
+    # without them is no workspace at all: the helper walks out of the scratch
+    # tree to the repository around it and answers that repository's `ext/`
+    # [measured 2026-09-24: from seat bdb483a6a, which replaced the helper's
+    # level count with that walk, every run failed on "EXT is <battery>/ext,
+    # which does not reach metta-solars"]. The names come from the one module
+    # that says what a workspace is.
+    for mount in runpy.run_path(str(ROOT / "extensions/python/metta/_roots.py"))["_MOUNTS"]:
+        (scratch / mount).mkdir()
     (core / "_spaces").mkdir()
     (core / "doors").mkdir()
     (scratch / "pyproject.toml").write_text(CORE_MANIFEST, encoding="utf-8")

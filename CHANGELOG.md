@@ -210,6 +210,13 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- The layering self-test's fixture workspace holds the directories
+  `metta._roots._MOUNTS` names (`engine/` and `lib/`), so the `_workspace.py`
+  it plants finds the fixture as its workspace. Since the helper began walking
+  up to the nearest ancestor holding them instead of counting two levels, the
+  planted copy walked out of the scratch tree to the enclosing checkout and
+  reached that checkout's `ext/`, failing `layering-selftest` and
+  `layer-sync-selftest` on every tree.
 - `tools/battery.sh run` runs its command without `BATTERY_KEEP` or
   `BATTERY_SOURCE`, the settings it spent on the copy. A `battery.sh` the
   command ran in turn inherited the outer run's restriction: inside a
