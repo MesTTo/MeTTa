@@ -13,13 +13,13 @@ Assumes: a writable ai-tmp/ in this repository; and `metta._roots._MOUNTS`
   names every directory whose presence makes an ancestor the workspace, the
   set the planted `_workspace.py` walks up to [source:
   extensions/python/metta/_roots.py:62, extensions/python/_workspace.py:57;
-  commit=WORKTREE].
+  commit=bc4002575945c37c3f38db89bc49954e497604a5].
 Guarantees:
   - a clean fixture workspace is clean, its planted helper reaching the
     fixture's own `ext/` rather than the enclosing repository's [tested: this
-    file; commit=WORKTREE]
+    file; commit=bc4002575945c37c3f38db89bc49954e497604a5]
   - each of the seven planted crossings is reported, and the report names what
-    to do instead [tested: this file; commit=WORKTREE]
+    to do instead [tested: this file; commit=bc4002575945c37c3f38db89bc49954e497604a5]
 Fails when: run against a tree it did not write. It asserts on its own fixture.
 Open Obligations:
   To Do: None
