@@ -50,6 +50,15 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Changed
 
+- `register_prolog(path=...)` with no names refuses a file that is not there
+  as `SourceNotFound` ("no Prolog source"), as it already did with names,
+  where it read the missing file's declarations first and asked for a
+  `metta_export` the caller could not add. Asking for the members of an
+  extension nothing loaded refuses as it does not exist, so
+  `profile_extension(extension=...)` naming one no longer profiles nothing,
+  and inline Prolog loads under a module named by its SHA-256 rather than an
+  eight-byte BLAKE2s.
+
 - The C seat names an effect class by the generated `enum mt_effect_class`, the
   engine's effect-class vocabulary, instead of a hand-named enum of its own:
   `MT_PURE`, `MT_LOOKUP`, `MT_NONDET`, `MT_WRITES` and `MT_IO` are now
