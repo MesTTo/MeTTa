@@ -585,6 +585,11 @@
             metta_unimport/2,
             register_metta_library_path/3,
             resolve_existing_import_path/3,
+            % The Prolog registration every host runs, and the extension
+            % whose release answers what it installed
+            % [tested: prolog_registration_service].
+            metta_register_prolog/3,
+            metta_extension_members/2,
             unregister_metta_extension/1,
             use_module_global/1,
             use_module_global/2,

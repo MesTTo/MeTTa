@@ -970,7 +970,7 @@ record_extension_membership(File, Name) :-
 %a name nothing records [tested: an_extension_unloads_whole].
 unregister_metta_extension(Extension) :-
     must_be(atom, Extension),
-    loaded_extension_file(Extension, File),
+    loaded_extension_file(Extension, File, unregister_metta_extension/1),
     findall(Name, metta_extension_member(Extension, Name), Names),
     forall(member(Name, Names), forget_registered_function(Name)),
     retractall(metta_extension_member(Extension, _)),
@@ -980,15 +980,24 @@ unregister_metta_extension(Extension) :-
     retractall(metta_extension_info(Extension, File, _)),
     ( File == 'metta_inline' -> true ; catch(unload_file(File), _, true) ).
 
+%The names one extension installed, asked for before a release so its caller
+%can say what went. An extension no load declared is refused the way the
+%release refuses it: answering [] would report one that exists and installed
+%nothing, which is what a provider exporting no function answers
+%[tested: prolog_registration_service].
+metta_extension_members(Extension, Names) :-
+    must_be(atom, Extension),
+    loaded_extension_file(Extension, _, metta_extension_members/2),
+    findall(Name, metta_extension_member(Extension, Name), Names).
+
 %Its own predicate so the file is a head argument: read inline, the binding
 %happens in one branch of an if-then-else whose other branch throws, and SWI's
 %var_branches check cannot see that the other branch never returns.
-loaded_extension_file(Extension, File) :-
+loaded_extension_file(Extension, File, Caller) :-
     (   metta_extension_info(Extension, Recorded, _)
     ->  File = Recorded
     ;   throw(error(existence_error(metta_extension, Extension),
-                    context(unregister_metta_extension/1,
-                            'no extension of that name is loaded')))
+                    context(Caller, 'no extension of that name is loaded')))
     ).
 
 forget_registered_function(Name) :-
@@ -1041,6 +1050,144 @@ prolog_function_name_list(Names, Context) :-
     ;   throw(error(type_error(list, Names),
                     context(Context, 'the names to register')))
     ).
+
+%%%% One registration sequence for every host %%%%
+%
+%The whole of what a host's "register this Prolog as MeTTa functions" runs, so
+%PyMeTTa's register_prolog and tsmetta's registerProlog each cross here once
+%and cannot drift apart. Origin is file(Spec) or text(Text). Names is [], a
+%list of names, or a list of [From, To] renames, each importing a module
+%file's export From under the name To. Registered is what registered: the
+%names given, the renames' new names, or with no names the exports the source
+%recorded for itself, [] for one that joins an extension and exports nothing.
+%
+%The order is the point, and each step is one the Python seat used to run
+%across a crossing of its own [source: extensions/python/metta/_declare/prolog.py,
+%register_prolog, at the Python seat's a0f697126]. The names are checked
+%before the source loads, because a consulted builtin's name has replaced the
+%builtin by the time a later refusal fires. A source registered without names
+%says what it is before it loads, because discovering its names would register
+%whatever else it defines. And the names register all or none
+%[tested: prolog_registration_service].
+metta_register_prolog(Origin, Names, Registered) :-
+    prolog_registration_origin(Origin, Load, Source),
+    prolog_registration_shape(Names, Load, Shape),
+    prolog_registration(Shape, Load, Source, Registered).
+
+%A file is named by the path it resolves to, the identity its load records
+%clauses and exports under, and a missing one refuses before its declarations
+%are read, since a scan of nothing declares nothing. Text loads under a module
+%named for its content, so the same text registered again reloads that module
+%rather than adding a second copy, and two texts never share one: the address
+%a host once named it by went to the next string of the same size, and a
+%library generating Prolog lost every registration but its last
+%[source: extensions/python/metta/_spaces/handle.py, _inline_module_name, at
+%the Python seat's a0f697126].
+prolog_registration_origin(file(Spec), file(File), File) :-
+    !,
+    (   absolute_file_name(Spec, File,
+                           [file_type(prolog), access(read), file_errors(fail)])
+    ->  true
+    ;   throw(error(existence_error(source_sink, Spec),
+                    context(metta_register_prolog/3,
+                            'no Prolog source is there, resolving a path \c
+                             against the working directory')))
+    ).
+prolog_registration_origin(text(Text0), text(Module, Text), Module) :-
+    !,
+    text_to_string(Text0, Text),
+    filereader:metta_text_digest(Text, Digest),
+    atom_concat(metta_inline_, Digest, Module).
+prolog_registration_origin(Origin, _, _) :-
+    throw(error(domain_error(prolog_registration_origin, Origin),
+                context(metta_register_prolog/3,
+                        'an origin is file(Spec) or text(Text)'))).
+
+%What the names ask for, read off their shape: none, names, or renames. A
+%rename imports a module's export under another name and SWI's import list
+%names a module by its file, so renames need a file origin, and the NEW names
+%are the ones checked and registered.
+prolog_registration_shape([], _, declared) :-
+    !.
+prolog_registration_shape(Names, Load, renames(Names, Tos)) :-
+    is_list(Names),
+    forall(member(Rename, Names), is_list(Rename)),
+    !,
+    (   Load = file(_)
+    ->  maplist(renamed_to, Names, Tos)
+    ;   prolog_registration_refused(
+            'a rename imports a Prolog module\'s export under another name, \c
+             and SWI\'s import list names a module by its file, so renames \c
+             need a file origin')
+    ).
+prolog_registration_shape(Names, _, named(Names)) :-
+    prolog_function_name_list(Names, metta_register_prolog/3).
+
+renamed_to(Rename, To) :-
+    rename_pair(Rename, _, To0),
+    metta_name_atom(To0, To).
+
+prolog_registration(declared, Load, Source, Registered) :-
+    prolog_origin_declarations(Load, Declarations),
+    prolog_declared(Declarations, Declares),
+    prolog_origin_load(Load),
+    (   Declares == extension
+    ->  Registered = []
+    ;   findall(Name, metta_file_export(Source, Name), Exported),
+        sort(Exported, Registered),
+        (   Registered == []
+        ->  prolog_registration_refused(
+                'registering Prolog needs the names to register, or a \c
+                 :- metta_export("...") declaration naming a function in the \c
+                 source; discovering them would silently register whatever \c
+                 else the source defines')
+        ;   true
+        )
+    ).
+prolog_registration(named(Names), Load, Source, Names) :-
+    check_prolog_function_names(Names, Source, _),
+    prolog_origin_load(Load),
+    import_prolog_functions(Names, _).
+prolog_registration(renames(Renames, Tos), file(File), File, Tos) :-
+    check_prolog_function_names(Tos, File, _),
+    use_module_global(File, Renames),
+    import_prolog_functions(Tos, _).
+
+%What a source registered without names says it is, decided in clause heads so
+%the refusal's branch binds nothing SWI's var_branches check would miss: an
+%export makes it a library of functions, an extension alone a provider.
+prolog_declared(Declarations, exports) :-
+    memberchk(export(_), Declarations),
+    !.
+prolog_declared(Declarations, extension) :-
+    memberchk(extension(_), Declarations),
+    !.
+prolog_declared(_, _) :-
+    prolog_registration_refused(
+        'registering Prolog needs one of three things: the names to \c
+         register, a :- metta_export("...") declaration for a source that \c
+         defines functions, or a :- metta_extension(name, []) declaration for \c
+         one that contributes clauses to an extension point and exports \c
+         nothing, such as a space provider; discovering the names would \c
+         silently register whatever else the source defines').
+
+prolog_origin_declarations(file(File), Declarations) :-
+    metta_source_declarations(File, Declarations).
+prolog_origin_declarations(text(_, Text), Declarations) :-
+    metta_string_declarations(Text, Declarations).
+
+prolog_origin_load(file(File)) :-
+    consult_global(File).
+prolog_origin_load(text(Module, Text)) :-
+    consult_string_global(Module, Text).
+
+%A registration refused for what the caller passed crosses as the engine's
+%value signal, which every host reads as its own word for a value it cannot
+%use, with this sentence as the detail. Any other ball from an engine
+%predicate reaches a host as the generic engine kind
+%[source: engine/metta/registration.pl, metta_host_error_kind/3].
+prolog_registration_refused(Sentence) :-
+    throw(error(metta_control_signal(value, Sentence), context(metta, value))).
 
 %The head names one registration FORM claims, read from the form itself and
 %never run. A library that publishes its surface through

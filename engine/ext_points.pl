@@ -1611,6 +1611,11 @@ kind(metta_transport_failure/1, host_service).
 kind(metta_with_state_write_fence/1, host_service).
 kind(metta_live_state_cell/1, host_service).
 kind(sread_with_names/3, host_service).
+%Registering Prolog as MeTTa functions is one sequence every host transport
+%crosses once, and a release answers with the members an extension installed
+%[tested: prolog_registration_service].
+kind(metta_register_prolog/3, host_service).
+kind(metta_extension_members/2, host_service).
 kind(unregister_metta_extension/1, host_service).
 kind(with_metta_module/2, host_service).
 %The dispatch-ownership question behind every host direct-call door: a

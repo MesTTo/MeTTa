@@ -9,6 +9,19 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- Registering Prolog as MeTTa functions is one engine service every host
+  crosses once, `metta_register_prolog(Origin, Names, Registered)`, so
+  PyMeTTa's `register_prolog` and tsmetta's `registerProlog` run one sequence
+  instead of each keeping a copy. `Origin` is `file(Spec)` or `text(Text)`,
+  and `Names` is `[]`, a list of names, or `[From, To]` renames of a module
+  file's exports. The names are checked before the source loads, a source
+  registered without names has to declare `metta_export` or `metta_extension`
+  before it loads, and the names register all or none, or with none given the
+  source's own declared exports answer (`[]` for an extension alone). Inline
+  text loads under `metta_inline_<SHA-256 of the text>`, so the same text
+  again reloads its module. `metta_extension_members(Extension, Names)` answers
+  what an extension installed, beside `unregister_metta_extension/1`.
+
 - The WebAssembly host tsmetta runs on carries the shipped libraries' native
   halves and the SWI packages they import. `lib_string`, `lib_regex`,
   `lib_database` and `lib_compression` each carry `support/static.cmake`, and

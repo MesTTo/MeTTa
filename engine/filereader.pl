@@ -311,6 +311,9 @@
             % loader's own text for the claims they register.
             metta_source_digest/2,
             package_row/3,
+            % The same digest over a text, which names the module inline
+            % Prolog loads under [tested: prolog_registration_service].
+            metta_text_digest/2,
             process_loader_string/3,
             metta_reference_lazy_reader/2,
             metta_reference_source_reader/2,

@@ -19,6 +19,20 @@
 %   - every head in the translator's own registry is refused before Prolog
 %     function registration can install dead code
 %     [tested: test_registering_any_translator_compiled_head_is_refused_by_name]
+%   - metta_register_prolog/3 follows one rule over every origin, name shape
+%     and declaration: a missing file refuses before anything is read, a
+%     rename needs a module file, a source registered without names says
+%     what it is before it loads, and a named registration registers
+%     exactly its names
+%     [tested: every_origin_and_name_shape_follows_the_registration_rule,
+%     a_source_declaring_nothing_is_refused_before_it_loads]
+%   - inline text loads under metta_inline_<sha256 of the text>, and the same
+%     text again replaces its clauses rather than adding to them
+%     [tested: a_text_loads_under_the_module_its_content_names]
+%   - an extension's members are what it installed, and one nothing loaded
+%     is refused rather than answered empty
+%     [tested: an_extensions_members_are_what_it_installed,
+%     the_members_of_an_extension_nothing_loaded_are_refused]
 % Open Obligations:
 %   To Do: None
 %   Hacks: None
@@ -27,6 +41,7 @@
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
 :- ensure_loaded('../../../../engine/metta.pl').
 :- use_module('../../scratch.pl').
+:- use_module(library(sha), [sha_hash/3, hash_atom/2]).
 
 user:'plunit-pi-tag'(X, Y) :- member(X, [a, b, c]), atom_concat(X, '!', Y).
 user:'plunit-pi-is-b'(b).
@@ -929,3 +944,179 @@ cleanup_versioned_source :-
     nb_delete('$plunit_versioned_path').
 
 :- end_tests(prolog_interface_registrations).
+
+:- begin_tests(prolog_registration_service).
+
+% metta_register_prolog/3 is the one sequence every host crosses, so its
+% contract is a rule over what a caller chooses, and this checks the rule over
+% every combination: the origin (a file, text, or a file that is not there),
+% the names (none, one name, or one rename), and, with no names, what the
+% source declares (nothing, an export, or an extension). The expectation is
+% registration_expected/3, the rule written once as a table rather than
+% recomputed from the service it checks.
+registration_origin(file).
+registration_origin(text).
+registration_origin(missing).
+
+registration_shape(none(nothing)).
+registration_shape(none(exports)).
+registration_shape(none(extension)).
+registration_shape(names).
+registration_shape(renames).
+
+%A file that is not there refuses before anything is read; a rename needs a
+%module file; a source registered without names has to declare what it is;
+%and every other registration registers exactly its one name.
+registration_expected(missing, _, refused(source_sink)) :- !.
+registration_expected(text, renames, refused(value)) :- !.
+registration_expected(_, none(nothing), refused(value)) :- !.
+registration_expected(_, none(extension), registered(extension)) :- !.
+registration_expected(_, _, registered(name)).
+
+test(every_origin_and_name_shape_follows_the_registration_rule) :-
+    forall(( registration_origin(Origin), registration_shape(Shape) ),
+           with_scratch_directory(plunit_prs, registration_case(Origin, Shape))).
+
+registration_case(Origin, Shape, Directory) :-
+    registration_tag(Origin, Shape, Tag),
+    format(atom(Name), 'plunit-prs-~w', [Tag]),
+    format(atom(Extension), 'plunit_prs_~w', [Tag]),
+    registration_source(Shape, Tag, Name, Extension, Text, Names),
+    registration_origin_term(Origin, Directory, Tag, Text, OriginTerm),
+    catch(( metta_register_prolog(OriginTerm, Names, Registered),
+            Outcome0 = registered(Registered) ),
+          Error,
+          Outcome0 = raised(Error)),
+    registration_outcome(Outcome0, Name, Extension, Outcome),
+    registration_expected(Origin, Shape, Expected),
+    assertion(Outcome-Tag == Expected-Tag),
+    registration_effect(Expected, Shape, Name),
+    registration_cleanup(Name, Extension, OriginTerm).
+
+registration_tag(Origin, Shape, Tag) :-
+    ( Shape = none(What) -> format(atom(Tag), '~w-none-~w', [Origin, What])
+    ; format(atom(Tag), '~w-~w', [Origin, Shape]) ).
+
+%The source each shape registers, and the names the caller passes with it.
+registration_source(none(nothing), _, Name, _, Text, []) :-
+    format(string(Text), "'~w'(X, Y) :- Y is X * 7.~n", [Name]).
+registration_source(none(exports), _, Name, _, Text, []) :-
+    format(string(Text),
+           ":- metta_export(\"(: ~w (-> Number Number))\").~n'~w'(X, Y) :- Y is X * 7.~n",
+           [Name, Name]).
+registration_source(none(extension), _, Name, Extension, Text, []) :-
+    format(string(Text),
+           ":- metta_extension(~q, []).~n'~w'(X, Y) :- Y is X * 7.~n",
+           [Extension, Name]).
+registration_source(names, _, Name, _, Text, [Name]) :-
+    format(string(Text), "'~w'(X, Y) :- Y is X * 7.~n", [Name]).
+registration_source(renames, Tag, Name, _, Text, [[Export, Name]]) :-
+    format(atom(Export), 'plunit_prs_export_~w', [Tag]),
+    format(atom(Module), 'plunit_prs_module_~w', [Tag]),
+    format(string(Text),
+           ":- module('~w', ['~w'/2]).~n'~w'(X, Y) :- Y is X * 7.~n",
+           [Module, Export, Export]).
+
+registration_origin_term(file, Directory, Tag, Text, file(File)) :-
+    format(atom(Base), 'plunit_prs_~w.pl', [Tag]),
+    directory_file_path(Directory, Base, File),
+    setup_call_cleanup(open(File, write, Out), write(Out, Text), close(Out)).
+registration_origin_term(text, _, _, Text, text(Text)).
+registration_origin_term(missing, Directory, Tag, _, file(File)) :-
+    format(atom(Base), 'plunit_prs_absent_~w.pl', [Tag]),
+    directory_file_path(Directory, Base, File).
+
+%A refusal is read by the kind a host reads it by, and a registration by what
+%it answered; anything else is a defect in the service and rethrown.
+registration_outcome(raised(error(existence_error(source_sink, _), _)), _, _,
+                     refused(source_sink)) :- !.
+registration_outcome(raised(error(metta_control_signal(value, _), context(metta, value))),
+                     _, _, refused(value)) :- !.
+registration_outcome(raised(Error), _, _, _) :- !,
+    throw(Error).
+registration_outcome(registered([Name]), Name, _, registered(name)) :- !.
+registration_outcome(registered([]), _, Extension, registered(extension)) :-
+    metta_extension_members(Extension, []), !.
+registration_outcome(registered(Other), _, _, registered(Other)).
+
+%What each outcome leaves behind: a registered name answers as a function,
+%and a refused source never loaded, so its predicate does not exist.
+registration_effect(registered(name), _, Name) :- !,
+    reduce([Name, 3], Answer, _),
+    assertion(Answer == 21).
+registration_effect(refused(value), none(nothing), Name) :- !,
+    assertion(\+ current_predicate(user:Name/2)).
+registration_effect(_, _, _).
+
+registration_cleanup(Name, Extension, Origin) :-
+    catch(unregister_metta_extension(Extension), _, true),
+    catch(forget_registered_function(Name), _, true),
+    forget_pi_name(Name),
+    retractall(user:metta_file_export(_, Name)),
+    registration_unload(Origin).
+
+registration_unload(file(File)) :-
+    ( exists_file(File) -> catch(unload_file(File), _, true) ; true ).
+registration_unload(text(Text)) :-
+    registration_inline_module(Text, Module),
+    catch(unload_file(Module), _, true).
+
+%The module an inline text loads under, computed here from library(sha)
+%rather than read back from the service, so the naming rule is checked and not
+%restated.
+registration_inline_module(Text, Module) :-
+    sha_hash(Text, Bytes, [algorithm(sha256)]),
+    hash_atom(Bytes, Digest),
+    atom_concat(metta_inline_, Digest, Module).
+
+test(a_text_loads_under_the_module_its_content_names,
+     [cleanup(registration_cleanup('plunit-prs-inline', plunit_prs_inline_absent,
+                                   text("'plunit-prs-inline'(X, Y) :- Y is X + 5.\n")))]) :-
+    Text = "'plunit-prs-inline'(X, Y) :- Y is X + 5.\n",
+    metta_register_prolog(text(Text), ['plunit-prs-inline'], Registered),
+    assertion(Registered == ['plunit-prs-inline']),
+    % A stream load records its name as the clauses' file, which is what
+    % loading under a module means here; source_file/1 lists files only.
+    registration_inline_module(Text, Module),
+    predicate_property(user:'plunit-prs-inline'(_, _), file(File)),
+    assertion(File == Module),
+    predicate_property(user:'plunit-prs-inline'(_, _), number_of_clauses(Before)),
+    % The same text again reloads its module, so the clause count stays.
+    metta_register_prolog(text(Text), ['plunit-prs-inline'], _),
+    predicate_property(user:'plunit-prs-inline'(_, _), number_of_clauses(After)),
+    assertion(After == Before).
+
+test(a_source_declaring_nothing_is_refused_before_it_loads) :-
+    Text = "'plunit-prs-silent'(X, X).\n",
+    catch(metta_register_prolog(text(Text), [], _),
+          error(metta_control_signal(value, Sentence), context(metta, value)),
+          true),
+    assertion(nonvar(Sentence)),
+    % All three routes named, since a provider has no function to export.
+    forall(member(Route, ['the names to register', 'metta_export', 'metta_extension']),
+           assertion(sub_atom(Sentence, _, _, _, Route))),
+    assertion(\+ current_predicate(user:'plunit-prs-silent'/2)).
+
+test(an_extensions_members_are_what_it_installed,
+     [cleanup(registration_cleanup('plunit-prs-member', plunit_prs_members,
+                                   text("")))]) :-
+    format(string(Text),
+           ":- metta_extension(plunit_prs_members, []).~n\c
+            :- metta_export(\"(: plunit-prs-member (-> Number Number))\").~n\c
+            'plunit-prs-member'(X, Y) :- Y is X + 1.~n", []),
+    metta_register_prolog(text(Text), [], Registered),
+    assertion(Registered == ['plunit-prs-member']),
+    metta_extension_members(plunit_prs_members, Members),
+    assertion(Members == ['plunit-prs-member']),
+    unregister_metta_extension(plunit_prs_members),
+    catch(metta_extension_members(plunit_prs_members, _), Error, true),
+    assertion(subsumes_term(error(existence_error(metta_extension, plunit_prs_members),
+                                  context(metta_extension_members/2, _)),
+                            Error)).
+
+test(the_members_of_an_extension_nothing_loaded_are_refused,
+     [throws(error(existence_error(metta_extension, plunit_prs_absent),
+                   context(metta_extension_members/2, _)))]) :-
+    metta_extension_members(plunit_prs_absent, _).
+
+:- end_tests(prolog_registration_service).
