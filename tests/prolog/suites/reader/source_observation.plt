@@ -100,6 +100,47 @@ test(two_observations_of_one_source_store_identical_rows) :-
     assertion(memberchk(['source-error',_,
         "error(evaluation_error(zero_divisor),context((/)/2,_))"],First)).
 
+% SWI keeps the exception hook's first solution, so a clause that answers hides
+% every clause after it. Under NO_AUTOLOAD=1 library(prolog_stack) holds such a
+% clause for every error raised under the observation's trace, and the
+% observer, appended after it, stored no native error at all. This plants a
+% clause that answers the division first, as prolog_stack's does, and requires
+% the observer to record the error and the planted clause still to answer.
+test(an_answering_exception_hook_hides_no_native_error_from_the_observer) :-
+    flag(answering_hook_calls, _, 0),
+    setup_call_cleanup(
+        asserta((prolog:prolog_exception_hook(In, In, _, _, _) :-
+                     In = error(evaluation_error(zero_divisor), _),
+                     flag(answering_hook_calls, Calls, Calls+1)), Planted),
+        observe("(= (obs-divide-past $x) (+ 1 (/ 1 $x)))\n!(obs-divide-past 0)",Rows),
+        erase(Planted)),
+    flag(answering_hook_calls, Answered, 0),
+    assertion(memberchk(['source-error',_,
+        "error(evaluation_error(zero_divisor),context((/)/2,_))"],Rows)),
+    assertion(Answered > 0).
+
+% The observation's own catch receives the escaping exception only after every
+% hook clause has had it, and library(prolog_stack)'s clause replaces an
+% error's context with a backtrace, so the stored exception text depended on
+% whether that library was loaded. This plants a clause that replaces the
+% context of every error, as prolog_stack's does, and requires the stored text
+% to be the one an unplanted observation stores.
+test(a_rewriting_exception_hook_leaves_the_escaping_exception_as_raised) :-
+    Source = "(= (obs-check-past $x) (assertEqual $x 3))\n!(obs-check-past 0)",
+    observe(Source,Plain),
+    memberchk(['observation-exception',Text],Plain),
+    flag(rewriting_hook_calls, _, 0),
+    setup_call_cleanup(
+        asserta((prolog:prolog_exception_hook(error(Formal, context(Where, Message)),
+                                              error(Formal, context(rewritten(Where), Message)),
+                                              _, _, _) :-
+                     flag(rewriting_hook_calls, Calls, Calls+1)), Planted),
+        observe(Source,Rewritten),
+        erase(Planted)),
+    flag(rewriting_hook_calls, Rewrites, 0),
+    assertion(Rewrites > 0),
+    assertion(memberchk(['observation-exception',Text],Rewritten)).
+
 test(an_observed_error_does_not_mark_an_engines_outer_query_frame) :-
     setup_call_cleanup(
         engine_create(Rows, source_observation:observe_source(

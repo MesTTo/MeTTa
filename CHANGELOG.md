@@ -242,6 +242,21 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- `observe-source` records the errors a program raises, and the exception that
+  ends it, as they were raised, whatever other libraries hook exceptions. SWI
+  keeps the first answer of `prolog:prolog_exception_hook/5`, and the observer
+  appended its clause and answered with it, so any clause ahead of it that
+  answered hid every error from it. `library(prolog_stack)` has such a clause
+  for every error raised under the observation's trace, and `NO_AUTOLOAD=1`
+  loads that library, as does any printed backtrace, so observing a source
+  there stored no native error row and `03-source-errors.metta` failed the
+  no-autoload lane. The observer now goes first and fails after recording, the
+  way SWI's own `library(prolog_debug)` hooks exceptions, so every other clause
+  still answers. The observation's catch receives an exception only after
+  those clauses have rewritten it, so the observer also keeps the exception
+  raised to that catch, which it recognises by the frame SWI names as the
+  catcher, and the `observation-exception` row is written from that, not from
+  a copy carrying another library's backtrace.
 - A battery provisioned again at the revision it already held starts from that
   revision's index. `tools/battery.sh` gives every repository in a battery a
   fresh git identity on every provision: a worktree added without a checkout,

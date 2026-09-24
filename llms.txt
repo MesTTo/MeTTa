@@ -6261,6 +6261,9 @@ report space contains binary `source-coverage` rows, unchanged `source-error`
 values and `source-frame` rows with exact or `generated-by` attribution.
 Coordinates are one-based Unicode codepoints with exclusive ends. Unavailable
 source metadata is explicit; only the observation collects diagnostic state.
+A host error or the `observation-exception` kept as text is written from the
+term as raised, its variables numbered, so two observations of one source store
+identical rows whatever exception hooks other libraries hold.
 
 `metta_with_trailed(Key, Value, Goal)` runs a host goal with temporary engine
 context. Entry and ordinary return use backtrackable global writes, so failure,

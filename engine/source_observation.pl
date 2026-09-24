@@ -21,15 +21,18 @@
 %   representation [tested: source_observation:compiled_goals_are_unchanged;
 %   commit=6f634f6705fc1e40e0c2e3970d4156ee574ab70d].
 % Guarantees: only the starting thread is observed, and a hook that throws
-%   is reported without ending the observation [tested:
+%   is reported without ending the observation [tested 2026-09-25T04:02:23+10:00:
 %   source_observation:ordinary_other_thread_execution_does_not_enter_observation,
-%   source_observation:a_throwing_exit_hook_is_reported_and_the_observation_completes;
-%   commit=0c878d61a57754db5bc292e6f5baa2a2c48a8778].
-% Guarantees: an error or exception the observation stores as text is a
-%   function of the term alone, so two observations of one source store
-%   identical rows [tested:
-%   source_observation:two_observations_of_one_source_store_identical_rows;
-%   commit=11882680a6549ab9e52f78970950edefbd10a8c2].
+%   source_observation:a_throwing_exit_hook_is_reported_and_the_observation_completes].
+% Guarantees: an observation records every error raised under it, and stores
+%   each error and the exception that ends it as text that is a function of
+%   the term as raised, whatever prolog:prolog_exception_hook/5 clauses other
+%   libraries hold and whatever those clauses answer, so two observations of
+%   one source store identical rows, and every such clause still answers as it
+%   would without an observation [tested 2026-09-25T04:02:23+10:00:
+%   source_observation:two_observations_of_one_source_store_identical_rows,
+%   source_observation:an_answering_exception_hook_hides_no_native_error_from_the_observer,
+%   source_observation:a_rewriting_exception_hook_leaves_the_escaping_exception_as_raised].
 % Guarantees: an engine that never runs observe-source loads none of this and
 %   pays nothing for it. Loading it at boot cost 3,696 inferences, and its
 %   resident prolog:prolog_exception_hook/5 clause cost another 119 on the
@@ -524,12 +527,29 @@ observation_error(Buffer, Error, Frames) :-
 %the whole observation, so one process-wide record is enough.
 :- dynamic installed_hook/1.
 
+%The exception observer goes FIRST and FAILS. SWI runs the hook as one query
+%and keeps its first solution, so a clause that answers hides every clause
+%after it [source 2026-09-25T00:44:28+10:00: https://github.com/SWI-Prolog/swipl-devel/blob/69775434c8226897626b226aefcc8266499f1e2e/src/pl-wam.c#L2314-L2321].
+%Appended and answering, the observer saw an error only when no clause before
+%it answered. Under NO_AUTOLOAD=1 library(prolog_stack) is loaded, and its
+%clause answers every error raised under the observation's trace, because the
+%trace makes DebugMode true [source 2026-09-25T00:44:28+10:00: https://github.com/SWI-Prolog/swipl-devel/blob/69775434c8226897626b226aefcc8266499f1e2e/library/prolog_stack.pl#L702-L717].
+%So observe-source stored no native error at all: the hook held prolog_stack's
+%clause and then this one, and no division raised under the observations
+%reached this one [measured 2026-09-25T00:01:55+10:00: the observer
+%instrumented in a battery of the tree before this change, NO_AUTOLOAD=1 sh
+%tools/run.sh on a source observed twice]. A failing hook leaves ExceptionIn
+%in force, so every other clause still answers as it would without an
+%observation [source 2026-09-25T00:44:28+10:00: https://github.com/SWI-Prolog/swipl-devel/blob/69775434c8226897626b226aefcc8266499f1e2e/man/hack.plx#L444],
+%and running first is also what lets observe_exception/4 keep the exception
+%that escapes to the observation as it was raised.
+%library(prolog_debug) installs its own observing hook the same way, asserta'd
+%and failing [source 2026-09-25T00:44:28+10:00: https://github.com/SWI-Prolog/swipl-devel/blob/69775434c8226897626b226aefcc8266499f1e2e/library/prolog_debug.pl#L319-L368].
 install_exception_observers :-
-    assertz((prolog:prolog_exception_hook(Error, Error, Frame, _, _) :-
+    asserta((prolog:prolog_exception_hook(Error, _, Frame, Catcher, _) :-
                  nb_current('$metta_observation', Buffer),
-                 source_observation:source_frames(Frame,call,Frames),
-                 Frames \== [],
-                 source_observation:observation_error(Buffer,Error,Frames)),
+                 source_observation:observe_exception(Buffer,Error,Frame,Catcher),
+                 fail),
             ExceptionReference),
     assertz(installed_hook(ExceptionReference)),
     % The buffer is a global variable of the observing thread, so the
@@ -718,13 +738,17 @@ observation_string(Value,Remedy) :-
 
 %The shape the engine reads. Argument five is the sink engine/metta/terms.pl
 %calls for a constructed Error, which is what keeps the engine free of any
-%reference to this module; the other four are the hit set, the recorded
-%errors, the completed root-form answers and the document being observed.
+%reference to this module; the first four are the hit set, the recorded
+%errors, the completed root-form answers and the document being observed; six
+%is the frame run_observed/5 calls its catch/3 from, `none` outside it, and
+%seven is escaped(Raised) once the exception observer has seen an exception
+%raised to that catch, `none` before.
 %One constructor because the shape has two readers, this file and
 %tests/prolog/suites/reader/source_observation.plt, and a second spelling of
 %it in the suite is a shape that can drift.
 new_observation_buffer(observations(Hits,[],answers(0,[]),none,
-                                    source_observation:record_error)) :-
+                                    source_observation:record_error,
+                                    none,none)) :-
     empty_assoc(Hits).
 
 observe_source_locked(Space,Label,Source,Atoms) :-
@@ -739,8 +763,7 @@ observe_source_locked(Space,Label,Source,Atoms) :-
           nb_linkval('$metta_observation',Buffer),
           install_compiler_observers, install_runtime_observers,
           visible([+all,+cut,+exception]),
-          catch((trace,filereader:metta_host_run_source(Source,Space,[],Groups)),
-                Error,true),
+          run_observed(Buffer,Source,Space,Groups,Error),
           notrace,
           collect_observation(Buffer,Groups,Error,Atoms) ),
         ( notrace,
@@ -757,12 +780,48 @@ observe_source_locked(Space,Label,Source,Atoms) :-
           nb_delete('$metta_observation'),
           restore_context('$metta_observe_label',PreviousLabel) )).
 
+%The observed run, in a predicate of its own because SWI hands the exception
+%hook, as CatcherFrame, the frame that calls the catch/3 an exception will
+%reach [source 2026-09-25T00:44:28+10:00: https://github.com/SWI-Prolog/swipl-devel/blob/69775434c8226897626b226aefcc8266499f1e2e/src/pl-wam.c#L2294-L2306].
+%An exception whose catcher is this frame is therefore the one this catch
+%receives, and the observer keeps it as raised: this catch receives it only
+%after every other hook clause has had it, and library(prolog_stack)'s clause
+%replaces an error's context with a backtrace. The goal after the catch keeps
+%last-call optimisation from giving this frame to catch/3, which would hand
+%the hook this frame's caller instead.
+run_observed(Buffer,Source,Space,Groups,Error) :-
+    prolog_current_frame(Frame),
+    nb_setarg(6,Buffer,Frame),
+    catch((trace,filereader:metta_host_run_source(Source,Space,[],Groups)),
+          Error,true),
+    nb_setarg(6,Buffer,none).
+
+%The exception observer's record of one raise: the exception as raised when
+%run_observed/5's catch will receive it, and the error with its source frames
+%when observed source raised it.
+observe_exception(Buffer,Error,Frame,Catcher) :-
+    ( arg(6,Buffer,Run), integer(Run), Catcher == Run
+    -> nb_setarg(7,Buffer,escaped(Error))
+    ; true ),
+    ( source_frames(Frame,call,Frames), Frames \== []
+    -> observation_error(Buffer,Error,Frames)
+    ; true ).
+
+%The exception the observed run raised, as the observer kept it, or the caught
+%term when the observer saw no raise to that catch. SWI does not call the hook
+%for unwind(_) or a resource error, while tracing is suspended, or for a catch
+%frame whose exception it is already rewriting [source 2026-09-25T00:44:28+10:00: https://github.com/SWI-Prolog/swipl-devel/blob/69775434c8226897626b226aefcc8266499f1e2e/src/pl-vmi.c#L4933-L4939,
+%https://github.com/SWI-Prolog/swipl-devel/blob/69775434c8226897626b226aefcc8266499f1e2e/src/pl-wam.c#L2297-L2302].
+raised_exception(Buffer,Caught,Raised) :-
+    ( arg(7,Buffer,escaped(Raised)) -> true ; Raised=Caught ).
+
 collect_observation(Buffer, _Groups, Error, Atoms) :-
     arg(1,Buffer,Hits), arg(2,Buffer,Errors0), reverse(Errors0,Errors),
     arg(3,Buffer,answers(_,ReverseAnswers)), reverse(ReverseAnswers,Answers),
     ( var(Error)
     -> Extra=[], Status=['observation-status',complete]
-    ; observation_text(Error,Message), Extra=[['observation-exception',Message]],
+    ; raised_exception(Buffer,Error,Raised),
+      observation_text(Raised,Message), Extra=[['observation-exception',Message]],
       Status=['observation-status',exception] ),
     findall(['source-coverage',Label,L,C,EL,EC,Count],
             ( observed_location(Id,Span),
