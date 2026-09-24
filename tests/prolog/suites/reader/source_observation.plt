@@ -88,6 +88,18 @@ test(repeated_observations_do_not_retain_errors_or_documents, [nondet]) :-
     \+ member(['source-error',_,_],Second),
     memberchk(['observation-answer',0,3],Second).
 
+% The native division error's context carries an unbound variable, which
+% term_string/2 named by the engine's history: _3264 the first time this source
+% was observed and _3278 the second, so the rows differed with nothing about the
+% source changed.
+test(two_observations_of_one_source_store_identical_rows) :-
+    Source = "(= (obs-divide-again $x) (+ 1 (/ 1 $x)))\n!(obs-divide-again 0)",
+    observe(Source,First),
+    observe(Source,Second),
+    assertion(First == Second),
+    assertion(memberchk(['source-error',_,
+        "error(evaluation_error(zero_divisor),context((/)/2,_))"],First)).
+
 test(an_observed_error_does_not_mark_an_engines_outer_query_frame) :-
     setup_call_cleanup(
         engine_create(Rows, source_observation:observe_source(

@@ -210,6 +210,15 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- `observe-source` stores an error or exception it keeps as text as a function
+  of the term alone. The text came from `term_string/2`, which names an unbound
+  variable by its place in the engine's history, so observing one source twice
+  in one engine stored `error(evaluation_error(zero_divisor),context((/)/2,_3264))`
+  and then `..._3278`, and `03-source-errors.metta` stored `_19612` in one
+  checkout and `_19694` in a battery. The text is now written from a copy whose
+  variables are numbered, a singleton as `_` and shared ones as `A`, `B`, so two
+  observations of one source store identical rows, and a ground term reads as it
+  did. `03-source-errors.metta` claims the text row.
 - Form 22 of `06-the_prolog_rung_under_lib_thread.metta` in chapter 17 claims
   that cancelling a running `timer_every` answers `True`. It claimed the
   literal `stopped`, which its `let` answered whatever `timer_every` and

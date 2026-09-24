@@ -25,6 +25,11 @@
 %   source_observation:ordinary_other_thread_execution_does_not_enter_observation,
 %   source_observation:a_throwing_exit_hook_is_reported_and_the_observation_completes;
 %   commit=0c878d61a57754db5bc292e6f5baa2a2c48a8778].
+% Guarantees: an error or exception the observation stores as text is a
+%   function of the term alone, so two observations of one source store
+%   identical rows [tested:
+%   source_observation:two_observations_of_one_source_store_identical_rows;
+%   commit=WORKTREE].
 % Guarantees: an engine that never runs observe-source loads none of this and
 %   pays nothing for it. Loading it at boot cost 3,696 inferences, and its
 %   resident prolog:prolog_exception_hook/5 clause cost another 119 on the
@@ -757,7 +762,7 @@ collect_observation(Buffer, _Groups, Error, Atoms) :-
     arg(3,Buffer,answers(_,ReverseAnswers)), reverse(ReverseAnswers,Answers),
     ( var(Error)
     -> Extra=[], Status=['observation-status',complete]
-    ; term_string(Error,Message), Extra=[['observation-exception',Message]],
+    ; observation_text(Error,Message), Extra=[['observation-exception',Message]],
       Status=['observation-status',exception] ),
     findall(['source-coverage',Label,L,C,EL,EC,Count],
             ( observed_location(Id,Span),
@@ -813,7 +818,7 @@ record_answers(Id,Answers) :-
 
 error_atoms([],_,[]).
 error_atoms([error(Error,Frames)|Errors],Index,Atoms) :-
-    ( is_list(Error) -> Value=Error ; term_string(Error,Value) ),
+    ( is_list(Error) -> Value=Error ; observation_text(Error,Value) ),
     frame_atoms(Frames,Index,0,FrameAtoms),
     Next is Index+1, error_atoms(Errors,Next,Rest),
     append([['source-error',Index,Value]|FrameAtoms],Rest,Atoms).
@@ -825,6 +830,20 @@ frame_atoms([frame(Name,Label,span(_,_,L,C,EL,EC),Attribution)|Frames],Id,Depth,
 frame_atoms([unavailable(Name,Reason)|Frames],Id,Depth,
              [['source-frame-unavailable',Id,Depth,Name,Reason]|Atoms]) :-
     Next is Depth+1, frame_atoms(Frames,Id,Next,Atoms).
+
+%An error or exception an observation stores as text, written as a function of
+%the term alone. term_string/2 names an unbound variable by its place on the
+%engine's stacks, which everything that ran before decides, so one source
+%observed twice in one engine stored
+%error(evaluation_error(zero_divisor),context((/)/2,_3264)) and then _3278.
+%The copy is numbered in one pass instead, as swrite_prolog/2 names variables
+%(engine/parser.pl): a singleton prints as _ and a shared variable as A, B, ...,
+%so sharing stays visible, and copy_term_nat/2 leaves no attribute for
+%numbervars/4 to refuse. A ground term reads as term_string/2 wrote it.
+observation_text(Term,Text) :-
+    copy_term_nat(Term,Copy),
+    numbervars(Copy,0,_,[singletons(true)]),
+    format(string(Text),"~W",[Copy,[quoted(true),numbervars(true)]]).
 
 
 % Some generated VM frames expose a non-source PC that SWI cannot decode.
