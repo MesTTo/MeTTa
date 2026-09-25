@@ -24,7 +24,16 @@ Both isolations are load-bearing and neither is available in-process:
     one read `[a,c]` four times where it asserts once.
   - a fresh DIRECTORY, because fences write. Run in the checkout, the file and
     CSV examples left `report.txt`, `blob.bin`, `sales.csv` and `prices.csv` in
-    the repository root.
+    the repository root. The directory is the fence's temporary directory as
+    well, because `temp-dir!` and `temp-path!` write somewhere else entirely:
+    they mint under SWI's `tmp_dir` flag, which SWI reads from TMP and not from
+    TMPDIR [measured 2026-09-25T15:30:35+10:00: TMP moved the flag and the
+    directory `temp-dir!` answered, TMPDIR moved neither]. check.sh points TMP
+    at its own run's scratch (tests/checks/gate_scratch.sh), so under the gate
+    such a directory outlived its fence until the gate ended, and run by hand it
+    stayed in /tmp; minted in the fence's directory, it goes with the fence
+    either way. TMPDIR and TEMP point there too, the three names
+    gate_scratch.sh exports, so no host reading another escapes it.
 
 A reader pastes one block into a fresh session in their own project, which is
 exactly what this does.
@@ -40,6 +49,9 @@ Guarantees:
     because documentation that clones a repository is remote code execution
     inside a check
     [tested: tests/checks/check_readme_fences_selftest.py; commit=0388b2236aa6d48853d81563dca87eecf564d70e]
+  - a temporary directory a fence mints sits inside the fence's own directory,
+    so it is removed with it [tested 2026-09-25T16:13:38+10:00:
+    tests/checks/check_readme_fences_selftest.py]
 Fails when: run outside a checkout, which it reports.
 Open Obligations:
   To Do: None
@@ -49,6 +61,7 @@ Open Obligations:
 
 from __future__ import annotations
 
+import os
 import re
 import subprocess
 import sys
@@ -163,6 +176,7 @@ def run_one(item: tuple[str, int, str]) -> str | None:
                     ceiling=CEILING),
             cwd=scratch, input=body, capture_output=True, text=True,
             check=False, timeout=CEILING,
+            env={**os.environ, "TMP": scratch, "TMPDIR": scratch, "TEMP": scratch},
         )
     if finished.returncode == 0:
         return None

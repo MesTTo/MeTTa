@@ -17,6 +17,8 @@ Guarantees:
     [tested: tests/checks/check_readme_fences_selftest.py; commit=c6ed562a1a6f964aba906206f2558489b107dc24]
   - a fence that runs is not reported
     [tested: tests/checks/check_readme_fences_selftest.py; commit=c6ed562a1a6f964aba906206f2558489b107dc24]
+  - a temporary directory a fence mints is inside the fence's own directory
+    [tested 2026-09-25T16:13:38+10:00: tests/checks/check_readme_fences_selftest.py]
   - a fence DEMONSTRATING a refusal, whose comment is the message the engine
     raises, is not reported, and one whose comment is not that message still is
     [tested: tests/checks/check_readme_fences_selftest.py; commit=c6ed562a1a6f964aba906206f2558489b107dc24]
@@ -58,6 +60,16 @@ CASES: tuple[tuple[str, str, str | None], ...] = (
     (
         "a fence that runs",
         "!(test (+ 1 1) 2)\n",
+        None,
+    ),
+    (
+        # A temporary directory the fence mints has to be inside the fence's own
+        # directory, which is removed with it. Without the fence's own TMP it is
+        # minted wherever the caller's TMP points, and this assertion fails.
+        "a temporary directory minted inside the fence",
+        "!(import! &self (library lib_file))\n"
+        "!(import! &self (library lib_string))\n"
+        '!(test (string-starts-with (path-resolve (temp-dir! "fence")) (path-resolve ".")) True)\n',
         None,
     ),
     (

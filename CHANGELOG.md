@@ -361,6 +361,12 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- `readme-fences` points TMP, TMPDIR and TEMP at each fence's own directory, so
+  a directory a fence mints with `temp-dir!` or `temp-path!` is removed with
+  the fence. SWI reads its `tmp_dir` flag from TMP, so such a directory
+  outlived its fence in the gate's scratch until the gate ended, and stayed in
+  /tmp when the lane ran by hand.
+
 - `tools/bounded.sh` hands a command the same environment wherever its rung
   runs. A rung outside a scope probed for one and exported its answer as
   `METTA_BOUNDED_SCOPE`, and a rung that made a scope passed on the
