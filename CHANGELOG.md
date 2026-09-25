@@ -9,6 +9,15 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- The `llms` lane holds five more kinds of roster to their sources: a
+  sentence naming a `metta.vocabularies` enum and two of its members names
+  every member, and the root sheet's rosters of engine units, special forms,
+  process settings and `engine().info()` keys, with the count where it gives
+  one, equal the unit directories, the translator's special-form heads,
+  `metta.config` and `engine().info()`. All five had drifted before this
+  release and each now fails the lane; the selftest plants twenty-three more
+  cases, 110 in all.
+
 - The host service `metta_host_copy_rows/2`, which restores one space's rows
   into another the way a load restores a program and compiles in the copy
   exactly what the source had compiled; the Python seat's `Space.copy()`

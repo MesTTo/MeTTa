@@ -39,6 +39,13 @@ Guarantees:
   - a same-count substitution in the algebra-law roster and a changed alias
     expansion in its table are each caught [tested: this file is its own test,
     run by the gate; commit=5e0ae6c22d604c4b980766e3cc4811ee545e5c9e]
+  - a vocabulary roster sentence omitting a member, a sentence read past its
+    end, the engine-unit, special-form, setting and info-key rosters each
+    omitting a member or deleted, a wrong count beside the special forms or the
+    settings, and a compound count word each turn their checker red, while a
+    one-member mention, an enum-less constant, a period inside code and a seat
+    sheet stay quiet
+    [tested 2026-09-25T22:44:33+10:00: tests/checks/check_llms_selftest.py]
 Open Obligations:
   To Do: None
   Hacks: None
@@ -59,13 +66,16 @@ if str(HERE) not in sys.path:
 
 from check_llms_names import (  # noqa: E402  -- HERE must be on the path first
     REPO,
+    _number,
     _unreachable,
     builtin_count_findings,
     closed_value_findings,
     closed_value_source_findings,
+    config_roster_findings,
     count_findings,
     dotted_findings,
     head_findings,
+    info_roster_findings,
     library_findings,
     method_findings,
     near_miss_findings,
@@ -76,6 +86,9 @@ from check_llms_names import (  # noqa: E402  -- HERE must be on the path first
     refresh_source_claims,
     return_findings,
     shipped_libraries,
+    special_form_findings,
+    unit_roster_findings,
+    vocabulary_roster_findings,
 )
 
 SHEET = REPO / "llms.txt"
@@ -533,6 +546,157 @@ def main() -> int:
         ),
         "a false module object roster count was NOT reported",
     )
+
+    # VOCABULARY ROSTERS: a sentence naming a generated enum and two of its
+    # words has to name them all. The rule is the prose's own shape, so each
+    # case below is a sentence shape rather than a per-roster anchor.
+    words = {"Refinement": ("Gt", "Ge", "Lt", "Literal")}
+    whole = "`metta.vocabularies.Refinement` names `Gt`, `Ge`, `Lt` and `Literal`; `doc(x)` is not one."
+    expect(
+        vocabulary_roster_findings(SHEET, whole, words) == [],
+        "a whole vocabulary roster was reported",
+    )
+    expect(
+        any(
+            "omits `Literal`" in finding
+            for finding in vocabulary_roster_findings(
+                SHEET, whole.replace(" and `Literal`", ""), words
+            )
+        ),
+        "a vocabulary member the roster sentence omits was NOT reported",
+    )
+    expect(
+        any(
+            "omits `Lt`, `Literal`" in finding
+            for finding in vocabulary_roster_findings(
+                SHEET,
+                "`metta.vocabularies.Refinement` names `Gt` and `Ge`. Then `Lt` and `Literal`.",
+                words,
+            )
+        ),
+        "a vocabulary roster sentence was read past its end",
+    )
+    expect(
+        vocabulary_roster_findings(
+            SHEET, "`metta.vocabularies.Refinement` such as `Gt` is one.", words
+        )
+        == [],
+        "a one-member mention of a vocabulary was read as its roster",
+    )
+    expect(
+        vocabulary_roster_findings(
+            SHEET, "`metta.vocabularies.WIRE_TAGS` holds `s` and `g`.", words
+        )
+        == [],
+        "a vocabulary constant that is no enum was read as a roster",
+    )
+    expect(
+        vocabulary_roster_findings(
+            SHEET,
+            "`metta.vocabularies.Refinement` names `Gt`, `m.self.x`, `Ge`, `Lt` and `Literal`.",
+            words,
+        )
+        == [],
+        "a period inside inline code ended a vocabulary roster sentence",
+    )
+
+    # ENGINE UNITS, SPECIAL FORMS, SETTINGS: exact rosters with injected
+    # sources, required on the root sheet and absent from a seat's.
+    units = {"engine/metta": ("a", "b"), "engine/translator": ("c",), "engine/spaces": ("d", "e")}
+    unit_text = (
+        "| `engine/**/*.pl` | the two `engine/metta/*.pl` units (a, b), the one "
+        "`engine/translator/*.pl` units (c), the two `engine/spaces/*.pl` units (e, d) |"
+    )
+    expect(unit_roster_findings(SHEET, unit_text, units) == [], "exact engine unit rosters were reported")
+    expect(
+        any(
+            "engine/metta/*.pl" in finding
+            for finding in unit_roster_findings(SHEET, unit_text.replace("(a, b)", "(a)"), units)
+        ),
+        "an engine unit its roster omits was NOT reported",
+    )
+    expect(
+        any(
+            "engine/spaces/*.pl" in finding and "missing" in finding
+            for finding in unit_roster_findings(
+                SHEET, unit_text.replace("`engine/spaces/*.pl` units (e, d)", "spaces"), units
+            )
+        ),
+        "a deleted engine unit roster was NOT reported",
+    )
+    expect(
+        unit_roster_findings(PYTHON_SHEET, "no unit rosters here", units) == [],
+        "a seat sheet was held to the engine unit rosters",
+    )
+    forms = ("case", "chain", "case", "__metta_type_syntax__")
+    form_text = "These two, plus the internal `__metta_type_syntax__` below:\n\n```\nchain case\n```\n"
+    expect(special_form_findings(SHEET, form_text, forms) == [], "an exact special-form roster was reported")
+    expect(
+        any(
+            "says 3" in finding
+            for finding in special_form_findings(SHEET, form_text.replace("These two", "These three"), forms)
+        ),
+        "a wrong special-form count was NOT reported",
+    )
+    expect(
+        any(
+            "special-form roster must be" in finding
+            for finding in special_form_findings(SHEET, form_text.replace("chain case", "chain"), forms)
+        ),
+        "a special form its roster omits was NOT reported",
+    )
+    expect(
+        any("missing" in finding for finding in special_form_findings(SHEET, "no roster", forms)),
+        "a deleted special-form roster was NOT reported",
+    )
+    settings = ("alpha", "beta")
+    config_text = (
+        "Inspect all two settings\nwith `config.as_dict()` and set them atomically with\n"
+        "`config.configure(alpha=..., beta=...)`."
+    )
+    expect(config_roster_findings(SHEET, config_text, settings) == [], "an exact setting roster was reported")
+    expect(
+        any(
+            "says 3" in finding
+            for finding in config_roster_findings(SHEET, config_text.replace("all two", "all three"), settings)
+        ),
+        "a wrong setting count was NOT reported",
+    )
+    expect(
+        any(
+            "process setting roster must be" in finding
+            for finding in config_roster_findings(SHEET, config_text.replace(", beta=...", ""), settings)
+        ),
+        "a setting its roster omits was NOT reported",
+    )
+    expect(
+        any("missing" in finding for finding in config_roster_findings(SHEET, "no settings sentence", settings)),
+        "a deleted setting roster was NOT reported",
+    )
+    keys = ("metta", "actor")
+    info_text = "metta.engine().info() -> {metta, actor}: the version and the actor"
+    expect(info_roster_findings(SHEET, info_text, keys) == [], "an exact info-key roster was reported")
+    expect(
+        any(
+            "`engine().info()` key roster must be" in finding
+            for finding in info_roster_findings(SHEET, info_text.replace(", actor", ""), keys)
+        ),
+        "an info key its roster omits was NOT reported",
+    )
+    expect(
+        any("missing" in finding for finding in info_roster_findings(SHEET, "no info sentence", keys)),
+        "a deleted info-key roster was NOT reported",
+    )
+    expect(
+        (_number("sixty-nine"), _number("Sixty"), _number("twenty"), _number("1,000")) == (69, 60, 20, 1000),
+        "a compound or plain count word was misread",
+    )
+    rejected = False
+    try:
+        _number("sixty-ten")
+    except KeyError:
+        rejected = True
+    expect(rejected, "an impossible compound count word was accepted")
 
     # COUNTS: use the real table as the clean control, then corrupt one claim
     # in memory. The production derivation still reads the named source.

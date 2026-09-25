@@ -53,6 +53,13 @@ admitting it is hand-kept. Nine checks cover both directions of each promise:
               The root sheet must carry each one, so deleting a roster cannot
               silence its check; a seat sheet is free not to cover a set and
               is held to what it does state.
+              Beyond those five: a sentence naming a `metta.vocabularies` enum
+              and listing two or more of its members lists all of them, read
+              off the generated enums rather than kept per vocabulary; and the
+              root sheet's engine-unit rosters, special-form roster with its
+              count, process-setting roster with its count, and
+              `engine().info()` key set equal the directories, the
+              translator, `metta.config` and the engine they describe.
 
 Assumes:
   - swipl is on PATH; without it the HEADS half is skipped aloud rather than
@@ -94,6 +101,12 @@ Guarantees:
   - the algebra-law roster and its alias table are held to the catalog's own
     vocabulary row and expansion claims, the alias table by exact alias=target
     rows [tested: tests/checks/check_llms_selftest.py; commit=5e0ae6c22d604c4b980766e3cc4811ee545e5c9e]
+  - a vocabulary roster sentence that omits a member, an engine-unit,
+    special-form, setting or info-key roster that disagrees with its source, a
+    wrong count word beside the special forms or the settings, and the deletion
+    of any of those five root rosters each fail separately; a mention naming
+    fewer than two members and a vocabulary constant that is no enum are left
+    alone [tested 2026-09-25T22:44:33+10:00: tests/checks/check_llms_selftest.py]
 Open Obligations:
   To Do: None
   Hacks: None
@@ -352,6 +365,38 @@ _CAPABILITY_ROSTER = re.compile(
     r"^Capabilities are declared, not guessed:\s*(?P<body>.*?)(?=\.\s|\.$)",
     re.MULTILINE | re.DOTALL,
 )
+#: A mention of a generated vocabulary enum. The sentence it opens is a roster
+#: of that vocabulary once it names two of its members, and the rule is read
+#: off the prose rather than kept per vocabulary, so a new vocabulary roster
+#: needs no anchor of its own: `Refinement` gained `Literal` while the sheet kept
+#: naming eleven heads, and no per-roster anchor existed to notice
+#: [measured 2026-09-25T22:42:46+10:00: the root sheet before this rule's
+#: release pass reads Refinement 11 of 12 and every other vocabulary roster
+#: whole].
+_VOCABULARY_MENTION = re.compile(r"`metta\.vocabularies\.([A-Z]\w*)`")
+#: A count spelled as a word or digits, hyphenated compounds included, since
+#: the rosters below run past the nineteen `_NUMBER_WORDS` spells alone.
+_COUNT = r"(?P<count>[A-Za-z]+(?:-[A-Za-z]+)?|\d+)"
+#: The engine unit rosters the sources table lists beside the unit counts
+#: COUNTS already derives; the directory is the roster's source.
+_UNIT_ROSTERS = tuple(
+    (directory, re.compile(rf"`{re.escape(directory)}/\*\.pl` units \((?P<body>[^)]*)\)"))
+    for directory in ("engine/metta", "engine/translator", "engine/spaces")
+)
+#: The special forms: the count word, then the fenced roster right after it.
+_SPECIAL_FORM_ROSTER = re.compile(
+    rf"These {_COUNT}, plus the internal\s+`__metta_type_syntax__`[^\n]*\n\n```\n"
+    r"(?P<body>.*?)\n```",
+    re.DOTALL,
+)
+#: The process settings: the count word and the keywords `configure()` takes.
+_CONFIG_ROSTER = re.compile(
+    rf"Inspect all {_COUNT} settings\s+with `config\.as_dict\(\)` and set them "
+    r"atomically with\s+`config\.configure\((?P<body>[^`]*)\)`",
+    re.DOTALL,
+)
+#: The keys `metta.engine().info()` answers, written as the braced set.
+_INFO_ROSTER = re.compile(r"metta\.engine\(\)\.info\(\) -> \{(?P<body>[^}]*)\}")
 
 #: Each count is anchored to the table row that makes the claim. A missing
 #: match is itself a finding, so deleting the number cannot disable its check.
@@ -529,7 +574,18 @@ _NUMBER_WORDS = {
     "seventeen": 17,
     "eighteen": 18,
     "nineteen": 19,
+}
+#: The tens, so `sixty-nine` is read as the two words it is rather than
+#: listed: the prose's counts grew past the table above.
+_TENS = {
     "twenty": 20,
+    "thirty": 30,
+    "forty": 40,
+    "fifty": 50,
+    "sixty": 60,
+    "seventy": 70,
+    "eighty": 80,
+    "ninety": 90,
 }
 
 #: Receiver names used by the Python examples. The same spelling can denote a
@@ -921,7 +977,13 @@ def _number(written: str) -> int:
     normalized = written.replace(",", "").lower()
     if normalized.isdecimal():
         return int(normalized)
-    return _NUMBER_WORDS[normalized]
+    if normalized in _NUMBER_WORDS:
+        return _NUMBER_WORDS[normalized]
+    tens, hyphen, unit = normalized.partition("-")
+    ones = _NUMBER_WORDS.get(unit, 0) if hyphen else 0
+    if tens in _TENS and (not hyphen or 1 <= ones <= 9):
+        return _TENS[tens] + ones
+    raise KeyError(written)
 
 
 def refresh_source_claims(text: str, root: Path = REPO) -> str:
@@ -1462,6 +1524,212 @@ class EngineUnavailableError(Exception):
     """swipl is not installed, which is a skip; anything else is a finding."""
 
 
+def _sentence_after(text: str, start: int) -> str:
+    """The rest of the sentence from ``start``, ending at a blank line or a stop.
+
+    A stop is a ``.`` or ``;`` outside inline code and followed by whitespace.
+    Code spans are skipped because a token such as `m.self` holds a period that
+    ends nothing, and a blank line ends a paragraph a sentence cannot cross.
+    """
+    inside = False
+    for index in range(start, len(text)):
+        character = text[index]
+        if character == "`":
+            inside = not inside
+        elif inside:
+            continue
+        elif character in ".;" and (index + 1 == len(text) or text[index + 1].isspace()):
+            return text[start:index]
+        elif text.startswith("\n\n", index):
+            return text[start:index]
+    return text[start:]
+
+
+def vocabulary_members() -> dict[str, tuple[str, ...]]:
+    """Every enum `metta.vocabularies` generates, by class name, with its words.
+
+    The module is generated from the catalog's `(vocabulary ...)` rows and the
+    vocab-sync lane holds it to them, so this reads the rows without a boot.
+    """
+    python_path = str(REPO / "extensions" / "python")
+    if python_path not in sys.path:
+        sys.path.insert(0, python_path)
+    import enum
+
+    from metta import vocabularies
+
+    return {
+        name: tuple(member.value for member in value)
+        for name, value in vars(vocabularies).items()
+        if isinstance(value, type)
+        and issubclass(value, enum.Enum)
+        and value.__module__ == vocabularies.__name__
+    }
+
+
+def vocabulary_roster_findings(
+    sheet: Path, text: str, members: Mapping[str, tuple[str, ...]]
+) -> list[str]:
+    """A sentence naming a vocabulary enum and two of its words names them all.
+
+    Fewer than two words is a mention of the set rather than a roster of it,
+    and a name that is no enum, such as the `WIRE_TAGS` table, is a constant
+    `dotted_findings` already resolves; both are left alone. The check runs
+    one way, a member the sentence omits, since a word the sentence adds is
+    indistinguishable here from the prose around it.
+    """
+    findings: list[str] = []
+    for mention in _VOCABULARY_MENTION.finditer(text):
+        name = mention.group(1)
+        expected = members.get(name)
+        if expected is None:
+            continue
+        named = set(re.findall(r"`([^`]+)`", _sentence_after(text, mention.end())))
+        listed = [value for value in expected if value in named]
+        if len(listed) < 2 or len(listed) == len(expected):
+            continue
+        omitted = ", ".join(f"`{value}`" for value in expected if value not in named)
+        findings.append(
+            f"{sheet.relative_to(REPO)}:{_line_of(text, mention.start())}: the "
+            f"`{name}` roster names {len(listed)} of its {len(expected)} members "
+            f"and omits {omitted}"
+        )
+    return findings
+
+
+def unit_rosters(root: Path = REPO) -> dict[str, tuple[str, ...]]:
+    """The engine units each sources-table roster describes, by directory."""
+    return {
+        directory: tuple(sorted(path.stem for path in (root / directory).glob("*.pl")))
+        for directory, _ in _UNIT_ROSTERS
+    }
+
+
+def unit_roster_findings(
+    sheet: Path, text: str, units: Mapping[str, tuple[str, ...]] | None = None
+) -> list[str]:
+    """Each engine-unit roster in the sources table names exactly its units."""
+    if sheet != _ROOT_SHEET:
+        return []
+    rosters = unit_rosters() if units is None else units
+    findings: list[str] = []
+    for directory, pattern in _UNIT_ROSTERS:
+        match = pattern.search(text)
+        actual = (
+            tuple(name.strip() for name in match.group("body").split(",") if name.strip())
+            if match is not None
+            else ()
+        )
+        findings.extend(
+            _roster_difference(
+                sheet,
+                text,
+                f"`{directory}/*.pl` unit",
+                match,
+                actual=actual,
+                expected=rosters[directory],
+                opening=f"`{directory}/*.pl` units (",
+            )
+        )
+    return findings
+
+
+def _counted_roster_findings(
+    sheet: Path,
+    text: str,
+    label: str,
+    match: re.Match[str] | None,
+    *,
+    actual: tuple[str, ...],
+    expected: tuple[str, ...],
+    opening: str,
+) -> list[str]:
+    """A roster that also states its size: both have to match the source."""
+    findings = _roster_difference(
+        sheet, text, label, match, actual=actual, expected=expected, opening=opening
+    )
+    if match is not None and _number(match.group("count")) != len(expected):
+        findings.append(
+            f"{sheet.relative_to(REPO)}:{_line_of(text, match.start())}: the {label} "
+            f"roster says {_number(match.group('count'))}, the source has {len(expected)}"
+        )
+    return findings
+
+
+def special_form_findings(sheet: Path, text: str, forms: tuple[str, ...]) -> list[str]:
+    """The special-form roster and its count against the translator's own set.
+
+    `__metta_type_syntax__` is named beside the roster as the internal one, so
+    the roster is every other head `metta_special_form_head/1` answers.
+    """
+    if sheet != _ROOT_SHEET:
+        return []
+    match = _SPECIAL_FORM_ROSTER.search(text)
+    return _counted_roster_findings(
+        sheet,
+        text,
+        "special-form",
+        match,
+        actual=tuple(match.group("body").split()) if match is not None else (),
+        # The predicate answers a head once per clause declaring it, so the
+        # roster is the distinct heads.
+        expected=tuple(dict.fromkeys(form for form in forms if form != "__metta_type_syntax__")),
+        opening="These <count>, plus the internal `__metta_type_syntax__`",
+    )
+
+
+def config_settings() -> tuple[str, ...]:
+    """The settings `metta.config` holds, read without booting an engine."""
+    python_path = str(REPO / "extensions" / "python")
+    if python_path not in sys.path:
+        sys.path.insert(0, python_path)
+    from metta._catalog.bounds import config
+
+    return tuple(config.as_dict())
+
+
+def config_roster_findings(sheet: Path, text: str, settings: tuple[str, ...]) -> list[str]:
+    """The settings sentence's count and `configure()` keywords against `config`."""
+    if sheet != _ROOT_SHEET:
+        return []
+    match = _CONFIG_ROSTER.search(text)
+    return _counted_roster_findings(
+        sheet,
+        text,
+        "process setting",
+        match,
+        actual=tuple(re.findall(r"(\w+)=", match.group("body"))) if match is not None else (),
+        expected=settings,
+        opening="Inspect all <count> settings with `config.as_dict()`",
+    )
+
+
+def engine_info_keys() -> tuple[str, ...]:
+    """The keys `metta.engine().info()` answers, which takes one engine boot."""
+    python_path = str(REPO / "extensions" / "python")
+    if python_path not in sys.path:
+        sys.path.insert(0, python_path)
+    from metta import engine
+
+    return tuple(engine().info())
+
+
+def info_roster_findings(sheet: Path, text: str, keys: tuple[str, ...]) -> list[str]:
+    """The braced key set beside `metta.engine().info()` against its answer."""
+    if sheet != _ROOT_SHEET:
+        return []
+    match = _INFO_ROSTER.search(text)
+    return _roster_difference(
+        sheet,
+        text,
+        "`engine().info()` key",
+        match,
+        actual=tuple(key.strip() for key in match.group("body").split(",")) if match is not None else (),
+        expected=keys,
+        opening="metta.engine().info() -> {",
+    )
+
+
 def _query_values(disjunction: str) -> tuple[str, ...]:
     """Ask one engine process for the names a goal enumerates, in source order."""
     goal = (
@@ -1516,6 +1784,10 @@ def closed_value_catalog() -> dict[str, tuple[str, ...]]:
         "provider-capabilities": _query_values(
             "metta_catalog_row([vocabulary,'provider-capability'|Vs]), member(N, Vs)"
         ),
+        # The translator's own answer to "which heads are special forms",
+        # the service a linter and a completion list ask instead of reading
+        # the compiler's clause table.
+        "special-forms": _query_values("metta_special_form_head(N)"),
     }
 
 
@@ -1663,12 +1935,30 @@ def main(argv: list[str] | None = None) -> int:
         findings.append(f"llms: {broken}")
     if closed_values is not None:
         findings.extend(closed_value_source_findings(closed_values))
+    members: dict[str, tuple[str, ...]] | None
+    settings: tuple[str, ...] | None
+    info_keys: tuple[str, ...] | None
+    try:
+        members = vocabulary_members()
+        settings = config_settings()
+        info_keys = engine_info_keys()
+    except ImportError as absent:
+        # The package is in this tree, so a failed import is a finding, the
+        # way the operator and receiver checks treat it.
+        members = None
+        settings = None
+        info_keys = None
+        findings.append(
+            f"llms: the metta package under extensions/python did not import, so "
+            f"the vocabulary, setting and info-key rosters went unchecked: {absent}"
+        )
     used = corpus_head_uses() if known is not None else {}
     for sheet in sheets():
         text = sheet.read_text(encoding="utf-8")
         findings.extend(path_findings(sheet, text))
         findings.extend(library_findings(sheet, text))
         findings.extend(count_findings(sheet, text))
+        findings.extend(unit_roster_findings(sheet, text))
         findings.extend(operator_word_findings(sheet, text))
         findings.extend(builtin_count_findings(sheet, text))
         findings.extend(near_miss_findings(sheet, text, known))
@@ -1677,6 +1967,11 @@ def main(argv: list[str] | None = None) -> int:
         findings.extend(return_findings(sheet, text))
         if closed_values is not None:
             findings.extend(closed_value_findings(sheet, text, closed_values))
+            findings.extend(special_form_findings(sheet, text, closed_values["special-forms"]))
+        if members is not None and settings is not None and info_keys is not None:
+            findings.extend(vocabulary_roster_findings(sheet, text, members))
+            findings.extend(config_roster_findings(sheet, text, settings))
+            findings.extend(info_roster_findings(sheet, text, info_keys))
         if known is not None:
             assert corpus_known is not None
             findings.extend(head_findings(sheet, text, known))
