@@ -361,6 +361,15 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- `test_answer_position_cache_does_not_own_generated_code` asks whether the
+  Answers position cache holds a generated code object strongly, where it
+  asked whether the code object died at `gc.collect()`. The gate's pytest lane
+  runs under coverage, whose `sys.monitoring` core, the default on CPython
+  3.14, keeps every code object it has started alive, so the test failed in
+  every gate run and passed wherever coverage was off. Nothing the cache holds
+  reaches the code object through a strong reference, which is what the cache
+  promises.
+
 - A library head backed by Prolog stays a function in every space still
   importing the library when the first space that imported it is dropped or
   unimports it, and its arity row leaves with the last of them. The first
