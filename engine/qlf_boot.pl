@@ -74,13 +74,17 @@
 %     commit=5f8a823d23fbed5c7395912a89ba32760e2df4b1].
 %   - the child is the running home's own swipl, whatever swipl the PATH
 %     finds, so the host check accepts it and the artifacts are written by
-%     the build that loads them; and it also writes the artifact of every
-%     governed source its file's own load brought in, so a half's nested
+%     the build that loads them; and every governed source its file's own
+%     load brought in is compiled by a child of its own, so a half's nested
 %     governed dependency loads from an artifact in every later process
-%     [tested: extensions/python/tests/repository/test_library_halves.py,
+%     [tested 2026-09-25T15:48:44+10:00:
+%     extensions/python/tests/repository/test_library_halves.py,
 %     test_the_first_import_compiles_each_half_once_in_a_child and
-%     test_a_later_process_loads_every_governed_source_from_its_artifact;
-%     commit=0a81c782fd6ba00984c36e58e228f73bca810dee].
+%     test_a_later_process_loads_every_governed_source_from_its_artifact].
+%   - a half's artifact is the same whether a claim of that half or of a half
+%     that loads it wrote it, since either way a child that had not loaded it
+%     compiles it [tested 2026-09-25T15:46:07+10:00:
+%     a_nested_source_compiles_to_the_artifact_a_direct_claim_writes].
 %   - the engine's own set is written by the same hermetic child (-f none,
 %     --no-packs) when a boot finds it absent, so no process's flags,
 %     initialisation file or packs shape an artifact the tree shares
@@ -341,16 +345,35 @@ qlf_shell_word(Text, Word) :-
 
 %The child's whole job: raise the flag that says so, boot the engine the way
 %every host does, compile the one file its command line names beside itself,
-%then compile every governed source that file's own load brought in and found
-%stale. The second step is what lets a half's nested dependency load from an
-%artifact. A use_module inside a half names a stem, and SWI's '$qlf_file'/5
-%loads a fresh artifact for a stem but writes one only under a qcompile option
-%or flag, which a nested load in the importing process never carries; so
-%lib/_support/native_build.pl, which every library with a native half loads,
-%and lib_string.pl under lib_csv.pl compiled from source in every process
-%that reached them. Only governed sources are compiled, so an artifact still
-%appears only where the stamp purges it, and a file loaded before the
-%argument's own load, the engine included, is not this child's to write.
+%then have every governed source that file's own load brought in and found
+%stale compiled by a child of its own. The second step is what lets a half's
+%nested dependency load from an artifact. A use_module inside a half names a
+%stem, and SWI's '$qlf_file'/5 loads a fresh artifact for a stem but writes one
+%only under a qcompile option or flag, which a nested load in the importing
+%process never carries; so lib/_support/native_build.pl, which every library
+%with a native half loads, and lib_string.pl under lib_csv.pl compiled from
+%source in every process that reached them. Only governed sources are
+%compiled, so an artifact still appears only where the stamp purges it, and a
+%file loaded before the argument's own load, the engine included, is not this
+%child's to write.
+%
+%A child of its own, not qcompile/1 here, because this process has already
+%loaded that source, and compiling a loaded source writes a different
+%artifact: SWI's non_terminal_decl/2 writes a DCG head's :- non_terminal
+%directive only when no earlier load flagged the head [source
+%2026-09-25T09:09:58+10:00:
+%https://github.com/SWI-Prolog/swipl-devel/blob/69775434c8226897626b226aefcc8266499f1e2e/boot/expand.pl#L211,
+%V10.1.14, the host's source]. So
+%lib_string.qlf came out 5213 bytes compiled under lib_csv's child, which is
+%where the warm-up's glob order compiles it, and 5252 compiled by its own,
+%which is what a plunit suite importing lib_string first gets, and a program
+%loading the second paid 10 more inferences [measured
+%2026-09-25T08:33:56+10:00: 51032 inferences loading the first, 51042 the
+%second]. A nested source is now compiled by a process that had not loaded
+%it, as the argument is, so which process claims it first does not change its
+%artifact. A nested source costs one child boot on a set that lacks its
+%artifact, and nothing once the set is current.
+%
 %Its output is discarded by the parent and its status is the parent's only
 %reading, and a failure to compile is the next load's to report, loudly, in
 %the process that asked; that is also why one nested file that fails to
@@ -366,7 +389,7 @@ qlf_compile_argument :-
              \+ qlf_member(Loaded, Before),
              qlf_governed_source(Loaded),
              qlf_artifact_stale(Loaded, _) ),
-           catch(qcompile(Loaded), _, true)).
+           qlf_child('metta_qlf_boot:qlf_compile_argument', [Loaded])).
 
 %The engine's own set is written by a child for the same reason a library
 %half is: the first process to boot after a purge compiled it in place, under

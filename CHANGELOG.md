@@ -361,6 +361,18 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- A library half's compiled artifact no longer depends on which process
+  claimed the half first. The compile child ran `qcompile/1` again on each
+  governed source its argument's load pulled in, in the process that had
+  already loaded that source, and SWI then leaves out the `:- non_terminal`
+  declaration of a DCG rule's head. So `lib/lib_string/lib_string.qlf` was
+  5213 bytes when `lib_csv`'s child compiled it and 5252 when its own claim
+  did, and loading the second cost 10 more inferences. On a cold tree, the
+  twins lane read the twins that load `lib_string` 10 over their pins
+  whenever plunit ran beside it and claimed `lib_string` first. Each such
+  source is now compiled by a child of its own, and the point twins that
+  load `lib_string` are re-pinned at the cost of that artifact.
+
 - The gate's plunit lane no longer rewrites the engine and library artifacts
   that every other lane boots from. `compiled_sources.plt` tested the artifact
   claim on the shared tree. It deleted and regenerated

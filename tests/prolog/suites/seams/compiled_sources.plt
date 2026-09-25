@@ -3,8 +3,8 @@
    source's artifact is written by a child swipl and this process reads it,
    the first time included; an unclaimed one loads from source and leaves
    nothing behind; a stale artifact is recompiled; a process marked as a
-   compile child compiles in place; and the process-tier loaders reach the
-   door.
+   compile child compiles in place; a nested dependency's artifact is the one
+   its own claim writes; and the process-tier loaders reach the door.
    Assumes: a swipl the boot can start exists, which is the shipped
    configuration. The shared tree's lib/lib_conformance artifact is current,
    or the checkout is writable so the claim's child can write it, since the
@@ -38,10 +38,13 @@
    goes through the same child when its umbrella artifact is absent, and never
    in a child-marked process [tested 2026-09-25T15:34:15+10:00:
    the_engine_set_is_written_by_a_hermetic_child,
-   a_child_marked_process_writes_the_engine_set_in_place]. The conformance kit,
-   a runtime-loaded half, loads through the door and reads its artifact
-   [tested 2026-09-25T15:34:15+10:00: the_conformance_kit_loads_through_the_door]. Three
-   things are proved elsewhere, by
+   a_child_marked_process_writes_the_engine_set_in_place]. A half compiled as
+   another claimed half's nested dependency gets the artifact a claim of it
+   alone writes [tested 2026-09-25T15:46:07+10:00:
+   a_nested_source_compiles_to_the_artifact_a_direct_claim_writes]. The
+   conformance kit, a runtime-loaded half, loads through the door and reads its
+   artifact [tested 2026-09-25T15:34:15+10:00: the_conformance_kit_loads_through_the_door].
+   Three things are proved elsewhere, by
    extensions/python/tests/repository/test_library_halves.py: the first and
    later processes and the child's nested closure, because each takes more
    than one process; and the child being the running home's own swipl,
@@ -58,6 +61,7 @@
 :- use_module('../../scratch.pl').
 :- use_module(library(filesex), [directory_file_path/3, set_time_file/3,
                                  copy_file/2, delete_directory_and_contents/1]).
+:- use_module(library(dcg/basics), [string//1, digits//1]).
 
 % Everything but the tests is defined here, in this file's module, which both
 % units inherit from. A unit that ran retractall/1 on the load record below
@@ -222,6 +226,46 @@ cs_left_out('__pycache__').
 cs_left_out('.git').
 cs_left_out(Name) :- sub_atom(Name, _, _, _, '.qlf').
 
+% Two governed halves planted in the copy: the outer loads the inner, whose DCG
+% rule's head it does not export.
+cs_nested(Which, File) :-
+    cs_root(Root),
+    atomic_list_concat([Root, '/lib/cs_nested_', Which, '/cs_nested_', Which, '.pl'], File).
+
+cs_plant_nested :-
+    cs_nested(inner, Inner),
+    cs_nested(outer, Outer),
+    cs_write_source(Inner, [":- module(cs_nested_inner, [cs_nested_inner/1]).",
+                            "cs_nested_inner(Codes) :- phrase(cs_greeting, Codes).",
+                            "cs_greeting --> \"hello\"."]),
+    cs_write_source(Outer, [":- module(cs_nested_outer, [cs_nested_outer/1]).",
+                            ":- use_module('../cs_nested_inner/cs_nested_inner').",
+                            "cs_nested_outer(Codes) :- cs_nested_inner(Codes)."]).
+
+cs_write_source(File, Lines) :-
+    file_directory_name(File, Directory),
+    make_directory(Directory),
+    setup_call_cleanup(open(File, write, Out),
+                       forall(member(Line, Lines), format(Out, "~w~n", [Line])),
+                       close(Out)).
+
+cs_unplant_nested :-
+    forall(member(Which, [outer, inner]),
+           ( cs_nested(Which, File),
+             ( source_file(File) -> unload_file(File) ; true ),
+             file_directory_name(File, Directory),
+             ( exists_directory(Directory) -> delete_directory_and_contents(Directory) ; true ) )),
+    cs_forget_loads.
+
+% An artifact's bytes after the name SWI records in its header for the file it
+% wrote, <dir>/.<name>.qlf.<pid>, the one thing two compiles of one source in
+% one tree differ in [measured 2026-09-25T08:40:51+10:00: lib_datetime.qlf and
+% metta.qlf from two batteries 5 and 4 bytes apart, all inside that PID, their
+% bytes after it equal].
+cs_artifact_content(File, Content) :-
+    read_file_to_codes(File, Codes, [type(binary)]),
+    once(phrase((string(_), ".qlf.", digits([_|_])), Codes, Content)).
+
 :- begin_tests(compiled_sources,
                [setup((current_prolog_flag(source, Source),
                        set_prolog_flag(source, false))),
@@ -369,5 +413,26 @@ test(consult_global_loads_a_library_half_through_the_door,
     assertion(cs_loaded_how(File, loaded)),
     assertion(exists_file(Artifact)),
     assertion(current_predicate(lib_datetime:now/1)).
+
+% The artifact of a source compiled as another claimed half's nested
+% dependency is the one a claim of that source alone writes, so it does not
+% depend on which process claimed it first. The inner half's DCG rule is what
+% told the two apart: compiled in the child that had already loaded it, its
+% :- non_terminal directive was left out.
+test(a_nested_source_compiles_to_the_artifact_a_direct_claim_writes,
+     [setup(cs_plant_nested), cleanup(cs_unplant_nested)]) :-
+    cs_nested(outer, Outer),
+    cs_nested(inner, Inner),
+    file_name_extension(InnerStem, pl, Inner),
+    file_name_extension(InnerStem, qlf, InnerArtifact),
+    metta_load_source(user:Outer, []),
+    assertion(exists_file(InnerArtifact)),
+    cs_artifact_content(InnerArtifact, Nested),
+    unload_file(Outer),
+    unload_file(Inner),
+    delete_file(InnerArtifact),
+    metta_load_source(user:Inner, []),
+    cs_artifact_content(InnerArtifact, Direct),
+    assertion(Nested == Direct).
 
 :- end_tests(compiled_sources_private_tree).
