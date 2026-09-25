@@ -386,6 +386,16 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- `examples/ch08-data/08-03-the-shipped-libraries/31-system_lib.metta` claims
+  the platform family is one of the four SWI's platform flags name,
+  `"windows"`, `"apple"`, `"unix"` or `"emscripten"`, where it pinned the
+  native `"unix"`. lib_system answers `"emscripten"` on a WebAssembly build,
+  which sets that flag in place of `unix`, so under tsmetta on WebAssembly
+  build 10 the form failed with `"emscripten" does not match "unix"`. The
+  claim holds on both hosts and still fails on one none of the flags names,
+  where lib_system answers `"unknown"`. Its Python twin claims the same
+  through Python's `in` and reads its pinned count.
+
 - A space's own function named `with_metta_module` no longer takes the
   argument check the compiler writes into a body that constructs an
   arrow-declared data head. The call was written unqualified, so it resolved

@@ -536,6 +536,13 @@ on master at 7ecd70c84909 (2026-09-24), where they are unchanged [source
 13:03:34 for src/pl-gc.c and src/pl-vmi.c, which differ from the tag only in
 atom GC's local-stack margin and in T_DELAY].
 
+Item 16 still reproduces on build 10: the name converts to `null` and the next
+query fails with `type_error(atom, [])` once [measured
+2026-09-25T16:42:08+10:00: item 16's reproduction on build 10's host]. Master
+at the same commit still reads a functor's name through `atom_chars()` with
+`CVT_EXCEPTION` [source 2026-09-25T16:44:06+10:00: src/wasm/prolog.js:1675
+and 1924-1938 at 7ecd70c84909].
+
 ### 17. An index built after an erase hides the erased clause from older views
 
 `fill_clause_index()` in `src/pl-index.c` builds a JIT clause index from the

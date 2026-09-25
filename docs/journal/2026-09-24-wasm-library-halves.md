@@ -655,3 +655,51 @@ leaves `type_error(atom, [])` pending in `prolog.js`'s `toJSON()`, and the
 next query from JavaScript fails with it once. Nothing this engine sends
 across the bridge has that shape, so it is item 16 of the upstream list and
 not a patch.
+
+## 2026-09-25
+
+### Build 10, and a claim that described the native host
+
+Every original, run under tsmetta on WebAssembly build 10 as extensions/node
+d7185ad vendors it, from the repository root with the examples tree mounted:
+37 of 44 run every form, and the other 7 refuse at their first failing form
+with `PlatformCapabilityError`, the same seven on the same capabilities as on
+build 9 [measured 2026-09-25T16:36:51+10:00: the 44 before the change]. A later
+form of 32, 38 and 40 fails too, each on a process, a server or a socket the
+refused form never made. 31-system_lib failed a form on its own: after
+env-all's three refusals, form 19's `(platform-info family)` answered
+"emscripten" where the original pinned "unix".
+
+The pin described the native host, not the library. SWI sets `emscripten` in
+place of `unix`, `linux` and `apple` on a WebAssembly build [source
+2026-09-25T16:38:13+10:00:
+https://github.com/SWI-Prolog/swipl-devel/blob/V10.1.14/src/os/pl-prologflag.c#L2519-L2529],
+and lib_system has named that family since the rebuilt host above. The form
+now claims the family is one of the four the flags name, `(is-member
+(platform-info family) ("windows" "apple" "unix" "emscripten"))`. That holds
+on both hosts, and fails where no flag names the host and lib_system answers
+"unknown". The architecture cannot stand in for the family: it reads
+"x86_64-linux" natively and "wasm-emscripten" on build 10 [measured
+2026-09-25T16:36:02+10:00: platform-info on swipl-patched.6, and at 16:35:52
+on build 10], so deriving the family from it would need a table of operating
+systems in the example, a second copy of SWI's flag logic. Accepting
+"unknown" as well would hold on every host by construction. With the change
+the original passes 29 of 29 claims natively, and its Python twin reads its
+pinned count, 294242 inferences on the tree it lands on [measured
+2026-09-25T18:29:41+10:00: the twins lane's row inside a bounded scope]. On
+build 10 the 44 originals give the
+verdicts above, and 31-system_lib's forms 15 to 17 are the only ones of it
+that raise [measured 2026-09-25T16:56:03+10:00: examples with the change].
+
+Nothing the Node seat hands back reaches item 16 of the upstream list. A
+Prolog function answering `'[]'(a, b)` through tsmetta on build 10 is refused
+as text by `metta_node_encode/2`, which spells a functor's name only when it
+is an atom, and the next query answers `(+ 1 2)` as 3 [measured
+2026-09-25T16:42:18+10:00: the function registered from a Prolog file, then
+`!(nil_answer)`, `!(test (nil_answer) 1)` and `!(car-atom (nil_answer))`,
+each followed by an arithmetic query]. A failed test over that value arrives
+as `EngineError` rather than `AssertionError`, because the error-kind
+classifier writes the test's parts with `swrite/2`, which refuses a value
+whose printed form would read back as a different value [measured
+2026-09-25T16:46:12+10:00: `metta_host_error_kind/3` on
+`metta_test_failed('[]'(a, b), 1)` natively].
