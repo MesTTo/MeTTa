@@ -361,6 +361,14 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- The engine README's metta fences run under the `readme-fences` lane, each as
+  a program in a process and a directory of its own, as every other README's
+  already did. `test_readme.py` ran them inside a pytest worker, where a fresh
+  space does not isolate a program: the Concurrency fence writes `&Point`, a
+  name every program in the engine shares, so a class named `Point` defined
+  later in the same worker was refused as a space already used and
+  `test_a_subtype_edge_waits_for_the_base_and_skips_an_undeclared_one` failed.
+
 - `test_vector_lib.py` imports lib_vector into a context of its own and
   releases it after its last test. It imported the library into the process's
   `&self`, which every later test in the worker reads, and lib_vector's `norm`

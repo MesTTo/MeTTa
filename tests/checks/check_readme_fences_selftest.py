@@ -20,6 +20,9 @@ Guarantees:
   - a fence DEMONSTRATING a refusal, whose comment is the message the engine
     raises, is not reported, and one whose comment is not that message still is
     [tested: tests/checks/check_readme_fences_selftest.py; commit=c6ed562a1a6f964aba906206f2558489b107dc24]
+  - the repository root README is among the pages run, so no fence of any
+    README shares an engine with what runs after it
+    [tested 2026-09-25T12:45:49+10:00: tests/checks/check_readme_fences_selftest.py]
 Fails when: run outside a checkout, which it reports.
 Open Obligations:
   To Do: None
@@ -90,6 +93,12 @@ def main() -> int:
             problems.append(f"{name}: went unreported, so the check cannot see it")
         elif expected not in finding:
             problems.append(f"{name}: reported, but did not say {expected!r}: {finding}")
+    # The root README was exempted as covered elsewhere, and elsewhere ran its
+    # fences inside a pytest worker, where one left &Point behind for the rest
+    # of that worker's items.
+    if "README.md" not in checked.readmes():
+        problems.append("the repository root README is not among the pages run, "
+                        "so its fences share an engine with whatever runs them")
     for problem in problems:
         print(f"  {problem}")
     print(f"readme-fences-selftest: {len(problems)} finding(s) over {len(CASES)} planted case(s)")

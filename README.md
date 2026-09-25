@@ -1,8 +1,9 @@
 <!--
 Purpose: show what MeTTa is, how it is put together, and what each surface can
   do, through examples that run.
-Guarantees: every metta fence runs on the engine [tested: python -m pytest
-  extensions/python/tests/repository/test_readme.py -q]. Every component is
+Guarantees: every metta fence runs on the engine, each as a program in a
+  fresh process and directory [tested 2026-09-25T12:45:30+10:00:
+  tests/checks/check_readme_fences.py]. Every component is
   documented in its OWN repository and named once in the Architecture table, so
   no fence here belongs to a surface, to the library pack or to a backend: this
   page is the engine's, and a second copy of a component's own page drifts from

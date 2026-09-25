@@ -1,13 +1,20 @@
-"""Purpose: every metta fence in a component README runs on a fresh engine.
+"""Purpose: every metta fence in a tracked README runs on a fresh engine.
 
 Each runs in a directory of its own too, so a page that shows the language
 cannot show something the engine will not do.
 
-`test_readme.py` covers the repository root README, and the website's run-fence
-rule covers `website/` pages. That left the component front pages ungated: the
-engine's, the library pack's, the examples index's, each library's own, and the
-MORK backend's, 130 fences between them. A showcase that shows code which does
-not run is worse than one that shows none.
+The website's run-fence rule covers `website/` pages. That left the front pages
+ungated: the engine's, the library pack's, the examples index's, each library's
+own, and the MORK backend's, 130 fences between them. A showcase that shows
+code which does not run is worse than one that shows none.
+
+The repository root README is one of them. Its fences ran inside a pytest
+worker instead (test_readme.py, one engine for every item that worker took),
+and its Concurrency fence writes `&Point`, a space name every program in that
+engine shares, so the next class named Point defined in the worker was refused
+as a space already used [measured 2026-09-25T12:43:57+10:00: test_readme.py then
+test_type_inspection.py in one pytest process fails
+test_a_subtype_edge_waits_for_the_base_and_skips_an_undeclared_one that way].
 
 WHY A PROCESS EACH, rather than a pytest parametrisation sharing one engine.
 Both isolations are load-bearing and neither is available in-process:
@@ -29,9 +36,9 @@ Assumes: `tools/bounded.sh`, and a python that can import `metta`.
 Guarantees:
   - a fence that does not run fails the check and is named with its file and
     index [tested: tests/checks/check_readme_fences_selftest.py]
-  - a fence naming a network URL or `git-import!` fails without being run, for
-    the reason test_readme.py gives: documentation that clones a repository is
-    remote code execution inside a test
+  - a fence naming a network URL or `git-import!` fails without being run,
+    because documentation that clones a repository is remote code execution
+    inside a check
     [tested: tests/checks/check_readme_fences_selftest.py; commit=0388b2236aa6d48853d81563dca87eecf564d70e]
 Fails when: run outside a checkout, which it reports.
 Open Obligations:
@@ -57,8 +64,6 @@ from bounded_spawn import bounded
 ROOT = next(parent for parent in Path(__file__).resolve().parents
             if (parent / "engine").is_dir() and (parent / "lib").is_dir())
 SEAT = ROOT / "extensions/python"
-#: The root README has its own executor, which also mirrors its ts and c fences.
-COVERED_ELSEWHERE = ("README.md",)
 NOT_HERMETIC = ("git-import!", "https://", "http://")
 #: Every component that is its own repository, plus the superproject.
 COMPONENTS = ("", "lib", "ext", "examples", "engine", "extensions/python",
@@ -98,7 +103,7 @@ def readmes() -> list[str]:
             capture_output=True, text=True, check=False,
         ).stdout.split()
         found += [f"{component}/{path}" if component else path for path in listed]
-    return sorted(set(found) - set(COVERED_ELSEWHERE))
+    return sorted(set(found))
 
 
 def fences() -> list[tuple[str, int, str]]:
