@@ -147,7 +147,14 @@ Owns resources: one `uv` subprocess per cell, and one more for a failing cell
     unreaped, and run to completion. Under --awaiting it also owns
     ai-tmp/release-check/awaiting.<pid>/, the stand-in wheels, created for the
     run and removed in a `finally` however the run ends; nothing is written to
-    /tmp.
+    /tmp. Unless $UV_CACHE_DIR names one, it also owns
+    ai-tmp/release-check/uv-cache.<pid>/, the run's uv cache, removed the same
+    way, because a cache shared with the machine's other uv processes failed
+    one cell of 495 that resolves [measured 2026-09-25T19:39:34+10:00:
+    metta-polars on linux aarch64 cp312, uv's "failed to rename file" under
+    ~/.cache/uv, while the same step on a cache of its own resolved 495 of 495]
+    [tested 2026-09-25T19:42:59+10:00: release-resolvable-selftest, and the live step on
+    pypi.org resolving 495 of 495 on the run's own cache]
 Decides:
   - the five platform rows and their uv triples, below. They are fixed outside
     this program by what the project supports, not observable from it.
@@ -568,7 +575,7 @@ def release_set() -> list[str]:
 
 
 def resolve(uv: str, requirement: str, cell: Cell,
-            arguments: list[str]) -> tuple[bool, dict[str, str], str]:
+            arguments: list[str], cache: Path | None = None) -> tuple[bool, dict[str, str], str]:
     """One resolution, for one platform and one interpreter.
 
     --no-config because this repository's own pyproject.toml carries a
@@ -580,9 +587,13 @@ def resolve(uv: str, requirement: str, cell: Cell,
     them with no bound at all. No ceiling is passed: a resolution is allowed to
     take as long as it takes, and bounded.sh's own hour is the orphan reaper
     for a run nobody is waiting on rather than a deadline on the work.
+
+    `cache`, when given, is the run's own uv cache: the cells of one run share
+    it and nothing outside the run can touch it.
     """
+    cached = ["--cache-dir", str(cache)] if cache is not None else []
     done = subprocess.run(  # nosec B603
-        bounded([uv, "pip", "compile", "--no-config", "--quiet", "--no-header",
+        bounded([uv, "pip", "compile", "--no-config", *cached, "--quiet", "--no-header",
                  "--no-annotate", "--python-platform", cell.triple,
                  "--python-version", cell.python, *arguments, "-"]),
         input=f"{requirement}\n", capture_output=True, text=True, check=False)
@@ -604,6 +615,8 @@ class Run(NamedTuple):
     #: Empty unless --awaiting named something, and then the probe that tells a
     #: cell failing for an awaited project from one failing for anything else.
     awaited_links: list[str]
+    #: The run's own uv cache, or None when the caller named one in $UV_CACHE_DIR.
+    cache: Path | None
 
 
 def judge(run: Run, cell: Cell) -> Verdict:
@@ -615,9 +628,9 @@ def judge(run: Run, cell: Cell) -> Verdict:
     does -- the exact pin on the core sends the resolver back to an older
     member, the install works, and the user has the wrong one.
     """
-    uv, index, step_versions, step_links, awaited_links = run
+    uv, index, step_versions, step_links, awaited_links, cache = run
     after = index.uv_args() + step_links
-    ok, pins, reason = resolve(uv, cell.requirement, cell, after)
+    ok, pins, reason = resolve(uv, cell.requirement, cell, after, cache)
     if ok:
         wrong = [f"{name} resolved to {pins[name]} where this step sends {wanted}"
                  for name, wanted in step_versions.items()
@@ -631,7 +644,7 @@ def judge(run: Run, cell: Cell) -> Verdict:
     # package in a message answering a whole extra, so reading the reason would
     # waive a cell whose second cause nobody saw; a resolution that succeeds
     # once those names exist, and only then, is the claim being made.
-    if awaited_links and resolve(uv, cell.requirement, cell, after + awaited_links)[0]:
+    if awaited_links and resolve(uv, cell.requirement, cell, after + awaited_links, cache)[0]:
         return Verdict(cell, "awaited", reason, preexisting=False)
     # Britney's question: did the index already have this failure? Only asked
     # when the step contributes files at all and when the index really carries
@@ -639,7 +652,7 @@ def judge(run: Run, cell: Cell) -> Verdict:
     # failed there for any reason but its own absence.
     preexisting = False
     if step_links and index.has(cell.distribution, cell.version):
-        preexisting = not resolve(uv, cell.requirement, cell, index.uv_args())[0]
+        preexisting = not resolve(uv, cell.requirement, cell, index.uv_args(), cache)[0]
     elif not step_links:
         preexisting = index.has(cell.distribution, cell.version)
     return Verdict(cell, "failed", reason, preexisting=preexisting)
@@ -848,15 +861,23 @@ def main(argv: list[str] | None = None) -> int:
           f"{len(PLATFORMS)} platform(s) and python {', '.join(candidates)}")
 
     # The stand-ins live for this run only, under the repository's scratch
-    # root, never /tmp, and go when it ends however it ends.
+    # root, never /tmp, and go when it ends however it ends. So does the run's
+    # uv cache, unless the caller named one: another process on the machine
+    # writing ~/.cache/uv at the same time failed a cell that resolves, with
+    # uv's own "Failed to write to the client cache" in place of an answer.
     stand_in_root = ROOT / "ai-tmp" / "release-check" / f"awaiting.{os.getpid()}"
+    cache_root = (None if os.environ.get("UV_CACHE_DIR")
+                  else ROOT / "ai-tmp" / "release-check" / f"uv-cache.{os.getpid()}")
     try:
         run = Run(uv, index, step_versions, step_links,
-                  stand_ins(stand_in_root, {name: declared[name] or "" for name in acknowledged}))
+                  stand_ins(stand_in_root, {name: declared[name] or "" for name in acknowledged}),
+                  cache_root)
         with concurrent.futures.ThreadPoolExecutor(max_workers=max(1, arguments.jobs)) as pool:
             verdicts = list(pool.map(functools.partial(judge, run), cells))
     finally:
         shutil.rmtree(stand_in_root, ignore_errors=True)
+        if cache_root is not None:
+            shutil.rmtree(cache_root, ignore_errors=True)
 
     if unpublished:
         print("\nUNPUBLISHED, in the release set with no version in this step and "

@@ -1726,6 +1726,13 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   reader to install a local `tsmetta-0.0.1-alpha.0.tgz` because the package
   was not published yet, which stopped being true when 0.0.1-alpha.0 was.
 
+- `tests/checks/check_release_resolvable.py` gives each run a uv cache of its
+  own, under `ai-tmp/release-check/`, unless `UV_CACHE_DIR` names one. Sharing
+  `~/.cache/uv` with the other uv processes on the machine failed a cell that
+  resolves, metta-polars on linux aarch64 under CPython 3.12, with uv's own
+  cache-write error in place of an answer, which the check counts as a
+  refusal; the same step on a cache of its own resolves 495 of 495.
+
 ## [0.9.2] - 2026-09-24
 
 ### Added
