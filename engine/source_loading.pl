@@ -69,4 +69,9 @@ loading_loudly(Goal) :-
               throw(error(metta_load_failed(Summary),
                           context(loading_loudly/1, Goal)))
           ) ),
+        % erase-license: owner; watching/0 is thread_local, so no other thread
+        % sees Ref, and nothing retracts, retractalls or abolishes it, so on
+        % this thread only the call that asserted Ref erases it [source
+        % 2026-09-25T16:56:06+10:00: git grep -w watching over engine/, lib/
+        % and the seats].
         ( erase(Ref), retractall(diagnostic(Ref, _)) )).

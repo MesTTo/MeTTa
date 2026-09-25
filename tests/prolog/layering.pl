@@ -371,7 +371,7 @@ reaches(filereader, support_graph, 'a load records what its assertions support s
 reaches(filereader, translator, 'a load compiles the forms it read').
 reaches(filereader, translator_rules, 'a fast-cache image is a whole program and a program includes its translator rules, so capture, restore and the rollback of a failed restore all cross here').
 reaches(filereader, type_rules, 'source compilation and rollback hold the typing policy stable while rebuilding affected clauses').
-reaches(filereader, host_transactions, 'source retirement, the loading marker and the type-alias support scope release clause references recorded in transactional tables, and whether such a reference is still live is a transaction-semantics question rather than a loader one').
+reaches(filereader, host_transactions, 'source retirement, executable and equation-binding retirement, the loading marker and the type-alias support scope release clause references recorded in transactional tables, and whether such a reference is still live is a transaction-semantics question rather than a loader one').
 reaches(kernel, metta, 'the kernel builtins are typed and refuse through the core\'s own vocabulary').
 reaches(kernel, spaces, 'the kernel builtins ask spaces about their atoms').
 reaches(kernel, packages, 'space-admission-verdict asks whether a space is \c
@@ -399,7 +399,7 @@ reaches(metta, packages, 'the engine fixes four things about a package and \c
     claims and reads the seam rows the laws contribute for setup!, \c
     get-property and package-prolog').
 reaches(metta, filereader, 'import! and the file builtins are the loader\'s surface').
-reaches(metta, host_transactions, 'reference reconciliation runs after the native transaction returns').
+reaches(metta, host_transactions, 'reference reconciliation runs after the native transaction returns, and the host registration probe releases its clause by reference').
 reaches(metta, identity, 'property declaration precedence follows occurrence generation and actor').
 reaches(metta, parser, 'sread, swrite and sdisplay are the core\'s text builtins').
 reaches(metta, qlf_boot, 'the runtime loader asks the boot, through seam:compiled_source/1, whether it governs a source before compiling it beside itself').
@@ -470,11 +470,12 @@ reaches(translator, spaces, 'compiles into a space\'s execution module and asks 
 reaches(translator, specializer, 'a higher-order call may specialize').
 reaches(translator, translator_rules, 'the shipped rule set is the compiler\'s own first tier').
 reaches(translator, type_rules, 'a compile-time type check resolves through the typing-rule registry').
-reaches(translator, host_transactions, 'the self tier and the idle translation-cache hooks are installed clauses released by reference').
+reaches(translator, host_transactions, 'the self tier, the idle translation-cache hooks, segment dispatch guards and function metadata rows are clauses released by reference').
 reaches(translator, packages, 'indexing builtin masks, result finality and \c
     call-site type chains reads the type declarations a package\'s claimed \c
     builtins publish').
 reaches(source_observation, filereader, 'observes source execution, file identities and completed answers').
+reaches(source_observation, host_transactions, 'an observed goal\'s temporary clause is released by reference after a goal that may have cleared the module holding it').
 reaches(source_observation, metta, 'resolves the execution module for an observed space').
 reaches(source_observation, source_positions, 'maps parsed source to side-table positions').
 reaches(source_observation, spaces, 'validates spaces and identifies stored source equations').
@@ -485,6 +486,7 @@ reaches(translator_rules, filereader, 'new rule registrations and derived equati
 reaches(translator_rules, spaces, 'a shipped rule expands into space operations').
 reaches(translator_rules, translator, 'a rule declares itself a special form to the compiler').
 reaches(type_rules, filereader, 'records the assertion of a user typing rule').
+reaches(type_rules, host_transactions, 'a withdrawn user rule is released by reference, and a rollback or an older transaction view can have erased it first').
 reaches(type_rules, metta, 'reads the module context a user rule is scoped to').
 reaches(type_rules, translator, 'a changed typing rule clears the translation cache').
 

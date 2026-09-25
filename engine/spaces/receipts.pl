@@ -53,6 +53,11 @@ metta_receive_occurrences(Space, Incoming, Stored) :-
 % The journal is itself transactional, so a nested rollback restores the
 % parent's deletion set. No native clause reference survives outer completion.
 metta_erase_storage_ref(Ref) :-
+    % erase-license: claim; failing is this predicate's answer that another
+    % removal took the occurrence first, which native_retract_one/2 reports as
+    % Removed = false, and only an occurrence this removal took is journalled
+    % [source 2026-09-25T16:44:14+10:00: engine/spaces/lifecycle.pl,
+    % native_retract_one/2, its two callers].
     erase(Ref),
     (   current_transaction(_)
     ->  metta_receipt_transaction_scope(Scope),
@@ -69,12 +74,19 @@ metta_retract_storage(Head) :-
     (   current_transaction(_)
     ->  Context = receipt_scope(_),
         forall(clause(Head, true, Ref),
-               ( erase(Ref),
-                 arg(1, Context, Scope),
-                 ( nonvar(Scope) -> true
-                 ; metta_receipt_transaction_scope(Owner),
-                   nb_setarg(1, Context, Owner), Scope = Owner ),
-                 assertz(metta_receipt_erased(Scope, Ref)) ))
+               % erase-license: claim; a clause this view still lists can be
+               % gone already, taken by a removal another thread committed
+               % after this transaction opened, and the journal holds only
+               % what this transaction erased, so a clause already gone is
+               % passed over rather than failing the clear
+               % [tested 2026-09-25T19:33:07+10:00: erase_sites:a_stale_clear_journals_only_what_it_erased].
+               (   erase(Ref)
+               ->  arg(1, Context, Scope),
+                   ( nonvar(Scope) -> true
+                   ; metta_receipt_transaction_scope(Owner),
+                     nb_setarg(1, Context, Owner), Scope = Owner ),
+                   assertz(metta_receipt_erased(Scope, Ref))
+               ;   true ))
     ;   retractall(Head)
     ).
 

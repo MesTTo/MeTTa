@@ -1159,12 +1159,25 @@ unguarded_math_expansion_body(arithmetic:math_goal_expansion(A, B), A, B) :- !.
 unguarded_math_expansion_body(_:Inner, A, B) :-
     unguarded_math_expansion_body(Inner, A, B).
 
+%Two listeners can find the same unguarded clause: each enumerates every
+%goal_expansion/2 clause, and an assert on any thread fires one. The erase
+%decides which of them replaces it, and the other has nothing left to do.
+%A bare erase failed the losing listener, and a failing listener VETOES the
+%assert it observes, so another library's own goal_expansion/2 clause was
+%taken back [source 2026-09-25T16:36:02+10:00: swipl-devel V10.1.14
+%src/pl-proc.c assertDefinition, which retracts the clause when
+%predicate_update_event() answers false, and src/pl-event.c call_event_list(),
+%which answers false for a callback that fails].
 guard_arithmetic_goal_expansion_clause(Ref) :-
-    erase(Ref),
-    assertz(( system:goal_expansion(Math, MathGoal) :-
-                  catch(arithmetic:math_goal_expansion(Math, MathGoal),
-                        error(type_error(evaluable, _), _),
-                        fail) )).
+    % erase-license: claim; the erase is which listener installs the guarded
+    % replacement [tested 2026-09-25T19:33:07+10:00: erase_sites:a_guard_already_taken_installs_nothing].
+    (   erase(Ref)
+    ->  assertz(( system:goal_expansion(Math, MathGoal) :-
+                      catch(arithmetic:math_goal_expansion(Math, MathGoal),
+                            error(type_error(evaluable, _), _),
+                            fail) ))
+    ;   true
+    ).
 
 % The first listener the engine registers, so the door loads here; every later
 % engine file reaches metta_listen/2 through the engine's module.

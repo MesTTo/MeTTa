@@ -1990,16 +1990,20 @@ rollback_source_load_stable(LoadId, ReleaseSpace, Names) :-
             SupportGroups),
     forall(retract(source_load_resource(LoadId, translator_rule(Name, Ref))),
            translator_rules:rollback_source_translator_rule(Name, Ref)),
-    forall(( member(Refs, SupportGroups), member(Ref, Refs) ),
-           ( catch(erase(Ref), _, true) -> true ; true )),
+    maplist(retire_source_artifacts, SupportGroups),
     findall(Kind-Ref, retract(source_load_assertion(LoadId, Kind, Ref)),
             Asserted),
     reverse(Asserted, Journal),
     %An artifact another load still owns stays for it: share_source_assertion/1
-    %gives one artifact several owners, and each one's code calls it.
-    forall(( member(Kind-Ref, Journal),
-             \+ ( Kind == artifact, source_load_assertion(_, artifact, Ref) ) ),
-           ( catch(erase(Ref), _, true) -> true ; true )),
+    %gives one artifact several owners, and each one's code calls it. The
+    %owners are read before anything is retired, which selects the same set as
+    %reading them between erases: no retirement, and no callback an erase
+    %runs, removes another load's source_load_assertion/3 rows.
+    findall(Ref,
+            ( member(Kind-Ref, Journal),
+              \+ ( Kind == artifact, source_load_assertion(_, artifact, Ref) ) ),
+            Refs),
+    retire_source_artifacts(Refs),
     findall(Space,
             retract(source_load_resource(LoadId, owned_space(Space))),
             Owned0),
@@ -2018,8 +2022,17 @@ rollback_source_load_stable(LoadId, ReleaseSpace, Names) :-
 % Cleanup already owns these exact reference groups. Attempt every reference,
 % including stale ones and duplicates, and preserve the established policy
 % that one failed cleanup does not abandon the rest of a failed source load.
+% rollback_source_load_stable/3 above is its one caller, for the support
+% groups and then for the assertions no other load still owns, so the policy
+% is spelled here once.
 retire_source_artifacts([]).
 retire_source_artifacts([Ref|Refs]) :-
+    % erase-license: teardown; a rollback has to reach its last reference
+    % whatever one of them does, and a clause can carry a prolog_listen/2
+    % callback that raises for its own reasons, so this contains the raise as
+    % well as a reference already gone
+    % [tested 2026-09-25T19:33:07+10:00: source_retirement:callbacks_and_failure_prefixes_match,
+    % source_retirement:cleanup_attempts_stale_and_duplicate_references].
     ( catch(erase(Ref), _, true) -> true ; true ),
     retire_source_artifacts(Refs).
 

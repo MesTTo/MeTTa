@@ -697,6 +697,9 @@ build_dual(Fun, InputArity, Module) :-
     setup_call_cleanup(
         true,
         build_dual_clause(Fun, DualName, InputArity, Module),
+        % erase-license: owner; nothing retracts, retractalls or abolishes
+        % dual_building/3 [source 2026-09-25T16:56:06+10:00: git grep -w
+        % dual_building over engine/, lib/ and the seats].
         erase(BuildRef)),
     assertz(dual_ready(Fun, InputArity, Module), ReadyRef),
     record_source_assertion(ReadyRef).

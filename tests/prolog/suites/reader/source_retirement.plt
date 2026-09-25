@@ -11,15 +11,22 @@
 :- begin_tests(source_retirement).
 :- dynamic artifact/1.
 
+% Each oracle is the per-reference loop over the same release the grouped
+% form makes, so what the comparison can see is the grouping alone. The
+% executable release is try_erase/1 and the storage release a claim, so a
+% reference already gone, or one a callback refuses, is passed over by both;
+% a callback that raises still stops both at the same reference.
 original_cleanup(Refs) :-
     forall(member(Ref, Refs), (catch(erase(Ref), _, true) -> true ; true)).
 original_executable(Module, Refs) :-
     forall(member(Ref, Refs),
       ( filereader:translated_from(Ref, Term)
-      -> filereader:forget_translated_from(Module, Ref, Term), erase(Ref)
-      ; erase(Ref) )).
+      -> filereader:forget_translated_from(Module, Ref, Term),
+         host_transactions:try_erase(Ref)
+      ; host_transactions:try_erase(Ref) )).
 original_storage :-
-    forall(clause(artifact(_), true, Ref), spaces:metta_erase_storage_ref(Ref)).
+    forall(clause(artifact(_), true, Ref),
+           ( spaces:metta_erase_storage_ref(Ref) -> true ; true )).
 
 retirement(cleanup, original, Refs) :- original_cleanup(Refs).
 retirement(cleanup, grouped, Refs) :- filereader:retire_source_artifacts(Refs).

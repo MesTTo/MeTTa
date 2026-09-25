@@ -69,12 +69,36 @@
 %   That measurement covers STALENESS and nothing else, so try_erase/1 is not
 %   the right call at an erase whose clause carries a prolog_listen/2 callback:
 %   the callback runs inside erase/1 and can raise for its own reasons, and a
-%   retirement that must finish has to contain that. Those sites keep
-%   catch(erase(Ref), _, true), and the difference is pinned rather than
+%   retirement that must finish has to contain that. Those sites spell
+%   ( catch(erase(Ref), _, true) -> true ; true ), which contains the raise as
+%   well as the loss, and the difference is pinned rather than
 %   remembered: source_retirement.plt compares filereader:retire_source_artifacts/1
 %   against an oracle written as that exact spelling, and it refuses the
 %   substitution [tested: source_retirement:callbacks_and_failure_prefixes_match;
 %   commit=561cfeaa23b27fc84f86a9bcccf6ccf8b9d2e73f].
+%
+%   Which spelling an erase site takes follows from three questions, and
+%   tests/prolog/static_checks.pl holds every erase/1 under engine/ to them.
+%   An erase/1 that is not this predicate's own carries an
+%   `erase-license: <kind>; <reason>` comment block immediately above its
+%   line, the reason backed by a source, tested or measured tag, and the kind
+%   is one of three:
+%   - owner: nothing else can erase the reference first. It came from this
+%     code's own assertz/2, and nothing retracts, retractalls or abolishes its
+%     predicate, so a failing erase would be a defect that tolerating it would
+%     hide.
+%   - claim: the site reads the erase's failure as its answer, so a reference
+%     another path took first is information rather than an error:
+%     ( erase(Ref) -> ... ; ... ), or an erase in a generator that moves on to
+%     the next candidate.
+%   - teardown: the spelling above, for a teardown that must reach its last
+%     reference whatever each erase does.
+%   Every other site calls this: its reference sits in a table that another
+%   path, another thread or this thread's own older view can erase first, and
+%   it only needs the clause gone. Holding a mutex does not make a site an
+%   owner of a reference in a transactional table, because a caller already
+%   inside a transaction keeps that transaction's view when it takes the mutex
+%   [tested 2026-09-25T19:33:07+10:00: host_transactions:a_mutex_taken_inside_a_transaction_keeps_its_view].
 %
 %   Time: one erase attempt. Space: none.
 try_erase(Ref) :- ignore(erase(Ref)).

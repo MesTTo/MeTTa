@@ -1003,6 +1003,10 @@ translate_when_still_deferred(Module, F) :-
     ;   setup_call_cleanup(
             assertz(metta_function_compiling(Module, F), Guard),
             translate_deferred_function(Module, F),
+            % erase-license: owner; nothing retracts, retractalls or abolishes
+            % metta_function_compiling/2 [source 2026-09-25T17:39:26+10:00: git
+            % grep -w metta_function_compiling over engine/, lib/ and the
+            % seats].
             erase(Guard))
     ).
 
@@ -2064,7 +2068,17 @@ remove_equation_source(Space, Term, Probe, Origin, Removed) :-
             -> filereader:source_load_assertion(SourceLoad, artifact, Ref)
             ; true )
         )
-    ->  forget_translated_from(Module, Ref, Probe), erase(Ref), Erased = true
+    ->  forget_translated_from(Module, Ref, Probe),
+        % erase-license: claim; Erased says whether THIS removal took the
+        % compiled clause. A forget of the same specialization, a recompile or
+        % a source rollback can erase it first, and a caller inside an older
+        % transaction still reads its translated_from/2 row, so a clause
+        % already gone leaves Erased false and the removal answers for what it
+        % did [tested 2026-09-25T19:33:07+10:00: erase_sites:an_equation_whose_clause_is_gone_is_still_removed].
+        (   erase(Ref)
+        ->  Erased = true
+        ;   Erased = false
+        )
     ;   Erased = false
     ),
     %A local predicate the erase just EMPTIED still shadows the same name

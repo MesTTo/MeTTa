@@ -386,6 +386,28 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- An engine erase that meets a clause reference something else already erased
+  no longer fails the operation around it. `erase/1` fails on a clause a second
+  thread, a source rollback or the caller's own older transaction view took
+  first, and holding a mutex does not prevent that for a caller already inside
+  a transaction, which keeps its view when it takes the mutex. Removing an
+  equation, a function's metadata rows, a user typing rule or a
+  specialization's clauses, forgetting an equation's bindings and the host
+  registration probe now finish instead of failing, and an observed goal's
+  cleanup still abolishes its temporary predicate. A source-owned equation
+  removal no longer raises `permission_error(remove, source_atom, …)` for it.
+  An equation removal reports whether it took the compiled clause, and a
+  transactional space clear journals only what it erased. The arithmetic
+  `goal_expansion/2` guard lets the listener whose erase succeeds install the
+  replacement: a losing listener used to fail, and a failing listener vetoes
+  the assert it observes, so another library's own `goal_expansion/2` clause
+  was taken back. The exception observers' teardown reaches its last hook when
+  one is already gone, where it left every later hook installed, and a source
+  rollback retires its references through `retire_source_artifacts/1` rather
+  than two inline copies of it. `prolog-static` now refuses an `erase/1` under
+  `engine/` that is neither `host_transactions:try_erase/1`'s own nor beneath
+  an `erase-license:` comment naming why (`owner`, `claim` or `teardown`) with
+  its evidence, and refuses a license with no erase beneath it.
 - A Prolog source loaded on a thread other than the one that loaded the engine,
   or inside an engine of its own, raises the errors it prints. `consult`,
   `use_module`, `ensure_loaded` and a seat's registered Prolog source load

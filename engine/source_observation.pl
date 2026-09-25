@@ -568,15 +568,26 @@ install_exception_observers :-
 %NOT host_transactions:try_erase/1, which propagates a raise on purpose, and
 %the reason is this site's own rather than a count: the erase runs while the
 %exception observers are being torn down, so a raise here would strand the
-%remaining hooks. The other broad catches are filereader's retirement loop,
+%remaining hooks. The other broad catch is filereader's retirement loop,
 %where the clause carries a prolog_listen/2 callback that can raise for its
 %own reasons; every erase over a table another path can reach is try_erase/1.
 %[The claim here used to be that this was the ONE such erase. It counted
 %wrong: space_hooks and native_matching had four between them, none with a
 %reason of its own, and they became try_erase/1 on 2026-09-21.]
+%
+%Total for a LOST reference too, which catch/3 alone was not: an erase that
+%failed made forall/2 fail at that row and left every later hook installed.
+%A row can name a clause that is already gone, because installed_hook/1 is
+%transactional and an observation inside a transaction opened during an
+%earlier observation still reads that observation's rows after it removed
+%them [tested 2026-09-25T19:33:07+10:00: host_transactions:a_row_naming_a_clause_another_thread_erased_is_released_only_by_try_erase].
 remove_exception_observers :-
     forall(retract(installed_hook(Reference)),
-           catch(erase(Reference), _, true)).
+           % erase-license: teardown; the observers' teardown must reach its
+           % last hook, so it contains a raise and a reference already gone
+           % [tested 2026-09-25T19:33:07+10:00: source_observation:the_observer_holds_no_hook_outside_an_observation,
+           % erase_sites:a_stale_observer_row_leaves_no_hook_behind].
+           ( catch(erase(Reference), _, true) -> true ; true )).
 
 observe_port(call, Frame, Buffer) :- !,
     ( prolog_frame_attribute(Frame,pc,PC),
@@ -654,7 +665,12 @@ execute_observed_goals(Module,Goals,Id,node(Span,_),Context) :-
           forall((goal_path(Clause,[],Path,_),\+ clause_location(Ref,Path,_,_,_)),
                  assertz(clause_location(Ref,Path,Id,Span,['generated-by',execution]))),
           call(Module:Head) ),
-        ( erase(Ref), abolish(Module:Name/1) )).
+        % try_erase/1 because the observed goal runs the program, and a
+        % program that clears its own space retracts this clause with every
+        % other predicate its module owns, so the abolish still has to run
+        % [source 2026-09-25T16:46:51+10:00: engine/spaces/lifecycle.pl,
+        % clear_generated_predicates/1].
+        ( host_transactions:try_erase(Ref), abolish(Module:Name/1) )).
 
 :- meta_predicate source_input(+,0), source_forms(+,+,0).
 source_input(Source,Goal) :-

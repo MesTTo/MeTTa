@@ -38,6 +38,10 @@
 % Guarded by: '$metta_fun_metadata' serializes metadata writers; transaction/1
 %   publishes the source and its projections together and rolls back failures
 %   [tested: run_tests(translator_metadata_projection); commit=3c64e2e24787362a5a5081513bc24b880711a1d7].
+%   Source withdrawal erases the same rows outside that mutex, and a caller
+%   already inside a transaction keeps its older view when it takes the mutex,
+%   so drop_fun_meta/5 releases rows through try_erase/1
+%   [tested 2026-09-25T19:33:07+10:00: erase_sites:a_stale_fun_meta_row_does_not_fail_the_removal].
 %   '$metta_translation_cache' guards translation reservations, publication
 %   and invalidation. metta_source_singleflight/2 serializes misses per key;
 %   compilation runs outside the publication mutex and releases reservations
@@ -272,18 +276,19 @@ drop_fun_meta_rows(Module, F, Args, Body, Owner) :-
     ( once(( clause(fun_meta_clause(Module, F, StoredArgs, StoredBody), true, Ref),
              (StoredArgs-StoredBody) =@= (Args-Body),
              source_removal_owns_metadata(Owner, Ref) ))
-    %Two spellings on purpose, and the rule is reachability rather than
-    %taste. drop_segment_dispatch/3 tolerates a reference already gone
-    %because its guards are ALSO erased by source withdrawal, which does not
-    %hold this mutex. HeadRef and Ref are erased here alone: every writer of
-    %fun_meta_clause/4 and fun_meta_projection/4 runs under
-    %with_mutex('$metta_fun_metadata'), the three sites in this file, so
-    %there is no second eraser to lose a race with and a failure here would
-    %be a real defect rather than a lost race. Tolerating it would hide that.
+    %try_erase/1 for the same reason drop_segment_dispatch/3 gives, and the
+    %mutex does not change it. record_fun_meta_rows/5 records every row here
+    %as a source artifact, so a rollback erases them under the typing-policy
+    %mutex rather than this one; and a caller inside an outer transaction
+    %keeps that transaction's view when it takes this mutex, so it still
+    %reads rows another holder erased and committed. A bare erase then failed
+    %the removal that contained it
+    %[tested 2026-09-25T19:33:07+10:00: host_transactions:a_mutex_taken_inside_a_transaction_keeps_its_view,
+    %erase_sites:a_stale_fun_meta_row_does_not_fail_the_removal].
     -> retract(fun_meta_projection(Module, F, Ref, HeadRef)),
        drop_segment_dispatch(Module, F, Ref),
-       erase(HeadRef),
-       erase(Ref)
+       host_transactions:try_erase(HeadRef),
+       host_transactions:try_erase(Ref)
     ; true ),
     drop_fun_meta_types(Module, F, Args, Body, Owner).
 drop_fun_meta_types(Module, F, Args, Body, Owner) :-
@@ -291,6 +296,10 @@ drop_fun_meta_types(Module, F, Args, Body, Owner) :-
                     true, Ref),
              (StoredArgs-StoredBody) =@= (Args-Body),
              source_removal_owns_metadata(Owner, Ref),
+             % erase-license: claim; a row another eraser took first fails
+             % here and once/1 moves on to the next variant-equal row, so the
+             % removal takes one row that is still there, or none
+             % [tested 2026-09-25T19:33:07+10:00: erase_sites:a_stale_fun_meta_row_does_not_fail_the_removal].
              erase(Ref) ))
     -> true
     ; true ).

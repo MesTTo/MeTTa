@@ -10,6 +10,9 @@
 %   clause whenever another thread commits the erase first, and try_erase/1 is
 %   what releases it without failing the cleanup around it
 %   [tested: host_transactions; commit=561cfeaa23b27fc84f86a9bcccf6ccf8b9d2e73f].
+% Guarantees: a mutex taken inside an open transaction or snapshot leaves that
+%   view in place, so its holder still reads a row another thread erased under
+%   the same mutex [tested 2026-09-25T19:33:07+10:00: host_transactions:a_mutex_taken_inside_a_transaction_keeps_its_view].
 % Owns resources: each test removes its private rows; worker threads are joined.
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
 :- use_module('../../../../engine/host_transactions', []).
@@ -176,6 +179,45 @@ test(a_row_naming_a_clause_another_thread_erased_is_released_only_by_try_erase,
     message_queue_destroy(ToObserver), message_queue_destroy(FromObserver),
     assertion(Status == true),
     assertion(Report == report(visible, failed, succeeded)).
+
+%A mutex does not refresh a view an open transaction already holds: a nested
+%transaction/1 keeps the outermost one's start, so a reader that takes the
+%mutex after the writer committed under it still sees the row, and its bare
+%erase fails. With nothing open the same reader finds the row gone, which is
+%the only case the mutex serializes. Holding a mutex is therefore no license
+%for a bare erase over a table another path writes.
+mutex_reader(Outer, In, Out) :-
+    Read = ( thread_send_message(Out, opened),
+             thread_get_message(In, committed),
+             with_mutex(host_transactions_probe,
+                 transaction(( reference_row(Ref)
+                             -> ( erase(Ref) -> Bare = succeeded ; Bare = failed ),
+                                ( host_transactions:try_erase(Ref)
+                                -> Tolerant = succeeded ; Tolerant = failed ),
+                                Report = report(visible, Bare, Tolerant)
+                             ;  Report = report(gone, not_reached, not_reached) ))) ),
+    ( Outer == none -> call(Read) ; call(Outer, Read) ),
+    thread_send_message(Out, Report).
+
+test(a_mutex_taken_inside_a_transaction_keeps_its_view,
+     [forall(member(Outer-Expected,
+                    [ none-report(gone, not_reached, not_reached),
+                      transaction-report(visible, failed, succeeded),
+                      snapshot-report(visible, failed, succeeded) ])),
+      cleanup(( retractall(reference_row(_)), retractall(guarded(_)) ))]) :-
+    assertz(guarded(installed), Ref),
+    assertz(reference_row(Ref)),
+    message_queue_create(ToReader), message_queue_create(FromReader),
+    thread_create(mutex_reader(Outer, ToReader, FromReader), Reader, []),
+    thread_get_message(FromReader, opened),
+    with_mutex(host_transactions_probe,
+               transaction(( retract(reference_row(_)), erase(Ref) ))),
+    thread_send_message(ToReader, committed),
+    thread_get_message(FromReader, Report),
+    thread_join(Reader, Status),
+    message_queue_destroy(ToReader), message_queue_destroy(FromReader),
+    assertion(Status == true),
+    assertion(Report == Expected).
 
 %The other direction. try_erase/1 tolerates a lost race and nothing else, so a
 %caller defect still reaches the caller; ignore/1 is what draws that line and

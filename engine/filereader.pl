@@ -33,8 +33,10 @@
 %   source-prefix translation, effects and observation boundary
 %   [tested: source_runnable_envelope, source_observation, fuel; commit=e246959279271d22f166a1c8fb1840896295a020].
 % Guarantees: retire_translated_clauses/2 consumes an ordered list of exact
-%   executable references, stopping at the first failed erase or callback
-%   [tested: source_retirement; commit=e246959279271d22f166a1c8fb1840896295a020].
+%   executable references, releasing each through try_erase/1, so a reference
+%   already gone does not stop it and a callback that raises still does
+%   [tested 2026-09-25T19:33:07+10:00: source_retirement:callbacks_and_failure_prefixes_match,
+%   erase_sites:a_stale_executable_list_retires_what_is_left].
 % Owns resources: a trailed publication context selects a source's journal
 %   owners for its lexical scope; source rows remain transactional
 %   [tested: source_publication; commit=e246959279271d22f166a1c8fb1840896295a020].
@@ -1642,6 +1644,10 @@ recompile_function_in_module_stable(Module, G) :-
              forget_translated_from(Module, Ref, Term) )),
     findall(rebuild(Term, Owners, StoredRef, Types),
             ( member(compiled(Ref, _, Term, Owners, StoredRef, Types), Recorded),
+              % erase-license: claim; the erase is the liveness test above, so a
+              % reference something else took first is left out of the rebuild
+              % [tested 2026-09-25T19:33:07+10:00: translator_evaluation_errors:builtin_type_import_keeps_runtime_refusals_visible,
+              % translator_super:a_later_definition_retargets_an_earlier_super].
               erase(Ref) ),
             Rebuilds),
     forall(member(rebuild(Term, Owners, StoredRef, Types), Rebuilds),
@@ -1947,23 +1953,36 @@ forget_translated_from(_, Ref, _) :-
     retractall(translated_from(Ref, _)).
 
 % Retire the selected executable list in its supplied order. Each provenance
-% withdrawal stays adjacent to its erase, so a callback sees the same prefix
-% and a refusal leaves the same unvisited suffix. The traversal is linear:
-% every retained reference still requires its own erase and callbacks.
+% withdrawal stays adjacent to its erase, so a callback sees the same prefix.
+% The traversal is linear: every retained reference still requires its own
+% erase and callbacks.
+%
+% The list is read from the caller's view, and two forgets of one
+% specialization can run at once: forget_symbol/2 is reached under
+% '$metta_specializer' from the specializer and under '$metta_support_graph'
+% from an invalidation, and a caller inside an older transaction still sees
+% clauses another thread has erased. So each release is try_erase/1, and a
+% clause already gone, or one a callback refuses to give up, no longer stops
+% the retirement with the rest of the list still standing
+% [tested 2026-09-25T19:33:07+10:00: erase_sites:a_stale_executable_list_retires_what_is_left].
 retire_translated_clauses(_, []).
 retire_translated_clauses(Module, [Ref|Refs]) :-
     ( translated_from(Ref, Term) -> forget_translated_from(Module, Ref, Term)
     ; true ),
-    erase(Ref),
+    host_transactions:try_erase(Ref),
     retire_translated_clauses(Module, Refs).
 
+% The token and binding rows are source artifacts too, which a rollback erases
+% under the typing-policy mutex, and the caller's view may predate that erase,
+% so both releases tolerate a row whose clause is already gone
+% [tested 2026-09-25T19:33:07+10:00: erase_sites:a_stale_equation_binding_is_forgotten].
 forget_translated_equation_binding(Ref) :-
     forall(clause('$metta_equation_token'(_, _, Ref, _), true, TokenRef),
            ( retractall(source_load_assertion(_, artifact, TokenRef)),
-             erase(TokenRef) )),
+             host_transactions:try_erase(TokenRef) )),
     forall(clause(translated_equation_binding(_, _, Ref), true, BindingRef),
            ( retractall(source_load_assertion(_, artifact, BindingRef)),
-             erase(BindingRef) )).
+             host_transactions:try_erase(BindingRef) )).
 
 % All module views already present in the graph are the callers a late global
 % registration can have made stale. Each support_invalidate/1 is itself

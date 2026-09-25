@@ -633,6 +633,10 @@ package_require(Source, Space, Required) :-
               assertz(package_pending_requirement(Source, Path), Flight) )),
         ( package_collect_requirement(Required, Path),
           metta_engine:importer_helper(Space, Path) ),
+        % erase-license: owner; package_pending_requirement/2 is '$notransact'
+        % and nothing retracts, retractalls or abolishes it [source
+        % 2026-09-25T16:56:06+10:00: git grep -w package_pending_requirement
+        % over engine/, lib/ and the seats].
         erase(Flight)).
 
 package_resolve_requirement(Source, Required, Path, Pin) :-

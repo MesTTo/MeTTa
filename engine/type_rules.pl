@@ -309,7 +309,12 @@ remove_typing_rule_locked(Module, Name, Changed) :-
     ;   Changed = registry
     ).
 
-erase_typing_rule_entry(_-Ref) :- erase(Ref).
+%try_erase/1: a user rule is a source artifact that a rollback erases too,
+%and a caller already inside a transaction reads the registry from before it
+%took the typing-policy mutex, the `conservative` snapshot below, so an entry
+%it lists can be one a preceding owner removed
+%[tested 2026-09-25T19:33:07+10:00: erase_sites:a_rule_removed_twice_is_removed_once].
+erase_typing_rule_entry(_-Ref) :- host_transactions:try_erase(Ref).
 
 %The families a STATIC FAST PATH depends on, which is what makes a user rule in
 %one of them a policy change rather than a registry change: a compiled shortcut

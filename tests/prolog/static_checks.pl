@@ -27,6 +27,11 @@
 %   - every prolog_listen/2,3 and prolog_unlisten/2 under engine/, lib/ and
 %     the seats' binding halves is the one inside engine/host_listeners.pl
 %     [tested: every_host_listener_registers_through_the_door; commit=5837e2077cf16be3f8223b4ab8b1a2c86c6f076f].
+%   - every erase/1 under engine/ is the one inside
+%     host_transactions:try_erase/1 or sits beneath an erase-license: block
+%     naming owner, claim or teardown with a tagged reason, closures such as
+%     maplist(erase, Refs) included, and no license outlives the erase beneath
+%     it [tested 2026-09-25T19:33:07+10:00: sh tools/check.sh prolog-static].
 %   - var_branches warnings are fatal for repository engine sources without
 %     attributing warnings from SWI's own libraries to the repository.
 %   - Every unqualified multifile seam declared anywhere under engine, lib,
@@ -143,6 +148,7 @@ main :-
     every_seam_kind_matches_its_direction,
     no_cut_in_an_event_hook,
     every_host_listener_registers_through_the_door,
+    every_erase_is_tolerant_or_licensed,
     arithmetic_expansion_stays_at_run_time,
     metta_host_set_silent(true),
     representative_source(Source),
@@ -742,6 +748,349 @@ source_scan_sees_a_raw_registration :-
                'the raw listener scan saw ~d of 3 planted calls, so its \c
                 clean result says nothing~n', [Seen]),
         fail
+    ).
+
+%%%% Every erase is try_erase/1 or carries its license %%%%
+%
+% erase/1 FAILS on a clause reference something else erased first: a second
+% thread, a source rollback sweeping the same reference, or this thread's own
+% older view inside a transaction opened before another thread committed the
+% erase, which a mutex taken inside that transaction does not refresh. A
+% failing erase inside forall/2 or a conjunction takes the cleanup around it
+% down with it. host_transactions:try_erase/1 is the one operation that
+% tolerates the lost reference, and its documentation is where the three
+% reasons a site may spell erase/1 itself are decided: nothing else can erase
+% the reference (owner), the site reads the erase's failure as its answer
+% (claim), or a teardown that must finish contains a raise as well as the loss
+% (teardown). This refuses an erase/1 anywhere under engine/ that is neither
+% the one inside try_erase/1 nor licensed by an `erase-license:` comment block
+% immediately above its line, naming one of those kinds and carrying a source,
+% tested or measured tag; and refuses a license with no erase beneath it, so a
+% license cannot outlive the site it was written for.
+%
+% That is a lint suppression with a required reason, and a suppression that
+% must still suppress something: Rust's #[expect(lint, reason = ...)], whose
+% unfulfilled_lint_expectations fires when the lint no longer arrives, and
+% ESLint's reportUnusedDisableDirectives beside eslint-comments'
+% require-description [source 2026-09-25T17:31:49+10:00:
+% https://rust-lang.github.io/rfcs/2383-lint-reasons.html,
+% https://eslint.org/docs/latest/use/configure/rules]. The RFC's reason is this
+% one: only text the tooling reads stays true.
+%
+% A call is found by reading terms, never by matching text, so a comment or a
+% string mentioning erase(Ref) is not one, and a closure is: maplist(erase,
+% Refs) counts, read off the meta_predicate declaration the way
+% reachability.pl reads which argument holds a goal.
+every_erase_is_tolerant_or_licensed :-
+    erase_license_selftest,
+    findall(File, erase_source_file(File), Files),
+    maplist(erase_file_audit, Files, Audits),
+    foldl(erase_audit_sum, Audits, tally([], 0, 0, [], 0), Tally),
+    Tally = tally(Findings, Doors, Tolerant, Kinds, Licensed),
+    (   Findings == [], Doors =:= 1
+    ->  length(Files, Count),
+        msort(Kinds, Sorted), clumped(Sorted, ByKind),
+        format("static: every erase/1 in ~d engine files is try_erase/1's own \c
+                or licensed: ~d try_erase/1 calls, ~d licensed erase/1 \c
+                lines ~w; the scan saw the door and every planted site~n",
+               [Count, Tolerant, Licensed, ByKind])
+    ;   forall(member(finding(File, Line, Message), Findings),
+               format(user_error, '~w:~d: ~w~n', [File, Line, Message])),
+        (   Doors =:= 1
+        ->  true
+        ;   format(user_error,
+                   'the erase scan saw ~d erase/1 calls inside \c
+                    host_transactions:try_erase/1 where it must see exactly \c
+                    one, so it is not reading the door~n', [Doors])
+        ),
+        format(user_error,
+               'route an erase through host_transactions:try_erase/1, or write \c
+                the erase-license: block its documentation in \c
+                engine/host_transactions.pl describes~n', []),
+        fail
+    ).
+
+erase_source_file(File) :-
+    directory_member('../../engine', File, [recursive(true), extensions([pl])]).
+
+erase_audit_sum(audit(F, D, T, K), tally(F0, D0, T0, K0, L0), tally(F1, D1, T1, K1, L1)) :-
+    append(F0, F, F1),
+    D1 is D0 + D,
+    T1 is T0 + T,
+    append(K0, K, K1),
+    length(K, L), L1 is L0 + L.
+
+% One file's audit: its findings, how many erase/1 calls sit in the door, how
+% many try_erase/1 calls it makes, and the kind of every license it holds.
+erase_file_audit(File, audit(Findings, Doors, Tolerant, Kinds)) :-
+    read_file_to_string(File, Text, []),
+    ( sub_atom(File, _, _, 0, 'engine/host_transactions.pl') -> Role = door_file ; Role = plain ),
+    setup_call_cleanup(prolog_open_source(File, Stream),
+                       erase_stream_occurrences(Stream, Role, Occurrences),
+                       prolog_close_source(Stream)),
+    erase_text_audit(File, Text, Occurrences, Findings, Doors, Tolerant, Kinds).
+
+erase_stream_occurrences(Stream, Role, Occurrences) :-
+    prolog_read_source_term(Stream, Term, _,
+                            [subterm_positions(Pos), syntax_errors(error)]),
+    (   Term == end_of_file
+    ->  Occurrences = []
+    ;   erase_term_occurrences(Role, Term, Pos, Here),
+        append(Here, Rest, Occurrences),
+        erase_stream_occurrences(Stream, Role, Rest)
+    ).
+
+% The occurrences one term holds, each Offset-What: an erase/1 call, the one
+% inside try_erase/1's own clause, or a call of try_erase/1 itself.
+erase_term_occurrences(Role, Term, Pos, Occurrences) :-
+    (   Role == door_file, erase_door_clause(Term)
+    ->  What = door
+    ;   What = erase
+    ),
+    findall(Offset-What, erase_call_offset(erase, Term, Pos, Offset), Erases),
+    findall(Offset-tolerant, erase_call_offset(try_erase, Term, Pos, Offset), Tolerant),
+    append(Erases, Tolerant, Occurrences).
+
+erase_door_clause((Head :- _)) :-
+    nonvar(Head),
+    ( Head = _:Plain -> true ; Plain = Head ),
+    nonvar(Plain), Plain = try_erase(_).
+
+% The character offset of every call of Name/1 that Term makes, qualified or
+% not, and of Name standing, qualified or not, as a one-argument closure in a
+% declared meta-argument.
+erase_call_offset(Name, Term, Pos, From) :-
+    compound(Term), nonvar(Pos),
+    (   Pos = parentheses_term_position(_, _, Inner)
+    ->  erase_call_offset(Name, Term, Inner, From)
+    ;   compound_name_arity(Term, Name, 1), Pos = term_position(From, _, _, _, _)
+    ;   erase_closure_argument(Name, Term, Pos, From)
+    ;   erase_subterm_position(Term, Pos, Argument, ArgumentPos),
+        erase_call_offset(Name, Argument, ArgumentPos, From)
+    ).
+
+erase_closure_argument(Name, Term, term_position(_, _, _, _, Positions), From) :-
+    arg(Index, Term, Argument),
+    nonvar(Argument), strip_module(Argument, _, Plain), Plain == Name,
+    catch(predicate_property(user:Term, meta_predicate(Spec)), _, fail),
+    arg(Index, Spec, Mode), Mode == 1,
+    nth1(Index, Positions, ArgumentPos),
+    erase_position_start(ArgumentPos, From).
+
+erase_position_start(From-_, From).
+erase_position_start(term_position(From, _, _, _, _), From).
+erase_position_start(parentheses_term_position(From, _, _), From).
+
+erase_subterm_position(Term, term_position(_, _, _, _, Positions), Argument, ArgumentPos) :-
+    nth1(Index, Positions, ArgumentPos),
+    arg(Index, Term, Argument).
+erase_subterm_position(Term, list_position(_, _, Elements, Tail), Argument, ArgumentPos) :-
+    erase_list_position(Term, Elements, Tail, Argument, ArgumentPos).
+erase_subterm_position({Argument}, brace_term_position(_, _, ArgumentPos), Argument, ArgumentPos).
+
+erase_list_position([Head|_], [HeadPos|_], _, Head, HeadPos).
+erase_list_position([_|Rest], [_|Positions], Tail, Argument, ArgumentPos) :-
+    Positions \== [],
+    erase_list_position(Rest, Positions, Tail, Argument, ArgumentPos).
+erase_list_position([_|Rest], [_], Tail, Rest, Tail) :-
+    Tail \== none.
+
+% The license reading, over the file's lines. An erase/1 line is licensed by
+% the comment block immediately above it holding a line
+%     % erase-license: <owner|claim|teardown>; <reason>
+% with a source, tested or measured tag somewhere in the block. The block is
+% every consecutive comment line ending at the line before the erase, so a
+% reason may run on over as many lines as it needs.
+erase_text_audit(Label, Text, Occurrences, Findings, Doors, Tolerant, Kinds) :-
+    split_string(Text, "\n", "", Lines),
+    erase_line_starts(Lines, 0, Starts),
+    findall(Line-What,
+            ( member(Offset-What, Occurrences),
+              erase_offset_line(Starts, Offset, Line) ),
+            Placed0),
+    sort(Placed0, Placed),
+    aggregate_all(count, member(_-door, Placed), Doors),
+    aggregate_all(count, member(_-tolerant, Occurrences), Tolerant),
+    findall(Line, member(Line-erase, Placed), EraseLines0),
+    sort(EraseLines0, EraseLines),
+    findall(Finding-Kind,
+            ( member(Line, EraseLines),
+              erase_line_license(Lines, Line, Label, Finding, Kind) ),
+            Judged),
+    findall(F, ( member(F-_, Judged), F \== none ), SiteFindings),
+    findall(K, ( member(none-K, Judged), K \== none ), Kinds),
+    findall(finding(Label, Line, Message),
+            erase_orphan_license(Lines, EraseLines, Line, Message),
+            Orphans),
+    append(SiteFindings, Orphans, Findings).
+
+erase_line_starts([], _, []).
+erase_line_starts([Line|Lines], Offset, [Offset|Starts]) :-
+    string_length(Line, Length),
+    Next is Offset + Length + 1,
+    erase_line_starts(Lines, Next, Starts).
+
+% The line holding a character offset: the last line starting at or before it.
+erase_offset_line(Starts, Offset, Line) :-
+    erase_offset_line(Starts, Offset, 1, Line).
+erase_offset_line([_, Next|Starts], Offset, Index, Line) :-
+    Next =< Offset, !,
+    Following is Index + 1,
+    erase_offset_line([Next|Starts], Offset, Following, Line).
+erase_offset_line(_, _, Line, Line).
+
+% none-Kind for a licensed line, Finding-none otherwise.
+erase_line_license(Lines, Line, Label, Finding, Kind) :-
+    erase_comment_block_above(Lines, Line, Block),
+    (   member(Marker, Block), erase_license_marker(Marker, Rest)
+    ->  (   erase_license_fields(Rest, Kind0)
+        ->  (   erase_block_carries_evidence(Block)
+            ->  Finding = none, Kind = Kind0
+            ;   Finding = finding(Label, Line,
+                                  'erase-license: block carries no source, tested \c
+                                   or measured evidence tag for its reason'),
+                Kind = none
+            )
+        ;   format(atom(Message),
+                   'erase-license: ~w names none of owner, claim or teardown \c
+                    with a reason after it', [Rest]),
+            Finding = finding(Label, Line, Message), Kind = none
+        )
+    ;   Finding = finding(Label, Line,
+                          'erase/1 is neither host_transactions:try_erase/1 nor licensed'),
+        Kind = none
+    ).
+
+erase_comment_block_above(Lines, Line, Block) :-
+    Above is Line - 1,
+    erase_comment_block_above_(Lines, Above, [], Block).
+erase_comment_block_above_(Lines, Index, Acc, Block) :-
+    Index >= 1,
+    nth1(Index, Lines, Text),
+    comment_line(Text), !,
+    Previous is Index - 1,
+    erase_comment_block_above_(Lines, Previous, [Text|Acc], Block).
+erase_comment_block_above_(_, _, Block, Block).
+
+% The marker opens its comment line: `% erase-license:` and the rest.
+erase_license_marker(Line, Rest) :-
+    split_string(Line, "", " \t", [Trimmed]),
+    string_concat("%", AfterPercent, Trimmed),
+    split_string(AfterPercent, "", " \t", [Body]),
+    string_concat("erase-license:", Rest0, Body),
+    split_string(Rest0, "", " \t", [Rest]).
+
+% A kind, then a reason after the first semicolon.
+erase_license_fields(Rest, Kind) :-
+    sub_string(Rest, Before, 1, After, ";"), !,
+    sub_string(Rest, 0, Before, _, KindText0),
+    sub_string(Rest, _, After, 0, Reason0),
+    normalize_space(atom(Kind), KindText0),
+    memberchk(Kind, [owner, claim, teardown]),
+    normalize_space(string(Reason), Reason0),
+    Reason \== "".
+
+% Read as one text, because a tag runs across lines as a reason does, the way
+% the evidence lane reads a claim spanning several comment lines. The openers
+% are built here rather than written out, because the evidence lane reads this
+% file's text and a written-out opener is a tag with no stamp.
+erase_block_carries_evidence(Block) :-
+    atomic_list_concat(Block, ' ', Joined),
+    normalize_space(string(Text), Joined),
+    member(Kind, [source, tested, measured]),
+    member(Separator, [' ', ':']),
+    format(string(Opener), "[~w~w", [Kind, Separator]),
+    sub_string(Text, _, _, _, Opener), !.
+
+% A license line whose block is not followed by an erase/1 line, and a marker
+% opening a comment that trails code rather than a comment line of its own.
+% Both read the marker the one way erase_license_marker/2 does, so prose that
+% quotes the grammar mid-sentence is neither.
+erase_orphan_license(Lines, EraseLines, Line, Message) :-
+    nth1(Line, Lines, Text),
+    (   comment_line(Text)
+    ->  erase_license_marker(Text, _),
+        erase_block_end(Lines, Line, End),
+        Next is End + 1,
+        \+ memberchk(Next, EraseLines),
+        Message = 'erase-license: with no erase/1 on the line beneath its block'
+    ;   once(sub_string(Text, Before, _, _, "%")),
+        sub_string(Text, Before, _, 0, Comment),
+        erase_license_marker(Comment, _),
+        Message = 'erase-license: must sit on a comment line of its own, above the erase'
+    ).
+
+erase_block_end(Lines, Line, End) :-
+    Next is Line + 1,
+    (   nth1(Next, Lines, Text), comment_line(Text)
+    ->  erase_block_end(Lines, Next, End)
+    ;   End = Line
+    ).
+
+% Every planted spelling is seen, and every licensed or data spelling is not.
+% The texts are read by the same term walk and license reading the files are,
+% through a string stream rather than a temporary file.
+erase_license_selftest :-
+    format(string(Tag), "[~w ~w: engine/host_transactions.pl]",
+           [source, '2026-09-25T00:00:00+10:00']),
+    format(string(Licensed),
+           "% erase-license: owner; the reference is this clause's own ~s~nplanted(R) :- erase(R).~n", [Tag]),
+    format(string(Continued),
+           "% erase-license: claim; the erase is the answer~n% ~s~nplanted(R) :- ( erase(R) -> true ; true ).~n", [Tag]),
+    format(string(Orphan),
+           "% erase-license: owner; nothing beneath ~s~nplanted :- true.~n", [Tag]),
+    format(string(UnknownKind),
+           "% erase-license: maybe; a reason ~s~nplanted(R) :- erase(R).~n", [Tag]),
+    Cases = [ "planted(R) :- erase(R).\n"-[unlicensed(1)],
+              "planted(Rs) :- maplist(erase, Rs).\n"-[unlicensed(1)],
+              "planted(Rs) :- maplist(system:erase, Rs).\n"-[unlicensed(1)],
+              "planted(R) :- system:erase(R).\n"-[unlicensed(1)],
+              "planted(Rs) :- forall(member(R, Rs),\n    erase(R)).\n"-[unlicensed(2)],
+              ":- erase(_).\n"-[unlicensed(1)],
+              Licensed-[],
+              Continued-[],
+              Orphan-[orphan(1)],
+              UnknownKind-[malformed(2)],
+              "% erase-license: owner; no tag at all\nplanted(R) :- erase(R).\n"-[malformed(2)],
+              "planted(R) :- g(R). % erase-license: owner; trailing\n"-[placement(1)],
+              "% erase(Ref) in prose\nplanted :- prolog_listen(erase, handler), format(\"erase(R)\").\n"-[],
+              "% the `erase-license: <kind>` grammar, quoted in prose\nplanted :- true.\n"-[],
+              "planted :- format(\"100%\").\n% erase-license: owner; late\nplanted :- true.\n"-[orphan(2)],
+              "planted(R) :- host_transactions:try_erase(R).\n"-[]
+            ],
+    forall(member(Text-Expected, Cases),
+           (   erase_planted_findings(Text, Found),
+               (   Found == Expected
+               ->  true
+               ;   format(user_error, 'erase scan selftest: ~q gave ~q, expected ~q~n',
+                          [Text, Found, Expected]),
+                   fail
+               )
+           )).
+
+erase_planted_findings(Text, Found) :-
+    setup_call_cleanup(open_string(Text, Stream),
+                       erase_string_occurrences(Stream, Occurrences),
+                       close(Stream)),
+    erase_text_audit(planted, Text, Occurrences, Findings, _, _, _),
+    findall(Shape, ( member(finding(_, Line, Message), Findings),
+                     erase_finding_shape(Message, Line, Shape) ), Found0),
+    msort(Found0, Found).
+
+erase_string_occurrences(Stream, Occurrences) :-
+    read_term(Stream, Term, [subterm_positions(Pos), syntax_errors(error)]),
+    (   Term == end_of_file
+    ->  Occurrences = []
+    ;   erase_term_occurrences(plain, Term, Pos, Here),
+        append(Here, Rest, Occurrences),
+        erase_string_occurrences(Stream, Rest)
+    ).
+
+erase_finding_shape(Message, Line, Shape) :-
+    (   sub_atom(Message, 0, _, _, 'erase/1 is neither') -> Shape = unlicensed(Line)
+    ;   sub_atom(Message, _, _, _, 'with no erase/1') -> Shape = orphan(Line)
+    ;   sub_atom(Message, _, _, _, 'must sit on a comment line') -> Shape = placement(Line)
+    ;   Shape = malformed(Line)
     ).
 
 %%%% No cut in a live hook clause %%%%

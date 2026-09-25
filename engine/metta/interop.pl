@@ -415,9 +415,14 @@ metta_host_probe_function(Name, PredArity) :-
 metta_host_probe_function(Name, PredArity) :-
     metta_self_module(Base),
     functor(Probe, Name, PredArity),
+    % Both releases are try_erase/1: metta_host_drop_function/2 on another
+    % thread retracts every clause of Base:Probe, the probe's with them, and a
+    % probe that lost its clause that way has still proved the name writable
+    % [tested 2026-09-25T19:33:07+10:00: erase_sites:a_probe_whose_clause_is_taken_still_proves_the_name_free].
     % Workaround: swi-cleanup-window - mask signals over the probe and retire it through catch-port deferral.
     catch(sig_atomic(( assertz((Base:Probe :- fail), Ref),
-                       catch(erase(Ref), Ball, (host_transactions:try_erase(Ref), throw(Ball))) )),
+                       catch(host_transactions:try_erase(Ref), Ball,
+                             (host_transactions:try_erase(Ref), throw(Ball))) )),
           error(permission_error(modify, static_procedure, _), _),
           metta_host_refuse_taken_name(Name, PredArity, Probe)).
 
@@ -2118,6 +2123,12 @@ metta_source_flight_run(_, _, Goal) :- call(Goal).
 
 metta_source_flight_leave(owner(Ref, Queue)) :- !,
     with_mutex(metta_loader,
+        % erase-license: owner; only the owner's claim carries Ref, and
+        % metta_source_flight/3 is '$notransact' with nothing retracting,
+        % retractalling or abolishing it, so no rollback reaches it either. A
+        % failure here would skip message_queue_destroy/1 and strand every
+        % waiter [source 2026-09-25T16:56:06+10:00: git grep -w
+        % metta_source_flight over engine/, lib/ and the seats].
         ( erase(Ref), message_queue_destroy(Queue) )).
 metta_source_flight_leave(_).
 :- else.
