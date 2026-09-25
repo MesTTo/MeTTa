@@ -53,6 +53,8 @@
 #                                            host-declaration-selftest
 #                                            stock-host-refused
 #                                            host-bundle host-bundle-selftest
+#                                            wheel-first-boot
+#                                            wheel-first-boot-selftest
 #                                            cumulative-syntax
 #                                            cumulative-syntax-selftest
 #                                            parity twins twins-selftest

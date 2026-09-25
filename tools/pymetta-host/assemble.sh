@@ -19,13 +19,23 @@
 #
 # Assumes: /out/swipl is the home build-swipl.sh staged and declared, /out/janus
 #   holds one bridge wheel per TAG from build-janus.sh, and /dist holds exactly
-#   one pymetta-*-py3-none-any.whl.
+#   one pymetta-*-py3-none-any.whl; the network, for the packages dnf and pip
+#   install and for the wheels' own requirements.
 # Guarantees:
 #   - each wheel in /out/dist is the pure wheel plus metta/_host/swipl,
 #     metta/_host/_vendor and pymetta.libs, tagged for its interpreter and
 #     manylinux_2_28_x86_64, and passes tests/checks/check_host_bundle.py
 #     [tested: tests/checks/check_host_bundle.py, run on every wheel by the last
 #     loop below; commit=WORKTREE]
+#   - no wheel leaves this stage unless a fresh install of it, by its own
+#     interpreter from /out/wheelhouse alone and at two paths, with every
+#     bundled .qlf dated before its source, rewrites nothing it installed on
+#     its first boot: the last loop below runs
+#     tests/checks/check_wheel_first_boot.py on each, and set -e stops the
+#     stage at the first that fails; the wheelhouse stays beside dist/ for the
+#     ext component's wheel-first-boot lane
+#     [tested 2026-09-25T23:14:58+10:00:
+#     tests/checks/check_wheel_first_boot_selftest.py]
 set -euxo pipefail
 # The same host packages the SWI build used. auditwheel VENDORS these runtime
 # libraries into the wheel, so it can only find them if they are installed
@@ -79,5 +89,23 @@ done
 # libgmp from the host.
 for WHEEL in /out/dist/*.whl; do
     "$TOOLS/python" /repo/tests/checks/check_host_bundle.py "$WHEEL"
+done
+
+# And as they are first used. A fresh install's first boot has to leave every
+# file the install wrote as it found it, whatever order the installer wrote
+# them in: 0.9.2's rewrote up to 51 of its bundled library .qlf files when uv
+# installed it. The check installs with pip --no-index, because a check that
+# reached the index would fail for reasons that are not the wheel, so what
+# the wheels require is fetched here into /out/wheelhouse, each interpreter
+# downloading what it would itself install.
+rm -rf /out/wheelhouse && mkdir -p /out/wheelhouse
+for TAG in $TAGS; do
+    PY=/opt/python/$TAG-$TAG
+    "$PY/bin/python" -m pip download --quiet --only-binary :all: \
+        --dest /out/wheelhouse "${pure[0]}"
+    wheels=(/out/dist/pymetta-*-"$TAG"-"$TAG"-*.whl)
+    [ "${#wheels[@]}" -eq 1 ] || { echo "want one repaired wheel for $TAG in /out/dist, found ${#wheels[@]}"; exit 1; }
+    "$TOOLS/python" /repo/tests/checks/check_wheel_first_boot.py \
+        --python "$PY/bin/python" --find-links /out/wheelhouse "${wheels[0]}"
 done
 ls -la /out/dist

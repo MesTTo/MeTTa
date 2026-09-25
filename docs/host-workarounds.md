@@ -48,13 +48,16 @@ fails naming the patch to rebuild with. The reproduction still describes the
 defect as shipped, so a fresh environment learns what its host must carry.
 
 A patch is carried, which makes it a boot requirement, only where the engine,
-one of its seats or a shipped library meets the defect, or where a carried
-patch is written on top of it, and the entry says which. A defect nothing
-here meets has no entry even when a host carries its fix; the journal of
-defects to report upstream records it, and the fix sits in
+one of its seats or a shipped library meets the defect on a host the engine
+may boot on, or where a carried patch is written on top of it, and the entry
+says which. Every other fix a host carries sits in
 `tools/pymetta-host/host-only/` beside its reproduction, which the lane runs
 and reports without requiring its answer
-([patched-host.md](patched-host.md#patches-nothing-requires)).
+([patched-host.md](patched-host.md#patches-nothing-requires)), and has no
+entry: a defect nothing here meets, which the journal of defects to report
+upstream records, and one met only inside the home
+`tools/pymetta-host/assemble.sh` grafts into pymetta's Linux wheels, which is
+built from both layers and so carries the fix by construction.
 
 ## janus-callback-exception-leak
 Host: janus-swi 1.5.3 (janus/janus.c `check_error`, the same code at upstream

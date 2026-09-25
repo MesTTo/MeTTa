@@ -412,6 +412,25 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- A fresh install of pymetta's Linux wheels leaves its bundled SWI-Prolog
+  library alone on its first boot. SWI 10.1.14 recompiled a library's `.qlf`
+  file whenever its `.pl` was newer and wrote the new one over it, and an
+  installer stamps each file with the time it wrote it, in its own order: pip
+  writes a wheel in archive order, where every `.qlf` follows its source, but
+  uv extracts in parallel or copies in directory order, and a fresh uv install
+  of 0.9.2 rewrote 2, 25 or 51 of the 51 library `.qlf` files its first boot
+  looked up. The host now carries upstream swipl-devel b5da8260476b, which
+  SWI-Prolog 10.1.15 ships, as a host-only patch
+  (`swi-qlf-recompiles-unchanged-newer-source`): a `.qlf` file records a hash
+  of each source, in QLF format 72, and is recompiled only when the content
+  changed, and wheels built with it rewrote none under pip, uv or uv's copy
+  mode. `tools/pymetta-host/assemble.sh` checks every wheel it builds by
+  installing it at two paths with every bundled `.qlf` dated before its source
+  and booting it, which must answer, print nothing to stderr and leave every
+  installed file as it was (`tests/checks/check_wheel_first_boot.py`, the ext
+  component's `wheel-first-boot` lane, installing from the wheelhouse the build
+  fills beside the wheels).
+
 - Defining a class costs polynomially in the size of its hierarchy again: the
   seventh class of a chain costs 7.19M inferences to define where it cost
   89.5M, a diamond costs 1.16 times its two parents where it cost 2.08 times,

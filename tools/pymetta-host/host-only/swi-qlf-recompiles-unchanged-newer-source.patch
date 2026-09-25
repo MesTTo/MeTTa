@@ -1,0 +1,674 @@
+diff --git a/app/qlf.pl b/app/qlf.pl
+index 8596ba9..f08c158 100644
+--- a/app/qlf.pl
++++ b/app/qlf.pl
+@@ -236,9 +236,9 @@ write_source(Dep, Options) :-
+     option(indent(Indent), Options, 0),
+     format('~t~*|~w ~w~n', [Indent, Indicator, File]).
+ 
+-dep(source(File),     s, File).
+-dep(include(File),    i, File).
+-dep(dependency(File), d, File).
++dep(source(File, _Hash),     s, File).
++dep(include(File, _Hash),    i, File).
++dep(dependency(File, _Hash), d, File).
+ 
+ cli_qlf_info_exports(File, Options) :-
+     '$qlf_module'(File, Info),
+@@ -358,19 +358,32 @@ up_to_date(File, CurrentVersion, _MinLoadVersion, FileVersion,
+     maplist(arg(1), Sources, Files),
+     (   forall(member(S, Files), \+ exists_file(S))
+     ->  Status = no_source
+-    ;   include(outofdate(TQLF), Files, Modified)
+-    ->  (   Modified == []
++    ;   include(outofdate(TQLF), Sources, Changed)
++    ->  (   Changed == []
+         ->  Status = up_to_date
+-        ;   Status = out_of_date(Modified)
++        ;   maplist(arg(1), Changed, Modified),
++            Status = out_of_date(Modified)
+         )
+     ).
+ up_to_date(_File, _CurrentVersion, _MinLoadVersion, _FileVersion,
+            _CurrentSignature, _FileSignature, incompatible).
+ 
++%!  outofdate(+QlfTime, +Source) is semidet.
++%
++%   True when the file of Source changed since it was compiled into the
++%   .qlf file.  Its time only says that it may have; the hash the .qlf
++%   file records for it settles it, as it does for the system that
++%   decides whether to recompile.  See '$qlf_out_of_date'/3.
+ 
+ outofdate(TQLF, Source) :-
+-    catch(time_file(Source, TS), error(_,_), fail),
+-    TS > TQLF.
++    arg(1, Source, File),
++    arg(2, Source, Hash),
++    catch(time_file(File, TS), error(_,_), fail),
++    TS > TQLF,
++    (   Hash =\= 0
++    ->  \+ '$file_hash'(File, Hash)
++    ;   true
++    ).
+ 
+ %!  cli_qlf_list(+Files, +Options) is det.
+ %
+diff --git a/boot/init.pl b/boot/init.pl
+index 09b838e..b7a759c 100644
+--- a/boot/init.pl
++++ b/boot/init.pl
+@@ -2422,8 +2422,9 @@ load_files(Module:Files, Options) :-
+     (   access_file(PlFile, read)
+     ->  time_file(PlFile, PlTime),
+ 	time_file(QlfFile, QlfTime),
+-	(   PlTime > QlfTime
+-	->  Why = old                   % PlFile is newer
++	(   PlTime > QlfTime,
++	    '$qlf_source_changed'(QlfFile, PlFile)
++	->  Why = old                   % PlFile changed
+ 	;   Error = error(Formal,_),
+ 	    catch('$qlf_is_compatible'(QlfFile), Error, true),
+ 	    nonvar(Formal)              % QlfFile is incompatible
+@@ -2433,6 +2434,35 @@ load_files(Module:Files, Options) :-
+     ;   fail                            % can not read .pl; try .qlf
+     ).
+ 
++%!  '$qlf_source_changed'(+QlfFile, +PlFile) is semidet.
++%
++%   True when the content of PlFile differs from the copy that was
++%   compiled into QlfFile.  Only asked when the modification times say
++%   PlFile may be newer, which is cheap but proves nothing: a tree that
++%   arrives by checkout, copy, unpack or install carries times of its
++%   own, in either direction and at the resolution of the file system it
++%   landed on.  The hash the .qlf file records for each of its sources
++%   settles it.
++%
++%   If QlfFile records no hash for PlFile -- it was written by an older
++%   version, or PlFile could not be read when it was compiled -- the
++%   times have the last word, as they had before.
++%
++%   Note that a file edited in the second its .qlf file was written has
++%   the time of that file, so the times do not say "may be newer" and the
++%   content is never asked. Loading every .pl file to find out would cost
++%   more than it is worth here; qlf_needs_rebuild/1 of
++%   library(prolog_qlfmake), which is what a build asks, does compare the
++%   content of every source.
++
++'$qlf_source_changed'(QlfFile, PlFile) :-
++    (   catch('$qlf_sources'(QlfFile, Sources), _, fail),
++	'$member'(source(PlFile, Hash), Sources),
++	Hash =\= 0
++    ->  \+ '$file_hash'(PlFile, Hash)
++    ;   true
++    ).
++
+ %!  '$qlf_auto'(+PlFile, +QlfFile, +Options) is semidet.
+ %
+ %   True if we create QlfFile using   qcompile/2. This is determined
+@@ -2756,15 +2786,35 @@ load_files(Module:Files, Options) :-
+ %
+ %   Add compilation dependencies. These are files   that are loaded into
+ %   Module that define term or goal expansion rules.
++%
++%   This must be called with the .qlf file  open and the part written, as
++%   it is here: '$qlf_dependency'/1 writes into the stream and the record
++%   belongs after the part, in the trailer.
+ 
+ '$qlf_add_dependencies'(File) :-
+-    forall('$dependency'(File, DepFile),
++    findall(DepFile, '$dependency'(File, DepFile), DepFiles0),
++    sort(DepFiles0, DepFiles),          % a file need only be named once
++    forall('$member'(DepFile, DepFiles),
+            '$qlf_dependency'(DepFile)).
+ 
++%!  prolog:qlf_dependency(+File, -DependsOn) is nondet.
++%
++%   Hook. True when compiling File to  a  .qlf   file  takes  a copy of
++%   something in DependsOn, so that the  .qlf   file  must be rebuilt if
++%   DependsOn changes. Expansion rules are found  without this hook; the
++%   hook is for a library that copies code of its own, as XPCE does with
++%   a class template: the  methods  of   the  template  are  put in each
++%   class that uses one, when that class is compiled.
++
++:- multifile
++    prolog:qlf_dependency/2.        % +File, -DependsOn
++
+ '$dependency'(File, DepFile) :-
+     '$current_module'(Module, File),
+     '$load_context_module'(DepFile, Module, _Options),
+     '$source_defines_expansion'(DepFile).
++'$dependency'(File, DepFile) :-
++    prolog:qlf_dependency(File, DepFile).
+ 
+ % Also used by autoload.pl
+ '$source_defines_expansion'(File) :-
+diff --git a/library/prolog_qlfmake.pl b/library/prolog_qlfmake.pl
+index d38c02d..a273aac 100644
+--- a/library/prolog_qlfmake.pl
++++ b/library/prolog_qlfmake.pl
+@@ -168,11 +168,36 @@ qlf_needs_rebuild(PlFile) :-
+     ;   time_file(QlfFile, QlfTime),
+         '$qlf_sources'(QlfFile, Sources),
+         member(S, Sources),
+-        arg(1, S, File),
+-        time_file(File, STime),
+-        STime > QlfTime+1
++        source_changed(S, QlfTime)
+     ).
+ 
++%!  source_changed(+Source, +QlfTime) is semidet.
++%
++%   True when the file of Source differs from the copy that was compiled
++%   into the .qlf file.  This asks the content and not the modification
++%   time, which cannot answer it: a tree that arrives by checkout, copy,
++%   unpack or install carries times of its own, and a file edited in the
++%   second its .qlf file was written has the same time as that file, at
++%   the one second many file systems record.  Hashing every source of
++%   the system library takes about 100ms; recompiling one takes longer
++%   than that.
++%
++%   Files whose hash was not recorded -- 0, from a .qlf file written by
++%   a version that did not record them -- are compared by time alone,
++%   with a second of slack, which is what this test was before there
++%   were hashes.
++
++source_changed(Source, _QlfTime) :-
++    arg(1, Source, File),
++    arg(2, Source, Hash),
++    Hash =\= 0,
++    !,
++    \+ '$file_hash'(File, Hash).
++source_changed(Source, QlfTime) :-
++    arg(1, Source, File),
++    time_file(File, STime),
++    STime > QlfTime+1.
++
+ pl_qlf_file(PlFile, QlfFile) :-
+     file_name_extension(Base, pl, PlFile),
+     file_name_extension(Base, qlf, QlfFile).
+@@ -460,7 +485,7 @@ qmake_aggregate(Spec) :-
+                        ]),
+     pl_qlf_file(PlFile, QlfFile),
+     '$qlf_sources'(QlfFile, Sources),
+-    forall(member(source(S), Sources),
++    forall(member(source(S, _Hash), Sources),
+            assertz(qlf_part_of(S, PlFile))).
+ qmake_aggregate(_).
+ 
+diff --git a/man/builtin.plx b/man/builtin.plx
+index fd59c3f..f980d8b 100644
+--- a/man/builtin.plx
++++ b/man/builtin.plx
+@@ -1637,7 +1637,19 @@ \subsection{Quick load files}		\label{sec:qlf}
+ \secref{consulting}. If consult/1 is given an explicit \fileext{pl} file,
+ it will load the Prolog source. When given a \fileext{qlf} file, it
+ will load the file. When no extension is specified, it will load the
+-\fileext{qlf} file when present and the \fileext{pl} file otherwise.
++\fileext{qlf} file when present and up-to-date, and the \fileext{pl}
++file otherwise.
++
++A \fileext{qlf} file is up-to-date if the source it was compiled from
++has not changed since. Whether it changed is decided by the
++\emph{content} of the source, a hash of which is stored in the
++\fileext{qlf} file, and not by its modification time: a tree that
++arrives by checkout, copy, unpack or install carries times of its own,
++in either direction. A source that is newer but unchanged is thus still
++loaded from its \fileext{qlf} file. If the source did change, the
++\fileext{qlf} file is recompiled when it can be written and the source
++is loaded without it otherwise. Set the \prologflag{source} flag to
++ignore \fileext{qlf} files altogether.
+ 
+ \begin{description}
+     \predicate{qcompile}{1}{:File}
+diff --git a/src/ATOMS b/src/ATOMS
+index a6ed829..564c34f 100644
+--- a/src/ATOMS
++++ b/src/ATOMS
+@@ -1126,6 +1126,7 @@ F deep			1
+ F detached		1
+ F determinism_error	4
+ F dependency		1
++F dependency		2
+ F dexit			2
+ F dforeign_registered   2
+ F dgarbage_collect	1
+@@ -1209,6 +1210,7 @@ F ifthen		2
+ F import_into		1
+ F inf			0
+ F include		1
++F include		2
+ F input			0
+ F input			4
+ F integer		1
+@@ -1318,6 +1320,7 @@ F smaller		2
+ F smaller_equal		2
+ F softcut		2
+ F source		1
++F source		2
+ F spy			1
+ F sqrt			1
+ F ssu_commit		2
+diff --git a/src/SWI-Prolog.h b/src/SWI-Prolog.h
+index d781ab5..7d09d24 100644
+--- a/src/SWI-Prolog.h
++++ b/src/SWI-Prolog.h
+@@ -79,7 +79,7 @@ numbers are atomic type.
+ #define PL_FLI_VERSION      2		/* PL_*() functions */
+ #define	PL_REC_VERSION      3		/* PL_record_external(), fastrw */
+ #define PL_QLF_LOADVERSION 68		/* load all versions later >= X */
+-#define PL_QLF_VERSION     71		/* save version number */
++#define PL_QLF_VERSION     72		/* save version number */
+ 
+ 
+ 		 /*******************************
+diff --git a/src/pl-qlf.c b/src/pl-qlf.c
+index 8b8cf70..d8929ff 100644
+--- a/src/pl-qlf.c
++++ b/src/pl-qlf.c
+@@ -120,7 +120,7 @@ Below is an informal description of the format of a `.qlf' file:
+ 		      | <source>			% not a module
+ 			<time>
+ <qlf-export>	::=	'E' <XR/functor>
+-<source>	::=	'F' <string> <time> <system>
++<source>	::=	'F' <string> <hash> <time> <system>
+ 		      | '-'
+ ----------------------------------------------------------------
+ <magic code>	::=	<string>			% normally #!<path>
+@@ -179,9 +179,10 @@ Below is an informal description of the format of a `.qlf' file:
+ <codes>		::=	<num> {<code>}
+ <string>	::=	{<non-zero byte>} <0>
+ <word>		::=	<4 byte entity>
+-<include>	::=	<file> <owner> <parent> <line> <time>
++<include>	::=	<file> <hash> <owner> <parent> <line> <time>
+ 			(files as UTF-8 strings)
+-<trailer>	::=	{'D' <file>}			% file dependencies
++<hash>		::=	<num>				% content of <file>
++<trailer>	::=	{'D' <file> <hash>}		% file dependencies
+ 			{<mark-offset>}			% file offset of files
+ 			<offset-count>			% #mark offsets
+ 
+@@ -1851,10 +1852,94 @@ loadFileName(wic_state *state)
+   return fname;
+ }
+ 
++		 /*******************************
++		 *	  SOURCE HASHES		*
++		 *******************************/
++
++/* A .QLF file records a hash of the content of every source that went
++   into it, so that a source can be compared with the copy that was
++   compiled.  Modification times cannot do that: a tree that arrives by
++   checkout, copy, unpack or install carries times of its own, in either
++   direction, at the resolution of whatever file system it landed on.
++   The time still says cheaply that a file *may* have changed; the hash
++   settles it.
++
++   This is FNV-1a, 64 bits: cheap, needs no state but the hash, and is
++   only ever asked whether two byte strings are the same.  0 means "not
++   known" -- a file that could not be read, or one compiled by a version
++   that did not record hashes yet.  A file whose content hashes to 0 (one
++   in 2^64) is simply compared by time, as it was before.
++*/
++
++#define FNV1A_64_OFFSET	((uint64_t)0xcbf29ce484222325)
++#define FNV1A_64_PRIME	((uint64_t)0x100000001b3)
++
++static uint64_t
++hashStreamContent(IOSTREAM *s)
++{ uint64_t hash = FNV1A_64_OFFSET;
++  char buf[4096];
++  size_t n;
++
++  while( (n=Sfread(buf, 1, sizeof(buf), s)) > 0 )
++  { for(size_t i=0; i<n; i++)
++    { hash ^= (uint64_t)(unsigned char)buf[i];
++      hash *= FNV1A_64_PRIME;
++    }
++  }
++
++  return Sferror(s) ? 0 : hash;
++}
++
++
++static uint64_t
++fileContentHash(const char *name)	/* name in file name encoding */
++{ IOSTREAM *s;
++  uint64_t hash = 0;
++
++  if ( (s=Sopen_file(name, "rbr")) )
++  { hash = hashStreamContent(s);
++    Sclose(s);
++  }
++
++  return hash;
++}
++
++
++static uint64_t
++atomFileContentHash(atom_t name)
++{ PL_chars_t text;
++  uint64_t hash = 0;
++
++  if ( get_atom_text(name, &text) )
++  { if ( PL_mb_text(&text, REP_FN) )
++      hash = fileContentHash(text.text.t);
++    PL_free_text(&text);
++  }
++
++  return hash;
++}
++
++
++static void
++qlfSaveFileHash(wic_state *state, atom_t name)
++{ qlfPutInt64((int64_t)atomFileContentHash(name), state->wicFd);
++}
++
++
++static uint64_t
++qlfLoadFileHash(wic_state *state)	/* since version 72 */
++{ if ( state->saved_version >= 72 )
++    return (uint64_t)qlfGetInt64(state->wicFd);
++
++  return 0;
++}
++
++
+ static bool
+ qlfLoadSource(wic_state *state, SourceFile sf)
+ { IOSTREAM *fd = state->wicFd;
+   atom_t fname = loadFileName(state);
++  (void)qlfLoadFileHash(state);
+   double time = qlfGetDouble(fd);
+   int ftype = Qgetc(fd);
+ 
+@@ -2084,6 +2169,7 @@ loadInclude(DECL_LD wic_state *state, int skip)
+ 
+   if ( state->saved_version >= 70 )
+   { fn    = loadFileName(state);
++    (void)qlfLoadFileHash(state);
+     owner = loadFileName(state);
+     pn    = loadFileName(state);
+     line  = qlfGetInt32(fd);
+@@ -3284,16 +3370,19 @@ qlfSourceInfo(DECL_LD wic_state *state, size_t offset, term_t list)
+   if ( Sseek(s, (long)offset, SIO_SEEK_SET) != 0 )
+     return qlfError(state, "seek to %zd failed: %s", offset, OsError());
+   switch(Sgetc(s))
+-  { case 'F': type = FUNCTOR_source1;     break;
+-    case 'L': type = FUNCTOR_include1;    break;
+-    case 'D': type = FUNCTOR_dependency1; break;
++  { case 'F': type = FUNCTOR_source2;     break;
++    case 'L': type = FUNCTOR_include2;    break;
++    case 'D': type = FUNCTOR_dependency2; break;
+     default:
+       return qlfError(state, "No file at offset %zd", offset);
+   }
+-  fname = loadFileName(state);
++  fname = loadFileName(state);		/* the hash follows the name in */
++  uint64_t hash = qlfLoadFileHash(state); /* every one of the three */
+ 
+-  bool rc = ( PL_put_atom(tmp, fname) &&
+-	      PL_cons_functor_v(tmp, type, tmp) &&
++  term_t av = PL_new_term_refs(2);
++  bool rc = ( PL_put_atom(av+0, fname) &&
++	      PL_put_uint64(av+1, hash) &&
++	      PL_cons_functor_v(tmp, type, av) &&
+ 	      PL_unify_list(list, head, list) &&
+ 	      PL_unify(head, tmp) );
+   PL_reset_term_refs(head);
+@@ -3588,8 +3677,11 @@ PRED_IMPL("$qlf_is_compatible", 1, qlf_is_compatible, 0)
+ /** '$qlf_sources'(+File, -SourceFiles) is det.
+  *
+  * Unify SourceFiles with the files that are  embedded into the QLF file
+- * File. This predicate succeeds as long as the QLF file is sufficiently
+- * compatible to find the source files.
++ * File, as source(File, Hash), include(File, Hash) or dependency(File,
++ * Hash). Hash is the content of the file as it was compiled, or 0 if it
++ * was not recorded -- see '$file_hash'/2. This predicate succeeds as
++ * long as the QLF file is sufficiently compatible to find the source
++ * files.
+  */
+ 
+ static
+@@ -3604,6 +3696,26 @@ PRED_IMPL("$qlf_sources", 2, qlf_sources, 0)
+ }
+ 
+ 
++/** '$file_hash'(+File, -Hash) is det.
++ *
++ * Unify Hash with the hash of the content  of File, the way the QLF
++ * writer computes it for the sources it embeds. Hash is 0 if File
++ * cannot be read. Comparing this with the hash '$qlf_sources'/2
++ * reports tells whether a source really changed since it was compiled;
++ * see '$qlf_out_of_date'/3.
++ */
++
++static
++PRED_IMPL("$file_hash", 2, file_hash, 0)
++{ char *name;
++
++  if ( !PL_get_file_name(A1, &name, PL_FILE_ABSOLUTE) )
++    return false;
++
++  return PL_unify_uint64(A2, fileContentHash(name));
++}
++
++
+ /** '$qlf_module'(+File, -ModuleInfo:dict) is det.
+  *
+  * Extract  the principal  module  defined  by the  Qlf  file and  its
+@@ -3889,6 +4001,7 @@ qlfSaveSource(wic_state *state, SourceFile f)
+   sourceMark(state);
+   Sputc('F', fd);
+   qlfSaveFileName(state, f->name);
++  qlfSaveFileHash(state, f->name);
+   qlfPutDouble(f->mtime, fd);
+   Sputc(src_file_status(f), fd);
+   state->currentSource = f;
+@@ -4073,6 +4186,7 @@ PRED_IMPL("$qlf_include", 5, qlf_include, 0)
+     sourceMark(state);
+     Sputc('L', fd);
+     qlfSaveFileName(state, fn);
++    qlfSaveFileHash(state, fn);
+     qlfSaveFileName(state, owner);
+     qlfSaveFileName(state, pn);
+     qlfPutInt64(line, fd);
+@@ -4096,6 +4210,7 @@ PRED_IMPL("$qlf_dependency", 1, $qlf_dependency, 0)
+   { sourceMark(state);
+     Sputc('D', state->wicFd);
+     qlfSaveFileName(state, file);
++    qlfSaveFileHash(state, file);
+ 
+     return true;
+   }
+@@ -4840,6 +4955,7 @@ BeginPredDefs(wic)
+   PRED_DEF("$qlf_versions",	    6, qlf_versions,	     0)
+   PRED_DEF("$qlf_is_compatible",    1, qlf_is_compatible,    0)
+   PRED_DEF("$qlf_sources",	    2, qlf_sources,	     0)
++  PRED_DEF("$file_hash",	    2, file_hash,	     0)
+   PRED_DEF("$qlf_module",	    2, qlf_module,	     0)
+   PRED_DEF("$qlf_load",		    2, qlf_load,	     PL_FA_TRANSPARENT)
+   PRED_DEF("$add_directive_wic",    1, add_directive_wic,    PL_FA_TRANSPARENT)
+diff --git a/tests/save/test_qlf.pl b/tests/save/test_qlf.pl
+index c2d2d33..98aa67c 100644
+--- a/tests/save/test_qlf.pl
++++ b/tests/save/test_qlf.pl
+@@ -43,9 +43,12 @@
+ :- use_module(library(debug), [assertion/1, debug/3]).
+ :- use_module(library(apply), [maplist/3, maplist/2]).
+ :- use_module(library(prolog_code), [pi_head/2]).
++:- use_module(library(lists), [memberchk/2, member/2]).
++:- use_module(library(prolog_qlfmake), []).
+ 
+ test_qlf :-
+-    run_tests([ qlf
++    run_tests([ qlf,
++                qlf_staleness
+               ]).
+ 
+ find_me.
+@@ -134,6 +137,164 @@ test(rat,
+ 
+ :- end_tests(qlf).
+ 
++
++                /*******************************
++                *      IS IT OUT OF DATE?      *
++                *******************************/
++
++/* A .qlf file records a hash of the content of every source that went
++   into it.  Modification times alone cannot say whether a source
++   changed: a tree that arrives by checkout, copy, unpack or install
++   carries times of its own, in either direction and at the resolution
++   of the file system it landed on.  The time says cheaply that a file
++   *may* have changed; the hash settles it.
++*/
++
++:- begin_tests(qlf_staleness).
++
++test(the_hash_recorded_for_a_source_is_the_hash_of_the_file,
++     [ setup(compiled_file(Pl, Qlf)),
++       cleanup(remove_files([Pl, Qlf]))
++     ]) :-
++    '$qlf_sources'(Qlf, Sources),
++    memberchk(source(Pl, Hash), Sources),
++    Hash =\= 0,
++    '$file_hash'(Pl, Hash).
++
++%       Reinstalling a tree, or checking it out again, gives every source
++%       a time of its own.  Nothing changed, so nothing is recompiled.
++
++test(a_source_that_is_newer_but_unchanged_is_not_out_of_date,
++     [ setup(compiled_file(Pl, Qlf)),
++       cleanup(remove_files([Pl, Qlf]))
++     ]) :-
++    touch(Pl, Qlf, 10),
++    \+ '$qlf_out_of_date'(Pl, Qlf, _).
++
++test(and_one_whose_content_changed_is,
++     [ setup(compiled_file(Pl, Qlf)),
++       cleanup(remove_files([Pl, Qlf])),
++       true(Why == old)
++     ]) :-
++    write_source(Pl, "answer(43).\n"),
++    touch(Pl, Qlf, 10),
++    '$qlf_out_of_date'(Pl, Qlf, Why).
++
++%       prolog_qlfmake allowed a second of slack, to keep a tree that was
++%       copied file by file from recompiling itself.  An edit made in the
++%       second the .qlf file was written went unnoticed with it.
++
++test(a_change_within_a_second_of_the_qlf_needs_a_rebuild,
++     [ setup(compiled_file(Pl, Qlf)),
++       cleanup(remove_files([Pl, Qlf]))
++     ]) :-
++    write_source(Pl, "answer(43).\n"),
++    touch(Pl, Qlf, 1),
++    prolog_qlfmake:qlf_needs_rebuild(Pl).
++
++%       The time of a file edited in the second its .qlf file was written
++%       is the time of that .qlf file, at the one second many file systems
++%       record.  Which is why the build asks the content and not the time.
++
++test(and_so_does_a_change_made_in_the_same_second,
++     [ setup(compiled_file(Pl, Qlf)),
++       cleanup(remove_files([Pl, Qlf]))
++     ]) :-
++    write_source(Pl, "answer(43).\n"),
++    touch(Pl, Qlf, 0),
++    prolog_qlfmake:qlf_needs_rebuild(Pl).
++
++test(and_a_touch_within_it_does_not,
++     [ setup(compiled_file(Pl, Qlf)),
++       cleanup(remove_files([Pl, Qlf]))
++     ]) :-
++    touch(Pl, Qlf, 1),
++    \+ prolog_qlfmake:qlf_needs_rebuild(Pl).
++
++%       A library that copies code into the file it is compiling -- XPCE
++%       puts the methods of a class template in every class that uses one
++%       -- says so through prolog:qlf_dependency/2, and the .qlf file is
++%       then rebuilt when that other file changes.
++
++test(a_dependency_the_hook_declares_is_recorded,
++     [ setup(compiled_with_dependency(Pl, Qlf, Dep)),
++       cleanup(remove_files([Pl, Qlf, Dep]))
++     ]) :-
++    '$qlf_sources'(Qlf, Sources),
++    memberchk(dependency(Dep, Hash), Sources),
++    Hash =\= 0,
++    '$file_hash'(Dep, Hash).
++
++test(and_a_change_to_it_needs_a_rebuild,
++     [ setup(compiled_with_dependency(Pl, Qlf, Dep)),
++       cleanup(remove_files([Pl, Qlf, Dep]))
++     ]) :-
++    \+ prolog_qlfmake:qlf_needs_rebuild(Pl),
++    write_source(Dep, "% a change to what was copied\n"),
++    touch(Dep, Qlf, 1),
++    prolog_qlfmake:qlf_needs_rebuild(Pl).
++
++:- end_tests(qlf_staleness).
++
++%!  compiled_file(-PlFile, -QlfFile) is det.
++%
++%   A source of our own in the temporary directory and the .qlf file
++%   compiled from it, so that the times of both are ours to set.
++
++compiled_file(Pl, Qlf) :-
++    current_prolog_flag(tmp_dir, Tmp),
++    directory_file_path(Tmp, 'test_qlf_staleness.pl', Pl),
++    file_name_extension(Base, pl, Pl),
++    file_name_extension(Base, qlf, Qlf),
++    write_source(Pl, "answer(42).\n"),
++    remove_files([Qlf]),
++    qcompile(Pl),
++    unload_file(Pl).
++
++%!  compiled_with_dependency(-PlFile, -QlfFile, -Dependency) is det.
++%
++%   As compiled_file/2, with a file the hook below says PlFile takes a
++%   copy of something from.
++
++:- dynamic
++    hook_dependency/2.
++
++:- multifile
++    prolog:qlf_dependency/2.
++
++prolog:qlf_dependency(File, Dependency) :-
++    hook_dependency(File, Dependency).
++
++compiled_with_dependency(Pl, Qlf, Dep) :-
++    current_prolog_flag(tmp_dir, Tmp),
++    directory_file_path(Tmp, 'test_qlf_dependency.pl', Dep),
++    write_source(Dep, "% what the compiled file copied\n"),
++    retractall(hook_dependency(_, _)),
++    setup_call_cleanup(
++        assertz(hook_dependency(Pl, Dep)),
++        compiled_file(Pl, Qlf),
++        retractall(hook_dependency(_, _))).
++
++write_source(File, Text) :-
++    setup_call_cleanup(
++        open(File, write, Out),
++        format(Out, '~s', [Text]),
++        close(Out)).
++
++%!  touch(+File, +Reference, +Delay) is det.
++%
++%   Give File a modification time Delay seconds after that of Reference,
++%   so that a test does not have to wait for the clock.
++
++touch(File, Reference, Delay) :-
++    time_file(Reference, Time),
++    New is Time+Delay,
++    set_time_file(File, _, [modified(New)]).
++
++remove_files(Files) :-
++    forall(member(File, Files),
++           catch(delete_file(File), _, true)).
++
+ test_files(Spec, Prolog, Qlf) :-
+     atomic_list_concat([input,Spec], /, RelFile),
+     file_path(RelFile, Prolog),

@@ -146,8 +146,11 @@ as it does on a native host. A browser never takes that path.
 
 ## Patches nothing requires
 
-A host also carries fixes for defects nothing in this repository meets. Each
-such patch sits in `tools/pymetta-host/host-only/`, at the path of the
+A host also carries fixes no requirement names: for defects nothing in this
+repository meets, and for one met only inside the home
+`tools/pymetta-host/assemble.sh` grafts into pymetta's Linux wheels, which is
+built from every patch of both layers and so carries the fix by construction.
+Each such patch sits in `tools/pymetta-host/host-only/`, at the path of the
 swipl-devel tree it patches as the ledger's patches sit in
 `tests/checks/host_workarounds/`, beside a reproduction of its defect that
 carries its name. `fetch-source.sh` applies them after the ledger's, so one
@@ -156,7 +159,7 @@ them in `metta-host.pl` and exits nonzero on a tree that lacks one. No
 requirement names them, so the engine boots on a host without them, and
 [host-workarounds.md](host-workarounds.md) gives them no entry.
 
-There is one. `swi-alarm-scheduler-exits-holding-lock.patch` unlocks
+There are two. `swi-alarm-scheduler-exits-holding-lock.patch` unlocks
 library(time)'s scheduler mutex after `alarm_loop()`'s loop in
 `packages/clib/time.c`. Without it, a process that halts with alarms pending
 can wait for ever in the library's halt hook: on a stock 10.1.14 the first of
@@ -165,6 +168,22 @@ the reproduction's twenty processes did, in each of three runs (measured
 unwinds `call_with_time_limit/2`'s cleanup and removes its alarm first. The
 WebAssembly build compiles no time plugin, so there the patch changes a file
 nothing reads.
+
+`swi-qlf-recompiles-unchanged-newer-source.patch` is upstream swipl-devel
+b5da8260476b, which SWI-Prolog 10.1.15 ships: a `.qlf` file records a hash of
+every source it was compiled from, in QLF format 72, and a `.pl` newer than its
+`.qlf` recompiles it only when that hash says the content changed. 10.1.14
+decided by time alone, and a home that arrives by installation carries the
+times its installer wrote, in the installer's order: a fresh uv install of the
+pymetta 0.9.2 wheel recompiled up to 51 of its bundled library `.qlf` files on
+its first boot and wrote them into site-packages (measured 2026-09-25). A home
+`ninja install` lays down keeps each source's time, and the WebAssembly home
+ships its library as `.qlf` files alone, so only the wheels meet the defect,
+and `tests/checks/check_wheel_first_boot.py` holds each wheel to a first boot
+that rewrites nothing, with every bundled `.qlf` dated before its source. A
+host carrying the patch writes format 72, which a host without it cannot load
+and so recompiles; it still loads formats 68 to 71, whose files record no
+hash and stay judged by time.
 
 The `host-workarounds` lane runs each reproduction on the host it checks and
 prints its answer: `absent` for a host built the way step 1 builds one,
@@ -175,8 +194,8 @@ answers neither word, do.
 To add one, put the patch, `git diff` output against swipl-devel at the pin,
 and its reproduction, `<name>.sh` or `<name>.pl` answering `present` or
 `absent` on its last line, in `tools/pymetta-host/host-only/`. A patch whose
-defect the engine, one of its seats or a shipped library meets goes in the
-ledger instead.
+defect the engine, one of its seats or a shipped library meets on a host the
+engine may boot on goes in the ledger instead.
 
 ## When a patch changes
 
