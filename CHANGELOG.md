@@ -361,6 +361,11 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- A child of the heartbeat-accounting tests that exits nonzero is reported
+  with its whole stderr. pytest cut the list the test asserted to 240
+  characters, and in two gate runs the cut removed the error of the one child
+  boot that failed, leaving its first and last few words.
+
 - `test_no_binding_carries_its_own_verbosity_setter` reads the files the seats'
   repositories track, where it walked `extensions/` and skipped three
   directory names. A battery worktree of the Node seat,
