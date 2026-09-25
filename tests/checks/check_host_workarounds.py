@@ -27,6 +27,15 @@ rather than worked around in the tree, so the entry needs no site, its
 reproduction must answer `absent`, and `present` means this environment's
 host was built without the patch; the lane fails naming the patch.
 
+A host also carries patches nothing requires, because nothing this tree runs
+meets their defect: tools/pymetta-host/host-only, the layer
+tools/pymetta-host/fetch-source.sh applies after the ledger's. Such a patch
+has no entry. Its reproduction sits beside it under the patch's own name,
+and this lane runs it and prints the answer, which says whether the host was
+built the way fetch-source.sh builds one, without making that a condition of
+passing: only a patch with no single reproduction, or a reproduction that
+answers neither word, fails.
+
 Assumes:
   - the tree is a git checkout: sites are read from `git ls-files`, so a
     scratch file or a linked `node_modules` is never scanned
@@ -58,6 +67,14 @@ Guarantees:
     file [tested: test_a_patched_host_passes_without_a_site,
     test_a_patched_host_that_still_shows_the_defect_names_the_patch,
     test_a_patch_must_be_tracked; commit=928be33b031956e3eed5a05d62c7f2f3bd534631]
+  - a host-only patch's reproduction runs like an entry's and its answer,
+    `present` or `absent`, is reported and never a finding; a host-only patch
+    with no tracked reproduction beside it, or with two, and a host-only
+    reproduction that is broken, are each reported
+    [tested 2026-09-25T13:56:49+10:00:
+    test_a_host_only_answer_is_reported_and_never_required,
+    test_a_host_only_patch_needs_one_reproduction_beside_it,
+    test_a_broken_host_only_reproduction_is_reported]
   - the shipped tree passes: every worked-around entry has a site and answers
     `present`, and every patched one answers `absent`, on SWI-Prolog 10.1.13
     with Janus 1.5.3 built with the tracked patches [tested:
@@ -94,6 +111,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from gate_layout import BOUNDED  # noqa: E402  -- installed above
 
 LEDGER = Path("docs/host-workarounds.md")
+#: The layer of patches a host is built with that nothing requires, as
+#: tools/pymetta-host/patch-root.sh's patch_layers names it.
+HOST_ONLY = Path("tools/pymetta-host/host-only")
 KEY = r"[a-z0-9]+(?:-[a-z0-9]+)*"
 MARKER = re.compile(r"^[\s%#;/*!]*Workaround:(.*)$")
 SITE = re.compile(r"^\s+(" + KEY + r")\s+-\s+(\S.*)$")
@@ -125,6 +145,15 @@ class Entry:
     fields: dict[str, str] = field(default_factory=dict)
 
 
+@dataclass(frozen=True)
+class HostOnly:
+    """A host-only patch and what its reproduction answered on this host."""
+
+    patch: Path
+    reproduction: Path
+    verdict: str
+
+
 @dataclass
 class Report:
     """What one check of a tree found."""
@@ -132,6 +161,7 @@ class Report:
     sites: list[Site]
     entries: list[Entry]
     findings: list[str]
+    host_only: list[HostOnly] = field(default_factory=list)
 
 
 def tracked_files(root: Path) -> list[Path]:
@@ -271,6 +301,24 @@ def run_reproduction(root: Path, path: Path) -> tuple[str, str]:
     return verdict, ""
 
 
+def host_only_pairs(files: list[Path]) -> tuple[list[tuple[Path, Path]], list[str]]:
+    """Pair each host-only patch with its one reproduction; report each patch without exactly one."""
+    tracked = set(files)
+    pairs: list[tuple[Path, Path]] = []
+    findings: list[str] = []
+    for patch in sorted(f for f in files if f.suffix == ".patch" and f.is_relative_to(HOST_ONLY)):
+        beside = [patch.with_suffix(suffix) for suffix in sorted(RUNNABLE)
+                  if patch.with_suffix(suffix) in tracked]
+        if len(beside) == 1:
+            pairs.append((patch, beside[0]))
+        else:
+            findings.append(
+                f"{patch}: a host-only patch needs one tracked reproduction beside it,"
+                f" {patch.stem}.sh or {patch.stem}.pl, and has {len(beside)}"
+            )
+    return pairs, findings
+
+
 def check_tree(root: Path, *, run: bool = True) -> Report:
     """Check one tree: the ledger's shape, both directions, and every reproduction."""
     files = tracked_files(root)
@@ -316,12 +364,32 @@ def check_tree(root: Path, *, run: bool = True) -> Report:
                 f"{entry.key}: the host no longer shows this defect ({path} answered"
                 f" absent); lift the workaround at {where} and remove the entry"
             )
-    return Report(sites, entries, findings)
+    # Nothing requires a host-only patch, so either answer passes; a
+    # reproduction that cannot answer is the tree's defect and does not.
+    pairs, unpaired = host_only_pairs(files)
+    findings.extend(unpaired)
+    host_only = []
+    for patch, path in pairs:
+        if not run:
+            continue
+        verdict, detail = run_reproduction(root, path)
+        if verdict == "broken":
+            findings.append(f"{patch.stem}: host-only reproduction {path} is broken: {detail}")
+        else:
+            host_only.append(HostOnly(patch, path, verdict))
+    return Report(sites, entries, findings, host_only)
 
 
 def main() -> int:
-    """Check the shipped tree; print every finding; exit 1 when there is one."""
+    """Check the shipped tree; print every host-only answer and every finding; exit 1 on a finding."""
     report = check_tree(ROOT)
+    for answer in report.host_only:
+        built = "carries" if answer.verdict == "absent" else "was built without"
+        print(
+            f"host-only {answer.patch.stem}: {answer.reproduction} answered {answer.verdict},"
+            f" so this host {built} {answer.patch}, which fetch-source.sh applies and"
+            " nothing requires"
+        )
     for finding in report.findings:
         print(finding)
     if report.findings:
@@ -330,7 +398,8 @@ def main() -> int:
     print(
         f"host workarounds: {len(report.entries)} entries ({patched} patched),"
         f" {len(report.sites)} sites, every worked-around defect answers present"
-        " and every patched one absent"
+        f" and every patched one absent; {len(report.host_only)} host-only"
+        " reproduction(s) answered"
     )
     return 0
 

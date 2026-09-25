@@ -311,6 +311,12 @@ GUARANTEE_SOURCES = (
     "tests/checks/host_workarounds/**/*.pl",
     "tests/checks/host_workarounds/**/*.sh",
     "tests/checks/host_workarounds/**/*.py",
+    # And the reproductions of the host-only patches, the same class beside
+    # patches a host is built with and nothing requires, one level below the
+    # tools/*/*.sh the runners' glob reaches [source 2026-09-25T13:52:03+10:00:
+    # tools/pymetta-host/patch-root.sh, patch_layers].
+    "tools/pymetta-host/host-only/**/*.pl",
+    "tools/pymetta-host/host-only/**/*.sh",
     # And the Python half of the same class, which the seat grew on 2026-09-07.
     # A probe is where a measurement's reproduction is TRACKED rather than left
     # in a checkout, which is what the scratch rule below asks authors to do, so

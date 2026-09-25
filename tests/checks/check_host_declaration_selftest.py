@@ -23,9 +23,15 @@ Guarantees:
     of the WebAssembly host, to the one line COMMAND prints, and refuses,
     writing nothing, when COMMAND exits nonzero, prints nothing or prints more
     than one line [tested: this file; commit=02dc5471b552c74826880441400114c798ea66ca]
+  - a host-only patch, one stacked on a ledger patch included, is declared as
+    a host_patch fact beside the ledger's; a tree lacking it makes `declare`
+    exit 1 naming it; no `require` lists one; and one named like a ledger
+    patch is refused [tested 2026-09-25T13:56:49+10:00: this file]
   - the lane reports an edited requirement, a patched tree no requirement
     file covers, and a host that does not declare what a requirement names,
     and passes a matching pair [tested: this file; commit=WORKTREE]
+  - the lane leaves the host-only layer unrequired and reads the ledger's
+    directory where patch-root.sh names it [tested 2026-09-25T13:56:49+10:00: this file]
 Open Obligations:
   To Do: None
   Hacks: None
@@ -55,6 +61,11 @@ STACK_BASE = "--- a/stack.txt\n+++ b/stack.txt\n@@ -1,3 +1,3 @@\n alpha\n-beta\n
 STACK_ON = ("--- a/stack.txt\n+++ b/stack.txt\n@@ -1,3 +1,3 @@\n alpha\n beta patched\n"
             "-gamma\n+gamma patched\n")
 NESTED = "packages/swipy"
+LEDGER = "tests/checks/host_workarounds"
+HOST_ONLY = "tools/pymetta-host/host-only"
+# A host-only patch written on top of a.patch: it reads a.patch's line, so it
+# applies only after a.patch and comes off the stack before it.
+PATCH_ON_A = "--- a/one.txt\n+++ b/one.txt\n@@ -1 +1 @@\n-one patched\n+one patched twice\n"
 
 
 def run(*command: str, cwd: Path) -> subprocess.CompletedProcess[str]:
@@ -76,11 +87,12 @@ def plant(work: Path) -> Path:
     return layout
 
 
-def source(work: Path, *applied: str) -> Path:
+def source(work: Path, *applied: str, stacked: tuple[str, ...] = ()) -> Path:
     """A git tree holding every patch target, with the named patches applied.
 
     packages/swipy is a repository of its own, as in swipl-devel, and each
-    patch is applied in the tree it sits under.
+    patch is applied in the tree it sits under: the named ledger patches
+    first, then the STACKED host-only ones, as fetch-source.sh orders them.
     """
     tree = work / "src"
     (tree / NESTED).mkdir(parents=True)
@@ -89,9 +101,10 @@ def source(work: Path, *applied: str) -> Path:
     (tree / NESTED / "three.txt").write_text("three\n")
     run("git", "init", "--quiet", ".", cwd=tree)
     run("git", "init", "--quiet", ".", cwd=tree / NESTED)
-    for name in applied:
-        root = tree / Path(name).parent
-        run("git", "apply", str(work / "repo/tests/checks/host_workarounds" / name), cwd=root)
+    for layer, names in ((LEDGER, applied), (HOST_ONLY, stacked)):
+        for name in names:
+            root = tree / Path(name).parent
+            run("git", "apply", str(work / "repo" / layer / name), cwd=root)
     return tree
 
 
@@ -115,10 +128,17 @@ def digest(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def fact(layout: Path, name: str) -> str:
+def fact(layout: Path, name: str, layer: str = LEDGER) -> str:
     """The declaration line for one planted patch, keyed by its file name."""
-    path = layout / "tests/checks/host_workarounds" / name
+    path = layout / layer / name
     return f"host_patch('{Path(name).name}', '{digest(path)}')."
+
+
+def plant_host_only(layout: Path, name: str, text: str) -> None:
+    """Plant a patch in the host-only layer, at the path of the tree it patches."""
+    path = layout / HOST_ONLY / name
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(text)
 
 
 def case_declare_every_patch(work: Path) -> list[str]:
@@ -234,6 +254,55 @@ def case_declare_reads_a_stacked_patch(work: Path) -> list[str]:
     return out
 
 
+def case_declare_lists_a_host_only_patch(work: Path) -> list[str]:
+    """A host-only patch stacked on a ledger patch is declared with it, as a host_patch fact."""
+    layout = plant(work)
+    plant_host_only(layout, "on-a.patch", PATCH_ON_A)
+    tree = source(work, "a.patch", "b.patch", stacked=("on-a.patch",))
+    home = planted_home(work)
+    ran = run("sh", "tools/pymetta-host/declare-host.sh", "declare", str(tree), str(home), cwd=layout)
+    text = (home / "metta-host.pl").read_text() if (home / "metta-host.pl").exists() else ""
+    out = []
+    if ran.returncode != 0:
+        out.append(f"a tree carrying the host-only patch exited {ran.returncode}: {ran.stderr.strip()}")
+    wanted = [fact(layout, "a.patch"), fact(layout, "b.patch"), fact(layout, "on-a.patch", HOST_ONLY)]
+    out.extend(f"the declaration lacks {line}" for line in wanted if line not in text)
+    return out
+
+
+def case_declare_fails_closed_without_a_host_only_patch(work: Path) -> list[str]:
+    """A tree lacking only the host-only patch exits 1 and declares the ledger's."""
+    layout = plant(work)
+    plant_host_only(layout, "on-a.patch", PATCH_ON_A)
+    tree = source(work, "a.patch", "b.patch")
+    home = planted_home(work)
+    ran = run("sh", "tools/pymetta-host/declare-host.sh", "declare", str(tree), str(home), cwd=layout)
+    text = (home / "metta-host.pl").read_text() if (home / "metta-host.pl").exists() else ""
+    out = []
+    if ran.returncode != 1 or "missing: on-a" not in ran.stderr:
+        out.append(f"a tree lacking on-a.patch exited {ran.returncode}, wanted 1 naming it: {ran.stderr.strip()}")
+    out.extend(f"the carried {name} is missing from the declaration"
+               for name in ("a.patch", "b.patch") if fact(layout, name) not in text)
+    if "on-a.patch" in text.replace("% ", ""):
+        out.append("the absent on-a.patch was declared")
+    return out
+
+
+def case_require_leaves_out_a_host_only_patch(work: Path) -> list[str]:
+    """No requirement names a host-only patch, at the top or under a tree."""
+    layout = plant(work)
+    nest(layout)
+    plant_host_only(layout, "on-a.patch", PATCH_ON_A)
+    plant_host_only(layout, f"{NESTED}/on-c.patch", PATCH_C)
+    out = []
+    for tree in ("", NESTED):
+        ran = run("sh", "tools/pymetta-host/declare-host.sh", "require", *([tree] if tree else []), cwd=layout)
+        if ran.returncode != 0 or "on-" in ran.stdout:
+            out.append(f"require {tree or '(top)'} exited {ran.returncode} or named a host-only patch: "
+                       f"{ran.stdout!r} {ran.stderr.strip()}")
+    return out
+
+
 def case_require_lists_every_patch(work: Path) -> list[str]:
     """The require mode lists the top-level patches in name order under the engine's module."""
     layout = plant(work)
@@ -292,6 +361,17 @@ def case_require_refuses_a_shared_name(work: Path) -> list[str]:
     return [f"two patches named a.patch were not refused: exit {ran.returncode}, {ran.stderr.strip()}"]
 
 
+def case_require_refuses_a_name_shared_across_layers(work: Path) -> list[str]:
+    """A host-only patch named like a ledger patch is refused, since the declaration keys both by name."""
+    layout = plant(work)
+    plant_host_only(layout, "a.patch", PATCH_ON_A)
+    ran = run("sh", "tools/pymetta-host/declare-host.sh", "require", cwd=layout)
+    if ran.returncode == 1 and "more than one patch is named a.patch" in ran.stderr:
+        return []
+    return [f"a host-only a.patch beside the ledger's was not refused: exit {ran.returncode}, "
+            f"{ran.stderr.strip()}"]
+
+
 def case_lane_reports_a_stale_requirement(work: Path) -> list[str]:
     """The lane passes a current requirement and reports an edited one."""
     layout = plant(work)
@@ -317,6 +397,25 @@ def case_lane_reports_an_unrequired_tree(work: Path) -> list[str]:
     return [f"a tree no requirement covers was not reported once by name: {findings}"]
 
 
+def case_lane_leaves_the_host_only_layer_unrequired(work: Path) -> list[str]:
+    """The host-only layer is required by nobody by design, so its trees are no finding."""
+    layout = plant(work)
+    plant_host_only(layout, "packages/other/d.patch", PATCH_C)
+    if findings := lane.unrequired_trees(layout):
+        return [f"a host-only tree was reported as required by nobody: {findings}"]
+    return []
+
+
+def case_lane_reads_the_layer_patch_root_names(work: Path) -> list[str]:
+    """The lane's PATCHES is the directory patch-root.sh's patch_layers names, so the two cannot drift."""
+    del work
+    named = run("sh", "-c", '. tools/pymetta-host/patch-root.sh && patch_layers . && printf %s "$PATCHES"',
+                cwd=ROOT)
+    if named.returncode == 0 and Path(named.stdout) == lane.PATCHES:
+        return []
+    return [f"patch-root.sh names {named.stdout!r} ({named.stderr.strip()}), the lane reads {lane.PATCHES}"]
+
+
 def case_lane_reports_an_undeclared_host(work: Path) -> list[str]:
     """A host lacking a required patch is refused, naming the patch."""
     layout = plant(work)
@@ -338,12 +437,18 @@ CASES: list[Callable[[Path], list[str]]] = [
     case_declare_fails_closed,
     case_declare_reads_a_stacked_patch,
     case_declare_refuses_a_home_without_a_launcher,
+    case_declare_lists_a_host_only_patch,
+    case_declare_fails_closed_without_a_host_only_patch,
     case_require_lists_every_patch,
     case_declare_applies_a_nested_patch_in_its_own_tree,
     case_require_splits_by_tree,
+    case_require_leaves_out_a_host_only_patch,
     case_require_refuses_a_shared_name,
+    case_require_refuses_a_name_shared_across_layers,
     case_lane_reports_a_stale_requirement,
     case_lane_reports_an_unrequired_tree,
+    case_lane_leaves_the_host_only_layer_unrequired,
+    case_lane_reads_the_layer_patch_root_names,
     case_lane_reports_an_undeclared_host,
 ]
 

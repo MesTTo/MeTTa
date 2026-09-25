@@ -62,9 +62,11 @@ carry.
 
    This clones swipl-devel at the commit `tools/pymetta-host/swipl.pin` names
    into `ai-tmp/swipl-src` (set `DEST` to put it elsewhere), and applies every
-   patch in `tests/checks/host_workarounds/`, each in the tree it sits under,
-   so the ones in `packages/swipy/` land in that submodule. It stops, naming
-   the patch, if any one fails to apply.
+   patch in `tests/checks/host_workarounds/` and then every patch in
+   `tools/pymetta-host/host-only/` (see [Patches nothing
+   requires](#patches-nothing-requires)), each in the tree it sits under, so
+   the ones in `packages/swipy/` land in that submodule. It stops, naming the
+   patch, if any one fails to apply.
 
 2. Build and install it with CMake, into a prefix of your choosing:
 
@@ -86,10 +88,11 @@ carry.
    ```
 
    This writes `metta-host.pl` into the SWI home. For every patch the source
-   tree carries, it records the patch's SHA-256, and it records the
-   `compiled_at` of the launcher installed there. The engine believes that
-   declaration only for that binary, because the C patches live in the
-   binary. It exits nonzero if the tree lacks any patch.
+   tree carries, host-only ones included, it records the patch's SHA-256, and
+   it records the `compiled_at` of the launcher installed there. The engine
+   believes that declaration only for that binary, because the C patches live
+   in the binary. It exits nonzero if the tree lacks any patch step 1
+   applies.
 
 4. Install the janus bridge from the PATCHED tree, not from PyPI:
 
@@ -141,11 +144,48 @@ directory into the host's file system with
 directory at its own path and changing into it lets a relative path resolve
 as it does on a native host. A browser never takes that path.
 
+## Patches nothing requires
+
+A host also carries fixes for defects nothing in this repository meets. Each
+such patch sits in `tools/pymetta-host/host-only/`, at the path of the
+swipl-devel tree it patches as the ledger's patches sit in
+`tests/checks/host_workarounds/`, beside a reproduction of its defect that
+carries its name. `fetch-source.sh` applies them after the ledger's, so one
+may be written on top of a ledger patch, and `declare-host.sh declare` lists
+them in `metta-host.pl` and exits nonzero on a tree that lacks one. No
+requirement names them, so the engine boots on a host without them, and
+[host-workarounds.md](host-workarounds.md) gives them no entry.
+
+There is one. `swi-alarm-scheduler-exits-holding-lock.patch` unlocks
+library(time)'s scheduler mutex after `alarm_loop()`'s loop in
+`packages/clib/time.c`. Without it, a process that halts with alarms pending
+can wait for ever in the library's halt hook: on a stock 10.1.14 the first of
+the reproduction's twenty processes did, in each of three runs (measured
+2026-09-25). The engine never halts that way, because `halt/1`
+unwinds `call_with_time_limit/2`'s cleanup and removes its alarm first. The
+WebAssembly build compiles no time plugin, so there the patch changes a file
+nothing reads.
+
+The `host-workarounds` lane runs each reproduction on the host it checks and
+prints its answer: `absent` for a host built the way step 1 builds one,
+`present` for one built without the patch. Neither answer fails the lane. A
+patch with no reproduction beside it, or with two, and a reproduction that
+answers neither word, do.
+
+To add one, put the patch, `git diff` output against swipl-devel at the pin,
+and its reproduction, `<name>.sh` or `<name>.pl` answering `present` or
+`absent` on its last line, in `tools/pymetta-host/host-only/`. A patch whose
+defect the engine, one of its seats or a shipped library meets goes in the
+ledger instead.
+
 ## When a patch changes
 
 A patch edited in `tests/checks/host_workarounds/` has a new digest, so a host
 built before the edit is refused as `built from an older version of the
 patch`, and a host built before a patch was added is refused as missing it.
+A host-only patch is in no requirement, so no host is refused for lacking it
+or for an older version of it; rebuild to carry the new one, and the
+`host-workarounds` lane's `host-only` line says whether a host does.
 Rebuild it from step 1, and the WebAssembly host with
 `sh tools/wasm-host/build.sh && sh tools/wasm-host/build.sh vendor`. A patch to
 a file the host never compiles needs no rebuild, only the declaration:

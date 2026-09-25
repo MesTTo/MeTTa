@@ -53,8 +53,9 @@
 #   and the image's downloads.
 # Guarantees:
 #   - the host compiles swipl-devel at tools/pymetta-host/swipl.pin with every
-#     patch under tests/checks/host_workarounds applied, since fetch-source.sh
-#     refuses a tree it could not patch whole
+#     patch under tests/checks/host_workarounds and then every one under
+#     tools/pymetta-host/host-only applied, since fetch-source.sh refuses a
+#     tree it could not patch whole
 #   - packages/metta is staged fresh on every build from lib/, so the host links
 #     the halves of exactly the libraries that carry support/static.cmake now
 #   - host/ is written only after `node tools/wasm-host/host.mjs check` passes

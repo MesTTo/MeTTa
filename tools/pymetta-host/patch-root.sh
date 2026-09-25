@@ -1,14 +1,32 @@
-# Purpose: name the tree a host-workaround patch belongs to, for every script
-#   that applies one, asks whether one is applied, or requires one, so the
-#   rule has one implementation; and put a source tree back to the pinned
-#   state the patches apply to.
+# Purpose: say which patches a host is built from, in the order they are
+#   applied, and name the tree each belongs to, for every script that applies
+#   one, asks whether one is applied, or requires one, so each rule has one
+#   implementation; and put a source tree back to the pinned state the
+#   patches apply to.
 #
-# Sourced, never run. A patch's paths are relative to the tree it was made
-# in, so that tree is part of what the patch is, and it is written down once:
-# by where the patch file sits under PATCHES, at that tree's own path inside
-# swipl-devel. The two that patch janus live in packages/swipy/, because they
-# are written against that submodule's own tree and `git apply` has to run
-# inside it; every other patch sits at the top and is written against the
+# Sourced, never run. `patch_layers ROOT` names the two directories the
+# patches sit in, and a host is built from both, in this order:
+#
+#   PATCHES    tests/checks/host_workarounds, the patches the ledger
+#              (docs/host-workarounds.md) carries, which a host must carry
+#              for the engine to boot on it
+#   HOST_ONLY  tools/pymetta-host/host-only, the patches a host is built with
+#              that nothing requires, because nothing this tree runs meets
+#              their defect, so the ledger gives them no entry
+#
+# The second is a layer on top of the first, as Buildroot applies a
+# package's own patches and then each BR2_GLOBAL_PATCH_DIR's in turn, every
+# directory in alphabetical order [source 2026-09-25T13:33:51+10:00:
+# https://github.com/buildroot/buildroot/blob/e7bbe36be89f5917329fb33051d8f702ebffb402/docs/manual/patch-policy.adoc,
+# "How patches are applied"]. A host-only patch may then be written on top of
+# a ledger patch, and no ledger patch can depend on a host-only one.
+#
+# A patch's paths are relative to the tree it was made in, so that tree is
+# part of what the patch is, and it is written down once: by where the patch
+# file sits under its layer, at that tree's own path inside swipl-devel. The
+# two that patch janus live in packages/swipy/, because they are written
+# against that submodule's own tree and `git apply` has to run inside it;
+# every other patch sits at the top of its layer and is written against the
 # swipl-devel root, where a plain `git apply` also reaches the files of a
 # submodule's working tree, as swi-uuid-static-half-unlinked.patch does for
 # packages/clib.
@@ -19,16 +37,18 @@
 # patches only one host loads. Where the file sits answers both without a
 # second description of which files live in the submodule.
 #
-# Assumes: a POSIX shell; PATCHES names the tests/checks/host_workarounds
-#   directory, and its paths hold no whitespace.
+# Assumes: a POSIX shell, and paths under both layers that hold no
+#   whitespace.
 # Guarantees:
-#   - every_patch prints each *.patch under PATCHES, at any depth, one per
-#     line in byte order, so every consumer walks one list in one order
-#     [tested: tools/pymetta-host/fetch_selftest.sh; commit=c4054cea8e7156ba91ed70eacc67bf9750e1b6c4]
-#   - patch_tree PATCH prints the patch's tree relative to swipl-devel: an
-#     empty line for a patch at the top, packages/swipy for one under
-#     packages/swipy/ [tested: tools/pymetta-host/fetch_selftest.sh;
-#     commit=c4054cea8e7156ba91ed70eacc67bf9750e1b6c4]
+#   - every_patch prints the stack a host is built from, one patch per line:
+#     each *.patch under PATCHES, then each under HOST_ONLY, at any depth and
+#     in byte order within its layer, so every consumer walks one list in one
+#     order; a layer with no directory holds no patches
+#     [tested 2026-09-25T13:56:49+10:00: tools/pymetta-host/fetch_selftest.sh]
+#   - patch_tree PATCH prints the patch's tree relative to swipl-devel, read
+#     from where it sits under its layer: an empty line for a patch at the
+#     top, packages/swipy for one under packages/swipy/
+#     [tested 2026-09-25T13:56:49+10:00: tools/pymetta-host/fetch_selftest.sh]
 #   - patch_root SRC PATCH prints SRC joined with that tree, and returns 1
 #     printing nothing when SRC has no such directory, so a tree that lacks
 #     the submodule is refused rather than patched in the wrong place
@@ -49,6 +69,11 @@
 #     with every patch applied; tested: tools/pymetta-host/fetch_selftest.sh;
 #     commit=630a20e49e4aa29b4fab2617e2ae6dc474a06189]
 
+patch_layers() {
+    PATCHES=$1/tests/checks/host_workarounds
+    HOST_ONLY=$1/tools/pymetta-host/host-only
+}
+
 pristine_tree() {
     git -C "$1" checkout --quiet --force -- . &&
     git -C "$1" clean --quiet --force -d &&
@@ -56,12 +81,20 @@ pristine_tree() {
         'git checkout --quiet --force -- . && git clean --quiet --force -d'
 }
 
+layer_patches() {
+    [ ! -d "$1" ] || find "$1" -type f -name '*.patch' | LC_ALL=C sort
+}
+
 every_patch() {
-    find "$PATCHES" -type f -name '*.patch' | LC_ALL=C sort
+    layer_patches "$PATCHES"
+    layer_patches "$HOST_ONLY"
 }
 
 patch_tree() {
-    patch_tree_rel=${1#"$PATCHES"/}
+    case $1 in
+        "$HOST_ONLY"/*) patch_tree_rel=${1#"$HOST_ONLY"/} ;;
+        *) patch_tree_rel=${1#"$PATCHES"/} ;;
+    esac
     case $patch_tree_rel in
         */*) printf '%s\n' "${patch_tree_rel%/*}" ;;
         *) printf '\n' ;;

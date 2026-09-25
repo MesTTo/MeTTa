@@ -1,5 +1,10 @@
 #!/bin/bash
-# Drive the container stages from the host. One image, one mount set.
+# Purpose: drive the container stages that build pymetta's host wheels, each
+#   stage named on the command line (build-swipl.sh, build-janus.sh,
+#   assemble.sh) run from the host in one manylinux image over one mount set.
+# Decides: OUT, defaulting to ai-tmp/host-build, where the stages write; DIST,
+#   defaulting to dist/, where the pure wheel waits; SRC, defaulting to the
+#   tree fetch-source.sh produces.
 #
 # TAGS is derived from pymetta's classifiers rather than written here, so adding
 # an interpreter to extensions/python/pyproject.toml is the only edit a new
@@ -25,9 +30,9 @@ DIST=${DIST:-$REPO/dist}
 # distributions of 18 and build-distributions.sh skipped this one by name.
 #
 # The tree is DERIVED now: fetch-source.sh clones swipl-devel at the pinned
-# commit and applies every patch in tests/checks/host_workarounds, all of
-# which were committed here all along. SRC stays as an override for a tree
-# someone is actively editing.
+# commit and applies every patch in tests/checks/host_workarounds and then
+# every one in tools/pymetta-host/host-only, all of which are committed here.
+# SRC stays as an override for a tree someone is actively editing.
 if [ -z "${SRC:-}" ]; then
     sh "$HERE/fetch-source.sh"
     SRC=${DEST:-$REPO/ai-tmp/swipl-src}

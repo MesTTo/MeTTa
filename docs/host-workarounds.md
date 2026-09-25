@@ -51,7 +51,10 @@ A patch is carried, which makes it a boot requirement, only where the engine,
 one of its seats or a shipped library meets the defect, or where a carried
 patch is written on top of it, and the entry says which. A defect nothing
 here meets has no entry even when a host carries its fix; the journal of
-defects to report upstream records it.
+defects to report upstream records it, and the fix sits in
+`tools/pymetta-host/host-only/` beside its reproduction, which the lane runs
+and reports without requiring its answer
+([patched-host.md](patched-host.md#patches-nothing-requires)).
 
 ## janus-callback-exception-leak
 Host: janus-swi 1.5.3 (janus/janus.c `check_error`, the same code at upstream

@@ -1,26 +1,34 @@
 #!/bin/sh
-# Purpose: write down which host-workaround patches a SWI-Prolog carries, in
-#   the one shape the engine's boot check reads, so a patched host can be
-#   told from a stock one by something other than its version string.
+# Purpose: write down which patches a SWI-Prolog carries, in the one shape the
+#   engine's boot check reads, so a patched host can be told from a stock one
+#   by something other than its version string.
 #
 # Usage:
-#   declare-host.sh require [TREE]     print the requirement for the patches
-#                                      to one tree of swipl-devel. With no
-#                                      TREE, the patches to swipl-devel
-#                                      itself: engine/host_patches.pl, the
-#                                      set the engine refuses to boot
-#                                      without. With packages/swipy, the
-#                                      patches to janus, which the Python
-#                                      host requires in its own bridge
+#   declare-host.sh require [TREE]     print the requirement for the ledger's
+#                                      patches to one tree of swipl-devel.
+#                                      With no TREE, the patches to
+#                                      swipl-devel itself:
+#                                      engine/host_patches.pl, the set the
+#                                      engine refuses to boot without. With
+#                                      packages/swipy, the patches to janus,
+#                                      which the Python host requires in its
+#                                      own bridge
 #   declare-host.sh declare SRC HOME [--built-by COMMAND...]
 #                                      write HOME/metta-host.pl: the patches
-#                                      the source tree SRC carries, for a
-#                                      host installed from SRC into HOME
+#                                      of the stack the source tree SRC
+#                                      carries, host-only ones included, for
+#                                      a host installed from SRC into HOME
 #
 # Both write host_patch(File, Sha256) facts, one per patch, so the check
 # compares two sets of identical terms. The digest is of the patch file, which
 # makes a host built from an OLDER version of a patch fail the same way a
-# stock host does rather than passing on its name.
+# stock host does rather than passing on its name. The check asks only that
+# the declaration hold every fact a requirement names, so a host-only patch
+# is declared as what the host carries and required by nothing, as the janus
+# patches were never in the engine's requirement: a fact of another kind
+# would be refused as malformed by every engine written before it [source
+# 2026-09-25T13:46:22+10:00: engine/host_check.pl,
+# metta_require_host_patches/2 and read_declaration/5].
 #
 # `declare` also writes host_build(CompiledAt), the compiled_at flag of the
 # build installed in HOME, because the C patches live in the binary and the
@@ -51,19 +59,21 @@
 # Guarantees:
 #   - `require TREE` lists exactly the patches that sit under TREE in
 #     tests/checks/host_workarounds (the top level for no TREE), in byte order,
-#     so each requirement file is a function of that directory and every patch
-#     lands in exactly one of them [tested: tests/checks/check_host_declaration.py;
-#     commit=WORKTREE]
-#   - `require` refuses two patches with one file name in different trees,
-#     since the name is the key a declaration and a requirement share
-#   - `declare` lists a patch exactly when it comes off the stack of patches
-#     to the tree patch-root.sh routes it to: every file those patches name
-#     is copied, and the patches are reverse-applied to the copy last first,
-#     so each is checked against the tree as it stood right after it was
-#     applied and a patch another one builds on still reads as carried. A
-#     patch the tree lacks is absent from the declaration and the
-#     requirement holding it names it
-#     [tested: tests/checks/check_host_declaration_selftest.py; commit=95aaabc0b4bd4d1748e0e11fb1adead93e52ee3c]
+#     and never a host-only one, so each requirement file is a function of
+#     that directory and every ledger patch lands in exactly one of them
+#     [tested 2026-09-25T13:56:49+10:00: tests/checks/check_host_declaration_selftest.py]
+#   - `require` refuses two patches with one file name, in different trees or
+#     in different layers, since the name is the key a declaration and a
+#     requirement share
+#     [tested 2026-09-25T13:56:49+10:00: tests/checks/check_host_declaration_selftest.py]
+#   - `declare` lists a patch exactly when it comes off the stack
+#     fetch-source.sh put on the tree patch-root.sh routes it to: every file
+#     those patches name is copied, and the patches are reverse-applied to the
+#     copy last first, host-only ones before the ledger's, so each is checked
+#     against the tree as it stood right after it was applied and a patch
+#     another one builds on still reads as carried. A patch the tree lacks is
+#     absent from the declaration
+#     [tested 2026-09-25T13:56:49+10:00: tests/checks/check_host_declaration_selftest.py]
 #   - `declare` records the one line the identity command prints, run with
 #     SWI_HOME_DIR unset so the answer is that build's own: HOME/bin/<arch>/swipl
 #     reporting its compiled_at, or the command after --built-by. It refuses,
@@ -73,18 +83,20 @@
 #     [tested: tests/checks/check_host_declaration_selftest.py; commit=02dc5471b552c74826880441400114c798ea66ca]
 #   - the declaration is replaced whole, by rename, so a reader never sees a
 #     half-written one
-#   - `declare` exits 1 when the tree lacks any patch, after writing the
-#     declaration, so a build stops where a half-patched host would otherwise
-#     reach a wheel, and the file still names exactly what the engine will
-#     refuse [tested: tests/checks/check_host_declaration.py; commit=WORKTREE]
+#   - `declare` exits 1 when the tree lacks any patch of the stack, a
+#     host-only one included, after writing the declaration, so a build stops
+#     where a half-patched host would otherwise reach a wheel and a rebuild
+#     cannot drop a host-only fix unseen, and the file still names exactly
+#     what the tree carries
+#     [tested 2026-09-25T13:56:49+10:00: tests/checks/check_host_declaration_selftest.py]
 # Fails when: SRC is not a git tree, or HOME does not exist; both refuse with
 #   exit 1 rather than writing a declaration nothing was checked against.
 set -eu
 
 HERE=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 ROOT=$(CDPATH= cd -- "$HERE/../.." && pwd)
-PATCHES="$ROOT/tests/checks/host_workarounds"
 . "$HERE/patch-root.sh"
+patch_layers "$ROOT"
 NL='
 '
 
@@ -123,7 +135,9 @@ case "${1:-}" in
 :- module($module, [host_patch/2]).
 
 HEADER
-        for patch in $(every_patch); do
+        # A requirement is the ledger's layer alone: the host-only layer is
+        # what a host is built with and nothing requires.
+        for patch in $(layer_patches "$PATCHES"); do
             if [ "$(patch_tree "$patch")" = "$TREE" ]; then fact "$patch"; fi
         done
         ;;
@@ -159,7 +173,7 @@ HEADER
         esac
         OUT="$HOME_DIR/metta-host.pl"
         {
-            echo "% The host-workaround patches this SWI-Prolog was built with, written by"
+            echo "% The patches this SWI-Prolog was built with, written by"
             echo "% tools/pymetta-host/declare-host.sh from the tree it was installed from."
             echo "% The engine refuses to boot unless the running build is the one named"
             echo "% here and every patch it requires is listed with the same sha256."
@@ -175,12 +189,18 @@ HEADER
         # swipl-devel tree the host compiled Sep 24 2026, 09:57:51 was built
         # from read 25 of 26, missing
         # swi-concurrent-import-removal-resets-provider, beneath
-        # swi-unlinked-definition-uninitialised].
+        # swi-unlinked-definition-uninitialised]. Last first is every_patch
+        # read backwards, which sed's `1!G;h;$!d` does where tac(1) is not
+        # POSIX [source 2026-09-25T13:45:54+10:00:
+        # https://www.pement.org/sed/sed1line.txt version 5.5, sha256 prefix
+        # 1938a44bedf566f0, `reverse order of lines (emulates "tac")`,
+        # method 1], so the host-only layer comes off before the ledger's
+        # whatever the two directories are called.
         mkdir -p "$ROOT/ai-tmp"
         STACK=$(mktemp -d "$ROOT/ai-tmp/declare-host.XXXXXX")
         trap 'rm -rf "$STACK"' EXIT
         off=' '
-        for patch in $(every_patch | LC_ALL=C sort -r); do
+        for patch in $(every_patch | sed '1!G;h;$!d'); do
             tree=$(patch_tree "$patch")
             copy=$STACK/tree$(printf '%s' "$tree" | tr '/' '_')
             root=$(patch_root "$SRC" "$patch") || continue

@@ -19,6 +19,15 @@ Guarantees:
     test_a_patched_host_passes_without_a_site,
     test_a_patched_host_that_still_shows_the_defect_names_the_patch,
     test_a_patch_must_be_tracked; commit=928be33b031956e3eed5a05d62c7f2f3bd534631]
+  - a host-only patch's reproduction passes on either answer and is reported
+    with it, and a host-only patch with no reproduction or two, or a broken
+    one, is reported [tested 2026-09-25T13:56:49+10:00:
+    test_a_host_only_answer_is_reported_and_never_required,
+    test_a_host_only_patch_needs_one_reproduction_beside_it,
+    test_a_broken_host_only_reproduction_is_reported]
+  - the lane reads the host-only directory tools/pymetta-host/patch-root.sh
+    names [tested 2026-09-25T13:56:49+10:00:
+    test_the_host_only_layer_is_the_one_fetch_source_applies]
   - the shipped tree passes the same gate, so a red above is the fixture
     [tested: test_the_shipped_tree_passes_its_own_gate; commit=2bd6b250a22d9898ced449595c168a8dc3a78768]
 Open Obligations:
@@ -36,7 +45,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from check_host_workarounds import check_tree, main
+from check_host_workarounds import HOST_ONLY, ROOT, HostOnly, check_tree, main
 
 SITE = "% " + "Workaround: swi-planted-window - the marker is a trailed write.\n"
 ENTRY = (
@@ -69,8 +78,12 @@ def plant(
     entry: str = ENTRY,
     reproduction: str = PRESENT,
     patch: str | None = None,
+    host_only: dict[str, str] | None = None,
 ) -> Path:
-    """Write one fixture tree and stage it, so the gate's file listing sees it."""
+    """Write one fixture tree and stage it, so the gate's file listing sees it.
+
+    HOST_ONLY maps file names under the host-only layer to their text.
+    """
     (root / "src").mkdir(parents=True)
     (root / "docs").mkdir()
     (root / "tests" / "checks" / "host_workarounds").mkdir(parents=True)
@@ -83,6 +96,9 @@ def plant(
         (root / "tests" / "checks" / "host_workarounds" / "planted.patch").write_text(
             patch, encoding="utf-8"
         )
+    for name, text in (host_only or {}).items():
+        (root / HOST_ONLY / name).parent.mkdir(parents=True, exist_ok=True)
+        (root / HOST_ONLY / name).write_text(text, encoding="utf-8")
     subprocess.run(["git", "init", "-q"], cwd=root, check=True)
     subprocess.run(["git", "add", "-A"], cwd=root, check=True)
     return root
@@ -181,6 +197,42 @@ def test_a_patch_must_be_tracked(tmp_path: Path) -> None:
     """A patch the tree does not carry cannot be what the host was built with."""
     findings = findings_of(plant(tmp_path, site="", entry=PATCHED, reproduction=ABSENT))
     assert [f for f in findings if "needs `Patch:` to name a tracked .patch file" in f]
+
+
+def test_a_host_only_answer_is_reported_and_never_required(tmp_path: Path) -> None:
+    """Either answer from a host-only reproduction passes, and the report says which it was."""
+    for verdict, script in (("present", PRESENT), ("absent", ABSENT)):
+        tree = plant(tmp_path / verdict, host_only={"fix.patch": DIFF, "fix.sh": script})
+        report = check_tree(tree)
+        assert report.findings == []
+        assert report.host_only == [HostOnly(HOST_ONLY / "fix.patch", HOST_ONLY / "fix.sh", verdict)]
+
+
+def test_a_host_only_patch_needs_one_reproduction_beside_it(tmp_path: Path) -> None:
+    """A host-only patch with no reproduction named for it, or with two, cannot be checked."""
+    findings = findings_of(plant(tmp_path / "none", host_only={"fix.patch": DIFF}))
+    assert len(findings) == 1
+    assert "needs one tracked reproduction beside it, fix.sh or fix.pl, and has 0" in findings[0]
+    two = {"fix.patch": DIFF, "fix.sh": ABSENT, "fix.pl": "main :- writeln(absent).\n"}
+    findings = findings_of(plant(tmp_path / "two", host_only=two))
+    assert len(findings) == 1
+    assert "and has 2" in findings[0]
+
+
+def test_a_broken_host_only_reproduction_is_reported(tmp_path: Path) -> None:
+    """A host-only reproduction that answers neither word is the tree's defect, whatever the host."""
+    findings = findings_of(plant(tmp_path, host_only={"fix.patch": DIFF, "fix.sh": "#!/bin/sh\nexit 3\n"}))
+    assert len(findings) == 1
+    assert "host-only reproduction" in findings[0] and "is broken" in findings[0]
+
+
+def test_the_host_only_layer_is_the_one_fetch_source_applies() -> None:
+    """The lane's HOST_ONLY is the directory patch-root.sh's patch_layers names, so the two cannot drift."""
+    named = subprocess.run(
+        ["sh", "-c", '. tools/pymetta-host/patch-root.sh && patch_layers . && printf %s "$HOST_ONLY"'],
+        cwd=ROOT, capture_output=True, text=True, check=True,
+    ).stdout
+    assert Path(named) == HOST_ONLY
 
 
 def test_the_shipped_tree_passes_its_own_gate() -> None:

@@ -361,6 +361,18 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- A host built from `tools/pymetta-host/fetch-source.sh` carries the fix for
+  library(time)'s alarm scheduler, which returned holding its mutex, so a
+  process halting with alarms pending could wait for ever. Each native host
+  since build 7 had the fix added by hand, since the ledger gives no entry to
+  a defect nothing here meets, and a rebuild that followed the scripts alone
+  dropped it. Such patches now sit in `tools/pymetta-host/host-only/`, each
+  beside its reproduction: `fetch-source.sh` applies them after the ledger's,
+  `declare-host.sh declare` lists them in the declaration and exits nonzero on
+  a tree without one, no requirement names them, and the `host-workarounds`
+  lane runs each reproduction and prints its answer without failing on it
+  (`docs/patched-host.md`).
+
 - A call departing from a watched frame receives its arguments intact when a
   cleanup handler or a `frame_finished` listener shifts the stacks, on the
   patched host (`swi-shift-misses-pending-depart-arguments`): SWI-Prolog's
