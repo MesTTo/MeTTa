@@ -386,6 +386,20 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- A Prolog source loaded on a thread other than the one that loaded the engine,
+  or inside an engine of its own, raises the errors it prints. `consult`,
+  `use_module`, `ensure_loaded` and a seat's registered Prolog source load
+  through `loading_loudly/1`, which collected printed errors through a clause
+  of `user:thread_message_hook/3`. SWI declares that hook thread_local, so the
+  clause existed only on the thread that loaded `engine/source_loading.pl`,
+  and a load anywhere else printed its syntax error and carried on. The Node
+  seat runs each ask in an engine of its own, and a Python program may
+  register from a worker thread, so in both a syntax error in a registered
+  Prolog source surfaced as `no predicate named rp-syntax is loaded`, where
+  the Python seat's main thread raised the syntax error. The clause is now
+  one of `user:message_hook/3`, which SWI calls on every thread and engine,
+  and it collects only while a load is open on the thread printing the
+  message, so a load still never collects another thread's messages.
 - `examples/ch08-data/08-03-the-shipped-libraries/31-system_lib.metta` claims
   the platform family is one of the four SWI's platform flags name,
   `"windows"`, `"apple"`, `"unix"` or `"emscripten"`, where it pinned the

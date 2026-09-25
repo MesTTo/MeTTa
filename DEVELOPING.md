@@ -670,7 +670,7 @@ probes in tests name the owning module directly.
 Execution modules resolve through `&self`, `prelude`, `metta_engine`, `user`
 and `system`. The host's own registrations remain in `user`; engine and
 library definitions do not. The three exceptions are SWI's named hooks
-`user:exception/3`, `user:thread_message_hook/3` and
+`user:exception/3`, `user:message_hook/3` and
 `user:prolog_trace_interception/4`. A module's private callback must retain its
 module when stored as data or installed elsewhere. `thread_wait/2` also needs
 the module owning the dynamic predicates it watches. The timer barrier test

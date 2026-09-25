@@ -324,18 +324,20 @@ test(user_holds_nothing_the_engine_defines) :-
 %
 %   Exempt SWI's hooks in user. The census checks their multifile declarations
 %   and rejects every other engine or library definition in that module.
-%   [tested: engine_modules:user_holds_nothing_the_engine_defines; commit=b7866b4d874879ff0cb212eb1c6af60dddaa39c6]
+%   user:thread_message_hook/3 is not one: SWI declares it thread_local and
+%   not multifile [source 2026-09-25T02:28:34+10:00: SWI-Prolog V10.1.14
+%   boot/messages.pl:2466-2476], so a clause the engine loaded there existed
+%   only on the loading thread, and the engine defines none.
+%   [tested 2026-09-25T18:46:53+10:00: engine_modules:user_holds_nothing_the_engine_defines]
 swi_hook_in_user(exception/3,
                  'SWI calls user:exception(undefined_predicate, ...) before it \c
                   reports an unknown procedure, which is how a foreign space \c
                   materialises a predicate on demand').
-swi_hook_in_user(thread_message_hook/3,
-                 'SWI consults user:thread_message_hook/3 to intercept a \c
-                  message in THIS thread, which is how a load reports a syntax \c
-                  error the loader would otherwise only print').
 swi_hook_in_user(message_hook/3,
                  'SWI calls this multifile hook in user before printing a \c
-                  message; library logging may supply its handler there').
+                  message, on every thread and engine: it is how a load \c
+                  reports a syntax error the loader would otherwise only \c
+                  print, and library logging may supply its handler there').
 swi_hook_in_user(prolog_trace_interception/4,
                  'SWI calls user:prolog_trace_interception/4 from the debugger \c
                   port, which is the source observer\'s whole mechanism').

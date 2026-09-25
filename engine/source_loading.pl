@@ -7,8 +7,13 @@
    outer load's errors; ordinary warnings and plain goal failure retain their
    meaning; the source module is restored before QLF replay resumes and load
    errors have a readable message before the engine runtime unit is loaded
-   [tested: tests/prolog/suites/seams/source_loading.plt,
-   tests/shell/test_packaged_cli.sh; commit=8ee8fcd4e43a932131909f7c58ad4fbe4dcf8d1d].
+   [tested 2026-09-25T18:46:53+10:00: tests/prolog/suites/seams/source_loading.plt,
+   tests/shell/test_packaged_cli.sh];
+   a load raises what it printed on whichever thread or engine runs it, not
+   only on the thread that loaded this file [tested 2026-09-25T18:46:53+10:00:
+   tests/prolog/suites/seams/source_loading.plt,
+   a_load_inside_an_engine_raises_what_it_printed,
+   a_load_on_another_thread_raises_what_it_printed].
    Owns resources: each loading_loudly/1 call erases its diagnostic records and
    watching clause on success, failure or exception.
    Guarded by: watching/0 and diagnostic/2 are thread-local; clause references
@@ -17,7 +22,7 @@
 :- module(metta_source_loading, [loading_loudly/1]).
 
 :- thread_local watching/0, diagnostic/2.
-:- multifile user:thread_message_hook/3.
+:- multifile user:message_hook/3.
 :- multifile prolog:error_message//1.
 
 % Extension entries load before engine/metta/runtime.pl. Keep this error's
@@ -29,7 +34,15 @@ prolog:error_message(metta_load_failed(Summary)) -->
 % and initialization warnings likewise mean the requested load did not finish.
 % Backtracking records each active scope once, then fails so SWI still prints
 % the diagnostic and runs other hooks. No load scope means no diagnostic work.
-user:thread_message_hook(Term, Kind, _) :-
+%
+% user:message_hook/3 rather than user:thread_message_hook/3, which SWI
+% declares thread_local [source 2026-09-25T02:28:34+10:00: SWI-Prolog V10.1.14
+% boot/messages.pl:2466-2476], so a clause loaded here existed only for the
+% thread that loaded this file: a load on any other thread, or in an engine of
+% its own, printed its errors and carried on, and tsmetta runs every ask in an
+% engine of its own. The scope stays per thread and per engine because
+% watching/0 is thread_local.
+user:message_hook(Term, Kind, _) :-
     clause(watching, true, Ref),
     load_failure(Term, Kind),
     message_to_string(Term, Text),

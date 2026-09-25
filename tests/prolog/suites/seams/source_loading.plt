@@ -1,7 +1,11 @@
 /* Purpose: verify the shared source loader's diagnostics, nested scopes and
    restoration on every exit, independently of an engine boot.
    Guarantees: errors remain visible to enclosing loads and other threads do
-   not contaminate a successful load [tested: source_loading; commit=8ee8fcd4e43a932131909f7c58ad4fbe4dcf8d1d].
+   not contaminate a successful load [tested 2026-09-25T18:46:53+10:00: source_loading];
+   a load inside an engine of its own or on another thread raises what it
+   printed [tested 2026-09-25T18:46:53+10:00:
+   a_load_inside_an_engine_raises_what_it_printed,
+   a_load_on_another_thread_raises_what_it_printed].
    Owns resources: each test joins its worker and destroys its message queue;
    the suite checks that loading_loudly/1 leaves no diagnostic scope behind.
 */
@@ -60,6 +64,43 @@ test(other_threads_diagnostics_are_not_collected) :-
             (thread_send_message(Queue, start), thread_join(Worker, Status),
              assertion(Status == true))),
         message_queue_destroy(Queue)).
+
+% A load that is not on the thread that loaded this file still raises what it
+% printed. The collecting clause used to be one of user:thread_message_hook/3,
+% which SWI declares thread_local, so it existed only for that thread: every
+% engine of its own and every other thread printed its load errors and carried
+% on. tsmetta runs each ask in an engine of its own, so a syntax error in a
+% Prolog source it registered was reported as a missing predicate there, while
+% the Python seat, which loads on the thread it booted on, raised it.
+test(a_load_inside_an_engine_raises_what_it_printed, Outcome = refused(_)) :-
+    engine_create(Result, loud_syntax_error_load(Result), Engine),
+    call_cleanup(engine_next(Engine, Outcome), engine_destroy(Engine)).
+
+% The worker always sends a result, so an unexpected exception fails the test
+% by its value rather than leaving this thread waiting for a message.
+test(a_load_on_another_thread_raises_what_it_printed, Outcome = refused(_)) :-
+    setup_call_cleanup(
+        message_queue_create(Queue),
+        ( thread_create(( catch(loud_syntax_error_load(Result), Error,
+                                Result = raised(Error)),
+                          thread_send_message(Queue, Result) ), Worker, []),
+          thread_get_message(Queue, Outcome),
+          thread_join(Worker, Status),
+          assertion(Status == true) ),
+        message_queue_destroy(Queue)).
+
+loud_syntax_error_load(Outcome) :-
+    catch(( loading_loudly(
+                setup_call_cleanup(
+                    open_string("'loud-broken'(X) :- X is 1 * .", In),
+                    load_files(loud_broken_source, [stream(In)]),
+                    close(In))),
+            Outcome = loaded ),
+          error(metta_load_failed(Summary), _),
+          (   sub_atom(Summary, _, _, _, 'Syntax error')
+          ->  Outcome = refused(Summary)
+          ;   Outcome = refused_otherwise(Summary)
+          )).
 
 test(all_load_scopes_are_released) :-
     assertion(\+ metta_source_loading:watching),
