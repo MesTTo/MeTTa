@@ -686,7 +686,7 @@ MeTTa's own evaluator, written in MeTTa.
   author  = {MesTTo},
   title   = {MeTTa Kernel},
   url     = {https://github.com/MesTTo/MeTTa},
-  version = {0.8.0}
+  version = {0.9.2}
 }
 ```
 

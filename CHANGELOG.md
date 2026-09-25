@@ -1715,6 +1715,13 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   face-wave marker, so a table filled by a live call survives a refresh that
   changes nothing.
 
+- `CITATION.cff` and the README's citation block name the release they
+  describe. Both read 0.8.0 through 0.9.0, 0.9.1 and 0.9.2, because nothing
+  held them to `metta/_version.py`, the one place the package reads its
+  version from. `test_every_restatement_of_the_version_is_the_packaged_one`
+  now requires both, and this file's newest release heading, to name the
+  version the package builds.
+
 ## [0.9.2] - 2026-09-24
 
 ### Added
