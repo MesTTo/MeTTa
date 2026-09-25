@@ -935,4 +935,73 @@ test(an_untyped_local_shadow_does_not_type_its_specialization,
                      governing_type_declaration('plunit-shadow-hof', _))),
     assertion(\+ match_stored(Space, [':', SpecName, _], _, _)).
 
+% A specialization's name is made from the call, so every module that
+% specializes the same call makes the same name. Dropping a space that had
+% specialized a call its parent had specialized too removes the space's copy
+% and uncovers the parent's, and the shadow repair re-imports the parent's
+% predicate into the space's module so a compiled call keeps resolving
+% (metta_restore_inherited_predicate/3). The name's next life keeps that import
+% while its parent is unchanged, and specializing the same call there asserted
+% through the import into the parent: the parent's specialization held its
+% clause twice and every call answered twice. The weighted-subset marginals
+% property hung on exactly this, unfold's specializations doubled in the
+% process home and every level of unfold doubling the answers.
+test(a_recycled_space_specializes_into_its_own_module) :-
+    Parent = '&plunit_spec_recycled_parent',
+    Child = '&plunit_spec_recycled_child',
+    setup_call_cleanup(
+        ( retractall(silent(_)), assertz(silent(true)) ),
+        once(( recycled_specialization_program(Parent),
+               recycled_specialization_answers(Parent, [2]),
+               space_module(Parent, ParentModule),
+               ho_specialization(ParentModule, 'plunit-rc-map', SpecName),
+               current_predicate(ParentModule:SpecName/Arity),
+               functor(SpecHead, SpecName, Arity),
+               metta_declare_space_parent(Child, Parent),
+               recycled_specialization_program(Child),
+               recycled_specialization_answers(Child, [2]),
+               metta_release_space(Child),
+               metta_declare_space_parent(Child, Parent),
+               space_module(Child, ChildModule),
+               recycled_specialization_source(ChildModule, SpecHead, Planted),
+               recycled_specialization_program(Child),
+               recycled_specialization_answers(Child, ChildAnswers),
+               recycled_specialization_answers(Parent, ParentAnswers),
+               aggregate_all(count, clause(ParentModule:SpecHead, _), ParentClauses),
+               recycled_specialization_source(ChildModule, SpecHead, Derived) )),
+        ( catch(metta_release_space(Child), _, true),
+          catch(metta_release_space(Parent), _, true),
+          retractall(silent(_)),
+          assertz(silent(false)) )),
+    %The state under test: the recycled module reaches the parent's copy.
+    assertion(Planted == ParentModule),
+    assertion(ChildAnswers == [2]),
+    assertion(ParentAnswers == [2]),
+    assertion(ParentClauses == 1),
+    assertion(Derived == local).
+
+recycled_specialization_program(Space) :-
+    forall(member(Equation,
+                  [ [=, ['plunit-rc-map', F, X], [F, X]],
+                    [=, ['plunit-rc-inc', Y], ['+', Y, 1]],
+                    [=, ['plunit-rc-use', Z],
+                     ['plunit-rc-map', 'plunit-rc-inc', Z]] ]),
+           'add-atom'(Space, Equation, _)).
+
+recycled_specialization_answers(Space, Answers) :-
+    space_module(Space, Module),
+    findall(Answer,
+            with_metta_module(Module, reduce(['plunit-rc-use', 1], Answer, _)),
+            Answers).
+
+%Where a module's predicate comes from: the module an import names, local when
+%the module defines it, none when it resolves nowhere.
+recycled_specialization_source(Module, Head, Source) :-
+    (   predicate_property(Module:Head, imported_from(From))
+    ->  Source = From
+    ;   predicate_property(Module:Head, defined)
+    ->  Source = local
+    ;   Source = none
+    ).
+
 :- end_tests(specializer_invalidation).

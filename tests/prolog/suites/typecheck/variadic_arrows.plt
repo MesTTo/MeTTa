@@ -328,6 +328,52 @@ test(shape_recursion_and_the_differential_share_the_source_bag,
           once(specializer:metta_check_specialization(Name, M:Goal)),
           once(call(M:Goal)), assertion(Out == 0) )).
 
+% The shape door's side of specializer_invalidation:
+% a_recycled_space_specializes_into_its_own_module. A shape specialization's
+% name is made from the call's shape, so a child that specialized the shape its
+% parent had specialized too has its copy re-imported from the parent when it
+% is dropped, the recycled name keeps that import, and the next life's derive
+% asserted through it into the parent, whose copy then answered twice.
+test(a_recycled_space_specializes_a_shape_into_its_own_module) :-
+    Parent = '&plunit_seg_recycled_parent',
+    Child = '&plunit_seg_recycled_child',
+    Program = "(: seg-rc (-> (:seg Atom) Atom)) (= (seg-rc (:seg $xs)) old) !(seg-rc a b)",
+    setup_call_cleanup(
+        true,
+        once(( run_in(Parent, Program, [old]),
+               space_module(Parent, ParentModule),
+               ho_specialization(ParentModule, 'seg-rc', Name),
+               current_predicate(ParentModule:Name/Arity),
+               functor(Head, Name, Arity),
+               metta_declare_space_parent(Child, Parent),
+               run_in(Child, Program, [old]),
+               metta_release_space(Child),
+               metta_declare_space_parent(Child, Parent),
+               space_module(Child, ChildModule),
+               shape_source(ChildModule, Head, Planted),
+               run_in(Child, Program, ChildAnswers),
+               run_in(Parent, "!(seg-rc a b)", ParentAnswers),
+               aggregate_all(count, clause(ParentModule:Head, _), ParentClauses),
+               shape_source(ChildModule, Head, Derived) )),
+        ( catch(metta_release_space(Child), _, true),
+          catch(metta_release_space(Parent), _, true) )),
+    %The state under test: the recycled module reaches the parent's copy.
+    assertion(Planted == ParentModule),
+    assertion(ChildAnswers == [old]),
+    assertion(ParentAnswers == [old]),
+    assertion(ParentClauses == 1),
+    assertion(Derived == local).
+
+%Where a module's predicate comes from: the module an import names, local when
+%the module defines it, none when it resolves nowhere.
+shape_source(Module, Head, Source) :-
+    (   predicate_property(Module:Head, imported_from(From))
+    ->  Source = From
+    ;   predicate_property(Module:Head, defined)
+    ->  Source = local
+    ;   Source = none
+    ).
+
 test(fixed_builtin_mask_selection_remains_independent_of_arity_policy,
      [setup('new-space'(S)), cleanup(metta_release_space(S))]) :-
     space_module(S, M),

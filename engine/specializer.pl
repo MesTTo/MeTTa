@@ -65,6 +65,14 @@
 %     survives the standalone launcher's quiet logging policy [tested:
 %     tests/checks/check_specialization_differential_selftest.py;
 %     commit=694dff934a11dbc2ee99267b60f39564053baf87].
+%   - A derived specialization's clauses land in the module that derived it,
+%     including a recycled space's module that reaches its parent's copy of
+%     the same name through an import the space's last drop restored, and the
+%     parent's copy keeps its own clauses, at the call door and the shape door
+%     alike [tested 2026-09-25T06:26:34+10:00:
+%     specializer_invalidation:a_recycled_space_specializes_into_its_own_module]
+%     [tested 2026-09-25T06:26:35+10:00:
+%     variadic_arrows:a_recycled_space_specializes_a_shape_into_its_own_module].
 % Guarded by: '$metta_typing_policy' is acquired before '$metta_specializer'
 %   and before the publication transaction, so a specialization cannot retain
 %   a static type proof across a concurrent policy change. '$metta_specializer'
@@ -215,6 +223,11 @@ segment_specialization_locked(Module, Fun, N, Name) :-
         Clauses = [(FailedHead :- fail)]
     ;   Clauses = Clauses0
     ),
+    %A segment specialization's name is made from the call's shape, so it too
+    %can reach an ancestor's copy through an import; the rule is
+    %specialize_call_locked/7's [tested 2026-09-25T06:26:35+10:00:
+    %variadic_arrows:a_recycled_space_specializes_a_shape_into_its_own_module].
+    spaces:metta_prepare_function_predicate(Module, Name, Arity),
     forall(member(Clause, Clauses),
            ( assertz(Module:Clause, Ref), record_source_assertion(Ref) )).
 
@@ -541,7 +554,31 @@ specialize_call_locked(HV, CleanBindSet, MetaList, HasDirectBenefit,
     (   specialization_clauses_translated(HV, MetaList, HasDirectBenefit,
                                           SpecName, Space, ClauseInfos)
     ->  (   ho_specialization(Module, HV, SpecName)
-        ->  forall(member(clause_info(Input, Clause), ClauseInfos),
+        ->  %A specialization's name comes from the call, the function's name
+            %and what the call binds, so it is the same name in every module
+            %that specializes the same call, and a module can reach an
+            %ancestor's copy of it through an import. Dropping a space that had
+            %specialized a call its parent had specialized too removes the
+            %space's copy, and the shadow repair re-imports the parent's
+            %predicate so a compiled call keeps resolving
+            %(metta_restore_inherited_predicate/3); a recycled name keeps that
+            %import while its parent is unchanged. asserta/2 through an import
+            %writes into the module the import names, so the compiler's clause
+            %door removes it before every assert
+            %(metta_prepare_function_predicate/3), and this door is held to the
+            %same rule. Without it, each pooled space that specialized unfold
+            %over a statistics step in its next life gave the process home's
+            %copy another clause, and every level of unfold answered once per
+            %clause: the weighted-subset marginals property ran out a 150-second
+            %budget in the order seed 215044671 gave one worker, and finishes in
+            %3.64 seconds with this rule [measured 2026-09-25T06:07:20+10:00:
+            %that order, 2018 items, on e4c3bfd37 with the rule and then without
+            %it, where the home held unfold's two statistics specializations
+            %with two clauses each 20 seconds into the property]
+            %[tested 2026-09-25T06:26:34+10:00:
+            %specializer_invalidation:a_recycled_space_specializes_into_its_own_module].
+            spaces:metta_prepare_function_predicate(Module, SpecName, Arity),
+            forall(member(clause_info(Input, Clause), ClauseInfos),
                    ( asserta(Module:Clause, Ref),
                      record_source_assertion(Ref),
                      record_translated_from(Ref, Input, SourceRef),
