@@ -361,6 +361,12 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- `test_no_binding_carries_its_own_verbosity_setter` reads the files the seats'
+  repositories track, where it walked `extensions/` and skipped three
+  directory names. A battery worktree of the Node seat,
+  `extensions/node/ai-battery-1`, carried a copy of `engine/filereader.pl`,
+  which the walk read as a third binding writing `silent/1` itself.
+
 - The engine README's metta fences run under the `readme-fences` lane, each as
   a program in a process and a directory of its own, as every other README's
   already did. `test_readme.py` ran them inside a pytest worker, where a fresh
