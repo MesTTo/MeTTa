@@ -1,5 +1,5 @@
-% Purpose: resolve one scratch parent for every suite fixture, and scope a
-%   uniquely named directory under it to a goal.
+% Purpose: resolve one scratch parent for every suite fixture, and make a
+%   uniquely named directory under it, owned by a goal or by its caller.
 % Assumes: the process may run with TMPDIR set or unset. Both are ordinary; a
 %   plain interactive shell on this box exports neither.
 % Guarantees:
@@ -12,9 +12,11 @@
 %      current_prolog_flag(tmp_dir, D) still answered /tmp, so tmp_dir does
 %      NOT track TMPDIR on this build and cannot stand in for it; commit=2e54536e7b10e2e396a45e846c757258de0cd4b9]
 % Owns resources: with_scratch_directory/2 creates the directory and deletes it
-%   with its contents on success, failure or exception.
+%   with its contents on success, failure or exception. make_scratch_directory/2
+%   hands the directory to its caller, which deletes it: a plunit unit makes one
+%   in its setup for all its tests and deletes it in its cleanup.
 
-:- module(scratch, [scratch_parent/1, with_scratch_directory/2]).
+:- module(scratch, [scratch_parent/1, make_scratch_directory/2, with_scratch_directory/2]).
 :- use_module(library(filesex), [directory_file_path/3, delete_directory_and_contents/1]).
 :- meta_predicate with_scratch_directory(+, 1).
 
@@ -32,16 +34,23 @@ scratch_parent(Parent) :-
     ;   current_prolog_flag(tmp_dir, Parent)
     ).
 
-%! with_scratch_directory(+Base, :Goal) is semidet.
+%! make_scratch_directory(+Base, -Directory) is det.
 %
-%  Call Goal(Directory) on a fresh empty directory named from Base, removing it
-%  and anything left in it afterwards. tmp_file/2 contributes only the unique
-%  basename, because the directory it would pick is the tmp_dir flag and that
-%  ignores TMPDIR here.
-with_scratch_directory(Base, Goal) :-
+%  Create a fresh empty directory named from Base under the scratch parent and
+%  leave it to the caller. tmp_file/2 contributes only the unique basename,
+%  because the directory it would pick is the tmp_dir flag and that ignores
+%  TMPDIR here.
+make_scratch_directory(Base, Directory) :-
     scratch_parent(Parent),
     tmp_file(Base, Temporary), file_base_name(Temporary, Name),
     directory_file_path(Parent, Name, Directory),
-    setup_call_cleanup(make_directory(Directory),
+    make_directory(Directory).
+
+%! with_scratch_directory(+Base, :Goal) is semidet.
+%
+%  Call Goal(Directory) on a fresh empty directory, removing it and anything
+%  left in it afterwards.
+with_scratch_directory(Base, Goal) :-
+    setup_call_cleanup(make_scratch_directory(Base, Directory),
                        call(Goal, Directory),
                        delete_directory_and_contents(Directory)).

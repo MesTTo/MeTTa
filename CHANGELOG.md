@@ -361,6 +361,17 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- The gate's plunit lane no longer rewrites the engine and library artifacts
+  that every other lane boots from. `compiled_sources.plt` tested the artifact
+  claim on the shared tree. It deleted and regenerated
+  `lib/lib_datetime/lib_datetime.qlf` and `engine/metta.qlf`, and it backdated
+  the first below its source, so the next boot purged every governed artifact
+  and the suites rewrote the 41 they import on every run. The tests that write
+  an artifact now run in a unit of their own against a copy of `engine/` and
+  `lib/`, with the boot's root pointed at the copy while that unit runs. Two
+  plunit runs over a warmed tree now rewrite, delete and re-time none of its
+  artifacts.
+
 - A background `from` load reads finished only once its finish has
   republished the home's importers and decided the namespace watch. The
   finish wrote the finished state first and did that work after it, so a

@@ -80,4 +80,15 @@ test(the_whole_fixture_works_with_no_tmpdir_in_the_environment) :-
         with_scratch_directory(scratch_unset_case,
             [Directory]>>assertion(exists_directory(Directory)))).
 
+% The caller-owned form a plunit unit's setup uses: the directory is fresh,
+% empty, under the parent, and still there after the call returns.
+test(a_made_directory_is_empty_under_the_parent_and_outlives_the_call) :-
+    make_scratch_directory(scratch_made_case, Directory),
+    call_cleanup(( assertion(exists_directory(Directory)),
+                   scratch_parent(Parent), file_base_name(Directory, Name),
+                   assertion(directory_file_path(Parent, Name, Directory)),
+                   directory_files(Directory, Names), sort(Names, Sorted),
+                   assertion(Sorted == ['.', '..']) ),
+                 delete_directory_and_contents(Directory)).
+
 :- end_tests(scratch).
