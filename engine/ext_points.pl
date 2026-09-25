@@ -1467,6 +1467,12 @@ kind(swrite_with_names/3, host_service).
 %caller.
 kind(metta_host_save_fast/3, host_service).
 kind(metta_host_source_atoms/2, host_service).
+%A copy restores the source's rows into the clone as a program and compiles
+%there the functions the source had compiled, which adopts and owns the
+%specializations it copied. The adoption is the specializer's engine state, so
+%a binding composing the add doors itself could not reach it
+%[tested 2026-09-25T16:35:27+10:00: test_a_copy_of_compiled_lambda_code_equals_its_source].
+kind(metta_host_copy_rows/2, host_service).
 kind(metta_host_program_source/2, host_service).
 kind(metta_host_load_fast/2, host_service).
 kind(metta_host_fast_header/1, host_service).

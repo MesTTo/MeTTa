@@ -9,6 +9,11 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- The host service `metta_host_copy_rows/2`, which restores one space's rows
+  into another the way a load restores a program and compiles in the copy
+  exactly what the source had compiled; the Python seat's `Space.copy()`
+  crosses it once.
+
 - The library pack's page, `lib/README.md`, shows a worked example of every
   library again, all sixty-one, where fc6297c0d's move off the root page had
   left thirteen. Each is quoted from the corpus program that exercises the
@@ -380,6 +385,41 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   stamp.
 
 ### Fixed
+
+- A `|->` lambda is named by its content, `lambda_` and 16 hex digits of the
+  closed clause's `variant_sha1/2`, instead of a process-wide counter. Two
+  compiles of one lambda share one predicate, a specialization over a lambda
+  has the same name wherever the lambda compiles, and a saved space names
+  its lambdas the same in every process. A non-text blob in a lambda body is
+  lifted into the closure, a cyclic lambda is refused as
+  `metta_lambda_cyclic`, and a digest collision is refused as
+  `metta_lambda_name_collision`.
+- `Space.copy()` restores the source's rows into the copy the way a load
+  restores a program, and then compiles in the copy exactly the functions
+  its source had compiled. The copy holds its source's rows and nothing its
+  source had not derived, and owns the specializations it copied, so a
+  change to the function one was made from retires it in the copy. The
+  one-atom door the copy used compiled every copied equation on arrival, so
+  after one zip call a copy of a space holding lib_functional held the
+  specializations of chunk, window and group-by.
+- A specialization that fails in one space no longer stops the same call
+  from specializing in another: the failure record names the compiling
+  space.
+- A specialization loaded before its function compiles is compared with what
+  the function derives now before it is adopted. A program saved with a
+  specialization, loaded, and given a new definition of the specialized
+  function before its first call answered as the old definition did.
+- Importing a library after an earlier test had left a reference row in the
+  process home and copied and dropped a space no longer runs away. The
+  reference refresh repeats until nothing is pending. Each pass repaired the
+  functions whose bodies hold a `|->` lambda, and repairing one compiled its
+  lambdas under fresh counter names, so every pass left the face owing
+  another publication. test_reload.py, then test_imports.py's
+  minimal-lib-install test, then `metta += lib.statistics` minted `fun/1`
+  rows until it was stopped. With content names a repair reproduces the
+  heads it had, the refresh ends, and the same order passes. Each pass still
+  leaves the clauses it replaces allocated, which is recorded as its own
+  issue.
 
 - Writing a function into one space no longer compiles other spaces' waiting
   equations of that name. Every force of a waiting function names the module

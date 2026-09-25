@@ -305,8 +305,9 @@ CENSUS_VALUES: dict[str, tuple[str, ...]] = {
 CENSUS_WORLD: dict[str, str] = {
     "import!": "loads a file, so it answers each checkout's own module tree: "
                "`!(import! &self 1)` answers nothing upstream and raises here",
-    "|->": "answers a gensym from an engine-internal counter, `lambda_1` "
-           "upstream against `lambda_2` here for the same one-line program",
+    "|->": "answers a generated name, a counter's `lambda_1` upstream "
+           "against this engine's content digest `lambda_<16 hex digits>` "
+           "for the same one-line program",
     "add-translator-rule!": "rewrites the translator, so it changes how the "
                             "rest of the program is READ rather than answering",
 }

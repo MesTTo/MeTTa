@@ -266,8 +266,8 @@
 %     set_prolog_flag(autoload, false) already in effect: the
 %     directory_file_path/3 directive below needs library(filesex) before
 %     the rest of this section's use_module block would otherwise supply
-%     it, and next_lambda_name/1 (translator.pl) needs library(gensym) for
-%     every foldl-atom/map-atom/filter-atom/'|->' compile, both silently
+%     it, and gensym/2 needs library(gensym) for every new space, source
+%     load and translated form, both silently
 %     supplied by autoload before now [measured 2026-08-18: NO_AUTOLOAD=1
 %     sh test.sh, 200/200 examples; run.sh's own header has the mechanism].
 %     Cost: +1.50% instructions:u on a bare boot (swipl -s engine/metta.pl,
@@ -1776,14 +1776,14 @@ metta_platform_absence(Requires, Text) :-
 :- use_module(source_loading, [loading_loudly/1]).
 :- use_module(library(apply)).
 :- use_module(library(apply_macros)).
-%next_lambda_name/1 (translator.pl) calls gensym/2 to name every compiled
-%closure: '|->' itself and, through collection_closure/3, every inline body
-%argument of foldl-atom, map-atom and filter-atom. Nothing else loaded here
-%pulls library(gensym) in, so today it resolves by autoload on the first
-%such compile. With autoload=false that call raises
-%existence_error(procedure,gensym/2) from inside the engine's own prelude
-%(the prelude's type-cast-holds is the one form of that vocabulary that uses
-%foldl-atom with an inline body), and SWI's OWN initialization-error
+%gensym/2 names every new space ('new-space' in engine/metta/control.pl),
+%source load and translated form, and nothing else loaded here pulls
+%library(gensym) in, so without this line it resolves by autoload on the
+%first such name. With autoload=false that call raised
+%existence_error(procedure,gensym/2) from inside the engine's own prelude,
+%when lambda names still came from gensym (the prelude's type-cast-holds is
+%the one form of that vocabulary that uses foldl-atom with an inline body;
+%lambdas are named by their content now), and SWI's OWN initialization-error
 %reporting then masks that primary error: building a source-location
 %diagnostic for it calls into library(prolog_clause)'s
 %inlined_unification/7, which has its own undeclared, autoload-only
@@ -2036,6 +2036,7 @@ metta_engine_reexport(filereader, metta_host_run_source/4).
 metta_engine_reexport(filereader, metta_host_run_source_status/3).
 metta_engine_reexport(filereader, metta_host_save_fast/3).
 metta_engine_reexport(filereader, metta_host_source_atoms/2).
+metta_engine_reexport(filereader, metta_host_copy_rows/2).
 metta_engine_reexport(filereader, metta_host_program_source/2).
 metta_engine_reexport(filereader, metta_host_set_silent/1).
 metta_engine_reexport(filereader, metta_host_substitute/3).

@@ -1647,14 +1647,6 @@ seam:pattern_modifier([Assign, Wanted], Fresh, Fresh == Wanted) :-
 %Like membercheck but with direct equality rather than unification
 memberchk_eq(V, [H|T]) :- ( V == H -> true ; memberchk_eq(V, T) ).
 
-%Generate a readable lambda name. The counter has to be process-wide: SWI
-%global variables are thread-local, so a counter kept in one gave every
-%hyperpose worker its own sequence starting at 1, and two threads compiling a
-%lambda both produced lambda_1. assertz then added the second body to the first
-%lambda's predicate rather than defining a new one, and one lambda answered
-%with every colliding branch's result. gensym/2 counts in a process-wide flag
-%and is the same generator filereader.pl already uses for load ids.
-next_lambda_name(Name) :- gensym(lambda_, Name).
 
 declared_output_type(F, OutType) :- atom(F),
 									nonvar(OutType),

@@ -992,12 +992,20 @@ reduce([F|Args], Out, Status) :- !,
 %can retire a compiled predicate. A space whose module is torn down leaves its
 %lambdas behind as names nothing defines, and a recycled space NAME reaches a
 %fresh module: asking whether the cached predicate is still there answers both
-%at once, and next_lambda_name/1 counts in a process-global flag so a live
-%predicate of that name is always the one this row compiled
+%at once, and a live predicate of that name is the one any compile of that
+%content made, since the name is the content's digest and the '|->' door
+%refuses to answer with a clause compiled from anything else
 %[tested: test_a_recycled_space_name_inherits_no_clauses_from_its_past_life].
+%
+%The key is taken the way the '|->' door names the lambda it compiles: a
+%cyclic term refuses by name before variant_sha1/2 meets it, and the digest is
+%of the attribute-free copy, which is also what the stored row holds, since
+%assertz/1 keeps no attribute; a hit unifies that row with the caller's own
+%term, whose constraints stay on the caller's variables.
 written_lambda_closure(Written, Closure) :-
     current_metta_module(Module),
-    variant_sha1(Written, Key),
+    lambda_admissible(Written),
+    lambda_digest(Written, Key),
     (   compiled_written_lambda(Module, Key, Template, Cached),
         compiled_lambda_live(Module, Cached)
     ->  copy_term(Template-Cached, Written-Closure)

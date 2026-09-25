@@ -984,6 +984,15 @@ translate_special_dl('|->', [Args, Body0], AfterHead, Goals, Out) :-
     %reason, and a list MEMBER that is not a variable stays a pattern the
     %application must match, so `((|-> (foo) 1) 5)` is Empty and not an error.
     is_list(Args),
+    %A CYCLIC operand is refused before anything walks it. The occurs check is
+    %off, so `(let $x (f $x) ...)` builds a rational tree a lambda written at
+    %run time can hold, and no clause can compile one: the sealed walk below
+    %would not return, and the application cache met it as an anonymous
+    %type_error(acyclic_term) out of variant_sha1/2, since `!(let $x (f $x) $x)`
+    %answers a cyclic term [tested 2026-09-25T16:35:26+10:00:
+    %lambda_names:a_cyclic_lambda_is_refused_by_name]. One admission check, the
+    %shape the type syntax's acyclic_type_syntax refusal takes.
+    lambda_admissible(['|->', Args, Body0]),
     %Apply every nested sealed's rename BEFORE deciding which variables are
     %free. A variable that a sealed form localises is not free in the enclosing
     %lambda, and counting it as one made the lambda capture it as an extra
@@ -991,12 +1000,16 @@ translate_special_dl('|->', [Args, Body0], AfterHead, Goals, Out) :-
     %arity 2 while every call to it was arity 1, so the function was simply
     %uncallable. Measured 2026-08-15, and it behaved the same before sealed's
     %rename moved to compile time, so it is not that change's doing.
-    seal_lambda_locals(Body0, Body, SealedLocals),
-    next_lambda_name(Function),
-    %A cached template that compiles this lambda calls and may answer the
-    %generated predicate; the name is read from no written source, so the
-    %dependency is recorded here, where the name is made.
-    note_translation_dependency(Function),
+    seal_lambda_locals(Body0, Sealed, SealedLocals),
+    %An opaque constant, a blob that is not text, is lifted out of the body into
+    %a leading parameter the closure carries, which is closure conversion: the
+    %compiled clause is the body's SHAPE and the closure supplies the value.
+    %Hashed in place, a stream or a grounded object names the lambda by its
+    %address, which differs in every process, and two different ones would
+    %have compiled two predicates for one body [tested 2026-09-25T16:35:26+10:00:
+    %lambda_names:names_are_the_same_in_another_process,
+    %lambda_names:two_blobs_share_one_predicate].
+    lambda_lift_opaque(Sealed, Body, Opaque, OpaqueVars),
     term_variables(Body, AllVars),
     term_variables(Args, ArgVars),
     %A variable the BODY ITSELF BINDS is not free either, and for the same
@@ -1013,10 +1026,19 @@ translate_special_dl('|->', [Args, Body0], AfterHead, Goals, Out) :-
     %evaluation mask reaching `Expression` list parameters is what makes a
     %caller name its intermediate.
     lambda_body_binders(Body, BodyBinders),
-    append([ArgVars, SealedLocals, BodyBinders], NotFree),
+    append([ArgVars, SealedLocals, BodyBinders, OpaqueVars], NotFree),
     exclude({NotFree}/[Var]>>memberchk_eq(Var, NotFree), AllVars, FreeVars),
-    append(FreeVars, Args, FullArgs),
-    translate_clause([=, [Function|FullArgs], Body], Clause),
+    append([OpaqueVars, FreeVars, Args], FullArgs),
+    %The NAME is the content: two compiles of one lambda, in one space or in its
+    %copy, name one predicate, and so do the specializations named after it.
+    %A counter named it afresh at every compile, so a copy of a space holding
+    %compiled lambda code published rows its source never held [measured
+    %2026-09-24T23:47:14+10:00: 8 rows only in the copy, 6 only in the source].
+    lambda_content_name(FullArgs, Body, Function),
+    %A cached template that compiles this lambda calls and may answer the
+    %generated predicate; the name is read from no written source, so the
+    %dependency is recorded here, where the name is made.
+    note_translation_dependency(Function),
     %Into the space's own module, the way filereader.pl asserts every other
     %compiled equation. A bare assertz/2 puts the lambda in `user`, and a
     %module inherits from `user` rather than the other way round, so the
@@ -1033,17 +1055,12 @@ translate_special_dl('|->', [Args, Body0], AfterHead, Goals, Out) :-
     %2026-08-16: 1338 to 1348 for one map-atom compile-and-run, 10,005 either
     %way for a compiled map-atom over 2,000 elements].
     current_metta_module(Module),
-    register_fun_in(Module, Function),
-    assert_function_clause(Module, Clause, Ref),
-    record_source_assertion(Ref),
-    record_translated_from(Ref, [=, [Function|FullArgs], Body], SourceRef),
-    record_source_assertion(SourceRef),
-    format(atom(Label), "metta lambda (~w)", [Function]),
-    maybe_print_compiled_clause(Label, ['|->', Args, Body], Clause),
+    ensure_lambda_clause(Module, Function, FullArgs, Body, Args),
     length(FullArgs, InputArity),
     Arity is InputArity + 1,
     register_arity(Function, Arity),
-    ( FreeVars == [] -> Out = Function ; Out = partial(Function, FreeVars) ),
+    append(Opaque, FreeVars, Captured),
+    ( Captured == [] -> Out = Function ; Out = partial(Function, Captured) ),
     AfterHead = Goals.
 
 %The five write forms, by one rule rather than one clause each. Every one of
@@ -1301,6 +1318,151 @@ translate_special_dl('catch', [Expr], AfterHead, Goals, Out) :-
                         -> Out = ['Error', Type, Context]
                         ; Out = ['Error', Exception] )),
     AfterHead = [CatchGoal|Goals].
+
+%Each blob that is not text becomes a fresh variable, in order of occurrence,
+%and the blob goes to Opaque at the same position. Text atoms and reserved
+%symbols such as [] are constants of the language and stay; strings and
+%numbers are not blobs and stay. Every occurrence is its own parameter, so the
+%name is the same however the values alias.
+%Time: one visit per subterm of Term, n = its size. Space: Opaque's length.
+lambda_lift_opaque(Term, Lifted, Opaque, Vars) :-
+    lambda_lift_opaque(Term, Lifted, Opaque, [], Vars, []).
+
+lambda_lift_opaque(Term, Lifted, Opaque0, Opaque, Vars0, Vars) :-
+    (   var(Term)
+    ->  Lifted = Term, Opaque0 = Opaque, Vars0 = Vars
+    ;   blob(Term, Type), Type \== text, Type \== reserved_symbol
+    ->  Opaque0 = [Term|Opaque], Vars0 = [Lifted|Vars]
+    ;   compound(Term)
+    ->  compound_name_arguments(Term, Name, Arguments),
+        lambda_lift_opaque_list(Arguments, LiftedArguments, Opaque0, Opaque,
+                                Vars0, Vars),
+        compound_name_arguments(Lifted, Name, LiftedArguments)
+    ;   Lifted = Term, Opaque0 = Opaque, Vars0 = Vars
+    ).
+
+lambda_lift_opaque_list([], [], Opaque, Opaque, Vars, Vars).
+lambda_lift_opaque_list([Term|Terms], [Lifted|Rest], Opaque0, Opaque,
+                        Vars0, Vars) :-
+    lambda_lift_opaque(Term, Lifted, Opaque0, Opaque1, Vars0, Vars1),
+    lambda_lift_opaque_list(Terms, Rest, Opaque1, Opaque, Vars1, Vars).
+
+%The name is a digest of the lifted clause's content, taken over the
+%attribute-free copy copy_term/3 makes, because that copy is exactly the clause
+%assertz/1 stores: `put_attr(X, m, 1), assertz(kept(X)), kept(Y)` leaves Y
+%with no attribute, and a frozen variable is stored plain the same way, while
+%a captured variable's constraint stays live in the closure's own argument
+%[tested 2026-09-25T16:35:26+10:00: lambda_names:an_attributed_capture_names_as_the_plain_lambda].
+%variant_sha1/2 hashes variants alike and text by its characters, so the name
+%is the same in every process that compiles the same lambda [tested
+%2026-09-25T16:35:26+10:00: lambda_names:names_are_the_same_in_another_process]. The name
+%keeps sixteen hex digits of it, 64 bits: a digest can collide where
+%specialization_name/3's reversible encoding cannot, and ensure_lambda_clause/5
+%refuses a collision by name rather than answering with another lambda's
+%clause.
+lambda_content_name(FullArgs, Body, Function) :-
+    lambda_digest(lambda(FullArgs, Body), Digest),
+    sub_atom(Digest, 0, 16, _, Prefix),
+    atom_concat(lambda_, Prefix, Function).
+
+%The two lambda doors, this clause and the written-lambda application cache
+%(written_lambda_closure/2), admit and key a lambda term the same way.
+lambda_admissible(Lambda) :-
+    (   acyclic_term(Lambda)
+    ->  true
+    ;   throw(error(metta_lambda_cyclic(Lambda),
+                    context('|->'/2, 'a lambda body is a finite term')))
+    ).
+
+lambda_digest(Term, Digest) :-
+    copy_term(Term, Canonical, _),
+    variant_sha1(Canonical, Digest).
+
+%One predicate per content and module. The definition the module SEES under
+%that name, its own or the one an import names, is REUSED when it has a clause
+%and the equation that clause was compiled from is a variant of this one: the
+%same lambda compiled again, by a recompile, a second call site or a copy of
+%the space. A name that reaches no clause, abolished or unimported since its
+%first compile, is compiled again, and a dead import is dropped first: SWI
+%asserts THROUGH an import, so `assertz(src:p(1)), src:export(p/1),
+%m:import(src:p/1), assertz(m:p(2))` leaves src:p holding both clauses, and a
+%lambda compiled into the importing module would have landed in the other
+%module's predicate beside its own [tested 2026-09-25T16:35:26+10:00:
+%lambda_names:a_live_import_is_reused_and_an_unimported_name_compiles_again].
+%A live clause compiled from any other equation is a digest collision, refused
+%by name.
+%
+%The test and the assert are one step under the lock translation already runs
+%under, with_typing_policy_stable/1, since two threads naming one lambda would
+%otherwise both find it absent and assert it twice. It is reentrant inside a
+%translation, which is where a lambda is ordinarily met, and it is taken
+%before the specializer's lock on every path. A lock of the lambda's own,
+%taken inside those, closed a cycle through each of them [measured
+%2026-09-25T01:45:17+10:00: tests/prolog/lock_order.pl recorded
+%'$metta_lambda_names' -> '$metta_typing_policy' and -> '$metta_specializer'
+%beside their reverses].
+ensure_lambda_clause(Module, Function, FullArgs, Body, Args) :-
+    with_typing_policy_stable(
+        ensure_lambda_clause_stable(Module, Function, FullArgs, Body, Args)).
+
+ensure_lambda_clause_stable(Module, Function, FullArgs, Body, Args) :-
+    Equation = [=, [Function|FullArgs], Body],
+    copy_term(Equation, Plain, _),
+    length(FullArgs, InputArity),
+    Arity is InputArity + 1,
+    functor(Head, Function, Arity),
+    (   reuse_lambda_clause(Module, Head, Function, Plain)
+    ->  true
+    ;   (   predicate_property(Module:Head, imported_from(_))
+        ->  abolish(Module:Function/Arity)
+        ;   true
+        ),
+        translate_clause(Equation, Clause),
+        register_fun_in(Module, Function),
+        assert_function_clause(Module, Clause, Ref),
+        record_source_assertion(Ref),
+        record_translated_from(Ref, Equation, SourceRef),
+        record_source_assertion(SourceRef),
+        format(atom(Label), "metta lambda (~w)", [Function]),
+        maybe_print_compiled_clause(Label, ['|->', Args, Body], Clause)
+    ).
+
+%True when the definition Module sees for Head has a clause, shared with this
+%publication when it was compiled from a variant of Plain and refused as a
+%collision otherwise; false when there is none, and the caller compiles.
+reuse_lambda_clause(Module, Head, Function, Plain) :-
+    functor(Head, Function, Arity),
+    current_predicate(Module:Function/Arity),
+    (   predicate_property(Module:Head, imported_from(Home))
+    ->  true
+    ;   Home = Module
+    ),
+    predicate_property(Home:Head, number_of_clauses(Clauses)),
+    Clauses > 0,
+    clause(Home:Head, _, Ref),
+    clause_property(Ref, module(Home)),
+    !,
+    (   filereader:translated_from(Ref, Recorded),
+        Recorded =@= Plain
+    ->  share_source_assertion(Ref),
+        forall(clause(filereader:translated_from(Ref, _), true, SourceRef),
+               share_source_assertion(SourceRef))
+    ;   ( filereader:translated_from(Ref, Recorded) -> true ; Recorded = none ),
+        throw(error(metta_lambda_name_collision(Function, Recorded, Plain),
+                    context('|->'/2, _)))
+    ).
+
+prolog:error_message(metta_lambda_cyclic(Lambda)) -->
+    [ 'the lambda ~p holds a cyclic term, which no clause can compile. A \c
+       binding such as (let $x (f $x) ...) builds one because unification \c
+       here runs without the occurs check; pass the value to the lambda as \c
+       an argument instead of writing it into the body.'-[Lambda] ].
+prolog:error_message(metta_lambda_name_collision(Function, Recorded, Equation)) -->
+    [ 'two lambdas digest to the name ~w: the one compiled from ~p and the \c
+       one compiled now from ~p. Lambda names are 64 bits of each lambda''s \c
+       content digest, so this is a digest collision rather than anything a \c
+       program did; it is refused rather than answered by the other lambda.'-
+      [Function, Recorded, Equation] ].
 
 %%%% Gap patterns: what a call site hands its door %%%%
 %

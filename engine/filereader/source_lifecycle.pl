@@ -21,6 +21,12 @@
 %   commit=WORKTREE].
 %
 % Purpose: implement fast caches, source digests, transactional reload, and source assertion ownership.
+% Guarantees: metta_host_copy_rows/2 leaves the copy holding exactly its
+%   source's rows, compiled where the source's were, and owning the
+%   specializations it copied [tested 2026-09-25T16:35:27+10:00:
+%   test_a_copy_of_compiled_lambda_code_equals_its_source,
+%   test_a_copy_of_a_named_space_equals_its_source,
+%   test_a_copy_owns_the_specializations_it_copied].
 % Guarantees: every source retirement restores surviving function registrations
 %   before repairing callers, including deferred equations in other spaces and
 %   heads another library home's backing still registers, each journalled to
@@ -389,6 +395,40 @@ metta_host_source_atoms(Space, Atoms) :-
               ( seam:foreign_space(Each)
               -> 'get-atoms'(Each, Atom)
               ;  metta_source_occurrence(Each, Atom, _, _) ) ), Atoms).
+
+%A copy is a restore that never leaves the process. The source's own rows,
+%the ones save() persists, arrive in the clone as a PROGRAM, the way a load or
+%a fast image arrives, so every copied equation is stored and registered and
+%then waits. After that, each function the SOURCE had compiled compiles in the
+%clone, in the order its equations first appear, and nothing else compiles. A
+%specialization row exists because the function whose call it serves was
+%compiled, so reproducing the source's compile state reproduces exactly the
+%source's specializations. The clone's compile of zip adopts the copied unfold
+%specialization over zip's lambda, which gives that specialization the owner
+%that retires it when unfold changes. chunk, window and group-by, which the
+%source never ran, derive nothing. The one-atom door compiled every copied
+%equation on arrival instead. So after one zip call, a copy of a space holding
+%lib_functional held three specializations its source did not [measured
+%2026-09-25T02:18:49+10:00: six rows, a declaration and an equation for each;
+%tested 2026-09-25T16:35:27+10:00: test_a_copy_of_compiled_lambda_code_equals_its_source,
+%test_a_copy_of_a_named_space_equals_its_source].
+%Time: one enumeration and one store of the source's n rows. Each name the
+%source compiled then costs its translation once, the same work the source
+%spent on it.
+metta_host_copy_rows(Source, Clone) :-
+    metta_host_source_atoms(Source, Atoms),
+    findall(F, metta_fast_equation_name(Atoms, F), Written),
+    list_to_set(Written, Names),
+    sort(Names, Pending),
+    space_module(Source, From),
+    space_module(Clone, To),
+    with_definition_batch(
+        with_named_program_order(Clone, Pending,
+            ( metta_add_program_atoms(Clone, Atoms, Arrived),
+              forall(member(F, Arrived), source_definition_arrived(F)),
+              forall(( member(F, Names),
+                       translator:metta_function_translated(From, F) ),
+                     spaces:metta_ensure_compiled(To, F)) ))).
 
 % Text conversion closes over referenced spaces as well as owned children.
 % Reference edges may cycle; creation-time model edges remain a DAG. The fast
@@ -1739,6 +1779,25 @@ record_source_assertion(Ref) :-
 retain_source_assertion(Ref) :-
     retractall(source_load_assertion(_, artifact, Ref)).
 
+% This publication REUSES an artifact another made, the way a lambda named by
+% its content is one clause however many compiles reach it, so the artifact has
+% to live as long as its longest-lived user. An artifact no source owns is
+% never retired and stays that way. Otherwise each owner of this publication
+% records it as its own, and rollback_source_load_stable/3 erases an artifact
+% only when its last owner leaves; a publication with no owner is never
+% retired, so it adopts the artifact as retain_source_assertion/1 does.
+share_source_assertion(Ref) :-
+    (   \+ source_load_assertion(_, artifact, Ref)
+    ->  true
+    ;   b_getval('$metta_source_publication', source_context(_, _, Owners, _)),
+        Owners == []
+    ->  retain_source_assertion(Ref)
+    ;   b_getval('$metta_source_publication', source_context(_, _, Owners, _)),
+        forall(( member(Load, Owners),
+                 \+ source_load_assertion(Load, artifact, Ref) ),
+               assertz(source_load_assertion(Load, artifact, Ref)))
+    ).
+
 record_source_atom_assertion(Ref) :-
     b_getval('$metta_source_publication', source_context(_, _, _, Load)),
     ( Load == none -> true ; assertz(source_load_assertion(Load, stored, Ref)) ).
@@ -1933,9 +1992,13 @@ rollback_source_load_stable(LoadId, ReleaseSpace, Names) :-
            translator_rules:rollback_source_translator_rule(Name, Ref)),
     forall(( member(Refs, SupportGroups), member(Ref, Refs) ),
            ( catch(erase(Ref), _, true) -> true ; true )),
-    findall(Ref, retract(source_load_assertion(LoadId, _, Ref)), Asserted),
-    reverse(Asserted, Refs),
-    forall(member(Ref, Refs),
+    findall(Kind-Ref, retract(source_load_assertion(LoadId, Kind, Ref)),
+            Asserted),
+    reverse(Asserted, Journal),
+    %An artifact another load still owns stays for it: share_source_assertion/1
+    %gives one artifact several owners, and each one's code calls it.
+    forall(( member(Kind-Ref, Journal),
+             \+ ( Kind == artifact, source_load_assertion(_, artifact, Ref) ) ),
            ( catch(erase(Ref), _, true) -> true ; true )),
     findall(Space,
             retract(source_load_resource(LoadId, owned_space(Space))),

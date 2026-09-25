@@ -217,7 +217,10 @@ test(failed_load_removes_compiler_state_and_generated_lambdas) :-
     RuntimeFunction = 'plunit-loader-runtime-function',
     test_lambda_functions(BeforeLambdas),
     tmp_file_stream(text, Path, Stream),
-    format(Stream, "(= (~w) (|-> ($x) (+ $x 1)))~n", [Outer]),
+    %A lambda body no other test compiles: a lambda is named by its content, and
+    %one another test compiled first would be REUSED here and rightly outlive
+    %this load, so it could not show that the load's own lambda leaves with it.
+    format(Stream, "(= (~w) (|-> ($x) (+ $x 7919)))~n", [Outer]),
     format(Stream, "!(~w)~n", [Symbol]),
     format(Stream,
            "!(add-atom &self (plunit-loader-runtime-atom value))~n", []),
@@ -233,8 +236,10 @@ test(failed_load_removes_compiler_state_and_generated_lambdas) :-
         true,
         ( catch(filereader:load_metta_file(Path, _), Error, true),
           Error = error(metta_unsolved_arithmetic('+', unbounded_domain), _),
-          flag('$gs_lambda_', LambdaNumber, LambdaNumber),
-          format(atom(GeneratedLambda), 'lambda_~d', [LambdaNumber]),
+          %The lambda the rolled-back load compiled, named as the translator
+          %names it: by its content, which for `(|-> ($x) (+ $x 7919))` with no
+          %capture is the one parameter and the body.
+          translator:lambda_content_name([X], ['+', X, 7919], GeneratedLambda),
           test_lambda_functions(AfterLambdas),
           AfterLambdas == BeforeLambdas,
           \+ user:fun(Outer),

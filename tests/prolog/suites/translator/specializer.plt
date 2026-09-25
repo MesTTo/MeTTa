@@ -233,7 +233,7 @@ test(repeated_failed_specialization_is_recorded_once_per_function,
      [ setup(setup_failed_specialization_memo),
        cleanup(cleanup_failed_specialization_memo) ]) :-
     findall(F-Arity-Key,
-            specializer:ho_specialization_failed(F, Arity, Key),
+            specializer:ho_specialization_failed(_, F, Arity, Key),
             Failures),
     Failures == [pass-3-[myfun], wrap-3-[myfun]].
 
@@ -253,10 +253,10 @@ cleanup_failed_specialization_chain :-
 test(branching_failed_specialization_is_linear_in_chain_depth,
      [ setup(setup_failed_specialization_chain),
        cleanup(cleanup_failed_specialization_chain) ]) :-
-    aggregate_all(count, specializer:ho_specialization_failed(_, _, _), 11),
+    aggregate_all(count, specializer:ho_specialization_failed(_, _, _, _), 11),
     forall(between(1, 11, Index),
            ( atom_concat(f, Index, Function),
-             specializer:ho_specialization_failed(Function, 3, [myfun]) )).
+             specializer:ho_specialization_failed(_, Function, 3, [myfun]) )).
 
 setup_failed_specialization_type :-
     set_specializer_test_mode,
@@ -271,7 +271,7 @@ test(failed_specialization_does_not_leak_generated_type,
        cleanup(cleanup_failed_specialization_type) ]) :-
     once(get_native_atom(
         '&self', [':', wrap, ['->', 'Number', 'Number', 'Number']])),
-    specializer:ho_specialization_failed(wrap, 3, [myfun]),
+    specializer:ho_specialization_failed(_, wrap, 3, [myfun]),
     \+ ( get_native_atom('&self', [':', Name, _]),
          atom(Name),
          sub_atom(Name, 0, _, _, 'wrap_Spec_') ).

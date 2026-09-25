@@ -290,7 +290,10 @@ test(a_cached_generated_value_is_rebuilt_after_its_function_retires,
               eval([First,2],3),
               specializer:forget_symbol(Module,First),
               run_translated(Source,Second),
-              assertion(First \== Second),
+              %Rebuilt, not served stale: the name is the lambda's content, so
+              %the rebuild answers under the same one, and the application
+              %below needs the clause the rebuild put back.
+              assertion(Second == First),
               eval([Second,4],5) )),
         metta_release_space(Space)).
 

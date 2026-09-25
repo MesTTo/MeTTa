@@ -140,6 +140,12 @@ nested_conditional(N, [if, [==, 1, 1], Inner, 0]) :-
     N1 is N - 1,
     nested_conditional(N1, Inner).
 
+%The lambdas a test compiled, taken back out of &self's module. File level,
+%because two units call it and a unit's own predicates are its own.
+forget_lambdas(Names) :-
+    metta_self_module(Module),
+    forall(member(Name, Names), specializer:forget_symbol(Module, Name)).
+
 :- begin_tests(translator_hyperpose).
 
 hyperpose_space('&plunit_hyperpose').
@@ -297,23 +303,36 @@ test(engine_state_does_not_use_function_names,
                 nb_delete(lambda_counter))) ]) :-
     translate_clause([=, [specneeded, X], X], _),
     translate_clause([=, [lambda_counter, Y], Y], _),
-    translator:next_lambda_name(First),
-    translator:next_lambda_name(Second),
-    First \== Second,
-    nb_getval(specneeded, user_spec_state),
-    nb_getval(lambda_counter, user_lambda_state).
+    setup_call_cleanup(
+        true,
+        ( translate_expr(['|->', [A], [plunit_state_pair, A, 1]], _, First),
+          translate_expr(['|->', [B], [plunit_state_pair, B, 2]], _, Second),
+          First \== Second,
+          nb_getval(specneeded, user_spec_state),
+          nb_getval(lambda_counter, user_lambda_state) ),
+        forget_lambdas([First, Second])).
 
-%A lambda name must be unique across the whole process, not per thread. SWI
-%global variables are thread-local, so a counter kept in one gave each
-%hyperpose worker its own sequence from 1: two threads generated lambda_1 and
-%the second assertz added its body to the first lambda's predicate, so one
-%lambda answered with both branches' results.
-test(lambda_names_are_unique_across_threads) :-
-    translator:next_lambda_name(Main),
-    concurrent_maplist([_,Name]>>(translator:next_lambda_name(Name)), [1,2,3,4], Workers),
-    msort([Main|Workers], Sorted),
-    sort([Main|Workers], Unique),
-    Sorted == Unique.
+%ONE predicate per lambda content, whatever thread compiles it. A counter kept
+%in a thread-local global once gave two hyperpose workers the same lambda_1 for
+%DIFFERENT bodies, and the second assertz added its body to the first lambda's
+%predicate, so one lambda answered with both branches' results. Named by
+%content, the same name means the same body, and the typing policy's lock,
+%which translation runs under, makes the absence test and the assert one
+%step, so four threads compiling one lambda at once leave one clause, not
+%four.
+test(one_lambda_compiled_in_four_threads_is_one_clause) :-
+    Lambda = ['|->', [X], [plunit_thread_pair, X]],
+    concurrent_maplist([_, Name]>>translate_expr(Lambda, _, Name),
+                       [1, 2, 3, 4], Names),
+    sort(Names, Distinct),
+    setup_call_cleanup(
+        true,
+        ( Distinct = [Name],
+          metta_self_module(Module),
+          functor(Head, Name, 2),
+          aggregate_all(count, clause(Module:Head, _), 1) ),
+        forget_lambdas(Distinct)).
+
 
 meta_store_size(500).
 meta_store_size(1000).
@@ -1808,28 +1827,29 @@ test(output_type_check_waits_for_a_return_value) :-
                           remove_sexp('&self',
                                       [':', plunit_typed_once, _]))) ]).
 
-%translator:next_lambda_name/1 counts in gensym's process-wide flag, whose key gensym/2
-%builds as '$gs_' followed by the base.
-lambda_counter_value(Value) :-
-    flag('$gs_lambda_', Value, Value).
-
-cleanup_generated_lambdas(First) :-
-    lambda_counter_value(Last),
-    Start is First + 1,
-    forall(between(Start, Last, Number),
-           ( format(atom(Name), 'lambda_~d', [Number]),
-             metta_self_module(M), specializer:forget_symbol(M, Name) )).
-
+%Every |-> the translator meets enters ensure_lambda_clause/5 once, whether it
+%compiles the lambda or finds it compiled, so its entries count the times the
+%typed argument was translated.
 test(typed_argument_is_compiled_once) :-
-    lambda_counter_value(Before),
+    nb_setval(plunit_lambda_entries, []),
     setup_call_cleanup(
-        true,
+        prolog_wrap:wrap_predicate(
+            translator:ensure_lambda_clause(_, Name, _, _, _), plunit_lambda_count,
+            Wrapped,
+            ( nb_getval(plunit_lambda_entries, Seen),
+              nb_setval(plunit_lambda_entries, [Name|Seen]),
+              Wrapped )),
         ( translate_expr(
               [plunit_typed_once, ['|->', [X], ['+', X, 1]], 41],
               _Goals, _Out),
-          lambda_counter_value(After),
-          After - Before =:= 1 ),
-        cleanup_generated_lambdas(Before)).
+          nb_getval(plunit_lambda_entries, Entries),
+          length(Entries, 1) ),
+        ( prolog_wrap:unwrap_predicate(translator:ensure_lambda_clause/5,
+                                       plunit_lambda_count),
+          nb_getval(plunit_lambda_entries, Named),
+          sort(Named, Lambdas),
+          forget_lambdas(Lambdas),
+          nb_delete(plunit_lambda_entries) )).
 
 :- end_tests(translator_typed_single_pass).
 

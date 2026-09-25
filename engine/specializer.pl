@@ -65,6 +65,14 @@
 %     survives the standalone launcher's quiet logging policy [tested:
 %     tests/checks/check_specialization_differential_selftest.py;
 %     commit=694dff934a11dbc2ee99267b60f39564053baf87].
+%   - A failed specialization is recorded against the space that compiled it,
+%     so another space specializes the same call from its own definitions
+%     [tested 2026-09-25T16:35:27+10:00:
+%     test_a_failed_specialization_in_one_space_leaves_another_free_to_specialize].
+%   - Rows found under a generated name are adopted only while they are what
+%     the call derives now. A stale set is retired, its waiting translation
+%     with it, and derived again [tested 2026-09-25T16:35:27+10:00:
+%     test_a_loaded_specialization_is_not_adopted_once_its_function_changes].
 %   - A derived specialization's clauses land in the module that derived it,
 %     including a recycled space's module that reaches its parent's copy of
 %     the same name through an import the space's last drop restored, and the
@@ -120,7 +128,7 @@
 :- metta_import_shared_registries(specializer).
 
 :- dynamic ho_specialization/3.
-:- dynamic ho_specialization_failed/3.
+:- dynamic ho_specialization_failed/4.
 %Verified once per specialization, under the checking mode only.
 :- dynamic ho_specialization_agrees/1.
 %Recorded when the generic side could not be run inside the bound.
@@ -154,7 +162,14 @@ maybe_specialize_call(HV, AVs, Out, Goal) :-
     \+ get_native_atom('&metta', [tabled, _, HV, _]),
     length(AVs, N),
     Arity is N + 1,
-    \+ ho_specialization_failed(HV, Arity, CleanBindSet),
+    %A failure is the compiling space's, because the plan reads that space's
+    %definitions of HV and of everything its body passes the function on to.
+    %Keyed by name and call alone, a space whose definitions gain nothing
+    %declined the specialization for every other space, whose definitions
+    %might gain everything [tested 2026-09-25T16:35:27+10:00:
+    %test_a_failed_specialization_in_one_space_leaves_another_free_to_specialize].
+    current_metta_module(Module),
+    \+ ho_specialization_failed(Module, HV, Arity, CleanBindSet),
     specialization_name(HV, CleanBindSet, SpecName),
     ( nb_current('$metta_spec_stack', Stack) -> true ; Stack = [] ),
     ( active_specialization(HV, Stack, ActiveKey, ActiveSpecName)
@@ -527,12 +542,30 @@ specialize_call_locked(HV, _, _, _, SpecName, _, ready) :-
 %specialization_goal materializes that source before emitting a native call,
 %and invalidation sees the clone's specializations again
 %[tested: a_copied_space_adopts_its_specializations_instead_of_duplicating].
-specialize_call_locked(HV, _, _, _, SpecName, _, ready) :-
+%A name is not a derivation. Rows that arrived under the name before their
+%function compiled are adopted only while they are what this call would store
+%now; otherwise the function changed after they were derived, and they are
+%retired and derived again. A load keeps its rows waiting until a call needs
+%them, so a program saved with twice's specialization over inc, loaded, and
+%given a new twice before its first call answered as the old twice did
+%[tested 2026-09-25T16:35:27+10:00:
+%test_a_loaded_specialization_is_not_adopted_once_its_function_changes].
+specialize_call_locked(HV, CleanBindSet, MetaList, HasDirectBenefit,
+                       SpecName, Arity, Outcome) :-
     current_metta_module(Module),
     fun_in(Module, SpecName), !,
-    assertz(ho_specialization(Module, HV, SpecName), Ref),
-    record_source_assertion(Ref),
-    record_specialization_support(Module, HV, SpecName).
+    current_metta_space(Space),
+    (   stored_specialization_current(Space, SpecName, MetaList)
+    ->  assertz(ho_specialization(Module, HV, SpecName), Ref),
+        record_source_assertion(Ref),
+        record_specialization_support(Module, HV, SpecName),
+        Outcome = ready
+    ;   remove_every_sexp(Space, [=, [SpecName|_], _]),
+        remove_every_sexp(Space, [':', SpecName, _]),
+        forget_symbol(Module, SpecName),
+        specialize_call_locked(HV, CleanBindSet, MetaList, HasDirectBenefit,
+                               SpecName, Arity, Outcome)
+    ).
 %The specialization belongs to the space whose code triggered it. This runs
 %during translation, inside with_metta_module/2, so the current module is the
 %one whose functions the generated body references. Registering globally and
@@ -608,9 +641,9 @@ specialize_call_locked(HV, CleanBindSet, MetaList, HasDirectBenefit,
       ; format("Not specialized ~w~n", [SpecName/Arity]) ),
       forget_symbol(Module, SpecName),
       retractall(ho_specialization(Module, HV, SpecName)),
-      ( ho_specialization_failed(HV, Arity, CleanBindSet)
+      ( ho_specialization_failed(Module, HV, Arity, CleanBindSet)
         -> true
-      ; assertz(ho_specialization_failed(HV, Arity, CleanBindSet), FailedRef),
+      ; assertz(ho_specialization_failed(Module, HV, Arity, CleanBindSet), FailedRef),
         record_source_assertion(FailedRef) ),
       Outcome = failed
     ).
@@ -642,6 +675,33 @@ remove_every_sexp(Space, Pattern) :-
     ->  remove_every_sexp(Space, Pattern)
     ;   true
     ).
+
+%The rows a derivation of this call would store, against the rows the space
+%holds under the name, compared as multisets of variants: a load renames every
+%variable, and the order the rows arrived in says nothing about them. The plan
+%is copied first because computing a stored row binds the plan's variables,
+%and the derivation that follows a mismatch needs them free.
+%Time: (e + s) log (e + s) comparisons for the plan's e rows and the name's s
+%stored rows.
+stored_specialization_current(Space, SpecName, MetaList) :-
+    copy_term(MetaList, Fresh),
+    findall(Input,
+            ( member(paired_meta(_, _, StoredMeta), Fresh),
+              specialization_storage_input(SpecName, StoredMeta, Input) ),
+            Expected),
+    findall([=, [SpecName|Args], Body],
+            get_native_atom(Space, [=, [SpecName|Args], Body]),
+            Stored),
+    variant_multiset(Expected, Key),
+    variant_multiset(Stored, Key).
+
+variant_multiset(Terms, Keys) :-
+    findall(Key,
+            ( member(Term, Terms),
+              copy_term(Term, Key, _),
+              numbervars(Key, 0, _) ),
+            Keys0),
+    msort(Keys0, Keys).
 
 specialization_goal(SpecName, AVs, Out, Goal) :-
     % Ordinary call preparation uses this same door: a copied specialization
@@ -1042,6 +1102,16 @@ forget_symbol(Module, Name) :-
     metta_module_space(Module, Space),
     remove_sexp(Space, [=, [Name|_], _]),
     remove_sexp(Space, [':', Name, _]),
+    %A generated name's rows can arrive by a load and wait there untranslated,
+    %so retiring the name retires the waiting too: its deferral, and the
+    %declaration groups queued for its equations. Left standing, the next
+    %call of the name translated whatever the space held under it by then,
+    %which after a retirement is the fresh derivation, and the name answered
+    %once from the derivation's clause and once more from that translation
+    %[tested 2026-09-25T16:35:27+10:00:
+    %test_a_loaded_specialization_is_not_adopted_once_its_function_changes].
+    retractall(spaces:deferred_metta_function(Name, Module, _, _, _, _)),
+    retractall(translator:deferred_equation_types(Name, Module, _, _)),
     findall(Ref,
             ( current_predicate(Module:Name/A),
               functor(H, Name, A),
@@ -1061,9 +1131,22 @@ forget_symbol(Module, Name) :-
     %Withdraw the ownership rows before invalidating the generated function's
     %own dependents. A compatibility cycle can otherwise re-enter this action
     %through the opposite row before either side has retired.
+    %
+    %The function's OWN specializations are listed before their rows go and
+    %retired from that list after the wave. The wave's action for a
+    %specialization finds it by its row, so with the rows already gone it
+    %found none of them, and each stayed behind as an orphan predicate; a
+    %rebuild under the same name, which a specialization's key and a lambda's
+    %content both give, then asserted its clause beside the orphan's and the
+    %call answered twice: a segment specialization of a lambda survived
+    %forget_symbol/2 and the rebuilt call answered [[1,2],[1,2]] [tested
+    %2026-09-25T16:35:26+10:00:
+    %translation_cache:a_cached_generated_value_is_rebuilt_after_its_function_retires].
+    findall(Spec, ho_specialization(Module, Name, Spec), Specs),
     retractall(ho_specialization(Module, Name, _)),
     retractall(ho_specialization(Module, _, Name)),
     support_invalidate(function(Module, Name)),
+    forall(member(Spec, Specs), forget_symbol(Module, Spec)),
     %announce_function_removed/1 rather than the bare event: the recompile of the
     %dependents rides in the engine now, so this path repairs compiled
     %mentions even when no host installed an observer.
@@ -1092,8 +1175,11 @@ invalidate_specializations(Module, F) :-
     support_invalidate(function(Module, F)),
     forall(support_repair_invalidations, true).
 
+%Every space's failures go, not the changed module's alone: a space's plan
+%reads its ancestors' definitions too, so a change in &self can turn a
+%child's failure into a success.
 prepare_specialization_invalidation(Module, F) :-
-    retractall(ho_specialization_failed(_,_,_)),
+    retractall(ho_specialization_failed(_, _, _, _)),
     ensure_specialization_supports(Module, F).
 
 % Existing hosts may have asserted ho_specialization/3 through its long-lived

@@ -1864,15 +1864,23 @@ def cast(self: Space, value: Any, type_: Any = ..., /) -> Any:
 def copy(self: Space) -> Space:
 ```
 
-> This space's contents in a new anonymous space, cloned through
-> one bulk write, so equations copy as equations and keep running:
-> "a scratch space set up like production" is one line. The handle
-> is ``space()``'s kind, so drop it, or use it as a context
-> manager, to return the name. copy.copy(m) answers the same
-> through the copy protocol. There is deliberately no __deepcopy__:
-> stored Python objects keep their identity across the clone, the
-> shallow reading, and a deep clone of a live engine handle has no
-> meaning to promise.
+> This space's contents in a new anonymous space, restored the way
+> a load restores a program: every copied equation arrives and waits,
+> and each function the source had compiled compiles in the clone,
+> which takes over the specializations it copied. So the clone holds
+> exactly its source's rows, including what the source derived and
+> nothing it had not, and its equations keep running: "a scratch
+> space set up like production" is one line. The handle is
+> ``space()``'s kind, so drop it, or use it as a context manager, to
+> return the name. copy.copy(m) answers the same through the copy
+> protocol. There is deliberately no __deepcopy__: stored Python
+> objects keep their identity across the clone, the shallow reading,
+> and a deep clone of a live engine handle has no meaning to promise.
+>
+> Adding the rows one by one compiled every copied equation as it
+> arrived, so after one zip call a copy of a space holding
+> lib_functional held the specializations of chunk, window and
+> group-by, which its source had never run.
 >
 > The contents are the space's OWN rows, the enumeration ``save()``
 > persists: an origin row ``(from ...)`` copies, and the declarations
