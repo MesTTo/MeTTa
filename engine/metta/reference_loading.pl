@@ -13,11 +13,23 @@
 %   load settles or the home is released. Scoped lazy observers leave at exit.
 % Guarded by: metta_source_singleflight/2 owns each canonical source; short
 %   manifest publication precedes worker admission through the same key.
+%   metta_loader orders each namespace-watch decision after the load-state
+%   change that prompts it, and a finish decides before it retracts pending.
 % Decides: a space defaults to identity mapping and eager loading. Waiting for
 %   another worker follows thread_await/2's transaction refusal.
 % Guarantees: a source path has one live home; a reload after release receives
 %   a fresh space identity and does not revive revoked handles [tested:
 %   test_a_library_reloads_after_its_first_scope_closes; commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
+% Guarantees: a background load reads finished only once its finish has
+%   republished the home's importers, or queued that for the source load it
+%   runs inside, and decided the namespace watch; until then every thread but
+%   the finishing one reads it pending and awaits its future
+%   [tested 2026-09-25T14:48:07+10:00:
+%   reference_loading:a_reader_arriving_while_a_background_finish_republishes_waits_for_it].
+% Guarantees: the namespace watch stands exactly while some home's load is
+%   pending or failed [tested 2026-09-25T14:48:07+10:00:
+%   reference_loading:a_background_namespace_of_only_references_waits_before_deciding_a_name_is_data,
+%   reference_loading:an_eager_retry_of_a_failed_background_load_takes_the_namespace_watch_down].
 
 :- dynamic metta_reference_library_home/2, metta_reference_prolog_head/3.
 :- dynamic metta_reference_manifest_head/3, metta_reference_manifest_row/2.
@@ -301,8 +313,19 @@ metta_reference_pending_namespace(Space, Seen, Home) :-
     ; metta_reference_row(Space, _, Next, _),
       metta_reference_pending_namespace(Next, [Space|Seen], Home) ).
 
+% A pending home is loading to every thread but the one settling it, whose
+% republication binds its importers against the settled home while every
+% other reader still awaits the load (metta_reference_finish/2). The settling
+% stack is read in place rather than through a declared context reader,
+% because a reader is one more engine predicate and each costs every large
+% source load's arity walk (existing_predicate_arities/2 in
+% engine/filereader.pl) [measured 2026-09-25T14:00:34+10:00: three added
+% predicates moved the 05-json_lib twin +6 and the 11-reference_rows example
+% +140 through loads that never reach this clause].
 metta_reference_loading(Home) :-
-    metta_reference_load_state(Home, pending(_)).
+    metta_reference_load_state(Home, pending(_)),
+    \+ ( nb_current('$metta_reference_settling', Settling),
+         memberchk(Home, Settling) ).
 metta_reference_loading(Home) :-
     metta_reference_load_state(Home, failed(_, _)).
 
@@ -349,17 +372,30 @@ metta_reference_install_finish(Home, Path) :-
              ( asserta(Clause, Ref),
                assertz(metta_reference_finish_ref(Home, Ref)) )) ).
 
+% A load is published finished by the last write its finish makes. Until then
+% it reads pending to every thread but the settling one, so a waiter awaits the
+% future, which settles only after the worker's finish returns, and never reads
+% the load finished while that finish is still republishing its importers or
+% deciding the namespace watch. CPython holds a module's _initializing flag up
+% until exec_module returns, and a reader that sees it waits on the module's
+% lock the same way [source 2026-09-25T13:05:59+10:00:
+% https://github.com/python/cpython/blob/v3.14.4/Lib/importlib/_bootstrap.py,
+% _load_unlocked/1 and _find_and_load/2]. Written the other way round, a
+% reader arriving mid-finish answered with the watch still standing and
+% returned from its wait before the republication [tested
+% 2026-09-25T14:48:07+10:00:
+% reference_loading:a_reader_arriving_while_a_background_finish_republishes_waits_for_it].
 metta_reference_finish(Home, Catcher) :-
-    (   retract(metta_reference_load_state(Home, pending(Future)))
+    (   metta_reference_load_state(Home, pending(Future))
     ->  metta_reference_admission_scope(Home, background, disabled),
         (   Catcher == exit
-        ->  assertz(metta_reference_load_state(Home, ready(Future))),
+        ->  Final = ready(Future),
             metta_reference_remove_loading_wrappers(Home),
             retractall(metta_reference_manifest_head(Home, _, _)),
             retractall(metta_reference_manifest_row(Home, _))
         ;   ( Catcher = exception(Error) -> true
             ; Error = error(metta_reference_load_failed(Home, Catcher), none) ),
-            assertz(metta_reference_load_state(Home, failed(Error, Future)))
+            Final = failed(Error, Future)
         ),
         % The finished home is the mutation root: its importers republish,
         % spaces elsewhere in the process stay untouched. It WALKS before it
@@ -369,9 +405,22 @@ metta_reference_finish(Home, Catcher) :-
         % would apply could stop the wave an importer's binding needs
         % [source: engine/metta/reference_refresh.pl, the rule above
         % metta_reference_changed/1; tested: reference_loading].
-        metta_reference_face_changed(Home),
-        metta_reference_changed(Home),
-        metta_reference_update_namespace_watch
+        %
+        % Both run in this thread's settling context, and so does the
+        % publication: the terminal state goes in beside pending and the watch
+        % is decided before pending leaves, under the lock every watch decision
+        % takes, so a reader that sees the terminal state alone sees the watch
+        % it implies. When two finishers settle one load, the lock lets one of
+        % them publish.
+        metta_with_trailed_push('$metta_reference_settling', Home,
+            ( metta_reference_face_changed(Home),
+              metta_reference_changed(Home),
+              with_mutex(metta_loader,
+                  (   metta_reference_load_state(Home, pending(Future))
+                  ->  assertz(metta_reference_load_state(Home, Final)),
+                      metta_reference_update_namespace_watch,
+                      retractall(metta_reference_load_state(Home, pending(Future)))
+                  ;   true )) ))
     ;   true
     ).
 
@@ -381,13 +430,16 @@ metta_reference_remove_loading_wrappers(Home) :-
            ( compiled_function_name(Name, Predicate), functor(Head, Predicate, Arity),
              unwrap_predicate(Module:Head, metta_reference_loading) )).
 
+% A failed load holds the namespace watch, so forgetting it decides the watch
+% again; an eager restart decides it nowhere else.
 metta_reference_forget_settled_future(Home) :-
     (   metta_reference_load_state(Home, ready(Future))
     ;   metta_reference_load_state(Home, failed(_, Future))
     ), !,
     metta_release_space(Future),
     retractall(metta_reference_load_state(Home, _)),
-    metta_reference_remove_loading_wrappers(Home).
+    metta_reference_remove_loading_wrappers(Home),
+    metta_reference_update_namespace_watch.
 metta_reference_forget_settled_future(_).
 
 metta_reference_release_loader(Home) :-

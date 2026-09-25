@@ -361,6 +361,26 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- A background `from` load reads finished only once its finish has
+  republished the home's importers and decided the namespace watch. The
+  finish wrote the finished state first and did that work after it, so a
+  reader arriving in between took the load as done: a caller whose failed
+  lookup was waiting for the home answered while the watch still stood, and a
+  call through a receiver's binding reached a name the republication had not
+  bound yet and answered `partial('q.loading-value', [])` where the value was
+  42. Those were the intermittent failures of
+  `a_background_namespace_of_only_references_waits_before_deciding_a_name_is_data`
+  and of the background arm of
+  `non_eager_rows_accept_each_map_and_follow_nested_references`. The load now
+  stays pending to every other thread until the finish's last step, which
+  writes the finished state and decides the watch under the loader lock, so a
+  waiter awaits the load's future, which settles only after the finish.
+
+- An eager `from` row that retries a failed background load takes the
+  namespace watch down. The failed load held it and forgetting the failure
+  decided nothing, so every failed name lookup afterwards went through the
+  watch's wait until some later load or release decided it again.
+
 - A host built from `tools/pymetta-host/fetch-source.sh` carries the fix for
   library(time)'s alarm scheduler, which returned holding its mutex, so a
   process halting with alarms pending could wait for ever. Each native host

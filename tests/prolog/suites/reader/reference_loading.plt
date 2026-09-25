@@ -12,7 +12,7 @@
 :- use_module(library(prolog_wrap)).
 
 :- begin_tests(reference_loading).
-:- dynamic loading_gate/1, loading_caller/1, loading_auxiliary/1.
+:- dynamic loading_gate/1, loading_caller/1, loading_auxiliary/1, loading_hold/1.
 
 loading_setup(Text) :-
     metta_host_set_silent(true),
@@ -463,6 +463,23 @@ test(a_background_namespace_of_only_references_waits_before_deciding_a_name_is_d
     loading_controlled_background(succeed, Outcome), assertion(Outcome == [42]),
     assertion(\+ metta_engine:metta_reference_namespace_watch).
 
+%A reader arriving while a background load's finish republishes the home's
+%importers waits for that finish instead of reading the load finished. The
+%finish is held inside metta_reference_face_changed/1, after the load answered
+%and before the republication and the watch decision. lookup is the caller of
+%the test above, whose failed lookup chose to wait for the home before the
+%load bound the name; wait is a binding guard's metta_reference_wait/1. The
+%first thing either reports while the finish is held has to be its await.
+test(a_reader_arriving_while_a_background_finish_republishes_waits_for_it,
+     [condition(current_prolog_flag(threads,true)),
+      forall(member(Reader-Answer, [lookup-[42], wait-returned])),
+      setup(loading_setup("")), cleanup(loading_cleanup)]) :-
+    loading_fixture(Path, _, _, B), metta_add_atom(B,[=,['loading-value'],42],_),
+    format(string(Text),"(from ~w)\n",[B]), loading_write(Path,Text),
+    loading_held_finish(Reader, First, Outcome),
+    assertion(First == awaiting), assertion(Outcome == completed(Answer)),
+    assertion(\+ metta_engine:metta_reference_namespace_watch).
+
 test(concurrent_transactions_keep_each_others_rollback_listener,
      [condition(current_prolog_flag(threads,true)),
       setup(loading_setup("(= (loading-value) 42)\n")), cleanup(loading_cleanup)]) :-
@@ -502,6 +519,17 @@ test(background_failure_reaches_callers_and_a_later_row_retries,
     assertion(\+ metta_engine:import_receipt(Home, Path, _, _)),
     metta_add_atom(B, [from, Path], _),
     loading_answers(A, ['loading-value'], [42]).
+
+%A failed background load holds the namespace watch until something decides
+%it again, and the eager row that retries the load is the last to touch it.
+test(an_eager_retry_of_a_failed_background_load_takes_the_namespace_watch_down,
+     [condition(current_prolog_flag(threads,true)),
+      setup(loading_setup("(= (loading-value) 42)\n")), cleanup(loading_cleanup)]) :-
+    loading_controlled_background(raise, raised(_)),
+    assertion(metta_engine:metta_reference_namespace_watch),
+    loading_fixture(Path, _, A, B), metta_add_atom(B, [from, Path], _),
+    loading_answers(A, ['loading-value'], [42]),
+    assertion(\+ metta_engine:metta_reference_namespace_watch).
 
 test(background_rechecks_the_text_read_after_submission,
      [condition(current_prolog_flag(threads,true)),
@@ -631,5 +659,79 @@ loading_gate_cleanup(Started, Release, Calling, Done) :-
     unwrap_predicate(metta_engine:metta_reference_wait(_), reference_test_wait),
     retractall(loading_gate(_)),
     maplist(message_queue_destroy, [Started, Release, Calling, Done]).
+
+% Hold the fixture's background finish inside metta_reference_face_changed/1
+% and let Reader read the load there. First is the reader's first report while
+% the finish is held: awaiting from its metta_reference_await/2, or
+% completed(Answer). Outcome is its completion once the finish goes on.
+loading_held_finish(Reader, First, Outcome) :-
+    loading_fixture(Path, Home, A, _),
+    setup_call_cleanup(
+        loading_hold_setup(Reader, Path, Home, Holds),
+        ( loading_option(A, load, background),
+          loading_hold_reader(Reader, Path, Home, A, Holds),
+          Holds = holds(Main, Finish, _, _),
+          thread_get_message(Main, First), thread_send_message(Finish, go),
+          ( First = completed(_) -> Outcome = First
+          ; thread_get_message(Main, completed(Answer)), Outcome = completed(Answer) ) ),
+        loading_hold_cleanup(Holds)).
+
+loading_hold_setup(Reader, Path, Home, holds(Main, Finish, Wait, Gate)) :-
+    maplist(message_queue_create, [Main, Finish, Wait]),
+    assertz(loading_hold(finish)),
+    ( Reader == lookup
+    -> assertz(loading_hold(wait)),
+       loading_gate_setup(Path, Home, succeed, Started, Release, Calling, Done),
+       Gate = gate(Started, Release, Calling, Done)
+    ; Gate = none ),
+    wrap_predicate(metta_engine:metta_reference_face_changed(Space), reference_test_finish,
+                   Changed, ( loading_hold_at(finish, Space, Home, Main, held, Finish),
+                              call(Changed) )),
+    wrap_predicate(metta_engine:metta_reference_wait(Space), reference_test_hold,
+                   Waited, ( loading_hold_at(wait, Space, Home, Main, at_wait, Wait),
+                             call(Waited) )),
+    wrap_predicate(metta_engine:metta_reference_await(Space, _), reference_test_await,
+                   Await, ( ( Space == Home -> thread_send_message(Main, awaiting) ; true ),
+                            call(Await) )).
+
+% The first call a hold names reports to Main and waits for go on its queue.
+loading_hold_at(Hold, Space, Home, Main, Report, Queue) :-
+    ( Space == Home, retract(loading_hold(Hold))
+    -> thread_send_message(Main, Report), thread_get_message(Queue, go)
+    ; true ).
+
+% lookup keeps the worker at its read until the caller's lookup has failed and
+% is held at its wait, then lets the worker run to the held finish before the
+% caller reads the load. wait starts its reader once the finish is held.
+loading_hold_reader(lookup, Path, _, A,
+                    holds(Main, _, Wait, gate(Started, Release, _, _))) :-
+    metta_add_atom(A, [from, Path], _), thread_get_message(Started, reading),
+    thread_create(loading_hold_read(lookup, A, Main), Caller, []),
+    assertz(loading_caller(Caller)), thread_get_message(Main, at_wait),
+    thread_send_message(Release, continue), thread_get_message(Main, held),
+    thread_send_message(Wait, go).
+loading_hold_reader(wait, Path, Home, A, holds(Main, _, _, none)) :-
+    metta_add_atom(A, [from, Path], _), thread_get_message(Main, held),
+    thread_create(loading_hold_read(wait(Home), A, Main), Caller, []),
+    assertz(loading_caller(Caller)).
+
+loading_hold_read(lookup, A, Main) :-
+    catch(loading_answers(A, ['loading-value'], Bag), Error, Bag = raised(Error)),
+    thread_send_message(Main, completed(Bag)).
+loading_hold_read(wait(Home), _, Main) :-
+    catch(( metta_engine:metta_reference_wait(Home), Bag = returned ),
+          Error, Bag = raised(Error)),
+    thread_send_message(Main, completed(Bag)).
+
+loading_hold_cleanup(holds(Main, Finish, Wait, Gate)) :-
+    thread_send_message(Finish, go), thread_send_message(Wait, go),
+    ( Gate = gate(Started, Release, Calling, Done)
+    -> loading_gate_cleanup(Started, Release, Calling, Done)
+    ; forall(retract(loading_caller(Caller)), thread_join(Caller, _)) ),
+    retractall(loading_hold(_)),
+    unwrap_predicate(metta_engine:metta_reference_face_changed(_), reference_test_finish),
+    unwrap_predicate(metta_engine:metta_reference_wait(_), reference_test_hold),
+    unwrap_predicate(metta_engine:metta_reference_await(_, _), reference_test_await),
+    maplist(message_queue_destroy, [Main, Finish, Wait]).
 
 :- end_tests(reference_loading).
