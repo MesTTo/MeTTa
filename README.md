@@ -281,10 +281,12 @@ Multiset operations over atoms.
 ## Sequence variables
 
 A pattern child that stands for a run of atoms. Upstream PeTTa has no such
-pattern, so this is the one part of the language below that a stock kernel will
-not parse, and sixteen of the
-[library pack](https://github.com/MesTTo/MeTTa-Library-Pack)'s libraries are written
-with it.
+pattern: it reads `(:seg $x)` as an ordinary expression and `...` as a symbol, so
+what a pattern below matches answers nothing there. This is the one part of the
+language below that a stock kernel will not run, and the
+[library pack](https://github.com/MesTTo/MeTTa-Library-Pack#what-each-library-needs)
+lists the libraries that need a kernel beyond PeTTa, for this or for the two
+other spellings upstream reads as data.
 
 ```metta
 !(test (collapse (let ((:seg $pre) SEP (:seg $post)) (a b SEP c SEP d)

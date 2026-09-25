@@ -9,6 +9,26 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Added
 
+- The library pack's page, `lib/README.md`, shows a worked example of every
+  library again, all sixty-one, where fc6297c0d's move off the root page had
+  left thirteen. Each is quoted from the corpus program that exercises the
+  library, less its comment lines, and links the lines it quotes. The
+  `library-readme` lane holds each example to those lines, and holds the page
+  to an entry for every library directory, to its counts, to every head its
+  tables list, and to a table of the twenty-four libraries that need a kernel
+  whose syntax is a superset of PeTTa's: those whose sources write a sequence
+  variable, a variadic signature or an annotated arrow, three spellings
+  upstream PeTTa reads as data, and those that require one of them. The list
+  60e9df0ce gave named sixteen, and counted neither lib_torch's annotated
+  arrows nor a library that reaches the syntax through a requirement. Five
+  examples read a corpus fixture or name a network address and are shown as
+  text; the other fifty-six run under `readme-fences`.
+  `tests/checks/check_library_readme.py --write` fills a new entry's fence from
+  its range and follows an excerpt that moved in its file. minimal_metta_lib,
+  which the runtime ships as a library and the page omitted, has an entry.
+  The root README's Sequence variables section links that table rather than
+  restating a count.
+
 - Every seat evaluates through one engine door,
   `metta_host_evaluate(Space, Generator, Term, Answer, Delays)`. It runs the
   term inside the evaluation fuel scope, so `(pragma! max-stack-depth N)`

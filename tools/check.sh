@@ -919,6 +919,16 @@ run GATE llms       "$PY" "$HERE/tests/checks/check_llms_names.py"
 run GATE readme-fences "$PY" "$HERE/tests/checks/check_readme_fences.py"
 # Umbrella: README snippets from every component run against the assembled workspace.
 run GATE readme-fences-selftest "$PY" "$HERE/tests/checks/check_readme_fences_selftest.py"
+# The library pack's page quotes a corpus program for every library and lists
+# the libraries that need a kernel beyond PeTTa. Moving the roster off the root
+# page left the pack's page with 13 examples for 60 libraries and no list, and
+# nothing noticed, because nothing compared the page with its sources.
+# This holds every example to the lines it cites, the roster and counts to the
+# directories, and the list to what the engine's reader finds in the sources.
+# Umbrella: the library pack's page quotes the example corpus and reads the libraries through the engine.
+run GATE library-readme "$PY" "$HERE/tests/checks/check_library_readme.py"
+# Umbrella: the library pack's page quotes the example corpus and reads the libraries through the engine.
+run GATE library-readme-selftest "$PY" "$HERE/tests/checks/check_library_readme_selftest.py"
 # Umbrella: component sources and documentation reference the shared workspace drivers.
 run GATE script-refs "$PY" "$HERE/tests/checks/check_script_references.py"
 # Umbrella: component sources and documentation reference the shared workspace drivers.
