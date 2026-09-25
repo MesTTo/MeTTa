@@ -13,6 +13,12 @@
 %   callable, a committed one abolishes the generated predicates and retires
 %   the receiver's binding at the completion [tested: space_retirement;
 %   commit=b45f5d440377b883af981ef3dea16da6b7c2e7e7].
+% Guarantees: neither a clear nor a committed release leaves a record
+%   describing a swept generated predicate, so the same space's rerun and a
+%   named space's next life compile a lambda's segment specialization afresh
+%   [tested 2026-09-25T23:23:10+10:00:
+%   space_retirement:a_cleared_space_leaves_no_record_to_its_own_rerun,
+%   space_retirement:a_released_module_leaves_no_record_to_its_next_life].
 % Owns resources: every test releases its generated spaces and erases its notes.
 
 :- ensure_loaded('../../../../engine/qlf_boot.pl').
@@ -390,5 +396,48 @@ test(a_released_space_leaves_no_import_bookkeeping_behind,
     transaction(metta_release_space(Home, plunit_space_retirement:retire_note)),
     findall(N, metta_engine:import_nested_source(Home, _, N), After),
     assertion(After == []).
+
+%The same rule for what the compiler GENERATED. A lambda is named by its
+%content, so the next life of a released module compiles it again under the
+%same name, and the records describing the dead life's predicates were read
+%as its own: its segment specialization was taken as built from the dead
+%life's ho_specialization/3 row and called after the release had abolished it,
+%`Unknown procedure: lambda_..._Spec_...`. The name is a named space's so the
+%second life has the same module; the program is the smallest one that makes
+%a lambda's segment specialization.
+test(a_released_module_leaves_no_record_to_its_next_life,
+     [setup(retire_setup),
+      cleanup(( catch(metta_release_space('&plunit_release_records'), _, true),
+                retire_cleanup ))]) :-
+    Space = '&plunit_release_records',
+    Program = "(= (use-seg $f) ($f a b)) !(use-seg (|-> ((:seg $xs)) (quote $xs)))",
+    process_metta_string(Program, First, Space),
+    space_module(Space, Module),
+    assertion(specializer:ho_specialization(Module, _, _)),
+    assertion(translator:fun_meta_clause(Module, _, _, _)),
+    metta_release_space(Space),
+    assertion(\+ specializer:ho_specialization(Module, _, _)),
+    assertion(\+ translator:fun_meta_clause(Module, _, _, _)),
+    assertion(\+ translator:fun_meta_projection(Module, _, _, _)),
+    process_metta_string(Program, Second, Space),
+    assertion(Second == First).
+
+%Within one life too: a clear sweeps the generated predicates and must take
+%their records with them, or the same program run again takes the swept
+%clone as built. The name's registration stays, because a live reference
+%resolves through it (reference_providers keeps a cleared provider's
+%receiver answering unreduced).
+test(a_cleared_space_leaves_no_record_to_its_own_rerun,
+     [setup(retire_setup), cleanup(retire_cleanup)]) :-
+    retire_space(Space),
+    Program = "(= (use-seg $f) ($f a b)) !(use-seg (|-> ((:seg $xs)) (quote $xs)))",
+    process_metta_string(Program, First, Space),
+    space_module(Space, Module),
+    assertion(specializer:ho_specialization(Module, _, _)),
+    metta_host_clear_space(Space),
+    assertion(\+ specializer:ho_specialization(Module, _, _)),
+    assertion(\+ translator:fun_meta_clause(Module, _, _, _)),
+    process_metta_string(Program, Second, Space),
+    assertion(Second == First).
 
 :- end_tests(space_retirement).

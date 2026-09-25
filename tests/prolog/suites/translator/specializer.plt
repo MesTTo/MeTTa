@@ -606,7 +606,7 @@ test(the_verifier_runs_a_clone_in_its_own_module,
     % is what the meta_predicate declaration on the verifier produces.
     specializer:metta_verified_specialization(SpecName, Module:SpecGoal),
     assertion(Out == 2),
-    assertion(specializer:ho_specialization_agrees(SpecName)).
+    assertion(specializer:ho_specialization_agrees(Module, SpecName)).
 
 %The comparison runs the call two more times than the program asked, once as
 %the clone and once as the generic, and then the wrapper runs the real one.
@@ -651,7 +651,7 @@ test(a_verified_call_writes_once_however_often_the_comparison_ran,
     Written is EndCount - StartCount,
     assertion(Answer == 2),
     assertion(Written == 1),
-    assertion(specializer:ho_specialization_agrees(SpecName)).
+    assertion(specializer:ho_specialization_agrees(Module, SpecName)).
 
 % A specialization belongs to the space whose code triggered it, and
 % ho_specialization/3 has said so in its first argument since it was written.

@@ -321,7 +321,7 @@ perform(declared_types) :-
 perform(reference_refresh) :- metta_engine:metta_reference_refresh.
 perform(reference_force) :- metta_engine:metta_reference_force(guard_absent).
 perform(specialization_check) :-
-    retractall(specializer:ho_specialization_agrees('$plunit_guard_spec')),
+    retractall(specializer:ho_specialization_agrees(_, '$plunit_guard_spec')),
     metta_self_module(Module),
     specializer:metta_verified_specialization('$plunit_guard_spec',
                                               Module:'$plunit_guard_spec'(42)).
@@ -390,7 +390,7 @@ test(internal_guarded_operations_restore_after_every_budget,
      [setup(install_operation_fixture(Refs)), cleanup(maplist(erase,Refs)),
       forall(operation(Site,Key))]) :-
     operation_sweep(Site,Key,1,Completed),
-    retractall(specializer:ho_specialization_agrees('$plunit_guard_spec')),
+    retractall(specializer:ho_specialization_agrees(_, '$plunit_guard_spec')),
     format('scope-sweep(~q,1,~d,zero_leaks).~n',[Site,Completed]).
 
 install_operation_fixture([Plain,Spec,Mapping]) :-

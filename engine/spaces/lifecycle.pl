@@ -16,6 +16,22 @@
 %   space_retirement:a_committed_release_abolishes_the_generated_predicates_at_completion,
 %   extensions/python/tests/ch09_types/test_class_withdrawal.py::test_a_rolled_back_drop_keeps_its_classes_and_their_rows;
 %   commit=b45f5d440377b883af981ef3dea16da6b7c2e7e7].
+% Guarantees: every sweep of a module's generated predicates, a clear's or a
+%   release's, retires the records describing each swept predicate (the
+%   translator's metadata, the specializer's rows naming it and each of its
+%   clauses' provenance), and a committed release retires the rest of the
+%   module's, so neither the same space's rerun nor the next life of a pooled
+%   name reads a swept clone as standing; the names' fun_in/2 registrations
+%   stay with the machinery that made them [tested 2026-09-25T23:23:10+10:00:
+%   space_retirement:a_cleared_space_leaves_no_record_to_its_own_rerun,
+%   space_retirement:a_released_module_leaves_no_record_to_its_next_life,
+%   reference_providers:clearing_native_and_foreign_providers_keeps_the_live_reference]
+%   [tested 2026-09-25T23:23:11+10:00:
+%   test_a_recycled_space_name_inherits_no_generated_record_from_its_past_life].
+% Guarantees: a foreign space's clear, and so its release, empties the native
+%   half the source loader writes beside the provider's, so a pooled name's
+%   next life reads none of its equations [tested 2026-09-25T23:23:11+10:00:
+%   test_a_foreign_product_refuses_when_its_storage_cannot_roll_back].
 % Guarantees: an undefined name in a space's module is never resolved against
 %   SWI's library index: refuse_autoload_into_exec_modules/0 answers `error`
 %   for every exec module from the undefined-procedure hook at engine boot, so
@@ -1718,12 +1734,14 @@ metta_space_release_complete(Space, Token, Module, Host) :-
         %The physical half of the retirement, once it is durable and before
         %the host can pool the name. The reference bindings go first: they
         %are imports and wrappers standing on the module's predicates. Then
-        %the module's generated predicates go, so the name's next life
-        %inherits none of them.
+        %the module's generated predicates go, and every record describing
+        %one, so the name's next life inherits none of them.
         metta_engine:metta_reference_retired(Space, Module),
         (   Module == none
         ->  true
-        ;   with_mutex('$metta_metta_exec', clear_generated_predicates(Module))
+        ;   with_mutex('$metta_metta_exec',
+                       ( clear_generated_predicates(Module),
+                         retire_released_module(Module) ))
         )
     ;   Outcome = restored,
         %The abort put the rows back; the references take the space back into
@@ -2981,10 +2999,19 @@ metta_clear_space_for_release(Space) :-
         ( metta_release_owned_children(Space),
           metta_host_clear_space(Space, retirement) )).
 
+%A foreign space can hold a native half beside its provider's: a program the
+%source loader runs into it stores each equation in the space's native storage
+%module, since filereader's process_form/3 writes there whatever the space's
+%kind, and the provider's clear never looks there. So the native clear follows
+%the provider's, and the next life of a pooled name, whose storage row names
+%the same module again, inherits neither half. Left standing, a named MORK
+%space's second life read its first life's equation beside its own and
+%answered each call twice, masked until the release retired the first life's
+%equation tokens [tested 2026-09-25T23:23:11+10:00:
+%test_a_foreign_product_refuses_when_its_storage_cannot_roll_back].
 metta_host_clear_foreign_storage(Space) :-
     clear_foreign_atoms(Space),
-    metta_forget_space_imports(Space),
-    forget_space_source_loads(Space).
+    clear_native_atoms(Space).
 
 %The equations above come out one per stored (= ...) atom, through
 %metta_remove_atom/3, so a predicate the compiler GENERATED with no stored
@@ -3003,23 +3030,78 @@ metta_host_clear_foreign_storage(Space) :-
 %keeps this to the space's own and away from the engine's; it is the same
 %enumeration metta_host_clear_tabling/2 above uses, and it runs after that one
 %because a tabled predicate cannot be abolished until it is untabled.
+%
+%The RECORDS describing a swept predicate go with it, because they would say
+%it still stands: the translator's metadata of its compiled form, the
+%specializer's rows naming it as a function specialized or as the clone, and
+%the provenance of each of its clauses, which dies with the clause below.
+%While lambdas were named by a counter these rows named names nothing would
+%compile again, so they only leaked. Named by their content, the same program
+%compiles the same names again, after a clear() in the same life or in the
+%next life of a pooled name, and read them as its own. A lambda's segment
+%specialization was taken as built from a row whose clone the sweep had
+%abolished, and called [tested 2026-09-25T23:23:11+10:00:
+%test_callable_conversion_keeps_authored_heads_as_live_references]
+%[tested 2026-09-25T23:23:10+10:00: space_retirement:a_cleared_space_leaves_no_record_to_its_own_rerun];
+%and a lambda's metadata stood beside its next compile's, so the
+%specialization built from both held two clauses and answered twice
+%[tested 2026-09-25T23:23:11+10:00: test_operation_publication_preserves_cached_native_callables].
+%The name's registration, fun_in/2, is the name's and not the predicate's,
+%and the machinery that registered it withdraws it by its own rule: the
+%removal funnel for a stored function, forget_symbol/2 for a generated one,
+%the reference bindings for an alias head. Were it withdrawn here as well, a
+%receiver of a cleared provider would answer nothing where the unreduced
+%call is the answer, and a released space's alias head would take the
+%name-wide scoped mark with it while fun/1 stood, so a later space's
+%background admission of the same alias would find nothing to call
+%[tested 2026-09-25T23:23:10+10:00:
+%reference_providers:clearing_native_and_foreign_providers_keeps_the_live_reference,
+%reference_loading:non_eager_admission_reads_an_already_evaluated_default_map].
+%A release also retires what no sweep reached, below, as the support graph
+%splits support_clear_module/1 for a clear from support_forget_module/1 for a
+%release [source 2026-09-25T19:23:26+10:00:
+%docs/journal/2026-09-15-clear-preserves-consumer-dependencies.md].
 clear_generated_predicates(Module) :-
     forall(( current_predicate(Module:Name/Arity),
              functor(Head, Name, Arity),
              \+ predicate_property(Module:Head, imported_from(_)) ),
            clear_generated_predicate(Module, Name/Arity, Head)).
 
+%The records describing a module's generated predicate Name, or every one of
+%them for an unbound Name.
+retire_generated_records(Module, Name) :-
+    translator:clear_fun_meta(Module, Name),
+    specializer:retire_specializations_of(Module, Name).
+
+%A released module's name goes back to the pool, so the records its dead life
+%kept for a generated predicate go too, swept or not, and the next life of
+%the name inherits none of them [tested 2026-09-25T23:23:10+10:00:
+%space_retirement:a_released_module_leaves_no_record_to_its_next_life].
+retire_released_module(Module) :-
+    retire_generated_records(Module, _).
+
 %Clauses first and predicate second, and the split is the transaction contract.
-%retractall/1 is clause-level, so a rollback restores what it removed; abolish/1
-%is predicate-level and a rollback cannot restore what it dropped, which is why
+%Erasing is clause-level, so a rollback restores what it removed; abolish/1 is
+%predicate-level and a rollback cannot restore what it dropped, which is why
 %the shadow repair beside it defers under a transaction rather than abolishing
 %eagerly [source: the current_transaction/1 branch in metta_remove_atom/3,
 %tested: test_a_reload_that_fails_leaves_the_previous_definitions_standing].
 %This defers through that same pending table, and its sweep re-checks that the
 %predicate is still empty, so a rolled-back clear leaves the predicate exactly
-%as it was.
+%as it was. The clauses go through retire_translated_clauses/2, the door
+%forget_symbol/2 already takes, so each clause's provenance row, equation token
+%and binding are withdrawn beside its erase; a static predicate's clauses are
+%not erasable and leave with the predicate. forget_symbol/2 filters on
+%clause_property(module/1) because it asks of a name the module may only
+%inherit; every predicate here is the module's own definition, whose clauses
+%are all its own.
 clear_generated_predicate(Module, Name/Arity, Head) :-
-    catch(retractall(Module:Head), _, true),
+    (   predicate_property(Module:Head, dynamic)
+    ->  findall(Ref, clause(Module:Head, _, Ref), Refs),
+        filereader:retire_translated_clauses(Module, Refs)
+    ;   true
+    ),
+    retire_generated_records(Module, Name),
     (   current_transaction(_)
     ->  assertz('$metta_shadow_repair_pending'(Module, Name, Arity))
     ;   metta_abolish_local_predicate(Module, Name, Arity)

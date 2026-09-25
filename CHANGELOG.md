@@ -386,6 +386,24 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- A clear or a release of a space no longer leaves behind the records
+  describing the generated predicates it sweeps. The translator's metadata,
+  the specializer's rows and each clause's provenance go with the predicate,
+  and a release retires every record its module still keeps, so the next
+  life of a pooled space name inherits none of them. Since lambdas are named
+  by their content, the same program run again after `clear()` or in a
+  recycled space read a dead life's specialization row as built and raised
+  `Unknown procedure: lambda_<digest>_Spec_...`, or built a lambda's
+  specialization from both lives' metadata and answered twice.
+- A foreign space's clear and release empty the equations the source loader
+  stored in its native storage beside the provider's atoms. A named MORK
+  space's next life read its previous life's equation beside its own and
+  answered each call twice once the release stopped leaving the first life's
+  equation tokens behind.
+- The specializer's checking mode records its verdicts per module, so one
+  space's agreement never certifies another space's clone of the same
+  specialization name.
+
 - Importing a `.metta.gz` source no longer aborts with `Execution Aborted`
   once lib_functional is imported into the process `&self`. The engine's
   undefined-predicate hook forced a waiting function for any module whose

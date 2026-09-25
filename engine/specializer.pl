@@ -81,6 +81,17 @@
 %     specializer_invalidation:a_recycled_space_specializes_into_its_own_module]
 %     [tested 2026-09-25T06:26:35+10:00:
 %     variadic_arrows:a_recycled_space_specializes_a_shape_into_its_own_module].
+%   - A swept generated predicate's specialization records leave with it, at a
+%     clear and at a release, so a content-named lambda's specialization is
+%     compiled afresh by the same space's rerun and by the next life of a
+%     pooled name [tested 2026-09-25T23:23:10+10:00:
+%     space_retirement:a_cleared_space_leaves_no_record_to_its_own_rerun,
+%     space_retirement:a_released_module_leaves_no_record_to_its_next_life].
+%   - The checking mode's verdicts are the module's whose clone was checked,
+%     so one space's agreement never certifies another space's clone of the
+%     same name [tested 2026-09-25T23:23:10+10:00:
+%     specializer_invalidation:the_verifier_runs_a_clone_in_its_own_module,
+%     specializer_invalidation:a_verified_call_writes_once_however_often_the_comparison_ran].
 % Guarded by: '$metta_typing_policy' is acquired before '$metta_specializer'
 %   and before the publication transaction, so a specialization cannot retain
 %   a static type proof across a concurrent policy change. '$metta_specializer'
@@ -100,6 +111,9 @@
           [ maybe_specialize_call/4,
             segment_specialization/4,
             prepare_specialization_invalidation/2,
+            %The generated-predicate sweep's door: a swept predicate's
+            %specialization records go with it.
+            retire_specializations_of/2,
             metta_refresh_specialization_verification/0,
             metta_finish_specialization_verification/0,
             %The generated-specialization table, read by engine/spaces.pl when a
@@ -129,10 +143,14 @@
 
 :- dynamic ho_specialization/3.
 :- dynamic ho_specialization_failed/4.
-%Verified once per specialization, under the checking mode only.
-:- dynamic ho_specialization_agrees/1.
+%Verified once per specialization, under the checking mode only, and keyed by
+%the module the clone lives in as ho_specialization/3 is: a lambda named by its
+%content gives its specializations one name in every space, while each space's
+%clone is derived from that space's own definitions, so a name alone would
+%certify one space's clone with another's check.
+:- dynamic ho_specialization_agrees/2.
 %Recorded when the generic side could not be run inside the bound.
-:- dynamic ho_specialization_unverified/2.
+:- dynamic ho_specialization_unverified/3.
 %Held while a specialization's own check is running, so the recursive
 %calls inside it do not each start another check.
 :- seam:context_reader(ho_specialization_checking(Name),
@@ -788,12 +806,12 @@ metta_specialization_report :-
     ).
 
 metta_specialization_coverage(Agreed, Unverified) :-
-    aggregate_all(count, ho_specialization_agrees(_), Agreed),
-    aggregate_all(count, ho_specialization_unverified(_, _), Unverified).
+    aggregate_all(count, ho_specialization_agrees(_, _), Agreed),
+    aggregate_all(count, ho_specialization_unverified(_, _, _), Unverified).
 
 metta_specialization_reset :-
-    retractall(ho_specialization_agrees(_)),
-    retractall(ho_specialization_unverified(_, _)).
+    retractall(ho_specialization_agrees(_, _)),
+    retractall(ho_specialization_unverified(_, _, _)).
 
 %Answers exactly what the specialization answers, after establishing once
 %per specialization that the generic call agrees. The comparison is over
@@ -808,11 +826,14 @@ metta_specialization_reset :-
 :- meta_predicate metta_verified_specialization(?, 0),
                   metta_check_specialization(?, 0).
 metta_verified_specialization(SpecName, Spec) :-
-    (   ho_specialization_agrees(SpecName)
+    %The clone is the one in the module the meta_predicate declaration
+    %qualified the goal with, and every memo below is that module's.
+    strip_module(Spec, Module, _),
+    (   ho_specialization_agrees(Module, SpecName)
     ->  call(Spec)
-    ;   ho_specialization_unverified(SpecName, _)
+    ;   ho_specialization_unverified(Module, SpecName, _)
     ->  call(Spec)
-    ;   ho_specialization_checking(SpecName)
+    ;   ho_specialization_checking(Module:SpecName)
     ->  %Re-entry: the clone under check calls itself, which is what a
         %recursive specialization IS. Checking again from inside its own
         %check nests a full comparison per recursive step, so the cost is
@@ -824,7 +845,7 @@ metta_verified_specialization(SpecName, Spec) :-
         call(Spec)
     ;   ( nb_current('$metta_specialization_checking', Names) -> true ; Names = [] ),
         % Workaround: swi-cleanup-window - recursive verification follows a trailed stack.
-        metta_with_trailed('$metta_specialization_checking', [SpecName|Names],
+        metta_with_trailed('$metta_specialization_checking', [Module:SpecName|Names],
                            metta_check_specialization(SpecName, Spec)),
         call(Spec)
     ).
@@ -879,7 +900,7 @@ metta_compare_specialization(SpecName, Module, SpecCopy, Generic, SpecArgs, Plai
         ),
         Error,
         (   control_exception(Error) -> throw(Error) ; Outcome = raised(Error) )),
-    metta_specialization_verdict(SpecName, Outcome).
+    metta_specialization_verdict(Outcome, Module, SpecName).
 
 %The comparison runs the call two more times than the program asked for: once
 %as the clone and once as the generic. That is invisible for a call that only
@@ -911,17 +932,19 @@ metta_compare_specialization(SpecName, Module, SpecCopy, Generic, SpecArgs, Plai
 metta_discarding_writes(Goal) :-
     snapshot(Goal).
 
-metta_specialization_verdict(SpecName, both(Specialized, Plain)) :-
+%The outcome leads so first-argument indexing tells the three apart and the
+%verdict leaves no choice point behind the verified call.
+metta_specialization_verdict(both(Specialized, Plain), Module, SpecName) :-
     (   Specialized =@= Plain
-    ->  assertz(ho_specialization_agrees(SpecName))
+    ->  assertz(ho_specialization_agrees(Module, SpecName))
     ;   throw(error(metta_specialization_disagrees(SpecName, Specialized, Plain),
                     context(metta_verified_specialization/2,
                             'a specialization answered differently from \c
                              the generic call')))
     ).
-metta_specialization_verdict(SpecName, unbounded) :-
-    assertz(ho_specialization_unverified(SpecName, inference_limit)).
-metta_specialization_verdict(SpecName, raised(Error)) :-
+metta_specialization_verdict(unbounded, Module, SpecName) :-
+    assertz(ho_specialization_unverified(Module, SpecName, inference_limit)).
+metta_specialization_verdict(raised(Error), _, SpecName) :-
     throw(error(metta_specialization_disagrees(SpecName, raised, Error),
                 context(metta_verified_specialization/2,
                         'one side raised where the other answered'))).
@@ -1165,6 +1188,25 @@ forget_symbol(Module, Name) :-
     ),
     support_forget(function(Module, Name)),
     support_forget(specialization(Module, Name)).
+
+%The records naming one generated predicate of a module, as the function a
+%specialization was made from or as the specialization itself, for a sweep
+%that abolishes the predicate without repairing what depended on it, which is
+%forget_symbol/2's work in a living program. An unbound Name is every record
+%of the module, for a release, whose pooled name's next life must read none
+%of them. Kept after the sweep, a row said a clone stood that it had
+%abolished, and since lambdas are named by their content the same program
+%run again, after a clear() or in the next life of the name, took that
+%clone as built and called it: `Unknown procedure:
+%lambda_bdb4263dea1a8f4b_Spec_...`/3
+%[tested 2026-09-25T23:23:10+10:00: space_retirement:a_released_module_leaves_no_record_to_its_next_life,
+%space_retirement:a_cleared_space_leaves_no_record_to_its_own_rerun].
+retire_specializations_of(Module, Name) :-
+    retractall(ho_specialization(Module, Name, _)),
+    retractall(ho_specialization(Module, _, Name)),
+    retractall(ho_specialization_failed(Module, Name, _, _)),
+    retractall(ho_specialization_agrees(Module, Name)),
+    retractall(ho_specialization_unverified(Module, Name, _)).
 
 % Compatibility name for callers that used to enter the specializer's bespoke
 % recursive walk. The common graph now reaches specializations, memo entries
