@@ -386,6 +386,13 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- The Python seat's import-receipt tests pass again. Their probe forced
+  `take-atom` from the process `&self` before counting the target space's
+  clauses, and since a force translates only the home its own module
+  resolves, the target's waiting equations stayed untranslated and eight
+  cases read no clauses. The probe forces through
+  `metta_ensure_compiled_from/2` from the target's module.
+
 - The translator suite's recursive-generator test counts inferences and the
   peak local stack instead of timing about a tenth of a millisecond, so it no
   longer fails at random. A generator whose recursive call stops being last
