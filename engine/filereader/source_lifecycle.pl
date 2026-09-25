@@ -22,7 +22,10 @@
 %
 % Purpose: implement fast caches, source digests, transactional reload, and source assertion ownership.
 % Guarantees: every source retirement restores surviving function registrations
-%   before repairing callers, including deferred equations in other spaces
+%   before repairing callers, including deferred equations in other spaces and
+%   heads another library home's backing still registers, each journalled to
+%   the load that owns what survives, so the registration leaves with the last
+%   of them [tested 2026-09-25T10:26:32+10:00: packages:a_backing_head_outlives_the_first_space_that_imported_it]
 %   [tested: lib_import_lifecycle:first_owner_retirement_keeps_other_spaces_callable,
 %   lib_import_lifecycle:failed_first_load_keeps_a_nested_import_callable,
 %   lib_import_lifecycle:retirement_inside_a_failed_load_keeps_older_registrations;
@@ -1590,16 +1593,53 @@ source_load_function_names(LoadId, Names) :-
 
 % The first source that introduced a name owns its registry references, but
 % later sources and caller equations can reuse them. Once that first source
-% leaves, derive their replacements from the executable equations that remain.
-% Pin to no source: an enclosing import does not own these older definitions.
+% leaves, derive their replacements from the definitions that remain, each
+% journalled to the load that owns the definition it was derived from, so a
+% replacement leaves with the last definition's own source. Pinned to no source
+% it outlived them: a second importer's surviving head restored the arity row
+% with no owner, and the row stayed after that importer went too [tested
+% 2026-09-25T10:26:32+10:00: packages:a_backing_head_outlives_the_first_space_that_imported_it].
+% The pin is never the enclosing load, since an enclosing import does not own
+% these older definitions.
 % [tested: lib_import_lifecycle; commit=4f2d6c0f8eb293b73f8dde30a1c84e24834f7393]
 restore_surviving_source_functions(Names) :-
-    forall(( member(F, Names),
-             ( translated_equation_of(F, Ref, [=, [F|Args], _]),
-               clause_property(Ref, module(Module)), length(Args, Inputs)
-             ; spaces:deferred_metta_function(F, Module, _, Inputs, _, _) ) ),
-           ( register_fun_in(Module, F),
-             Arity is Inputs+1, register_arity(F, Arity) )).
+    forall(( member(F, Names), surviving_definition(F, Module, Arity, Owner) ),
+           with_owning_source_load(Owner,
+               ( register_fun_in(Module, F), register_arity(F, Arity) ))).
+
+%What still defines a name once its first source has gone, with the load that
+%owns it, none for a definition no source made: a translated equation, an
+%equation waiting in some space, or a head a library home's backing still
+%registers, which the removal door's function_still_defined/2 already counts
+%as a definition. Without the third, the space that imported a backing first
+%took the name's process-wide arity row with it when it went, and every later
+%importer, which had found the row present and recorded none of its own, read
+%the name as data [tested 2026-09-25T10:26:32+10:00:
+%packages:a_backing_head_outlives_the_first_space_that_imported_it]: lib_thread's
+%`channel` answered `(channel_new 3)` and five tests of test_scopes.py failed
+%under seed 215044671 [measured 2026-09-25T03:08:45+10:00: the file alone at
+%84e2183eb].
+surviving_definition(F, Module, Arity, Owner) :-
+    translated_equation_of(F, Ref, [=, [F|Args], _]),
+    clause_property(Ref, module(Module)),
+    length(Args, Inputs),
+    Arity is Inputs + 1,
+    artifact_owner(Ref, Owner).
+surviving_definition(F, Module, Arity, Owner) :-
+    spaces:deferred_metta_function(F, Module, _, Inputs, Owner, _),
+    Arity is Inputs + 1.
+surviving_definition(F, Module, Arity, Owner) :-
+    clause(metta_engine:metta_reference_prolog_head(Home, F, Arity), true, Ref),
+    space_module(Home, Module),
+    artifact_owner(Ref, Owner).
+
+%The load whose journal holds an artifact, which is the load its retirement
+%erases it with.
+artifact_owner(Ref, Owner) :-
+    (   source_load_assertion(Load, artifact, Ref)
+    ->  Owner = Load
+    ;   Owner = none
+    ).
 
 % Clearing a source owner withdraws its artifacts in other spaces too. Unlike
 % file replacement, explicit clearing also releases owned children containing

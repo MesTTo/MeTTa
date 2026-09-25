@@ -17,6 +17,9 @@
 % Guarantees:
 %   - a backing row installs the head its artifact exports
 %     [tested: packages:a_backing_row_installs_the_head_its_artifact_exports]
+%   - a backed head stays a function in every space still importing it when
+%     the first space that imported it goes
+%     [tested 2026-09-25T10:26:32+10:00: packages:a_backing_head_outlives_the_first_space_that_imported_it]
 %   - the same library WITHOUT the row installs nothing, so the row is what
 %     does it rather than the import
 %     [tested: packages:a_file_with_no_backing_row_installs_nothing]
@@ -96,7 +99,7 @@
    atomic_list_concat([Here, '/../../../../ai-tmp'], Scratch),
    assertz(packages_scratch(Scratch)),
    forall(member(Kind, [backed, unbacked, unclaimed, requires, absent, declared,
-                        undepended, computed]),
+                        undepended, computed, outlived]),
           ( atomic_list_concat([Here, '/../../../data/packages/', Kind, '.pl'], Relative),
             absolute_file_name(Relative, Artifact, [access(read)]),
             assertz(packages_artifact(Kind, Artifact)) )).
@@ -140,6 +143,31 @@ artifact_loaded(Kind) :-
     Head =.. [Name, _, _],
     metta_engine:space_module('&self', Module),
     catch(predicate_property(Module:Head, defined), _, fail), !.
+
+%A backing's head is one process-wide name with one arity row, and the row
+%belongs to the load that registered it first: a later importer finds it
+%present and records nothing of its own. Retiring the first importer took the
+%row with it, so the name read as data in every space still importing it, the
+%way lib_thread's `channel` answered `(channel_new 3)` in test_scopes.py after
+%an earlier file's space imported lib_thread and was dropped. The row is not
+%kept past the last importer either.
+test(a_backing_head_outlives_the_first_space_that_imported_it,
+     [cleanup(forall(member(Space, ['&plunit_backing_first', '&plunit_backing_second']),
+                     metta_release_space(Space)))]) :-
+    package_fixture(outlived,
+                    '(= (package backing) (prolog "~w" (packages_outlived_double)))~n',
+                    Path),
+    'import!'('&plunit_backing_first', Path, _),
+    'import!'('&plunit_backing_second', Path, _),
+    metta_release_space('&plunit_backing_first'),
+    assertion(arity(packages_outlived_double, 2)),
+    space_module('&plunit_backing_second', Module),
+    findall(R, with_metta_module(Module, eval([packages_outlived_double, 21], R)), Answers),
+    assertion(Answers == [42]),
+    %The row lives while a home still backs the head, and no longer: once the
+    %last importer goes, nothing defines the name and it is data again.
+    metta_release_space('&plunit_backing_second'),
+    assertion(\+ arity(packages_outlived_double, _)).
 
 test(a_backing_row_installs_the_head_its_artifact_exports) :-
     package_fixture(backed, '(= (package backing) (prolog "~w" (packages_backed_double)))~n', Path),

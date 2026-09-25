@@ -361,6 +361,16 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- A library head backed by Prolog stays a function in every space still
+  importing the library when the first space that imported it is dropped or
+  unimports it, and its arity row leaves with the last of them. The first
+  import owned the process-wide `arity/2` row, later importers found it
+  present and recorded none of their own, and retiring the first took the
+  row with it, so the name read as data everywhere: lib_thread's `channel`
+  answered `(channel_new 3)`. Retirement now derives the row again from any
+  backing head a library home still registers, journalled to the load that
+  owns that head, so it goes when that load does.
+
 - A space whose name is recycled specializes a call into its own module. Its
   last drop had re-imported the parent's specialization of the same name,
   which a specialization's name always is, and the next life asserted the
