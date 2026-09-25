@@ -11,6 +11,12 @@
 %     library predicate, while the process's autoload flag stays true [tested:
 %     spaces_execution_modules:an_undefined_function_named_like_a_library_export_is_not_autoloaded;
 %     commit=b7d85e1d7e2ce7ea6d56a4a67ac7344ef2826750].
+%   - and the other way round, a waiting function is forced only for a module
+%     whose default-module chain reaches its home, so a library's undefined
+%     predicate, a lazily imported one included, is resolved by SWI's loader
+%     alone, with nothing forced and no second retry [tested 2026-09-25T23:20:41+10:00:
+%     spaces_deferred_translation:a_module_that_cannot_reach_the_home_is_left_to_the_loader,
+%     spaces_deferred_translation:a_lazy_library_import_is_resolved_by_the_loader_alone].
 %   - Every seam:engine_emitted/1 declaration is protected from capture in
 %     a space [tested: test_every_engine_emitted_name_is_protected_by_derivation;
 %     commit=dcfc20be4933c19140ccb5759291401d13058301].
@@ -3644,6 +3650,66 @@ one_function_batch_cost(Count, Micros) :-
     metta_add_program_atoms('&self', Equations),
     T1 is cputime,
     Micros is (T1 - T0) * 1000000 / Count.
+
+%The hook forces a home only where the call reaches it. A module's undefined
+%predicate is resolved through the module's default-module chain, which for a
+%space is MeTTa's chain with &self on it and for a library is itself and
+%system, so &self's waiting function is forced for a space that calls it and
+%left alone for a library that shares its name.
+test(a_module_that_cannot_reach_the_home_is_left_to_the_loader,
+     [ setup('new-space'(Space)), cleanup(metta_release_space(Space)) ]) :-
+    filereader:process_metta_string("(= (dt-unreached $x) (* $x 2))", _),
+    space_module('&self', Self),
+    assertion(\+ user:exception(undefined_predicate, lists:'dt-unreached'/2, _)),
+    assertion(spaces:deferred_metta_function('dt-unreached', Self, _, _, _, _)),
+    space_module(Space, Module),
+    call(Module:'dt-unreached'(21, Out)),
+    assertion(Out == 42),
+    assertion(\+ spaces:deferred_metta_function('dt-unreached', Self, _, _, _, _)).
+
+%The same through SWI's own path, the one a .metta.gz import took: zlib
+%imports partition/4 through autoload/2, which SWI resolves at the first call,
+%and with lib_functional's partition waiting in &self the hook forced it and
+%answered retry first, so the loader's retry was the second and SWI warned
+%"exception handler failed to define", which under debug_on_error traces.
+%debug_on_error is off here so a warning is heard rather than traced.
+test(a_lazy_library_import_is_resolved_by_the_loader_alone,
+     [ setup(dt_listen(Flag, Ref)), cleanup(dt_unlisten(Flag, Ref)) ]) :-
+    filereader:process_metta_string("(= (ord_memberchk $a $b $c) $a)", _),
+    space_module('&self', Self),
+    dt_load_lazy_importer,
+    assertion(dt_lazy_importer:dt_lazy_member(b, [a, b, c])),
+    assertion(\+ nb_current(dt_heard_retry_warning, _)),
+    assertion(spaces:deferred_metta_function(ord_memberchk, Self, _, _, _, _)).
+
+%An importer made the way a library is: system as its base, so only the
+%loader can resolve its import, and the import declared by autoload/2, which
+%records it only as a directive of a file being loaded
+%[source 2026-09-25T20:11:09+10:00: swipl-devel V10.1.14 boot/autoload.pl
+%assert_autoload/4, '$store_admin_clause2'/4 under '$initialization_context'/2].
+dt_load_lazy_importer :-
+    Text = ":- module(dt_lazy_importer, [dt_lazy_member/2]).\n\c
+            :- set_module(base(system)).\n\c
+            :- autoload(library(ordsets), [ord_memberchk/2]).\n\c
+            dt_lazy_member(X, Set) :- ord_memberchk(X, Set).\n",
+    setup_call_cleanup(open_string(Text, Stream),
+                       load_files(dt_lazy_importer, [stream(Stream), silent(true)]),
+                       close(Stream)).
+
+dt_listen(Flag, Ref) :-
+    nb_delete(dt_heard_retry_warning),
+    current_prolog_flag(debug_on_error, Flag),
+    set_prolog_flag(debug_on_error, false),
+    asserta((user:message_hook(message_lines(Lines), error, _) :-
+                 member(Line, Lines),
+                 sub_string(Line, _, _, _, "failed to define"),
+                 nb_setval(dt_heard_retry_warning, Line),
+                 fail), Ref).
+
+dt_unlisten(Flag, Ref) :-
+    erase(Ref),
+    set_prolog_flag(debug_on_error, Flag),
+    nb_delete(dt_heard_retry_warning).
 
 :- end_tests(spaces_deferred_translation).
 

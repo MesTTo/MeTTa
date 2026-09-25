@@ -386,6 +386,16 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- Importing a `.metta.gz` source no longer aborts with `Execution Aborted`
+  once lib_functional is imported into the process `&self`. The engine's
+  undefined-predicate hook forced a waiting function for any module whose
+  name lookup fell back to `&self`, so zlib's first call of its lazily
+  imported `partition/4` forced lib_functional's `partition` and answered
+  `retry` without defining anything, and SWI's warning about the second
+  retry started the tracer. The hook now forces only a home on the trapped
+  module's default-module chain, which for a space is its own chain and for
+  a library never reaches `&self`.
+
 - The Python seat's import-receipt tests pass again. Their probe forced
   `take-atom` from the process `&self` before counting the target space's
   clauses, and since a force translates only the home its own module

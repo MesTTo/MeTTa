@@ -6,6 +6,12 @@
 %   fun_home_in/3 resolves the name to from the module in force or the one
 %   named, and metta_ensure_compiled/2 the named module's own
 %   [tested 2026-09-25T16:27:23+10:00: filereader_global_function_scope].
+% Guarantees: the undefined-predicate hook forces only a home the trapped
+%   module's default-module chain reaches, so another module's undefined
+%   predicate, a library's lazily imported one included, is left to SWI's
+%   loader [tested 2026-09-25T23:20:41+10:00:
+%   spaces_deferred_translation:a_module_that_cannot_reach_the_home_is_left_to_the_loader,
+%   spaces_deferred_translation:a_lazy_library_import_is_resolved_by_the_loader_alone].
 % Guarantees: a write or a copy in one space publishes nothing into another
 %   [tested 2026-09-25T16:27:30+10:00: test_a_write_to_one_space_leaves_another_spaces_atoms_alone,
 %   test_copying_a_space_leaves_the_space_it_copies_alone].
@@ -1026,11 +1032,27 @@ translate_when_still_deferred(Module, F) :-
 %the marker, so a second miss on the same name finds nothing waiting at its
 %home and the ordinary error follows
 %[tested: translator_branch_returns:a_recursive_generator_enumerates_in_time_linear_in_its_answers].
+%
+%Only where the call reaches that home, which default_module/2 answers: SWI
+%resolves Module's undefined predicate through Module's default-module chain,
+%which for a space is MeTTa's own chain, its parents and &self, and for any
+%other module never reaches &self. There a force defines nothing the call can
+%reach, and its retry spends the one retry trapUndefined() grants the hooks,
+%so SWI's loader answering the next retry makes it warn "exception handler
+%failed to define", which under debug_on_error starts the tracer
+%[source 2026-09-25T20:04:21+10:00: swipl-devel V10.1.14, src/pl-proc.c
+%trapUndefined() and src/pl-init.c vwarning()]. With lib_functional's
+%partition waiting in &self, zlib's first call of its lazily imported
+%partition/4 did exactly that, and the tracer read end of file and aborted a
+%.metta.gz import [tested 2026-09-25T23:20:41+10:00:
+%spaces_deferred_translation:a_module_that_cannot_reach_the_home_is_left_to_the_loader,
+%spaces_deferred_translation:a_lazy_library_import_is_resolved_by_the_loader_alone].
 :- multifile user:exception/3.
 
 user:exception(undefined_predicate, Module:Name/_, retry) :-
     deferred_metta_function(Name, _, _, _, _, _),
     fun_home_in(Module, Name, equations(Home)),
+    default_module(Module, Home),
     deferred_metta_function(Name, Home, _, _, _, _),
     !,
     metta_ensure_compiled_from(Module, Name).
