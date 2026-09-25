@@ -16,6 +16,10 @@ Guarantees:
   - the page is in the navigation and its links resolve
     [tested: test_every_site_page_is_reachable_from_the_navigation,
     npm run docs:build; commit=57f21ba9edf94bcf28cde11f938bce2c241a3709]
+  - the install fence takes tsmetta from the npm registry into an empty
+    project, where the program above then prints bob and 3
+    [tested 2026-09-25T19:39:22+10:00: npm init -y and npm install tsmetta in an empty
+    directory, then node on the program above under env -i]
 -->
 
 # The TSMeTTa tutorial
@@ -51,17 +55,16 @@ directory with nothing else in it:
 
 ```sh
 npm init -y
-npm install /path/to/MeTTa/extensions/node/tsmetta-0.0.1-alpha.0.tgz
+npm install tsmetta
 ```
 
-That second line takes the packed tarball, which is what `npm pack` inside
-`extensions/node/` writes. The package is not on the public registry yet; when
-it is, `npm install tsmetta` is the same thing, and the name you import does
-not change either way.
+That second line takes the package from the npm registry. A tarball `npm pack`
+writes inside `extensions/node/` installs the same way by its path, and the
+name you import does not change either way.
 
 Node 22.18 or newer, which is what `package.json` declares.
 
-Two things ride in that tarball besides the compiled JavaScript: `bridge.pl`,
+Two things ride in the package besides the compiled JavaScript: `bridge.pl`,
 the extension's Prolog half, and `_runtime/`, a copy of the engine tree and the
 MeTTa libraries. Without the second one an installed package resolves `engine/`
 against your project directory and fails looking for a folder you never made.

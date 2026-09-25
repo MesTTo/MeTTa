@@ -1722,6 +1722,10 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   now requires both, and this file's newest release heading, to name the
   version the package builds.
 
+- The Node tutorial installs tsmetta from the npm registry. It still told a
+  reader to install a local `tsmetta-0.0.1-alpha.0.tgz` because the package
+  was not published yet, which stopped being true when 0.0.1-alpha.0 was.
+
 ## [0.9.2] - 2026-09-24
 
 ### Added
