@@ -170,4 +170,5 @@ A space that answers what it can and inherits the rest.
 
 ## Licence
 
-Apache-2.0. See [LICENSE](LICENSE).
+Apache-2.0, in [LICENSE](LICENSE). [NOTICE](NOTICE) keeps the MIT notice of
+[PeTTa](https://github.com/patham9/PeTTa), whose `src/` this engine began as.

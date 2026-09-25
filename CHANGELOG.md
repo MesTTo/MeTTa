@@ -371,6 +371,17 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   ceiling, `CPU_SECONDS` and their helpers are gone; the C lane and the CI image
   need valgrind.
 
+- The licence is Apache-2.0. The repository's LICENSE, the MIT License through
+  0.9.2, is the Apache License 2.0 text its components already carried, and
+  CITATION.cff, CONTRIBUTING.md, the site's footer and the `license` of
+  pymetta and its seventeen members say so. PeTTa's MIT copyright and
+  permission notice, which its licence requires in every copy or substantial
+  portion, stays unchanged in NOTICE, and in a NOTICE of its own in `engine/`,
+  the library pack, the examples, the Python seat and its twins, each of which
+  carries PeTTa's code or programs. The wheel ships LICENSE and NOTICE, and
+  `engine/NOTICE` travels with the engine in the wheel, the npm package and
+  the C install.
+
 ### Removed
 
 - The engine no longer publishes `metta_typed_dispatch_applies/2`. It answered

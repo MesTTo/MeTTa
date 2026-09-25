@@ -44,9 +44,9 @@ every non-obvious claim in that header carries an evidence tag. The header's
 open obligations are at zero when the change lands, which is `None` on all
 three lines, or the pull request says why one of them cannot be.
 
-There is no contributor license agreement. This repository is MIT, in
-[LICENSE](LICENSE), and a contribution is offered under those terms. Nothing
-further is asked of you.
+There is no contributor license agreement. This repository is Apache-2.0, in
+[LICENSE](LICENSE), and a contribution is offered under those terms, as the
+licence's section 5 says. Nothing further is asked of you.
 
 ## The gate
 

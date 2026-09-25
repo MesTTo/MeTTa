@@ -250,7 +250,7 @@ export default defineConfig({
     search: { provider: "local" },
     socialLinks: [{ icon: "github", link: "https://github.com/MesTTo/MeTTa" }],
     footer: {
-      message: "Released under the MIT License.",
+      message: "Released under the Apache License 2.0.",
       copyright: "MesTTo",
     },
   },
