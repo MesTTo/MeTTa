@@ -1,0 +1,263 @@
+diff --git a/src/pl-incl.h b/src/pl-incl.h
+index f34c1ec..da31594 100644
+--- a/src/pl-incl.h
++++ b/src/pl-incl.h
+@@ -1701,6 +1701,7 @@ struct clause_index
+   iarg_t	 args[MAX_MULTI_INDEX];	/* Indexed arguments */
+   iarg_t	 position[MAXINDEXDEPTH+1]; /* Deep index position */
+   float		 speedup;		/* Estimated speedup */
++  gen_t		 complete_from;		/* Oldest view it serves whole */
+   ClauseBucket	 entries;		/* chains holding the clauses */
+ };
+ 
+diff --git a/src/pl-index.c b/src/pl-index.c
+index 361911d..61f3598 100644
+--- a/src/pl-index.c
++++ b/src/pl-index.c
+@@ -564,13 +564,42 @@ consider_better_index(float speedup, unsigned int nclauses)
+ 	   (float)nclauses/speedup > MIN_SPEEDUP_RATIO );
+ }
+ 
++/* The generation at which the reader in `ctx` sees the clauses of other
++ * threads.  A frame inside a transaction carries a generation local to
++ * the transaction, but reads committed clauses as of the transaction's
++ * start (see visibleClause() and transaction_visible_clause()).
++ */
++
++#define reader_view(ctx) LDFUNC(reader_view, ctx)
++static inline gen_t
++reader_view(DECL_LD const IndexContext ctx)
++{ gen_t gen = ctx->generation;
++
++  if ( unlikely(LD->transaction.gen_base && gen >= LD->transaction.gen_base) )
++    return LD->transaction.gen_start;
++
++  return gen;
++}
++
++/* True if `ci` holds every clause visible at `view`.  fill_clause_index()
++ * sets `complete_from` before it completes the index, so a reader that
++ * has seen the index complete reads the final value.
++ */
++
++static inline bool
++index_serves(const ClauseIndex ci, gen_t view)
++{ MEMORY_ACQUIRE();
++  return view >= ci->complete_from;
++}
++
+ static ClauseIndex
+-existing_hash(ClauseIndex *cip, const Word argv, Word keyp)
++existing_hash(ClauseIndex *cip, const Word argv, Word keyp, gen_t view)
+ { for(; *cip; cip++)
+   { ClauseIndex ci = *cip;
+     word k;
+ 
+-    if ( ci->entries || is_satifies_index(ci, argv) )
++    if ( (ci->entries || is_satifies_index(ci, argv)) &&
++	 index_serves(ci, view) )
+     { if ( (k=indexKeyFromArgv(ci, argv)) )
+       { *keyp = k;
+ 	return ci;
+@@ -657,6 +686,8 @@ first_clause_guarded(DECL_LD const Word argv, size_t argc, ClauseList clist,
+     return next_clause_unindexed(ctx);
+   }
+ 
++  gen_t view = reader_view(ctx);
++
+ retry:
+   cref = NULL;
+ 
+@@ -706,7 +737,7 @@ retry:
+   if ( (cip=clist->clause_indexes) )
+   { ClauseIndex best_index;
+ 
+-    best_index = existing_hash(cip, argv, &chp->key);
++    best_index = existing_hash(cip, argv, &chp->key, view);
+ 
+     if ( best_index )
+     { if ( unlikely(!best_index->good) )
+@@ -725,9 +756,11 @@ retry:
+ 	  { if ( unlikely(ci == CI_RETRY) )
+ 	      goto retry;
+ 
+-	    chp->key = indexKeyFromArgv(ci, argv);
+-	    assert(chp->key);
+-	    best_index = ci;
++	    if ( index_serves(ci, view) )
++	    { chp->key = indexKeyFromArgv(ci, argv);
++	      assert(chp->key);
++	      best_index = ci;
++	    }
+ 	  }
+ 	}
+ 
+@@ -737,6 +770,9 @@ retry:
+ 	}
+       }
+ 
++      if ( unlikely(!index_serves(best_index, view)) )
++	goto retry;		/* completed after existing_hash() chose it */
++
+       unsigned int hi = hashIndex(chp->key, best_index->buckets);
+       const ClauseBucket bkt = &best_index->entries[hi];
+       if ( bkt->key && chp->key != bkt->key )
+@@ -770,11 +806,13 @@ retry:
+     { if ( unlikely(ci == CI_RETRY) )
+ 	goto retry;
+ 
+-      chp->key = indexKeyFromArgv(ci, argv);
+-      assert(chp->key);
+-      unsigned int hi = hashIndex(chp->key, ci->buckets);
+-      chp->cref = ci->entries[hi].head;
+-      return nextClauseFromBucket(ci, argv, ctx);
++      if ( index_serves(ci, view) )
++      { chp->key = indexKeyFromArgv(ci, argv);
++	assert(chp->key);
++	unsigned int hi = hashIndex(chp->key, ci->buckets);
++	chp->cref = ci->entries[hi].head;
++	return nextClauseFromBucket(ci, argv, ctx);
++      }
+     }
+   }
+ 
+@@ -1954,23 +1992,45 @@ Create a hash-index on def  for  arg.   We  compute  the  hash unlocked,
+ checking at the end that nobody  messed   with  the clause list. If that
+ happened anyway, we retry. At the end,   we  lock the definition and add
+ the new index to the indexes of the predicate.
++
++Clauses erased before  the fill are left out, but  a reader whose view
++predates the erase still sees them:  a frame called just before it, or
++a transaction  that started  before it  (whose snapshot  lasts as long
++as the transaction).  An index that existed at  the erase keeps such a
++clause until  clause GC.  The new index  records the latest  erase it
++left out in `complete_from`, and index_serves() makes older readers read
++the clause list instead.  Every eraser sets `generation.erased` before
++CL_ERASED.  An erase at a transaction-local generation is of a clause
++the transaction asserted itself, which nobody sees after the erase.
+ - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
+ 
+ static ClauseIndex
+ fill_clause_index(ClauseIndex ci, ClauseList clist, IndexContext ctx)
+-{ for(ClauseRef cref = clist->first_clause; cref; cref = cref->next)
+-  { if ( isoff(cref->value.clause, CL_ERASED) )
+-    { if ( !addClauseToIndex(ci, cref->value.clause, CL_END) )
++{ gen_t complete_from = 0;
++
++  for(ClauseRef cref = clist->first_clause; cref; cref = cref->next)
++  { Clause cl = cref->value.clause;
++
++    if ( isoff(cl, CL_ERASED) )
++    { if ( !addClauseToIndex(ci, cl, CL_END) )
+       { ci->invalid = true;
+ 	completed_index(ci);
+ 	deleteIndex(ctx->predicate, clist, ci);
+ 	return NULL;
+       }
++    } else
++    { gen_t erased;
++
++      MEMORY_ACQUIRE();
++      erased = cl->generation.erased;
++      if ( erased < GEN_TRANSACTION_BASE && erased > complete_from )
++	complete_from = erased;
+     }
+   }
+ 
+-  ci->resize_above = ci->size*2;
+-  ci->resize_below = ci->size/4;
++  ci->resize_above  = ci->size*2;
++  ci->resize_below  = ci->size/4;
++  ci->complete_from = complete_from;
+ 
+   completed_index(ci);
+   if ( !consider_better_index(ci->speedup, clist->number_of_clauses) )
+diff --git a/src/pl-proc.c b/src/pl-proc.c
+index 9f4cfe5..7b57cb7 100644
+--- a/src/pl-proc.c
++++ b/src/pl-proc.c
+@@ -1600,10 +1600,12 @@ removeClausesPredicate(Definition def, size_t sfindex, int fromfile)
+       if ( (sfindex == 0 || sfindex == cl->owner_no) &&
+ 	   (!fromfile || cl->line_no > 0) &&
+ 	   isoff(cl, CL_ERASED) )
+-      { set(cl, CL_ERASED);
++      {
+ #ifdef O_LOGICAL_UPDATE
+-	cl->generation.erased = update;
++	cl->generation.erased = update;	/* before CL_ERASED: */
++	MEMORY_RELEASE();		/* see fill_clause_index() */
+ #endif
++	set(cl, CL_ERASED);
+ 	deleted++;
+ 	memory += sizeofClause(cl->code_size) + SIZEOF_CREF_CLAUSE;
+ 	def->impl.clauses.number_of_clauses--;
+@@ -1683,7 +1685,8 @@ retract_clause(DECL_LD Clause clause, gen_t generation)
+   }
+ 
+   LOCKDEF(def);
+-  if ( ison(clause, CL_ERASED) )
++  MEMORY_RELEASE();		/* generation.erased before CL_ERASED: */
++  if ( ison(clause, CL_ERASED) )	/* see fill_clause_index() */
+   { UNLOCKDEF(def);
+     return false;
+   }
+@@ -1938,8 +1941,9 @@ reconsultFinalizePredicate(DECL_LD sf_reload *rl, Definition def, p_reload *r)
+     { Clause cl = cref->value.clause;
+ 
+       if ( cl->generation.erased == rl->reload_gen && isoff(cl, CL_ERASED) )
+-      { set(cl, CL_ERASED);
+-	cl->generation.erased = update;
++      { cl->generation.erased = update;	/* before CL_ERASED: */
++	MEMORY_RELEASE();		/* see fill_clause_index() */
++	set(cl, CL_ERASED);
+ 	deleted++;
+ 	memory += sizeofClause(cl->code_size) + SIZEOF_CREF_CLAUSE;
+ 	def->impl.clauses.number_of_clauses--;
+diff --git a/tests/transaction/test_transactions.pl b/tests/transaction/test_transactions.pl
+index 8ecf9c2..ae09aef 100644
+--- a/tests/transaction/test_transactions.pl
++++ b/tests/transaction/test_transactions.pl
+@@ -109,11 +109,12 @@ test(update3, [cleanup(cleanup)]) :-
+                  condition(current_prolog_flag(threads, true))
+                ]).
+ 
+-:- dynamic p/0, p/1.
++:- dynamic p/0, p/1, p/2.
+ 
+ cleanup :-
+     retractall(p),
+-    retractall(p(_)).
++    retractall(p(_)),
++    retractall(p(_,_)).
+ 
+ test(commit, [cleanup(cleanup)]) :-
+     test_transaction([ in([+p,?p]),
+@@ -173,6 +174,28 @@ test(isolate_retract2b, [cleanup(cleanup)]) :-
+                        in(x, ?p),
+                        end(x)
+                      ]).
++% A clause index built after an erase leaves the erased clause out; a
++% transaction that started before the erase must still find it.  The
++% erase looks the clause up by argument 1, so it builds no index on
++% argument 2.
++test(index_after_erase, [cleanup(cleanup)]) :-
++    forall(between(1, 16, I), assertz(p(I, I))),
++    test_transaction([ start(x),
++                       -p(8, 8),
++                       \+p(_, 8),       % first index on argument 2
++                       in(x, ?p(_, 8)),
++                       end(x)
++                     ]).
++test(index_rebuilt_after_erase, [cleanup(cleanup)]) :-
++    forall(between(1, 16, I), assertz(p(I, I))),
++    test_transaction([ \+p(_, 0),       % index on argument 2
++                       start(x),
++                       -p(8, 8),
++                       ?forall(between(17, 64, I), assertz(p(I, I))),
++                       \+p(_, 8),       % rebuilt after growing past its size
++                       in(x, ?p(_, 8)),
++                       end(x)
++                     ]).
+ 
+ :- end_tests(thread_transaction).
+ 

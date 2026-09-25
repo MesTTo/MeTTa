@@ -1784,3 +1784,183 @@ Lifted when: SWI-Prolog shares `as shared` tables between the engines of a
   entry go together then.
 Record: docs/journal/2026-09-24-wasm-library-halves.md, build 9; the
   record's a-tabling-park, c-tabling-tid-per-attachment and c-yield-refusal-wrong.
+
+## swi-index-built-after-erase-hides-older-views
+Host: SWI-Prolog 10.1.14 as shipped and as patched here up to the native host
+  compiled Sep 24 2026, 16:08:19 and WebAssembly build 9, and swipl-devel
+  master at 7ecd70c84909 (2026-09-24), which has the same fill:
+  `fill_clause_index()` in src/pl-index.c builds a JIT clause index from the
+  clauses not marked CL_ERASED. This tree runs on 10.1.14 built with the patch
+  below.
+Defect: an erased clause stays visible to a reader whose view predates the
+  erase, above all a transaction that started before it, which reads
+  committed clauses as of its start for as long as it runs. An index that
+  existed at the erase keeps the clause until clause GC. An index built after
+  it leaves the clause out: the first index on an argument, or one rebuilt
+  after the predicate grew past `resize_above` (or shrank below
+  `resize_below`), which deletes the old one. The old reader's indexed call
+  then misses a row that its walk of the clause list still admits. The Python
+  seat met it in the pytest lane:
+  `test_an_independent_snapshot_keeps_its_original_provider` reads
+  `PROVIDERS[name]` in a worker's transaction after the main thread
+  unregistered and re-registered the name. Every earlier test in the worker
+  grows and shrinks `'&metta'/4`, the provider rows' storage predicate. When
+  the re-registration's lookup rebuilt that predicate's index, the worker's
+  snapshot raised KeyError.
+Reproduction: tests/checks/host_workarounds/swi-index-built-after-erase-hides-older-views.pl,
+  a transaction reads row 8 of sixteen through an argument-2 index built after
+  a second engine erased the row. The transaction drives that engine, and each
+  engine has a transaction of its own, so the engine's erase and index build
+  are global the way another thread's are. The index is built for the first
+  time then, or rebuilt after growth past its resize bound, and the erase is
+  plain or a committed transaction's. Missing the row in all four cases
+  answers `present` and finding it in all four answers `absent`; either way
+  the second engine's own call must miss the row and the transaction's
+  clause-list walk must admit it. It needs no thread, so the WebAssembly host
+  runs it as the native host does, and there it answers present on build 9:
+  the defect is that host's too [measured 2026-09-25T12:59:33+10:00: this
+  file's main/0 on build 9, compiled Sep 24 2026, 06:12:34; three runs].
+Patch: tests/checks/host_workarounds/swi-index-built-after-erase-hides-older-views.patch,
+  against swipl-devel V10.1.14 src/pl-incl.h, pl-index.c and pl-proc.c, with
+  `index_after_erase` and `index_rebuilt_after_erase` in the
+  `thread_transaction` unit of tests/transaction/test_transactions.pl:
+  - The fill records in the index's new `complete_from` the latest erased
+    generation among the clauses it left out, or 0 when it left none. It
+    ignores a transaction-local generation, which only a clause asserted by
+    that transaction carries, and nobody sees that clause after its erase.
+  - `first_clause_guarded()` reads through an index only when the reader's
+    view is at least `complete_from`: the frame's generation, or inside a
+    transaction the transaction's start. Otherwise it reads the clause list
+    with the generation check, the unindexed path, which is correct for every
+    reader. `existing_hash()` prefers an index that serves the view. The
+    chosen index is checked again once it is complete, because
+    `complete_from` is set just before the index completes.
+  - `removeClausesPredicate()` and `reconsultFinalizePredicate()` set
+    `generation.erased` before CL_ERASED, as `retract_clause()` already did,
+    so a fill that sees CL_ERASED reads a final generation. Their generation
+    is unpublished until they release L_GENERATION, so no reader's view
+    changes.
+  - Rejected: filling erased clauses in and marking them dirty. The fill runs
+    outside L_PREDICATE, and a retract that already saw the new index marks
+    the clause again after the fill completes, so a list index's sub-list
+    count can reach 0 while a live clause remains. Rejected too: filling
+    under L_PREDICATE, the one lock for every predicate, which would stall
+    every assert and retract in the process for each fill.
+  - Cost: 7.6 more instructions per indexed lookup, 30.5M over 4M lookups of
+    a 100,000-row predicate, the same in all three interleaved runs; wall time
+    within noise [measured 2026-09-25T11:35:54+10:00: perf stat -e
+    instructions:u, the host without this patch against the build].
+  - Verification, on a build of the ledger's patches with this one (compiled
+    Sep 25 2026, 11:33:15): SWI's 34 core ctest groups pass, and 92 of the 93
+    groups overall. The one that fails, pldoc:man_links, fails the same way
+    (5 of 9) on the host without this patch, because this configuration
+    installs no manual [measured 2026-09-25T11:34:35+10:00: ctest on the
+    build; the host without this patch at 11:15:30]. The two new tests fail
+    on the host without this patch and pass on the build [measured
+    2026-09-25T11:33:38+10:00]. A differential stress runs 4 transaction
+    readers comparing an indexed call with a clause-list walk, against 2
+    writers that erase rows, grow and shrink the predicate past its resize
+    bounds and collect clauses. It found 9 to 49 missed rows per 15-second run
+    in four runs on the host without this patch, and none in 9,272 lookups
+    over two runs on the build [measured 2026-09-25T11:33:38+10:00: the
+    build; the host without this patch at 11:18:22]. The engine scenario,
+    forced by growing `'&metta'/4` between the unregister and the worker's
+    read, kept the original provider in 12 of 12 runs, against KeyError in 6
+    of 12 without this patch [measured 2026-09-25T11:34:29+10:00: the build;
+    the host without this patch at 11:34:32]. The engine's plunit lane passes
+    on the build, and the Python seat's spaces, transactions, concurrency and
+    backed-spaces chapters read the same there as on the host without this
+    patch, 1,499 passed [measured 2026-09-25T11:45:35+10:00: the build; the
+    host without this patch at 11:48:07].
+  - The host this tree runs on carries it with
+    swi-shift-misses-pending-depart-arguments (compiled Sep 25 2026,
+    12:27:40): 92 of SWI's 93 ctest groups pass there, pldoc:man_links failing
+    as above [measured 2026-09-25T12:31:36+10:00: ctest in its build tree],
+    and the engine scenario kept the original provider in 12 of 12 runs
+    [measured 2026-09-25T12:37:11+10:00]. WebAssembly build 10 compiles the
+    same sources with the patch, and the reproduction answers absent there
+    [measured 2026-09-25T12:59:34+10:00: this file's main/0 on build 10,
+    compiled Sep 25 2026, 02:32:38; three runs].
+  Carried because the Python seat meets the defect, as the Defect says.
+Lifted when: SWI-Prolog as shipped lets a reader whose view predates an erase
+  see the erased clause through an index built after it, so the reproduction
+  prints absent; the patch and the entry go together then.
+Record: docs/journal/2026-09-06-swi-defects-to-report-upstream.md, item 17;
+  the record's i-pl-t5b-new-index-omits and a-pl-t5b-index-complete-from.
+
+## swi-shift-misses-pending-depart-arguments
+Host: SWI-Prolog 10.1.14 as shipped and as patched here up to the native host
+  compiled Sep 24 2026, 16:08:19 and WebAssembly build 9, and swipl-devel
+  master at 7ecd70c84909 (2026-09-24), whose src/pl-gc.c and src/pl-vmi.c
+  differ from V10.1.14 only in atom GC's local-stack margin and in T_DELAY
+  [source 2026-09-25T13:03:34+10:00: both files at that commit against the
+  tag]: `grow_stacks()` and `update_stacks()` in src/pl-gc.c, I_DEPART in
+  src/pl-vmi.c. This tree runs on 10.1.14 built with the patch below.
+Defect: a stack shift relocates the pending call arguments of the running
+  query only. I_DEPART on a watched frame (a cleanup handler, or FR_NOTIFY,
+  which prolog_frame_attribute/3 sets on every frame it inspects) calls
+  frameFinished() after pushing the departing call's arguments above the
+  frame, and the cleanup handler and the frame_finished listeners run in
+  queries of their own. When one of them grows the stacks, update_stacks()
+  relocates every query's frames but only the running query's new arguments,
+  the ones get_vmi_state() found for LD->query, so copyFrameArguments() hands
+  the callee the pre-shift address of every compound the departing
+  arguments hold. The collector already takes get_vmi_state() of every
+  parent query (mark_stacks(), sweep_stacks()); the shifter never did. The
+  engine meets it through receipts.pl's nearest-transaction walk, which
+  inspects every ancestor frame, and its frame_finished listeners: with each
+  waiting function forced from the module that asks for it,
+  22-functional_lib's twin reached the specializer's departing
+  nb_current('$metta_spec_needed', needed(true)) with a dangling
+  needed(true) and died in do_unify(), 5 runs of 5, where the tree without
+  that change ran it clean [measured 2026-09-25T11:19:19+10:00: serial runs
+  of the twin on the host compiled Sep 24 2026, 16:08:19].
+Reproduction: tests/checks/host_workarounds/swi-shift-misses-pending-depart-arguments.pl,
+  plain SWI, a frame marked by prolog_frame_attribute/3 departing to a callee
+  with a compound it has just built, and a frame_finished listener that
+  forces a global, a local or a trail shift as swipl-devel's
+  tests/GC/test_tracer_callback.pl does, twenty fresh engines per arm and
+  each arm in a child process, because the defect kills the process that
+  meets it. The unshifted control must deliver every term; `present` iff a
+  shifted arm's child dies or its callee reads another term. The WebAssembly
+  host has no child processes, so there each arm, depart_arm/1, runs in a
+  Node process of its own: build 9 keeps every term unshifted and loses all
+  twenty in each shifted arm without its instance dying, so the defect is
+  that host's too [measured 2026-09-25T12:59:34+10:00: this file's
+  depart_arm/1 on build 9, compiled Sep 24 2026, 06:12:34].
+Patch: tests/checks/host_workarounds/swi-shift-misses-pending-depart-arguments.patch,
+  against swipl-devel V10.1.14 src/pl-gc.c, applied after
+  swi-gc-in-frame-finished-listener-clears-a-live-slot and
+  swi-heap-refusal-reported-as-stack-limit, the other patches to that file:
+  grow_stacks() takes get_vmi_state() of every parent query before the
+  stacks move, as it takes the running query's, and update_stacks()
+  relocates each parent's new arguments beside the running query's.
+  - Rejected: keeping the arguments out of the way in the engine, by walking
+    no ancestor frames or allocating nothing in its listeners, because any
+    watched frame's last call and any allocating handler meet the same
+    shift; that moves the timing, not the defect. Rejected too: disabling
+    last-call optimisation for watched frames in I_DEPART, because it changes
+    when a watched frame reports finished and costs every watched recursion a
+    frame, where the collector's per-parent walk already states what the
+    shifter owes.
+  - Verification: on the host this tree runs on, which carries it with
+    swi-index-built-after-erase-hides-older-views (compiled Sep 25 2026,
+    12:27:40), the reproduction answers absent in all three arms, and 92 of
+    SWI's 93 ctest groups pass, pldoc:man_links failing because this
+    configuration installs no manual [measured 2026-09-25T12:31:36+10:00:
+    ctest in its build tree]. With the patch, 22-functional_lib's twin ran
+    under that force 3 runs of 3, with the stored content it had before the
+    force [measured 2026-09-25T11:57:38+10:00: a build of the ledger's earlier
+    patches with this one].
+    WebAssembly build 10 compiles the same src/pl-gc.c with the patch, and
+    every arm there keeps all twenty terms [measured
+    2026-09-25T12:59:35+10:00: this file's depart_arm/1 on build 10, compiled
+    Sep 25 2026, 02:32:38].
+  Carried because the engine meets the defect once each waiting function is
+  forced from the module that asks for it, as the Defect says.
+Lifted when: SWI-Prolog as shipped relocates a parent query's pending
+  arguments when it shifts the stacks, so the reproduction prints absent;
+  the patch and the entry go together then.
+Record: docs/journal/2026-09-17-host-patches.md, 2026-09-25;
+  docs/journal/2026-09-06-swi-defects-to-report-upstream.md, item 19; the
+  record's c-rl-segv-mechanism and a-rl-shift-parent-args.

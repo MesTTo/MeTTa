@@ -361,6 +361,28 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- A call departing from a watched frame receives its arguments intact when a
+  cleanup handler or a `frame_finished` listener shifts the stacks, on the
+  patched host (`swi-shift-misses-pending-depart-arguments`): SWI-Prolog's
+  stack shifter relocated the pending arguments of the running query only,
+  so the callee read the pre-shift address of every compound it was passed.
+  It now relocates every parent query's pending arguments, as the collector
+  already marks them. 22-functional_lib's twin died of it on its first
+  `chunk` call once each waiting function was forced from the module that
+  asks for it.
+
+- A transaction reads rows another thread erased after it started, through
+  any clause index. SWI-Prolog built an index from the clauses not yet erased,
+  so a transaction older than the erase missed the row once its call read
+  through an index built afterwards, the first on an argument or one rebuilt
+  when the predicate grew or shrank past its resize bound. The Python seat met
+  it as `test_an_independent_snapshot_keeps_its_original_provider`'s KeyError:
+  a worker's snapshot looked up a provider the main thread had unregistered
+  and re-registered, and the re-registration rebuilt the index of the provider
+  rows' storage predicate. The host carries
+  `swi-index-built-after-erase-hides-older-views.patch`, and the engine
+  requires it (`docs/host-workarounds.md`).
+
 - A child of the heartbeat-accounting tests that exits nonzero is reported
   with its whole stderr. pytest cut the list the test asserted to 240
   characters, and in two gate runs the cut removed the error of the one child

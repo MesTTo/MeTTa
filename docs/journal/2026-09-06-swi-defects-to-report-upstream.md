@@ -524,3 +524,100 @@ answers `{"$t":"t","null":[["a","b"]]}`, and the following
 
 Suggested fix: read a functor's name without `CVT_EXCEPTION`, or clear what a
 failed conversion raised, and give `[]` a name the JSON side can carry.
+
+## 2026-09-25: build 10, two patched here and one recorded
+
+Items 17 and 19 are `Patch:` entries of the same keys in
+docs/host-workarounds.md, which the native host and WebAssembly build 10
+carry. Item 18 is recorded and not patched, since nothing this engine runs has
+been seen to meet it. All three locations are at 10.1.14 and were read again
+on master at 7ecd70c84909 (2026-09-24), where they are unchanged [source
+2026-09-25T11:29:23+10:00: src/pl-index.c and src/pl-proc.c at that commit;
+13:03:34 for src/pl-gc.c and src/pl-vmi.c, which differ from the tag only in
+atom GC's local-stack margin and in T_DELAY].
+
+### 17. An index built after an erase hides the erased clause from older views
+
+`fill_clause_index()` in `src/pl-index.c` builds a JIT clause index from the
+clauses not marked CL_ERASED. An erased clause stays visible to a reader whose
+view predates the erase, a transaction started before it above all, and an
+index that existed at the erase keeps it until clause GC. An index built
+after the erase leaves it out: the first index on an argument, or one rebuilt
+after the predicate grew past `resize_above`, which deletes the old one. The
+old reader's indexed call then misses the row while `nth_clause/3` with
+`'$clause'/4` in the same transaction still admits it.
+
+Reproduction: with `view_row(I, I)` for I in 1..16, a transaction drives a
+second engine, which erases `view_row(8, 8)` (found by argument 1, so no index
+on argument 2 exists yet) and calls `view_row(_, 8)`, building the argument-2
+index. That engine has a transaction of its own, so its erase and its index
+are global as another thread's would be, and the transaction's
+`findall(I, view_row(I, 8), L)` then answers `[]`. The same holds for an erase
+inside a committed transaction, and for an argument-2 index that existed at
+the erase and was rebuilt after growth to 64 rows.
+`swi-index-built-after-erase-hides-older-views.pl` runs all four, and needs
+no thread.
+
+Suggested fix: this tree's patch. The fill records the latest erased
+generation among the clauses it left out, and `first_clause_guarded()` reads
+through an index only for a view at or past it, reading the clause list
+otherwise. `removeClausesPredicate()` and `reconsultFinalizePredicate()` set
+`generation.erased` before CL_ERASED, as `retract_clause()` does, so the
+generation the fill reads is final.
+`swi-index-built-after-erase-hides-older-views`.
+
+### 18. An assertz during an index fill enters the index twice
+
+`hashDefinition()` inserts a new index under L_PREDICATE and then fills it
+outside the lock, walking the clause list to its current end.
+`assertDefinition()` links a clause at the end under L_PREDICATE, and
+`addClauseToListIndexes()` waits for an incomplete index and then adds the
+clause. When the fill is still behind the new tail, it reaches the clause
+too, so the index holds it twice and an indexed call answers that row twice.
+Only one assert can be in that state per fill, since it waits holding
+L_PREDICATE.
+
+Reproduction: 300,000 rows `fa(I, I mod 1000)`; one thread calls `fa(_, 7)`,
+building the argument-2 index, while another asserts `fa(new(N), 999999)`
+until that call returns. Afterwards `aggregate_all(count, fa(_, 999999), C)`
+exceeds the count the clause list holds by exactly one, in 5 trials of 5
+[measured 2026-09-25T11:22:07+10:00: on 10.1.14 with this tree's patches,
+with and without item 17's].
+
+Suggested fix: an assert that waited for a fill adds its clause only when the
+fill did not, which one scan of the clause's bucket tells, on the waiting path
+only. A retract that waited has the mirror problem, read from the source and
+not reproduced: when the fill already saw the clause erased and left it out,
+`deleteActiveClauseFromIndex()` still marks it, and in a list index
+`deleteActiveClauseFromBucket()` decrements the count of a sub-list that does
+not hold the clause (the scenario tests/GC/test_cgc_1.pl's comment draws for
+`erased_clauses`).
+
+### 19. A stack shift leaves a parent query's pending call arguments where they were
+
+`update_stacks()` in `src/pl-gc.c` relocates every query's frames but the
+new arguments of the running query only, the ones `get_vmi_state()` found
+for `LD->query` before the stacks moved. I_DEPART on a watched frame, one
+with a cleanup handler or marked `FR_NOTIFY`, which `prolog_frame_attribute/3`
+sets on every frame it inspects, pushes the departing call's arguments above
+the frame, raises `lTop` over them and calls `frameFinished()`, whose cleanup
+handler and `frame_finished` listeners run in queries of their own. When one
+of those shifts the stacks, the departing query is a parent: its pushed
+arguments keep their pre-shift addresses, and `copyFrameArguments()` hands
+the callee the old address of every compound they hold. The collector does
+not have the gap, since `mark_stacks()` and `sweep_stacks()` take
+`get_vmi_state()` of every parent query.
+
+Reproduction: a frame calls `prolog_frame_attribute/3` on itself and departs
+to `callee(T, T)` with a compound it has just built, and a `frame_finished`
+listener forces a global, a local or a trail shift the way
+`tests/GC/test_tracer_callback.pl` does, in fresh engines, whose small
+stacks move when they grow. Each shifted arm kills the process in
+`do_unify()`; the unshifted control and a listener that collects and then
+allocates keep every term. `swi-shift-misses-pending-depart-arguments.pl`
+runs the three arms, each in a child process.
+
+Suggested fix: this tree's patch. `grow_stacks()` takes `get_vmi_state()` of
+every parent query before the stacks move, as it takes the running query's,
+and `update_stacks()` relocates each parent's new arguments beside the
+running query's. `swi-shift-misses-pending-depart-arguments`.

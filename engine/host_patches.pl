@@ -18,6 +18,7 @@ host_patch('swi-gc-in-frame-finished-listener-clears-a-live-slot.patch', '989519
 host_patch('swi-gc-signal-engineless-thread.patch', 'd127f57e851f1af353b986e5f9f25142be0b36a65e73d486dcaf882677b88e09').
 host_patch('swi-halt-passes-created-thread.patch', '3bba612df049bca193ecaf0bab499fc3f447dee83b6671b5881788adff4d8c34').
 host_patch('swi-heap-refusal-reported-as-stack-limit.patch', '36d9a4ee30b32e6f5cd0090e0f19d56ed45448798968cbe504f246019900dbcf').
+host_patch('swi-index-built-after-erase-hides-older-views.patch', '6befd562a1518fbdffb0c27f83d21b39864d15023c5efbc4d2469bd137de23a1').
 host_patch('swi-libbf-powm-unreduced.patch', '003e372224f7d0a22cf442e053d8b5d9ccf0c18ffa75a5f6fbec2d5d238e14e1').
 host_patch('swi-locale-default-encoding.patch', 'f4a78676056b8fcafa64ab6b4988bddc0f1700afe90b210e94f7676b565d730c').
 host_patch('swi-nested-retract-loses-outer-assert.patch', 'e07802e6a24d839288fb9805424cf583600066f129bfa15e644667902e281550').
@@ -26,6 +27,7 @@ host_patch('swi-qlf-failed-include-source-module.patch', '00915b2e768e7eee601cc5
 host_patch('swi-query-frame-discarded-on-engine-destroy.patch', '068f6ab5bcf8703df9292222e16663c6fc7b0df61cb52e0bcaed2926fbf9cccf').
 host_patch('swi-reeval-prepare-writes-past-its-arguments.patch', 'e07f43cf7d7b3147987298b6f773cac1388a9ef46bfe5be17d1d002e50339e66').
 host_patch('swi-shared-table-waits-for-owner-beneath.patch', '59e4968de7423abe5c4650d0092da472cca5c45ca9d27a511c56dec007258526').
+host_patch('swi-shift-misses-pending-depart-arguments.patch', 'f24b658ebf1f3782d8f758dfb75ec42748bf2ce42a2fa032f49d1a1de2633bff').
 host_patch('swi-thread-join-detach-window.patch', '418987e80776f6e69611af7912133f2398f208b3cbab5abd6209d1d4a576c192').
 host_patch('swi-threadless-shared-table-private-per-engine.patch', '6619febea289bf67cb7b8c6e41be4bc7a006931ebb342a1ac2652cc4240542eb').
 host_patch('swi-transaction-enumerator-repeats-parent.patch', '9a0d35671e46540bd2109602e3d27054d53e36c0d36d9671b0facb98d30eeb6a').

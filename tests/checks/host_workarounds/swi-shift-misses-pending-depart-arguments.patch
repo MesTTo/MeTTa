@@ -1,0 +1,121 @@
+diff --git a/src/pl-gc.c b/src/pl-gc.c
+index b681cde..edc5fd1 100644
+--- a/src/pl-gc.c
++++ b/src/pl-gc.c
+@@ -3825,6 +3825,60 @@ restore_vmi_state(vm_state *state)
+ }
+ 
+ 
++/* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
++The new arguments of the queries outside the running one. A query can run
++Prolog while the arguments of its next call are pushed above its frames:
++I_DEPART on a watched frame calls frameFinished() with them pending, and the
++cleanup handler and frame_finished listeners run in queries of their own.
++Those arguments belong to no frame. mark_stacks() and sweep_stacks() find
++them through get_vmi_state() on every parent query; a stack shift has to
++relocate them the same way, or the call receives the pre-shift address of
++each compound its arguments hold. The states are taken before the stacks
++move, as the running query's is, because get_vmi_state() reads the frames.
++- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
++
++typedef struct parent_vm_states
++{ vm_state     *states;			/* parents with new arguments */
++  size_t	count;			/* entries in states */
++  size_t	allocated;		/* entries allocated */
++} parent_vm_states;
++
++static void
++get_parent_vmi_states(parent_vm_states *parents)
++{ GET_LD
++  QueryFrame qf;
++  size_t depth = 0;
++
++  parents->states = NULL;
++  parents->count = parents->allocated = 0;
++
++  for(qf = LD->query; qf && qf->parent; qf = qf->parent)
++    depth++;
++  if ( depth == 0 )
++    return;
++
++  parents->states = allocHeapOrHalt(depth*sizeof(vm_state));
++  parents->allocated = depth;
++  for(qf = LD->query; qf && qf->parent; qf = qf->parent)
++  { QueryFrame pqf = qf->parent;
++
++    if ( pqf->registers.fr )
++    { vm_state *state = &parents->states[parents->count];
++
++      get_vmi_state(pqf, state);
++      if ( state->lNext )
++	parents->count++;
++    }
++  }
++}
++
++static void
++free_parent_vmi_states(parent_vm_states *parents)
++{ if ( parents->states )
++    freeHeap(parents->states, parents->allocated*sizeof(vm_state));
++}
++
++
+ /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ Used in D_BREAK to safely set lTop,  so the debugger won't overwrite the
+ stack-frame.
+@@ -5133,7 +5187,8 @@ This function should be called *after*  the  stacks have been relocated.
+ 
+ 
+ static void
+-update_stacks(vm_state *state, void *lb, void *gb, void *tb)
++update_stacks(vm_state *state, parent_vm_states *parents,
++	      void *lb, void *gb, void *tb)
+ { GET_LD
+   intptr_t ls, gs, ts;
+ 
+@@ -5199,6 +5254,12 @@ update_stacks(vm_state *state, void *lb, void *gb, void *tb)
+ 
+     if ( gs || ls )
+     { update_new_arguments(state, gs);
++      for(size_t i=0; i<parents->count; i++)
++      { vm_state *parent = &parents->states[i];
++
++	update_pointer(&parent->lNext, ls);
++	update_new_arguments(parent, gs);
++      }
+       update_argument(ls, gs);
+       update_trail(tb, ls, gs);
+       update_global(gb, gs);
+@@ -5370,6 +5431,7 @@ grow_stacks(DECL_LD size_t l, size_t g, size_t t)
+ { sigset_t mask;
+   size_t lsize=0, gsize=0, tsize=0;
+   vm_state state;
++  parent_vm_states parents;
+   Stack fatal = NULL;	/* stack we couldn't expand due to lack of memory */
+   boolex_t rc;
+ #if O_DEBUG
+@@ -5454,6 +5516,7 @@ grow_stacks(DECL_LD size_t l, size_t g, size_t t)
+   PL_clearsig(SIG_GC);
+ 
+   get_vmi_state(LD->query, &state);
++  get_parent_vmi_states(&parents);
+ 
+   { TrailEntry tb = tBase;
+     Word gb = gBase;
+@@ -5554,7 +5617,7 @@ grow_stacks(DECL_LD size_t l, size_t g, size_t t)
+     }
+ 
+     gBase++; gb++;
+-    update_stacks(&state, lb, gb, tb);
++    update_stacks(&state, &parents, lb, gb, tb);
+     gBase--; gb--;
+ 
+     LD->stacks.local.max  = addPointer(LD->stacks.local.base,  lsize);
+@@ -5591,6 +5654,7 @@ grow_stacks(DECL_LD size_t l, size_t g, size_t t)
+ 	  gBase--;
+ 	});
+   restore_vmi_state(&state);
++  free_parent_vmi_states(&parents);
+   unblockGC(0);
+   unblockSignals(&mask);
+   leaveGC();
