@@ -26,7 +26,9 @@
 %   - spaces:deferred_metta_function/6 is the engine's register of equations
 %     whose translation is deferred. The translate case reads it only to CHECK
 %     that its own forcing pass left nothing behind; the pass itself drives
-%     the public metta_ensure_compiled/1 over names read out of the parse.
+%     the public metta_ensure_compiled/1 over names read out of the parse,
+%     inside the space that holds them, because a force translates what a
+%     call from the module in force reaches and &self's reaches none of them.
 %     If that register is renamed this file throws `Unknown procedure` and
 %     says so here rather than measuring less than it claims.
 %   - the .qlf artifact set is warm. engine/bench.py warms it before sampling,
@@ -238,7 +240,7 @@ bench_setup('parse-prolog', Text) :- bench_setup_parse(Text).
 % source_equation_name/2 reads [source: engine/filereader.pl:956], and loading
 % the library REGISTERS them with their translation deferred, so forcing them
 % is a translator measurement with the reader and the loader already paid for.
-bench_setup(translate, Names) :- bench_setup_translate(Names).
+bench_setup(translate, Module-Names) :- bench_setup_translate(Module, Names).
 % examples/ch18-performance/18-01-larger-workloads/01-scale.metta is the
 % corpus's own indexing benchmark, and its five query shapes are exactly the
 % index shapes the store has to tell apart. Its own !(test ...) runs a million
@@ -264,7 +266,7 @@ bench_setup_parse(Text) :-
     bench_boot_quiet,
     bench_text('tests/data/prelude-spec.metta', Text).
 
-bench_setup_translate(Names) :-
+bench_setup_translate(Module, Names) :-
     bench_boot_quiet,
     bench_text('lib/lib_pln/lib.metta', Text),
     parse_metta_source(Text, Forms),
@@ -281,7 +283,8 @@ bench_setup_translate(Names) :-
                             'lib/lib_pln/lib.metta no longer \c
                              defines 49 function names')))
     ),
-    process_metta_string(Text, _, '&bench-pln').
+    process_metta_string(Text, _, '&bench-pln'),
+    space_module('&bench-pln', Module).
 
 % The warm-up round is what makes the two match cases steady. A query is
 % idempotent, so running each shape once in setup changes nothing about what
@@ -314,8 +317,9 @@ bench_work(parse, Text, Forms) :-
     bench_parse_rounds(25, parse_metta_source, Text, Forms).
 bench_work('parse-prolog', Text, Forms) :-
     bench_parse_rounds(25, parse_metta_source_prolog, Text, Forms).
-bench_work(translate, Names, forced) :-
-    forall(member(Name, Names), metta_ensure_compiled(Name)).
+bench_work(translate, Module-Names, forced) :-
+    with_metta_module(Module,
+                      forall(member(Name, Names), metta_ensure_compiled(Name))).
 bench_work(match, Space, Rows) :-
     bench_selective_rounds(200, Space, Rows).
 bench_work('match-skew', Space, Rows) :-

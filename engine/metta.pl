@@ -411,7 +411,7 @@
             metta_argument_admitted/3,
             forget_registered_function/1,
             fun_here/1,
-            fun_here_in/2,
+            fun_home_in/3,
             metta_emits/2,
             metta_function_cacheable/1,
             metta_function_cacheable/2,
@@ -1744,9 +1744,12 @@ metta_platform_absence(Requires, Text) :-
 %reasoning as the library(option) and library(gensym) blocks below, and the
 %same policy the rest of this section holds, which is that nothing the
 %engine needs resolves lazily.
-%Only member/2, not pairs_keys/2: that one is reached from
-%predicate_property/2's `wrapped(List)` property, which nothing here asks for,
-%and resolving it would load library(pairs) at every boot for nothing.
+%pairs_keys/2 is the same case, reached from predicate_property/2's
+%`wrapped(List)` property, which the reference-demand wrapper asks at every
+%publication (engine/metta/reference_refresh.pl,
+%metta_reference_demand_wrapper/2), and library(pairs) is already resident at
+%boot (engine/host_check.pl imports from it), so it too is a module-table
+%import and not a file load.
 %import/1 rather than a wrap-and-unwrap round trip that exercises the real
 %path: the round trip resolves the same import and costs 27,606 boot
 %inferences doing it, where this costs 12
@@ -1757,6 +1760,8 @@ metta_platform_absence(Requires, Text) :-
 %library(lists) is already loaded above, so this is a module-table import and
 %not a file load.
 :- ignore(catch(prolog_wrap:import(lists:member/2), _, true)).
+:- use_module(library(pairs), []).
+:- ignore(catch(prolog_wrap:import(pairs:pairs_keys/2), _, true)).
 %library(thread) does not declare its own dependency on option/2, and nothing
 %else loaded here pulls library(option) in, so jobs/2 resolved it by autoload
 %on the first concurrent_and/3 call [verified 2026-08-15: swi_option is absent
@@ -1857,7 +1862,7 @@ metta_platform_absence(Requires, Text) :-
    ).
 
 %The module the base tier compiles into, written ONCE and read everywhere:
-%current_metta_module/1's default, reduce/3's dispatch, fun_here_in/2's shared
+%current_metta_module/1's default, reduce/3's dispatch, fun_home_in/3's shared
 %tier and the type family's &self clause all ask for it.
 %
 %Declared here, before the files that read it are compiled, so the expansion
@@ -2093,6 +2098,7 @@ metta_engine_reexport(spaces, metta_declare_space_equation_home/2).
 metta_engine_reexport(spaces, metta_declare_space_parent/2).
 metta_engine_reexport(spaces, metta_disclaim_space/2).
 metta_engine_reexport(spaces, metta_ensure_compiled/1).
+metta_engine_reexport(spaces, metta_ensure_compiled_from/2).
 metta_engine_reexport(spaces, metta_forget_derived/0).
 metta_engine_reexport(spaces, metta_host_clear_defined/1).
 metta_engine_reexport(spaces, metta_host_clear_space/1).

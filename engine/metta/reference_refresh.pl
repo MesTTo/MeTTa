@@ -590,14 +590,30 @@ metta_reference_demanded_elsewhere(Name) :-
     metta_reference_unsettled(Home, Original), !.
 
 metta_reference_demand_wrapper :-
+    forall(metta_reference_force_door(Door, Name),
+           metta_reference_demand_wrapper(Door, Name)).
+
+%The two doors a resolving force enters by, from the module in force and from
+%a module the caller names. Both are wrapped, so a demanded alias forces its
+%original whichever door a call site, a hook or an inspection takes.
+metta_reference_force_door(spaces:metta_ensure_compiled(Name), Name).
+metta_reference_force_door(spaces:metta_ensure_compiled_from(_, Name), Name).
+
+%Asked at every publication, so each state takes its cheapest test: a failing
+%unwrap when nothing is demanded, and the wrapped/1 property while something
+%is, which reads the wrapper's name where current_predicate_wrapper/4 rebuilds
+%its body [measured 2026-09-25T01:13:28+10:00: 11 inferences against 63 on a
+%wrapped predicate, and a failing unwrap 3; the class_decorators twin runs
+%this 496 times].
+metta_reference_demand_wrapper(Module:Head, Name) :-
     ( \+ metta_reference_demand(_)
-    -> ( unwrap_predicate(spaces:metta_ensure_compiled/1, metta_reference_demand)
+    -> functor(Head, Door, Arity),
+       ( unwrap_predicate(Module:Door/Arity, metta_reference_demand)
        -> true ; true )
-    ; current_predicate_wrapper(spaces:metta_ensure_compiled(_),
-                                metta_reference_demand, _, _)
+    ; predicate_property(Module:Head, wrapped(Wrappers)),
+      memberchk(metta_reference_demand, Wrappers)
     -> true
-    ; wrap_predicate(spaces:metta_ensure_compiled(Name), metta_reference_demand,
-                     Wrapped,
+    ; wrap_predicate(Module:Head, metta_reference_demand, Wrapped,
                      ( ( metta_reference_demand(Name)
                        -> metta_reference_force(Name) ; true ), Wrapped ))
     ).

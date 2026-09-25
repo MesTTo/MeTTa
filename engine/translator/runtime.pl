@@ -718,11 +718,13 @@ metta_host_evaluation_body(Module, Term, Body) :-
 %evaluating it. A deferred function has no fun_meta rows until its equations
 %translate, and those rows are the whole question
 %[tested 2026-09-25T05:48:27+10:00: host_evaluation:an_unmatched_call_is_told_apart_from_an_empty_body].
+%The force names Space's module, whose rows the next goal reads, as every
+%inspection that names its module forces from that module.
 metta_host_unmatched(Space, [F|Args]) :-
     atom(F),
     metta_settle_definitions,
     space_module(Space, Module),
-    metta_ensure_compiled(F),
+    metta_ensure_compiled_from(Module, F),
     fun_meta_module(Module, F, _),
     \+ dispatch_any_head_matches(Module, F, Args).
 
@@ -747,7 +749,7 @@ metta_minimal_equation_step(Module, [Fun|Args], Out) :-
     %function has none until its equations translate: unforced, a function
     %frame decided NotReducible-with-no-equations where the arbiter's
     %protocol wants one equality step over the source equations.
-    metta_ensure_compiled(Fun),
+    metta_ensure_compiled_from(Module, Fun),
     fun_meta_module(Module, Fun, _),
     !,
     (   metta_minimal_equation_body(Module, Fun, Args, Body)

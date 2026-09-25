@@ -932,8 +932,17 @@ super_call_parts(Call, Fun, Args) :-
 %module_owns_function/2 for a MeTTa function, which excludes an inherited
 %clause, and a plain definedness test for a predicate the engine compiled,
 %because the engine's own are not equations and own no clause record.
+%
+%Each ancestor is read for its OWN clauses, and an ancestor whose equations of
+%the name are still waiting to translate has none yet, so it is translated
+%before it is asked. Nothing else translates it: a force made from this module
+%translates the definition a call from here reaches, which is this module's own
+%shadow, and a world's child declaring `super` over the world's definition
+%found no clause there and refused
+%[tested 2026-09-25T16:27:23+10:00: space_worlds:a_context_close_takes_its_world_with_it].
 super_target_module(Module, Fun, Arity, Parent) :-
     (   super_chain(Module, Candidate),
+        spaces:metta_ensure_compiled(Candidate, Fun),
         super_defines(Candidate, Fun, Arity)
     ->  Parent = Candidate
     ;   metta_module_space(Module, Space),

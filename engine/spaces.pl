@@ -251,6 +251,8 @@
             metta_add_program_atoms/4,
             store_data_atoms/2,
             metta_ensure_compiled/1,
+            metta_ensure_compiled/2,
+            metta_ensure_compiled_from/2,
             metta_prepare_function_predicate/3,
             ensure_native_storage_module/2,
             foreign_provides/2,

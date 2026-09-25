@@ -153,7 +153,7 @@ import_prolog_function_now(N, Arity) :-
     %The clauses are the HOST's, in whatever module consult_global/1 put them
     %(`user`), and every space reaches them through the base chain. What is
     %registered here is the base TIER's claim on the name, which is &self's
-    %module: fun_here_in/2 reads that claim as "callable from every space
+    %module: fun_home_in/3 reads that claim as "callable from every space
     %unless a space of its own claims the name", and it is the same claim
     %register_op/2 makes on the Python side.
     (   Arity == scan

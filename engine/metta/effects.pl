@@ -459,7 +459,7 @@ metta_effect_named_call(Module, Name, Arity, Queue-Reads, Next-Reads) :-
         %question has to be asked of the translated function.
         %current_predicate/1 is not a call, so the engine's
         %undefined-predicate net does not fire for it.
-        fun(Name), metta_ensure_compiled(Name),
+        fun(Name), metta_ensure_compiled_from(Module, Name),
         current_predicate(Module:Name/Arity)
     ->  Next = [Name/Arity|Queue]
     ;   metta_effect_inert(Name)
@@ -1200,7 +1200,8 @@ metta_effect_plan_type_chains(Module, Name, Chains) :-
     with_metta_module(Module, translator:call_site_type_chains(Name, Chains)).
 
 metta_effect_plan_ensure_compiled(Module, _) :- metta_effect_source_program(Module, _), !.
-metta_effect_plan_ensure_compiled(_, Name) :- metta_ensure_compiled(Name).
+metta_effect_plan_ensure_compiled(Module, Name) :-
+    metta_ensure_compiled_from(Module, Name).
 
 %Replaying a frozen program executes only its compilation positions. Publish
 %that projection separately so world admission can cover translator actions

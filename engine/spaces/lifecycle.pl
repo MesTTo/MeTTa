@@ -479,7 +479,7 @@ metta_exec_module_name(Space, Module) :-
 %builtin, every library predicate and every function imported from Prolog still
 %resolves from a compiled MeTTa clause. Every other space inherits &self's,
 %which is the sharing rule the engine already states for functions and types
-%("&self is the shared space", fun_here_in/2) and which named spaces used to get
+%("&self is the shared space", fun_home_in/3) and which named spaces used to get
 %by accident: &self WAS `user`, and SWI gives an implicitly created module the
 %base `user`.
 %
@@ -792,7 +792,7 @@ metta_prepare_function_predicate(Module, Name, Arity) :-
 %summary; and builtin_fun/1 is the engine tier. A sibling-only fun_scoped/1
 %hit is harmless because metta_existing_import/3 below still requires an
 %actual import in this module. Fresh source names miss these indexed facts and
-%avoid the recursive fun_here_in/2 walk entirely.
+%avoid the recursive fun_home_in/3 walk entirely.
 metta_may_inherit_function(Module, Name) :-
     (   fun_scoped(Name)
     ->  true
@@ -2032,7 +2032,7 @@ compiled_predicate_arity(F, Module, Predicate, Arity, Owner) :-
     %a call, so the undefined-predicate net does not fire for it. Source
     %withdrawal updates deferred budgets itself and must not compile a body
     %the caller is removing; ordinary removal retains its existing forcing.
-    ( Owner == ordinary -> metta_ensure_compiled(F) ; true ),
+    ( Owner == ordinary -> metta_ensure_compiled(Module, F) ; true ),
     (   arity(F, _)
     ->  arity(F, Arity),
         current_predicate(Module:Predicate/Arity)

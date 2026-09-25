@@ -722,7 +722,7 @@ build_dual_clause(Fun, DualName, InputArity, Module) :-
     maybe_print_compiled_clause(Label, ['not-provable', [Fun|DualArgs]], Clause).
 
 equations_of_arity(Module, Fun, InputArity, Equations) :-
-    metta_ensure_compiled(Fun),
+    metta_ensure_compiled_from(Module, Fun),
     (   fun_meta_clauses(Module, Fun, All)
     ->  include(equation_arity(InputArity), All, Equations)
     ;   Equations = []
@@ -735,7 +735,7 @@ equation_arity(InputArity, fun_meta(Args, _)) :- length(Args, InputArity).
 %lives in Prolog where there is nothing to dual. Guessing that a builtin's
 %dual is a fact would make (not-provable (+ 1 2)) answer True for every pair.
 refuse_undefined_builtin(Fun, InputArity, Module) :-
-    (   \+ fun_here_in(Module, Fun), \+ fun(Fun), \+ metta_special_form(Fun)
+    (   \+ fun_home_in(Module, Fun, _), \+ fun(Fun), \+ metta_special_form(Fun)
     ->  true
     ;   Arity is InputArity + 1,
         throw(error(type_error(dualisable_function, Fun/Arity),

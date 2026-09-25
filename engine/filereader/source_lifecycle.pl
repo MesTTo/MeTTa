@@ -1066,9 +1066,9 @@ metta_fast_restore_bound_atoms([binding(Index, Resolved)|Bindings], Atoms, Token
     length(PrefixTokens, Skip), append(PrefixTokens, [Token|RestTokens], Tokens),
     metta_add_program_atoms(Space, Prefix, PrefixTokens, _),
     Original = [=, [F|_], _],
-    metta_ensure_compiled(F),
-    add_sexp(Space, Original, Token, Ref), record_source_atom_assertion(Ref),
     space_module(Space, Module),
+    metta_ensure_compiled(Module, F),
+    add_sexp(Space, Original, Token, Ref), record_source_atom_assertion(Ref),
     compile_metta_equation(Module, Resolved, Ref, _, _),
     Next is Index+1,
     metta_fast_restore_bound_atoms(Bindings, Rest, RestTokens, Next, Space).

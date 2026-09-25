@@ -191,8 +191,8 @@ setup_mutation_fixture(_, _).
 % ai-tmp/ai-a-guard-is-a-trailed-write.md, "What the owners of the fifteen
 % refused sites have to do".
 % Workaround: swi-cleanup-window - the inventory of sites the trailed primitive has not reached.
-scope_setup_backlog('engine/spaces/foreign.pl', translate_when_still_deferred/1, assertz/2,
-                    classes, "the process-wide metta_function_compiling/1 guard, with its three readers and the deferred_translation_settled decision after the lock").
+scope_setup_backlog('engine/spaces/foreign.pl', translate_when_still_deferred/2, assertz/2,
+                    classes, "the process-wide metta_function_compiling/2 guard, with its three readers and the deferred_translation_settled decision after the lock").
 scope_setup_backlog('engine/spaces/lifecycle.pl', metta_remove_atom_reference/1, nb_setval/2,
                     classes, "the native removal selector, consumed with b_setval(Key, []) rather than nb_delete/1").
 scope_setup_backlog('engine/spaces/lifecycle.pl', with_native_removal_reference/2, nb_setval/2,

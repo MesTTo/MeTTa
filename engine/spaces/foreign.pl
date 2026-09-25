@@ -1,6 +1,14 @@
 % Guarantees: resolved_equation_removal/4 honors exact source occurrence selection
 %   [tested: lib_import_lifecycle; commit=4f2d6c0f8eb293b73f8dde30a1c84e24834f7393].
 % Purpose: validate foreign-provider capabilities and route foreign and native space operations
+% Guarantees: a force translates the waiting equations of one module:
+%   metta_ensure_compiled/1 and metta_ensure_compiled_from/2 the home
+%   fun_home_in/3 resolves the name to from the module in force or the one
+%   named, and metta_ensure_compiled/2 the named module's own
+%   [tested 2026-09-25T16:27:23+10:00: filereader_global_function_scope].
+% Guarantees: a write or a copy in one space publishes nothing into another
+%   [tested 2026-09-25T16:27:30+10:00: test_a_write_to_one_space_leaves_another_spaces_atoms_alone,
+%   test_copying_a_space_leaves_the_space_it_copies_alone].
 % Guarantees: deferred arrival rearms missing native calls while preserving
 %   existing native answers and lazy bodies [tested: spaces_deferred_translation;
 %   commit=2d1289dafba121b7582a5cfcd49915d780745e4b].
@@ -755,7 +763,7 @@ announce_equation_arrival(Module, F) :-
 %row's. The bulk door adds a whole batch's count in one write, so the
 %per-equation cost this table was built to avoid stays avoided.
 :- dynamic deferred_metta_function/6.
-:- dynamic metta_function_compiling/1.
+:- dynamic metta_function_compiling/2.
 
 %Record the equation and translate it when something reaches it. This is
 %s(CASP)'s shape: its scasp/2 collects the clauses transitively reachable from
@@ -883,13 +891,23 @@ visible_predicate_definition(Module, Predicate, Arity) :-
     current_predicate(Inherited:Predicate/Arity),
     !.
 
-%The NAME alone, not the name in a module: a call site compiles in the module
-%it is written in while the function it names may be defined in another, the
-%global fallback a name that is not scoped gets, and asking about the calling
-%module left that function untranslated and its call site compiled against an
-%empty predicate. Every module that is waiting to translate F translates it,
-%which is more than the one call site needs and never less
-%[tested: filereader_global_function_scope].
+%What a CALL reaches, and nothing beside it. A call site compiles in the module
+%it is written in while the function it names may be defined in another: a
+%declared parent, or &self, the global fallback every chain ends in. So the
+%force resolves the name from the module in force through fun_home_in/3, the
+%walk calls themselves take, and translates that home alone
+%[tested 2026-09-25T16:27:23+10:00: filereader_global_function_scope]. Asking the calling module alone
+%left a fallback's function untranslated and its call site compiled against an
+%empty predicate; translating every module waiting on the name, which replaced
+%that, published those modules' specializations into their own spaces as a side
+%effect of compiling somewhere else. A copy of &self compiles each function
+%&self has already translated into the copy as it arrives, and those bodies'
+%call sites translated &self's WAITING callees, so copying a home that held
+%lib_functional added unfold's specializations over zip's lambda to the home
+%itself [measured 2026-09-24T23:47:14+10:00: eight rows, through public Python
+%API, tests/ch04_spaces_and_matching/test_space.py's copy-source case].
+%The first test is on the name alone and is the whole cost when nothing of it
+%waits anywhere, which is the ordinary call site's case.
 %
 %The guard is re-entrancy, not memoisation: translating one equation's body
 %compiles its call sites, and a recursive function's body names ITSELF, which
@@ -905,7 +923,7 @@ visible_predicate_definition(Module, Predicate, Arity) :-
 %
 %Both halves carry weight here. par-race stops its losing branch with
 %thread_signal(Thread, abort) [source: lib/lib_thread/lib_thread.pl, race_stop_/2], and a
-%branch aborted between translate_deferred_function/1 retracting the deferral
+%branch aborted between translate_deferred_function/2 retracting the deferral
 %and its clauses arriving left the function neither deferred nor defined: the
 %NEXT call to it raised "Unknown procedure: slow/2" from a form that had
 %nothing to do with the race [measured 2026-08-24: examples/ch17-concurrency-and-the-loop/01-thread_lib.metta].
@@ -920,13 +938,42 @@ visible_predicate_definition(Module, Predicate, Arity) :-
 %deferral is gone by then and this predicate stops at its first test.
 metta_ensure_compiled(F) :-
     (   deferred_metta_function(F, _, _, _, _, _)
+    ->  current_metta_module(Module),
+        ensure_home_compiled(Module, F)
+    ;   true
+    ).
+
+%The same force made from a module the caller names rather than the one in
+%force, for a door that reads what a call from that space would reach.
+metta_ensure_compiled_from(Module, F) :-
+    (   deferred_metta_function(F, _, _, _, _, _)
+    ->  ensure_home_compiled(Module, F)
+    ;   true
+    ).
+
+ensure_home_compiled(Module, F) :-
+    (   fun_home_in(Module, F, equations(Home))
+    ->  metta_ensure_compiled(Home, F)
+    ;   true
+    ).
+
+%Module's OWN waiting equations of F, Module bound. A door about to store an
+%equation of F in one space needs that space's waiting equations translated
+%first and no other's: resolving from the writer would reach &self's F when the
+%space holds none yet, and a write would then translate &self's equations and
+%publish &self's specializations into &self. A zip equation added to a fresh
+%space did exactly that to a home holding lib_functional [measured
+%2026-09-24T23:47:14+10:00: tests/ch04_spaces_and_matching/test_space.py's
+%cross-space case, reproduced on 99bd67a73 through public Python API].
+metta_ensure_compiled(Module, F) :-
+    (   deferred_metta_function(F, Module, _, _, _, _)
     ->  sig_atomic(with_mutex(metta_deferred_translation,
-                              translate_when_still_deferred(F))),
+                              translate_when_still_deferred(Module, F))),
         %The SETTLE point. A body's own call sites force their callees from
         %inside this one, so the inner forces reach here with the outer
         %function still guarded; only the outermost fires, and by then no
         %predicate is half-built.
-        (   metta_function_compiling(_)
+        (   metta_function_compiling(_, _)
         ->  true
         ;   forall(seam:deferred_translation_settled, true)
         )
@@ -944,14 +991,18 @@ metta_ensure_compiled(F) :-
 %because the mutex admits one thread at a time, and SWI's mutexes are recursive,
 %so the nested force a body's own call sites make re-enters rather than blocks
 %[measured 2026-08-24: with_mutex(m, with_mutex(m, true)) succeeds].
-translate_when_still_deferred(F) :-
-    (   \+ deferred_metta_function(F, _, _, _, _, _)
+%It names the module as well as the function because a force translates one
+%module: a body naming the same function in ANOTHER module, as a space's f
+%calling &self's g whose body calls &self's f does, has that other module's
+%equations to translate and must not read the first module's marker as its own.
+translate_when_still_deferred(Module, F) :-
+    (   \+ deferred_metta_function(F, Module, _, _, _, _)
     ->  true
-    ;   metta_function_compiling(F)
+    ;   metta_function_compiling(Module, F)
     ->  true
     ;   setup_call_cleanup(
-            assertz(metta_function_compiling(F), Guard),
-            translate_deferred_function(F),
+            assertz(metta_function_compiling(Module, F), Guard),
+            translate_deferred_function(Module, F),
             erase(Guard))
     ).
 
@@ -961,16 +1012,24 @@ translate_when_still_deferred(F) :-
 %[source: SWI-Prolog 10.1 Reference Manual, exception/3]. So a deferred
 %function is translated by anything that reaches its predicate -- a compiled
 %goal, a host reaching into a space's execution module, a plain Prolog call --
-%and not only by the doors this engine knows to guard. It cannot loop:
-%translate_deferred_function/1 retracts the marker, so a second miss on the
-%same name finds nothing here and the ordinary error follows
+%and not only by the doors this engine knows to guard. Module is the CALLER's,
+%the module the undefined definition was looked up in before SWI walked its
+%supers [source 2026-09-25T03:27:07+10:00: swipl-devel V10.1.14,
+%src/pl-proc.c trapUndefined(), `Module module = def->module;`, and
+%boot/init.pl '$undefined_procedure'/4], so the name is
+%resolved from there as a call site's is, and the home the call would reach is
+%what gets translated. It cannot loop: translate_deferred_function/2 retracts
+%the marker, so a second miss on the same name finds nothing waiting at its
+%home and the ordinary error follows
 %[tested: translator_branch_returns:a_recursive_generator_enumerates_in_time_linear_in_its_answers].
 :- multifile user:exception/3.
 
 user:exception(undefined_predicate, Module:Name/_, retry) :-
-    deferred_metta_function(Name, Module, _, _, _, _),
+    deferred_metta_function(Name, _, _, _, _, _),
+    fun_home_in(Module, Name, equations(Home)),
+    deferred_metta_function(Name, Home, _, _, _, _),
     !,
-    metta_ensure_compiled(Name).
+    metta_ensure_compiled_from(Module, Name).
 
 %The equations come back out of the space in the order they went in, which is
 %the order they were written, because a store read enumerates its clauses. An
@@ -994,7 +1053,7 @@ user:exception(undefined_predicate, Module:Name/_, retry) :-
 %equations that DID land are excused by their provenance rows on the retry,
 %and translate_missing_equations translates the rest, exactly once each
 %[tested: spaces_deferred_translation:a_limit_landing_anywhere_inside_the_force_leaves_the_function_callable].
-translate_deferred_function(F) :-
+translate_deferred_function(Module, F) :-
     findall(deferred(Space, Module, InputArity, Load, Count),
             deferred_metta_function(F, Module, Space, InputArity,
                                     Load, Count),
@@ -1180,10 +1239,12 @@ metta_source_reduction_count([_|Arguments], Count) :- !,
 metta_source_reduction_count(_, 0).
 
 add_function_atom(Storage, Space, Module, Term, FAtom, W, Token) :-
-    %Any equation of FAtom still waiting is translated BEFORE this one is
+    %Any equation of FAtom still waiting HERE is translated BEFORE this one is
     %stored, because the marker translates everything the space holds for
-    %FAtom and this equation is about to be one of them.
-    metta_ensure_compiled(FAtom),
+    %FAtom and this equation is about to be one of them. Another module's
+    %marker for FAtom translates only its own space, which never holds this
+    %equation, so it is left waiting.
+    metta_ensure_compiled(Module, FAtom),
     store_equation(Storage, Space, Term, Token, StoredRef),
     length(W, N),
     Arity is N + 1,

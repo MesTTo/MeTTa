@@ -1997,7 +1997,7 @@ support_function_change_node(Module, F, function_view(ViewModule, F)) :-
 
 %The module views an equation arriving in Module can move. A name resolves UP
 %a space's own chain and never sideways, so a sibling space's view of F cannot
-%see a definition that lands here: fun_here_in/2 asks this module, then its
+%see a definition that lands here: fun_home_in/3 asks this module, then its
 %parents, then &self, and stops. &self is on every chain as the global
 %fallback, which is why a definition there still reaches every view; that is
 %the same split type_marker_visible_in/2 draws in engine/spaces/foreign.pl for

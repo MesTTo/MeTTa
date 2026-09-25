@@ -2421,7 +2421,7 @@ test(switches_nest_and_unwind_in_order) :-
 % that is NOT a plain shared-tier function, and not at all for one that is:
 % `fun(F), \+ fun_scoped(F) -> Module = Self` settles the second case without
 % asking, and everything else falls through to `current_metta_module(Module),
-% fun_here_in(Module, F)`. A DATA CONSTRUCTOR is the common case rather than a
+% fun_home_in(Module, F, _)`. A DATA CONSTRUCTOR is the common case rather than a
 % space-scoped function, which is worth writing down because the name of the
 % branch suggests otherwise: examples/ch18-performance/18-01-larger-workloads/05-matespacefast.metta reduces
 % (num (M $t)) and (M $t) at every node of a binary tree of depth 19, and that

@@ -579,6 +579,10 @@ metta_reference_unsettled(Home, _) :- metta_reference_loading(Home), !.
 metta_reference_unsettled(Home, Name) :-
     spaces:deferred_metta_function(Name, _, Home, _, _, _).
 
+%A root's original waits in its HOME space, so that space's own equations are
+%what is translated, the original spelled like the face or not: a force made
+%from the face's space translates what a call from there reaches, and Home is
+%not on that space's chain.
 metta_reference_force(Name) :-
     (   metta_reference_forcing(Name)
     ->  true
@@ -586,15 +590,17 @@ metta_reference_force(Name) :-
             forall(( metta_reference_roots(_, Name, _, Roots),
                      member(root(Home, Original, _, _), Roots) ),
                    ( metta_reference_wait(Home),
-                     ( Original == Name -> true
-                     ; spaces:metta_ensure_compiled(Original) ) )))
+                     (   spaces:deferred_metta_function(Original, HomeModule,
+                                                        Home, _, _, _)
+                     ->  spaces:metta_ensure_compiled(HomeModule, Original)
+                     ;   true ) )))
     ).
 
 :- multifile user:exception/3.
 user:exception(undefined_predicate, Module:Predicate/Arity, retry) :-
     metta_reference_demand(Name), compiled_function_name(Name, Predicate),
     metta_reference_roots(Module, Name, _, _),
-    spaces:metta_ensure_compiled(Name),
+    spaces:metta_ensure_compiled_from(Module, Name),
     current_predicate(Module:Predicate/Arity), !.
 
 metta_reference_retire_rows(Space) :-

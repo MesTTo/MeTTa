@@ -3,6 +3,12 @@
 %   [tested: trailed_scopes; commit=40b71fc99571872ca5fc85cdaf7902b467166539].
 %
 % Purpose: register function names and arities, protect callable surface, and import host and backend builtins
+% Guarantees: fun_home_in/3 is the one walk of a module's resolution chain,
+%   the module, then its declared parent or equation home, then &self, with a
+%   restricted module reaching builtins alone; it answers equations(Module) or
+%   builtin, and fun_here/1, metta_host_function_callable_from/2 and every
+%   resolving force read it [tested 2026-09-25T16:27:23+10:00: metta_builtin_scoping,
+%   filereader_global_function_scope].
 % Guarantees: process registration retains exactly the names and arities it
 %   adopts, including registry facts introduced by a temporary MeTTa source
 %   [tested: lib_import_lifecycle:host_registration_outlives_the_importing_source;
@@ -1125,7 +1131,7 @@ missing_procedure(error(existence_error(procedure, _), _)).
 %[measured 2026-08-15: alpha-unique 4,050,778 to 3,750,772 inferences].
 fun_here(F) :- fun(F),
                ( \+ fun_scoped(F) -> true
-               ; current_metta_module(Module), fun_here_in(Module, F) ).
+               ; current_metta_module(Module), fun_home_in(Module, F, _) ).
 
 %The same rule with the module made explicit, for a host asking about a space
 %it is not executing in: what one space's function namespace lists and
@@ -1133,7 +1139,7 @@ fun_here(F) :- fun(F),
 %translator resolves and its two indexed probes are the whole of its cost; a
 %host asks this once per catalogue build and once per attribute miss, so the
 %extra frame is nothing there. Published as a host service so the host
-%transport never reaches fun_scoped/1 or fun_here_in/2 directly
+%transport never reaches fun_scoped/1 or fun_home_in/3 directly
 %[tested: test_a_namespace_lists_and_resolves_only_what_its_space_can_call,
 %test_builtins_equals_the_union_of_functions_and_special_forms;
 %commit=a376df6dff8099d6145ace55132c7e30922ea1de].
@@ -1141,24 +1147,36 @@ metta_host_function_callable_from(Module, F) :-
     fun(F),
     (   \+ fun_scoped(F)
     ->  true
-    ;   fun_here_in(Module, F)
+    ;   fun_home_in(Module, F, _)
     ).
 
+%Where a call to F made from Module lands: equations(Home) for the nearest
+%module on Module's chain whose equations define F, builtin when none does and
+%F is a builtin, and failure when the name reaches nothing from here. The
+%chain is the module itself, then its declared parent or equation home, then
+%&self, which is on every chain as the shared space; a restricted module stops
+%at itself and reaches builtins only. This is the one walk of that chain, so
+%whether a name is callable here is whether it has a home here, and a force
+%that translates what a call reaches translates that home and nothing beside
+%it (spaces:metta_ensure_compiled/1).
+%
 %The builtin fallback is what keeps (+ 1 2) working in &self after some other
 %named space defines (= (+ $a $b) ...). fun_scoped(N) stops fun_here/1's first
 %clause applying process-wide, and without this the name resolved nowhere: one
 %named space turned + into inert data in every other space and in engines
 %built afterwards [tested: metta_builtin_scoping].
-fun_here_in(Module, F) :-
+fun_home_in(Module, F, Home) :-
     (   fun_in(Module, F)
-    ->  true
+    ->  Home = equations(Module)
     ;   metta_restricted_exec_module(Module, _)
-    ->  restricted_callable_name(F)
+    ->  restricted_callable_name(F),
+        Home = builtin
     ;   metta_exec_module_parent(Module, ParentModule)
-    ->  fun_here_in(ParentModule, F)
+    ->  fun_home_in(ParentModule, F, Home)
     ;   metta_self_module(Self), Module \== Self, fun_in(Self, F)
-    ->  true
-    ;   builtin_fun(F)
+    ->  Home = equations(Self)
+    ;   builtin_fun(F),
+        Home = builtin
     ).
 
 %Register a function and record which module its clauses live in. fun/1 stays

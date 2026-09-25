@@ -381,6 +381,14 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- Writing a function into one space no longer compiles other spaces' waiting
+  equations of that name. Every force of a waiting function names the module
+  it is made from: a call site resolves the name from its own module, the
+  undefined-predicate hook from the caller's, and a write forces only the
+  space it writes. A zip equation added to a fresh space used to compile the
+  home's waiting lib_functional zip and store unfold's specializations in
+  the home, and copying a space added rows to the space it copied.
+
 - `readme-fences` points TMP, TMPDIR and TEMP at each fence's own directory, so
   a directory a fence mints with `temp-dir!` or `temp-path!` is removed with
   the fence. SWI reads its `tmp_dir` flag from TMP, so such a directory

@@ -347,13 +347,13 @@ install_annotated_dispatch(Fun, Ref) :-
     asserta((dispatch_call_goal_in(Module, Fun, Args, Out, Goal, PolicyGoal) :-
                  spaces:metta_arrow_product_in(Module, Fun, _, _),
                  !,
-                 metta_ensure_compiled(Fun),
+                 metta_ensure_compiled_from(Module, Fun),
                  dispatch_call_goal_for(Module, Fun, Args, Out, Goal, Dispatched),
                  PolicyGoal = metta_verify_annotated_call(
                      Module, Fun, Args, Out, Module:Dispatched)), Ref).
 
 dispatch_call_goal_in(Module, Fun, Args, Out, Goal, PolicyGoal) :-
-    metta_ensure_compiled(Fun),
+    metta_ensure_compiled_from(Module, Fun),
     (   fold_native_scalar_call(Module, Fun, Args, Out, Goal)
     ->  PolicyGoal = true
     ;   fold_sorted_constructor_projection(Module, Fun, Args, Out, Goal)
@@ -824,7 +824,7 @@ reduce([F|Args], Out, Status) :- !,
         %the parent and cannot see a child's clauses.
         metta_self_module(Self),
         ( fun(F), \+ fun_scoped(F) -> Module = Self
-        ; current_metta_module(Module), fun_here_in(Module, F) )
+        ; current_metta_module(Module), fun_home_in(Module, F, _) )
     ->  % --- Case 1: callable predicate ---
         %The reducer meets a function name that arrived as DATA, from a
         %higher-order argument, a match answer or a constructed expression,
@@ -1212,7 +1212,7 @@ apply_translator_rule_dl(HV, Declarations, RuleModule,
     %On a recycled module name the undefined-predicate hook is not entered,
     %so force the deferred rule through the engine's ordinary materialiser
     %before calling that descriptor.
-    metta_ensure_compiled(HV),
+    metta_ensure_compiled_from(RuleModule, HV),
     call(RuleModule:HookCall),
     %THE RULE MATCHED only if it did not reach back into the call. The body ran
     %on the copy, so subsumes_term/2 rejects a rule that instantiated the
