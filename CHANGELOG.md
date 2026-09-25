@@ -386,6 +386,10 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- The Python seat's space-retirement tests pass in any order: the storage
+  helper they share reads a space's scope revocation as false until lib_thread
+  loads, where the outside-transaction drop test raised Unknown procedure
+  whenever it ran before any lib_thread import.
 - The door catalog's order verdicts are regenerated from the seat they
   describe, and the `door-order` lane passes. `Space.copy()` crosses once to
   the engine's restore of its rows where it re-added each row through
