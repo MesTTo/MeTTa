@@ -952,7 +952,7 @@ package_contract(_, _, [_, _, Pattern], Pattern, [], []) :- Pattern == [], !.
 package_contract(_, _, Row, Pattern, Names, Contracts) :-
     Row = [_, Artifact, _],
     ( nonvar(Artifact), 'is-space'(Artifact, true)
-    -> metta_engine:metta_reference_face(Artifact, [], Face),
+    -> metta_engine:metta_reference_face(Artifact, Face),
        findall(contract(Name, Arity, Type),
            ( member(Name/Arity-_, Face), integer(Arity),
              ( metta_host_stored(Artifact, [':', Name, Type]) -> true

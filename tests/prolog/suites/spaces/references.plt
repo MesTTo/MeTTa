@@ -392,7 +392,7 @@ test(cycles_are_bounded_even_when_maps_change_names,
     reference_answers(1, ['x.reference-b'], A), assertion(A == [b]),
     reference_answers(2, ['y.reference-a'], B), assertion(B == [a]),
     reference_space(1, Space),
-    metta_engine:metta_reference_face(Space, [], Face), assertion(length(Face, 2)).
+    metta_engine:metta_reference_face(Space, Face), assertion(length(Face, 2)).
 
 test(a_standing_row_follows_new_heads_and_their_later_withdrawal,
      [setup(reference_setup), cleanup(reference_cleanup), nondet]) :-

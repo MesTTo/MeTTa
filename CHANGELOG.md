@@ -386,6 +386,27 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- Defining a class costs polynomially in the size of its hierarchy again: the
+  seventh class of a chain costs 7.19M inferences to define where it cost
+  89.5M, a diamond costs 1.16 times its two parents where it cost 2.08 times,
+  and `test_a_class_definition_publishes_its_references_once` passes. The
+  class spaces of one hierarchy all import one another, and a reference face
+  was remembered by its home and the part of the importing path the home
+  could reach again, so a face was computed for every set of classes a path
+  could block, 2^(n-2) of them for the root of a chain of n. The diamond
+  crossed the test's bound of 2 once 64169238b stopped recompiling lambdas
+  under fresh names on each refresh, work that grew with the parents and had
+  hidden the ratio. The faces of one strongly connected component of `from`
+  rows are now computed together, by label-setting over (space, entry) states
+  whose labels carry the spaces their derivation passed, the elementary-path
+  labelling of Feillet, Dejax, Gendreau and Gueguen (2004). It computes the
+  same union over simple paths, which the new `reference_faces` suite holds
+  equal to the old recursion over 80 seeded universes of cyclic rows with
+  identity, prefix, only, except, rename and argument-pattern maps; eight
+  spaces that all import one another cost 20,343 inferences where the
+  recursion took 342,420. `metta_reference_face/3` is
+  `metta_reference_face/2`, since its path argument was always empty.
+
 - `m.fn[name].compiled` lists an engine builtin's clauses where it raised
   `EngineError: Unknown procedure`, for `car-atom`, `+` and `match` among
   them. The door listed each arity in the space's own module, where a builtin

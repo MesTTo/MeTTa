@@ -138,7 +138,7 @@ metta_reference_source_current(Space, Map) :-
 
 metta_reference_source_current_face(Space, Map) :-
     flag('$metta_reference_epoch', Version, Version),
-    metta_reference_local_face(Space, [], Face),
+    metta_reference_provider_face(Space, [], Face),
     metta_reference_source_plan(Space, Face, source_plan(Current, _)),
     flag('$metta_reference_epoch', After, After),
     ( After =:= Version -> Map = Current

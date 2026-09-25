@@ -26,11 +26,14 @@
 %   subsorts without making their subjects callable
 %   [tested: references:constructor_declarations_travel_without_callable_heads;
 %   commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
-% Guarantees: a provider face is computed once per home and blocked path set
-%   while the rows stand, and a clean node answers its retained face [tested:
+% Guarantees: the faces of one strongly connected component of from rows are
+%   computed together, once per blocked importer while the rows stand, each
+%   the union over simple row paths that the recursion memoised by home and
+%   blocked path set computed before it, and a clean node answers its
+%   retained face [tested 2026-09-26T02:04:15+10:00: reference_faces:a_component_labels_what_every_simple_path_brings,
+%   reference_faces:a_blocked_importer_is_cut_where_every_path_through_it_is,
 %   references, reference_publication, reference_patterns,
-%   reference_source_origins, reference_scopes, reference_providers;
-%   commit=a8b3ad6e372c077945b36da93ed631f0a45d11fb].
+%   reference_source_origins, reference_scopes, reference_providers].
 % Guarantees: a kept importing space retains its scoped FROM providers
 %   [tested: lib_thread_scope_deferred:a_kept_cleanup_retains_its_captured_space_and_reference_provider;
 %   commit=9b0a084e534ddf7dd67980ad84c27c8279b877f1].
@@ -83,7 +86,9 @@
 %   traversal bounds cycles, including cycles whose maps change names.
 
 :- use_module(library(varnumbers), [varnumbers/2]).
-:- use_module(library(ordsets), [ord_intersection/3, ord_subtract/3]).
+:- use_module(library(ordsets), [ord_intersection/3, ord_subtract/3, ord_memberchk/2,
+                                 ord_subset/2, ord_add_element/3]).
+:- use_module(library(assoc), [get_assoc/3, put_assoc/4, list_to_assoc/2, assoc_to_keys/2]).
 :- use_module(library(pairs), [group_pairs_by_key/2, pairs_keys/2]).
 
 :- dynamic metta_reference_row/4, metta_reference_map/3.
@@ -229,7 +234,7 @@ metta_reference_watch(Space) :-
 metta_reference_validate_selection(Home, Map) :-
     findall(Name, metta_reference_selected(Map, Name), Names0),
     sort(Names0, Names),
-    ( Names == [] -> Face = [] ; metta_reference_face(Home, [], Face) ),
+    ( Names == [] -> Face = [] ; metta_reference_face(Home, Face) ),
     forall(member(Name, Names),
            ( must_be(atom, Name),
              ( metta_reference_internal(Home, Name)
@@ -394,13 +399,13 @@ metta_reference_own_head(Space, Name, declaration) :-
     metta_reference_declared_head(Space, Name),
     \+ metta_reference_internal(Space, Name).
 
-metta_reference_face(Space, Visited, Face) :-
+metta_reference_face(Space, Face) :-
     metta_with_under(visibility,
-        ( metta_reference_local_face(Space, Visited, Local),
+        ( metta_reference_provider_face(Space, [], Local),
           include(metta_reference_public_entry(Space), Local, Face) )).
 
 metta_host_reference_names(Space, Names) :-
-    metta_with_under(visibility, metta_reference_local_face(Space, [], Face)),
+    metta_with_under(visibility, metta_reference_provider_face(Space, [], Face)),
     findall(Name, member(Name/_-_, Face), Heads),
     sort(Heads, Names).
 
@@ -409,46 +414,44 @@ metta_reference_public_entry(Space, Name/Arity-root(Home, Original, _, Patterns)
     -> once(metta_reference_own_head(Space, Name, Arity))
     ; \+ metta_reference_internal(Space, Name) ).
 
-metta_reference_local_face(Space, Visited, Face) :-
-    (   memberchk(Space, Visited)
-    ->  Face = []
-    ;   findall(Name/Arity-root(Space, Name, Arity, []),
-                metta_reference_local_head(Space, Name, Arity), Own),
-        findall(Entry,
-                ( metta_reference_row(Space, Token, Home, Map),
-                  metta_reference_row_entry(Space, Visited, Token, Home, Map, Entry) ),
-                Imported),
-        append(Own, Imported, All), sort(All, Face)
-    ).
-
 %An entry one from row contributes to its space's face: each name its map
 %gives a public head of the home, rooted where that head is defined. A face is
 %its own heads and every row's entries, so a row added changes it by exactly
 %this, which is what metta_reference_publish_rows/8 publishes.
-metta_reference_row_entry(Space, Visited, Token, Home, Map, Name/Arity-Root) :-
-    metta_reference_source_face(Space, Home, Visited, Source),
-    member(Original/Arity-SourceRoot, Source),
+metta_reference_row_entry(Space, Token, Home, Map, Entry) :-
+    metta_reference_source_face(Space, Home, Source),
+    member(SourceEntry, Source),
+    metta_reference_row_image(Space, Token, Map, SourceEntry, Entry).
+
+%What one row makes of one entry its home publishes: an entry for each name
+%its map gives the entry's head.
+metta_reference_row_image(Space, Token, Map, Original/Arity-SourceRoot, Name/Arity-Root) :-
     metta_reference_names(Space, Token, Map, Original, Names),
     member(Target, Names),
     metta_reference_target(Target, Arity, SourceRoot, Name, Root).
 
 % A self reference aliases the space's own definitions once. Following its
 % imported face would repeatedly apply the same map to its previous aliases.
-metta_reference_source_face(Space, Space, _, Face) :- !,
+metta_reference_source_face(Space, Space, Face) :- !,
     findall(Name/Arity-root(Space, Name, Arity, []),
             metta_reference_own_head(Space, Name, Arity), Face).
-metta_reference_source_face(Space, Home, Visited, Face) :-
+metta_reference_source_face(Space, Home, Face) :-
     metta_with_under(visibility,
-        ( metta_reference_provider_face(Home, [Space|Visited], Local),
+        ( metta_reference_provider_face(Home, [Space], Local),
           include(metta_reference_public_entry(Home), Local, Face) )).
 
-% A provider's face depends on the path that reached it only through the
-% spaces of that path it can reach again: a from row back into the path is cut
-% there, so two paths with the same blocked set compute the same face. Faces
-% are remembered by home and blocked set while the rows stand (the reference
-% epoch, which every row change advances, and the two row retirements below
-% forget them), and a clean node's retained face serves when nothing it
-% reaches is blocked, which is what its publication computed.
+%A space's face is its own heads and, along every path of from rows that
+%visits no space twice, the heads at the path's end mapped by each row back to
+%the space: a row back into the path is cut there, which is what bounds a
+%cycle whose maps change names [tested 2026-09-26T02:04:15+10:00:
+%references:cycles_are_bounded_even_when_maps_change_names]. Visited is the
+%importing path, [] for a space's own face and [Importer] for what a row of
+%Importer reads, so the spaces of it Home reaches again lie in Home's strongly
+%connected component, and they alone change what Home's face can be. Faces are
+%remembered by home and that blocked set while the rows stand (the reference
+%epoch, which every row change advances, and the two row retirements below
+%forget them), and a clean node's retained face serves when nothing is
+%blocked, which is what its publication computed.
 :- thread_local metta_reference_face_memo/3, metta_reference_reach_memo/2,
                 metta_reference_memo_epoch/1.
 
@@ -462,10 +465,134 @@ metta_reference_provider_face(Home, Visited, Local) :-
         ->  true
         ;   Blocked == [], metta_reference_retained_face(Home, Local)
         ->  true
-        ;   metta_reference_local_face(Home, Visited, Local),
-            assertz(metta_reference_face_memo(Home, Blocked, Local))
+        ;   metta_reference_component_faces(Home, Blocked, Faces),
+            memberchk(Home-Local, Faces)
         )
     ).
+
+%Every face of Home's strongly connected component at once, for one blocked
+%set, by label-setting over (space, entry) states, the elementary-path
+%labelling of Feillet, Dejax, Gendreau and Gueguen (Networks 44(3), 2004,
+%doi:10.1002/net.20033): a label is a state and the component spaces its
+%derivation passed, a row extends it only to an importer outside them, and a
+%label whose spaces include another's at its state is dropped, since every
+%extension open to it is open to the other and a row's image depends on the
+%entry alone. A space's face is the entries labelled at it. Own heads, self
+%rows and rows leaving the component seed the labels, rows between members
+%carry them, and a row into a blocked member brings nothing.
+%
+%Computing the component together is what keeps a class hierarchy
+%polynomial: its class spaces all import one another, and remembering each
+%face by its blocked set recomputed one for every set of classes a path could
+%block, 2^(n-2) faces of the root class in a chain of n [measured
+%2026-09-26T00:50:45+10:00: the second to seventh class of a chain defined at
+%2235ce0ac computed 6, 14, 34, 82, 194 and 450 distinct faces, 0.79M to 89.5M
+%inferences a definition]. No algorithm is polynomial on every graph, since
+%whether a head reaches a space along a simple path through one given row is
+%two disjoint paths (Fortune, Hopcroft and Wyllie 1980,
+%doi:10.1016/0304-3975(80)90009-2); dominance keeps one label a state wherever
+%one route is minimal, as it is for every entry of a class hierarchy.
+%Time: (E + L*r) row images and L*r path extensions of at most m spaces, for E
+%seed entries, L labels, r component rows into a label's space and m members;
+%L is the labelled states when each keeps one label. Members no row joins,
+%which every space on no cycle is, have their sorted seeds for faces.
+metta_reference_component_faces(Home, Blocked, Faces) :-
+    flag('$metta_reference_epoch', Epoch, Epoch),
+    metta_reference_component(Home, Component),
+    ord_subtract(Component, Blocked, Members),
+    findall(Space-Seeds,
+            ( member(Space, Members),
+              findall(Entry, metta_reference_seed(Space, Component, Entry), Seeds0),
+              sort(Seeds0, Seeds) ),
+            Seeded),
+    metta_reference_member_rows(Members, Carried),
+    (   Carried == []
+    ->  Faces = Seeded
+    ;   metta_reference_label_faces(Members, Seeded, Carried, Faces)
+    ),
+    %A map that loads a library moves the epoch while this runs; what it read
+    %before then is not remembered for the rows after.
+    (   flag('$metta_reference_epoch', Now, Now), Now =:= Epoch
+    ->  forall(member(Space-Face, Faces),
+               assertz(metta_reference_face_memo(Space, Blocked, Face)))
+    ;   true
+    ).
+
+%The rows from one member into another, grouped by the member they import;
+%a single member has none.
+metta_reference_member_rows([_], []) :- !.
+metta_reference_member_rows(Members, Carried) :-
+    findall(Provider-row(Space, Token, Map),
+            ( member(Space, Members), metta_reference_row(Space, Token, Provider, Map),
+              Provider \== Space, ord_memberchk(Provider, Members) ),
+            Pairs0),
+    keysort(Pairs0, Pairs), group_pairs_by_key(Pairs, Carried).
+
+metta_reference_label_faces(Members, Seeded, Carried, Faces) :-
+    list_to_assoc(Carried, Rows),
+    findall(label(Space, Entry, [Space]),
+            ( member(Space-Seeds, Seeded), member(Entry, Seeds) ), Level),
+    findall((Space-Entry)-[Path], member(label(Space, Entry, Path), Level), Initial),
+    list_to_assoc(Initial, Labelled0),
+    metta_reference_spread(Level, Rows, Labelled0, Labelled),
+    assoc_to_keys(Labelled, States),
+    group_pairs_by_key(States, Held),
+    findall(Space-Face,
+            ( member(Space, Members), ( memberchk(Space-Face, Held) -> true ; Face = [] ) ),
+            Faces).
+
+%Home's strongly connected component of from rows: the spaces it reaches
+%that reach it again, itself among them; a space on no cycle is its own.
+metta_reference_component(Home, Component) :-
+    metta_reference_reach(Home, Reach),
+    (   ord_memberchk(Home, Reach)
+    ->  findall(Space, ( member(Space, Reach), metta_reference_reach(Space, Back),
+                         ord_memberchk(Home, Back) ), Component)
+    ;   Component = [Home]
+    ).
+
+%What a member holds without another member: its own heads, and what each row
+%brings from outside the component, a self row its own heads and any other
+%row its home's settled face. A row into another member is the labels' to
+%follow, and a row into a blocked member brings nothing.
+metta_reference_seed(Space, _, Name/Arity-root(Space, Name, Arity, [])) :-
+    metta_reference_local_head(Space, Name, Arity).
+metta_reference_seed(Space, Component, Entry) :-
+    metta_reference_row(Space, Token, Home, Map),
+    ( Home == Space -> true ; \+ ord_memberchk(Home, Component) ),
+    metta_reference_row_entry(Space, Token, Home, Map, Entry).
+
+%Admits each label no label at its state dominates and answers the admitted,
+%the next level. Breadth first, every label admitted before a new one names no
+%more spaces than it, so none can be dominated by it and nothing is withdrawn.
+metta_reference_admit([], Labelled, Labelled, []).
+metta_reference_admit([label(Space, Entry, Path)|Labels], Labelled0, Labelled, Admitted) :-
+    (   get_assoc(Space-Entry, Labelled0, Paths)
+    ->  (   member(Known, Paths), ord_subset(Known, Path)
+        ->  Labelled1 = Labelled0, Admitted = Rest
+        ;   put_assoc(Space-Entry, Labelled0, [Path|Paths], Labelled1),
+            Admitted = [label(Space, Entry, Path)|Rest]
+        )
+    ;   put_assoc(Space-Entry, Labelled0, [Path], Labelled1),
+        Admitted = [label(Space, Entry, Path)|Rest]
+    ),
+    metta_reference_admit(Labels, Labelled1, Labelled, Rest).
+
+%One level: each label's entry, where its space publishes it, through every
+%row of a member outside the label's spaces that imports that space.
+metta_reference_spread([], _, Labelled, Labelled).
+metta_reference_spread([Label|Level], Rows, Labelled0, Labelled) :-
+    findall(label(Importer, Image, Extended),
+            ( member(label(Home, Entry, Path), [Label|Level]),
+              get_assoc(Home, Rows, Importers),
+              metta_reference_public_entry(Home, Entry),
+              member(row(Importer, Token, Map), Importers),
+              \+ ord_memberchk(Importer, Path),
+              metta_reference_row_image(Importer, Token, Map, Entry, Image),
+              ord_add_element(Path, Importer, Extended) ),
+            Candidates),
+    metta_reference_admit(Candidates, Labelled0, Labelled1, Next),
+    metta_reference_spread(Next, Rows, Labelled1, Labelled).
 
 %The node stores face(Own, Public); a provider's face is the Own half
 %[source: metta_reference_stabilize_face/3 below, which says why it holds both].
@@ -729,7 +856,7 @@ metta_reference_publish_key(Space, Module, Name, Arity, Roots, Faces) :-
 %edge, and this node's dependents read two different things. The home's own
 %reference nodes read Own, every name it resolves, internal ones included. An
 %importer reads the same face FILTERED by the home's visibility grades, which
-%metta_reference_source_face/4 applies live through
+%metta_reference_source_face/3 applies live through
 %metta_reference_public_entry/2. With Own alone, removing `(internal X)` left
 %the stored value =@= and an importer kept answering `(X)` unevaluated where it
 %now had to answer X's definition

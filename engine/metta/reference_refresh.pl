@@ -457,7 +457,7 @@ metta_reference_publication(rows(New, Applied, Touched, Face0, Public0, Plan0),
     findall(Entry,
             ( member(Token-Home, NewRows),
               metta_reference_row(Space, Token, Home, Map),
-              metta_reference_row_entry(Space, [], Token, Home, Map, Entry) ),
+              metta_reference_row_entry(Space, Token, Home, Map, Entry) ),
             Entries0),
     sort(Entries0, Entries),
     (   metta_reference_source_plan_rows(Space, Module, Plan0, Entries, Plan, Added)

@@ -391,7 +391,7 @@
             % not exported is one the host cannot reach
             % [tested: engine_modules:every_declared_service_is_exported_to_the_host].
             metta_reference_check_prolog_source/1,
-            metta_reference_face/3,
+            metta_reference_face/2,
             metta_reference_option/3,
             metta_reference_read_exports/3,
             metta_reference_register_prolog/4,
