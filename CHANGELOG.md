@@ -361,6 +361,17 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- A count of what a dropped space left behind is read after
+  `Runtime.reclaim()`, the one reclamation barrier the tests and the
+  memory-scale benchmark cross. It stops SWI's collector thread for its
+  whole loop and repeats each clause and atom collection until SWI's own
+  count shows it ran. It stops at a round in which Python collected nothing
+  and the live clause and atom counts ended where they began. Six places
+  each ran their own single pass or loop, and an explicit collection does
+  nothing while another thread holds that collection. Under seed 215044671
+  the drop test read 3776 atoms standing that one round with the collector
+  stopped reclaimed.
+
 - The `process-bounds` lane passes. The upstream parity selftest's fixture
   spliced its git argv in through a starred list, which the checker cannot
   read and so reports as an unbounded spawn; its argv now opens with the
