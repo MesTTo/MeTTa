@@ -810,10 +810,19 @@ def upstream_prerequisite_failures() -> list[str]:
         with contextlib.redirect_stderr(io.StringIO()):
             if lane.upstream_prerequisite() is not None:
                 failures.append("a planted tree with no repository of its own was refused")
-        git = ["git", "-C", str(clone), "-c", "user.name=selftest", "-c", "user.email=selftest@invalid"]
-        subprocess.run([*git, "init", "-q"], check=True, capture_output=True)
-        subprocess.run([*git, "commit", "-q", "--allow-empty", "-m", "fixture"], check=True,
-                       capture_output=True)
+        # One door for the fixture's git, its argv opening with the literal
+        # program so check_process_bounds.py can read what it starts: a list
+        # spliced in through a starred name hides the program, and the check
+        # reports an argv it cannot read rather than spare it [source
+        # 2026-09-25T09:34:36+10:00: tests/checks/check_process_bounds.py,
+        # python_spawns].
+        def git(*arguments: str) -> None:
+            subprocess.run(["git", "-C", str(clone), "-c", "user.name=selftest",
+                            "-c", "user.email=selftest@invalid", *arguments],
+                           check=True, capture_output=True)
+
+        git("init", "-q")
+        git("commit", "-q", "--allow-empty", "-m", "fixture")
         missing = io.StringIO()
         with contextlib.redirect_stderr(missing):
             lacking = lane.upstream_prerequisite()

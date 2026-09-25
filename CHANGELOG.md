@@ -361,6 +361,11 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- The `process-bounds` lane passes. The upstream parity selftest's fixture
+  spliced its git argv in through a starred list, which the checker cannot
+  read and so reports as an unbounded spawn; its argv now opens with the
+  literal program.
+
 - A carrier's declared algebra operation and its declared negation run in the
   fuel scope. Asked by a host directly, which names the operation itself,
   each evaluated unbounded.
