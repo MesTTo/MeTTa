@@ -32,6 +32,7 @@
 %   heads another library home's backing still registers, each journalled to
 %   the load that owns what survives, so the registration leaves with the last
 %   of them [tested 2026-09-25T10:26:32+10:00: packages:a_backing_head_outlives_the_first_space_that_imported_it]
+%   [tested 2026-09-26T00:11:10+10:00: packages:a_surviving_head_is_published_before_its_callers_are_repaired]
 %   [tested: lib_import_lifecycle:first_owner_retirement_keeps_other_spaces_callable,
 %   lib_import_lifecycle:failed_first_load_keeps_a_nested_import_callable,
 %   lib_import_lifecycle:retirement_inside_a_failed_load_keeps_older_registrations;
@@ -1642,10 +1643,18 @@ source_load_function_names(LoadId, Names) :-
 % The pin is never the enclosing load, since an enclosing import does not own
 % these older definitions.
 % [tested: lib_import_lifecycle; commit=4f2d6c0f8eb293b73f8dde30a1c84e24834f7393]
+% The arity goes back before the name, the order register_process_function/2
+% and metta_reference_register_prolog/4 register a head in. Under the owner's
+% pin no load is open to defer the repair to, so register_fun_in/2 recompiles
+% the name's callers at once, and a caller recompiled while the name was a
+% function with no arity row failed to translate its call. lib_thread's
+% (= (await $handle) (thread_await $handle)) failed that way when the space
+% that first imported lib_thread was released, which failed the release
+% [tested 2026-09-26T00:11:10+10:00: packages:a_surviving_head_is_published_before_its_callers_are_repaired].
 restore_surviving_source_functions(Names) :-
     forall(( member(F, Names), surviving_definition(F, Module, Arity, Owner) ),
            with_owning_source_load(Owner,
-               ( register_fun_in(Module, F), register_arity(F, Arity) ))).
+               ( register_arity(F, Arity), register_fun_in(Module, F) ))).
 
 %What still defines a name once its first source has gone, with the load that
 %owns it, none for a definition no source made: a translated equation, an

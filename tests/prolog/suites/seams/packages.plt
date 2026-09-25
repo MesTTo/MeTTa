@@ -20,6 +20,9 @@
 %   - a backed head stays a function in every space still importing it when
 %     the first space that imported it goes
 %     [tested 2026-09-25T10:26:32+10:00: packages:a_backing_head_outlives_the_first_space_that_imported_it]
+%   - that release keeps working when an equation of the same library calls
+%     the head, because the head's arity is back before its callers recompile
+%     [tested 2026-09-26T00:11:10+10:00: packages:a_surviving_head_is_published_before_its_callers_are_repaired]
 %   - the same library WITHOUT the row installs nothing, so the row is what
 %     does it rather than the import
 %     [tested: packages:a_file_with_no_backing_row_installs_nothing]
@@ -99,7 +102,7 @@
    atomic_list_concat([Here, '/../../../../ai-tmp'], Scratch),
    assertz(packages_scratch(Scratch)),
    forall(member(Kind, [backed, unbacked, unclaimed, requires, absent, declared,
-                        undepended, computed, outlived]),
+                        undepended, computed, outlived, restored]),
           ( atomic_list_concat([Here, '/../../../data/packages/', Kind, '.pl'], Relative),
             absolute_file_name(Relative, Artifact, [access(read)]),
             assertz(packages_artifact(Kind, Artifact)) )).
@@ -168,6 +171,26 @@ test(a_backing_head_outlives_the_first_space_that_imported_it,
     %last importer goes, nothing defines the name and it is data again.
     metta_release_space('&plunit_backing_second'),
     assertion(\+ arity(packages_outlived_double, _)).
+
+%The first importer's release restores a surviving head under its owner's pin,
+%where no load is open to defer to, so register_fun_in/2 recompiles the head's
+%callers at once. Registered before its arity, the head was a function with no
+%arity row while its caller recompiled, the call failed to translate, and the
+%release failed. A Python context that imported lib_thread first could not
+%close for that reason: lib_thread's (= (await $handle) (thread_await $handle))
+%is such a caller, and every later lib_thread import on the worker failed too.
+test(a_surviving_head_is_published_before_its_callers_are_repaired,
+     [cleanup(forall(member(Space, ['&plunit_restore_first', '&plunit_restore_second']),
+                     metta_release_space(Space)))]) :-
+    package_fixture(restored,
+                    '(= (package backing) (prolog "~w" (packages_restored_double)))~n(= (packages-restored-twice $x) (packages_restored_double $x))~n',
+                    Path),
+    'import!'('&plunit_restore_first', Path, _),
+    'import!'('&plunit_restore_second', Path, _),
+    metta_release_space('&plunit_restore_first'),
+    space_module('&plunit_restore_second', Module),
+    findall(R, with_metta_module(Module, eval(['packages-restored-twice', 21], R)), Answers),
+    assertion(Answers == [42]).
 
 test(a_backing_row_installs_the_head_its_artifact_exports) :-
     package_fixture(backed, '(= (package backing) (prolog "~w" (packages_backed_double)))~n', Path),

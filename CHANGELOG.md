@@ -386,6 +386,15 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- A Python context that imported lib_thread before any other space did closes
+  again. Its release failed recompiling `&self`'s
+  `(= (await $handle) (thread_await $handle))`: the release restored
+  `thread_await` for the space still importing lib_thread by registering the
+  name before its arity, and the name's callers recompiled at once against a
+  function with no arity. The failed close raised `EngineError`, and every
+  later lib_thread import in that process refused the `await` equation. A
+  released space now restores each surviving name's arity first, the order
+  the engine registers a backed head in to begin with.
 - The Python seat's space-retirement tests pass in any order: the storage
   helper they share reads a space's scope revocation as false until lib_thread
   loads, where the outside-transaction drop test raised Unknown procedure
