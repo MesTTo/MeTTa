@@ -1228,7 +1228,7 @@ wheels = [
 
 [[package]]
 name = "metta-arrays"
-version = "0.9.2"
+version = "0.9.3"
 source = { editable = "ext/metta-arrays" }
 dependencies = [
     { name = "array-api-compat" },
@@ -1243,7 +1243,7 @@ requires-dist = [
 
 [[package]]
 name = "metta-benchmarking"
-version = "0.9.2"
+version = "0.9.3"
 source = { editable = "ext/metta-benchmarking" }
 dependencies = [
     { name = "pymetta" },
@@ -1254,7 +1254,7 @@ requires-dist = [{ name = "pymetta", editable = "." }]
 
 [[package]]
 name = "metta-duckdb"
-version = "0.9.2"
+version = "0.9.3"
 source = { editable = "ext/metta-duckdb" }
 dependencies = [
     { name = "duckdb" },
@@ -1269,7 +1269,7 @@ requires-dist = [
 
 [[package]]
 name = "metta-faiss"
-version = "0.9.2"
+version = "0.9.3"
 source = { editable = "ext/metta-faiss" }
 dependencies = [
     { name = "faiss-cpu" },
@@ -1286,7 +1286,7 @@ requires-dist = [
 
 [[package]]
 name = "metta-graphql"
-version = "0.9.2"
+version = "0.9.3"
 source = { editable = "ext/metta-graphql" }
 dependencies = [
     { name = "graphql-core" },
@@ -1301,7 +1301,7 @@ requires-dist = [
 
 [[package]]
 name = "metta-live"
-version = "0.9.2"
+version = "0.9.3"
 source = { editable = "ext/metta-live" }
 dependencies = [
     { name = "pymetta" },
@@ -1312,7 +1312,7 @@ requires-dist = [{ name = "pymetta", editable = "." }]
 
 [[package]]
 name = "metta-nanoarrow"
-version = "0.9.2"
+version = "0.9.3"
 source = { editable = "ext/metta-nanoarrow" }
 dependencies = [
     { name = "nanoarrow" },
@@ -1327,7 +1327,7 @@ requires-dist = [
 
 [[package]]
 name = "metta-numpy"
-version = "0.9.2"
+version = "0.9.3"
 source = { editable = "ext/metta-numpy" }
 dependencies = [
     { name = "numpy" },
@@ -1349,7 +1349,7 @@ provides-extras = ["test"]
 
 [[package]]
 name = "metta-otel"
-version = "0.9.2"
+version = "0.9.3"
 source = { editable = "ext/metta-otel" }
 dependencies = [
     { name = "opentelemetry-api" },
@@ -1371,7 +1371,7 @@ provides-extras = ["test"]
 
 [[package]]
 name = "metta-pandas"
-version = "0.9.2"
+version = "0.9.3"
 source = { editable = "ext/metta-pandas" }
 dependencies = [
     { name = "pandas" },
@@ -1386,7 +1386,7 @@ requires-dist = [
 
 [[package]]
 name = "metta-polars"
-version = "0.9.2"
+version = "0.9.3"
 source = { editable = "ext/metta-polars" }
 dependencies = [
     { name = "polars" },
@@ -1401,7 +1401,7 @@ requires-dist = [
 
 [[package]]
 name = "metta-pyarrow"
-version = "0.9.2"
+version = "0.9.3"
 source = { editable = "ext/metta-pyarrow" }
 dependencies = [
     { name = "pyarrow" },
@@ -1416,7 +1416,7 @@ requires-dist = [
 
 [[package]]
 name = "metta-pydantic"
-version = "0.9.2"
+version = "0.9.3"
 source = { editable = "ext/metta-pydantic" }
 dependencies = [
     { name = "pydantic" },
@@ -1431,7 +1431,7 @@ requires-dist = [
 
 [[package]]
 name = "metta-remote"
-version = "0.9.2"
+version = "0.9.3"
 source = { editable = "ext/metta-remote" }
 dependencies = [
     { name = "pymetta" },
@@ -1442,7 +1442,7 @@ requires-dist = [{ name = "pymetta", editable = "." }]
 
 [[package]]
 name = "metta-sqlite"
-version = "0.9.2"
+version = "0.9.3"
 source = { editable = "ext/metta-sqlite" }
 dependencies = [
     { name = "pymetta" },
@@ -1453,7 +1453,7 @@ requires-dist = [{ name = "pymetta", editable = "." }]
 
 [[package]]
 name = "metta-tables"
-version = "0.9.2"
+version = "0.9.3"
 source = { editable = "ext/metta-tables" }
 dependencies = [
     { name = "pymetta" },
@@ -1464,7 +1464,7 @@ requires-dist = [{ name = "pymetta", editable = "." }]
 
 [[package]]
 name = "metta-websocket"
-version = "0.9.2"
+version = "0.9.3"
 source = { editable = "ext/metta-websocket" }
 dependencies = [
     { name = "pymetta" },

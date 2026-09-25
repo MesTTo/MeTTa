@@ -7,6 +7,8 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ## [Unreleased]
 
+## [0.9.3] - 2026-09-26
+
 ### Added
 
 - The `llms` lane holds five more kinds of roster to their sources: a
@@ -126,6 +128,9 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   self-test to fail without it.
 
 ### Changed
+
+- Every integration member moves to 0.9.3 with pymetta, pinning
+  `pymetta==0.9.3`.
 
 - `prolog-static` refuses a host transport that evaluates any other way: a call
   to `eval/2`, `evalc/3`, `eval-one/2`, `metta/4`, `metta-thread/4`,
@@ -16877,7 +16882,8 @@ upstream tags above it. Published to PyPI as `pymetta` 0.6.0.
 - Released PeTTa v1.0 with smart dispatch, two-stage compilation, function
   specialization, modular libraries, and MORK, MM2, and FAISS integration.
 
-[Unreleased]: https://github.com/MesTTo/MeTTa/compare/pymetta-0.9.2...HEAD
+[Unreleased]: https://github.com/MesTTo/MeTTa/compare/pymetta-0.9.3...HEAD
+[0.9.3]: https://github.com/MesTTo/MeTTa/compare/pymetta-0.9.2...pymetta-0.9.3
 [0.9.2]: https://github.com/MesTTo/MeTTa/compare/e5c9e672e12cb40a88bbc7a6a776a62b46c370b6...pymetta-0.9.2
 [0.9.1]: https://github.com/MesTTo/MeTTa/compare/ca56ac3875e307ab049f6941529dc207d03480c2...e5c9e672e12cb40a88bbc7a6a776a62b46c370b6
 [0.9.0]: https://github.com/MesTTo/MeTTa/compare/v0.8.0...ca56ac3875e307ab049f6941529dc207d03480c2
