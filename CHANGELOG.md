@@ -412,6 +412,34 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- The four `llms.txt` sheets describe the tree the release ships. A release
+  pass checked every roster, count, contract and constructor the `llms` lane
+  cannot hold against the live engine, the files and the seats, and corrected
+  what it found: the carrier table's printed answers (`0.8999999999999999`
+  where it said `0.9`, a formula named by its root node's process-wide id, a
+  polynomial monomial's rule before its sources); ten carriers shipping where
+  thirteen do; four `metta.config` settings where there are seven; eleven
+  refinement heads where `Literal` makes twelve; `!(get-type pureStructural)`
+  answering `EffectClass`, where that type atom lives in `&metta` and
+  `get-type-space &metta` reaches it; an `ops` module whose doors are
+  `metta.withdraw` and `metta.registered` now; `Recording`, `HeadCard` and the
+  error tree missing fields and classes, and `HeadCard` naming `arrow` where
+  the field is `types`; seven seam points declared by `metta.seam` where
+  twelve are; eleven CLI subcommands where `extension` makes twelve;
+  `m.lock()` on a space where the door is the context's; fifty-nine special
+  forms where `match-under` makes sixty; and a builtin roster five heads short
+  of its own count. The Python seat's sheet installed only from a checkout,
+  where `pip install pymetta` is the consumer's install, asked for SWI-Prolog
+  9.3 or later instead of the patched host and named retired modules, and
+  costs stated without a date, in nine places, carry the date they were
+  measured, two of them measured again. The `m.stats` entry no longer counts a
+  spawned future's cancel among the joined workers taken out: a spawned future
+  is a scheduler engine that is never joined, and its cancel reads one of two
+  counts. And the root sheet states the known issues this release ships with:
+  a race pulled through a streaming door reads no single count in `m.stats`,
+  and a long-lived process that creates contexts and imports libraries can
+  grow the engine's predicate registry with its history.
+
 - The seat's `test_a_cancelled_future_is_not_charged` no longer fails at
   random. A cancel that found its task still queued disposed of the engine
   itself, 27 inferences dearer than stopping a running one, and which branch

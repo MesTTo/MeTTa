@@ -27,7 +27,7 @@ re-runs them.
 | `website/reference/refusals.md` | the engine's own `(refusal ...)` rows: the class each seat raises, the ground and the remedy | `extensions/python/tools/refusalsdoc.py` |
 | `tests/prolog/suites/*/*.plt` | plunit suites over the engine itself, grouped by the engine unit each one tests | the `plunit` gate lane |
 | `extensions/python/tests/*/test_*.py` | blackbox, hypothesis-fuzzed, in the same 20 chapters `examples/` uses, plus `conformance/` for the arbiters and `repository/` for the tests whose subject is this repository | the `pytest` gate lane |
-| `extensions/python/examples/language-feature-examples/**/*.py` | one Python file per shipped MeTTa example, written with no MeTTa source text, proving with `assert` every claim its original's `(test ...)` forms make or explicitly declining a structured-residue form, and priced by the engine's inference counter against a two-sided `BUDGET` at the foot of the file. Three further declarations sit beside it, each with the measurement that settled it: `ALLOWANCE` widens the point band where a twin's count tracks something that is not its work, `DIVERGENCE` pins the stored-content difference a twin means to have (a Python annotation IS a `(: ...)` row and a docstring IS an `(@doc ...)` row, so the two spaces are not obliged to be equal, only to differ exactly as declared), and `OVERRUN` names what the twin's own program costs beyond its example's 10% band. Read these for how a MeTTa program is spelled in Python | the `twins` gate lane, with `twins-selftest` planting one failure of each of the four |
+| `extensions/python/examples/language-feature-examples/**/*.py` | one Python file per twinned MeTTa example, at that example's own path (an example with no twin is a row of the `twins` lane's derived backlog), written with no MeTTa source text, proving with `assert` every claim its original's `(test ...)` forms make or explicitly declining a structured-residue form, and priced by the engine's inference counter against a two-sided `BUDGET` at the foot of the file. Three further declarations sit beside it, each with the measurement that settled it: `ALLOWANCE` widens the point band where a twin's count tracks something that is not its work, `DIVERGENCE` pins the stored-content difference a twin means to have (a Python annotation IS a `(: ...)` row and a docstring IS an `(@doc ...)` row, so the two spaces are not obliged to be equal, only to differ exactly as declared), and `OVERRUN` names what the twin's own program costs beyond its example's 10% band. Read these for how a MeTTa program is spelled in Python | the `twins` gate lane, with `twins-selftest` planting one failure of each of the four |
 | `CODEC.md` | the wire codec: the tagged form every atom crosses as, what a new binding implements | `extensions/python/tools/codecdoc.py`, whose tables come from `tests/codec/corpus.json` |
 | `extensions/python/metta/_pygments.py` | the MeTTa Pygments lexer, GENERATED from `website/.vitepress/metta.tmLanguage.json`, the one TextMate grammar the site and the editor colour from. Registered under the `pygments.lexers` entry point with the alias `metta`, every filename ending in `.metta`, and the MIME type `text/x-metta`, so Sphinx, mkdocs, rich, IPython, nbconvert and a Jupyter kernel colour MeTTa once `pymetta` is installed and nothing has to be imported to arrange it. It carries no semantic colouring: the grammar's twelve groups are lexical, and meaning (a definition against a call, a known type) is what the language server's semantic tokens add | `extensions/python/tools/pygmentsgen.py`, the `pygments-sync` gate lane, and the `tokenisation` gate lane, which runs the grammar's OWN tokeniser through `website/scripts/tokenise.mjs` and requires the two to agree about every character of every `.metta` file in the tree |
 | `extensions/python/metta/vocabularies.py` | the catalog's value vocabularies as StrEnum classes, one per `(vocabulary ...)` row; each member IS its wire word and encodes as its symbol, and bare words stay the runtime escape hatch | `extensions/python/tools/vocabgen.py`, the `vocab-sync` gate lane |
@@ -41,8 +41,8 @@ re-runs them.
 | `website/reasoning/*.md` | weighted relations, matchers and measure | |
 | `extensions/python/examples/*/*.py` | runnable Python programs, each printing checked claims through `_common.py`: `check(label, got, expected)` raises `CheckFailed` rather than asserting, because `python -O` strips an assert while the print under it still runs, and `done(name)` refuses to print its OK line when nothing was checked, so an example that verified nothing cannot report success; the six under `gallery/` also check adjacent emitted-MeTTa and output comments plus bilingual `@example` atoms | the `examples` and `gallery` gate lanes |
 | `extensions/python/notebooks/tour.ipynb` | the notebook surface, every structural argument a built term | the `notebook` lane |
-| `engine/**/*.pl` | `engine/metta.pl` declares `metta_engine`, the bootstrap including the 25 `engine/metta/*.pl` units (limits, terms, operators, input_guards, types, type_aliases, type_unions, refinements, effects, completion, algebra_operations, algebra_formula, algebra_fixpoint, space_hooks, runtime, control, interop, references, reference_sources, reference_loading, reference_refresh, properties, registration, prelude), `engine/translator.pl` compilation facade over the seven `engine/translator/*.pl` units (analysis, lowering, folding, constructors, special_forms, typing, runtime), `engine/spaces.pl` store facade over the twelve `engine/spaces/*.pl` units (catalog, lifecycle, foreign, bounded_matching, native_matching, segment_matching, generic_join, arrow_products, tokens, receipts, vocabulary_seed); vocabulary_seed has its own module and compiles the guarded initial vocabulary atoms, `engine/filereader.pl` loader over `engine/filereader/source_lifecycle.pl`, `engine/parser.pl` reader and writer (with `engine/c/reader.c`, 949 lines of C parsing shipped-grammar sources and handing back each source's signature and declaration summaries from the same walk when `engine/reader.so` is built beside it; the Prolog grammar stays the specification, the custom-token path, and the fallback), `engine/json_codec.pl` the one JSON door this repository reads and writes through (with `engine/c/json_codec.c`, 1,219 lines of C answering a document exactly as `library(json)` answers it or declining to it, when `engine/json_codec.so` is built beside it), `engine/kernel.pl` the performance vocabulary beyond the conforming stdlib, `engine/type_rules.pl` the typing registry, `engine/translator_rules.pl` the translator rule registry, `engine/support_graph.pl` derived-artifact dependencies, plus `engine/packages.pl` the package laws every implementation owes a manifest, `engine/owned_resources.pl` the outcome-preserving release combinator it and three libraries share, `engine/specializer.pl`, `engine/duals.pl`, `engine/scc.pl`, `engine/tracer.pl`, `engine/trs.pl` and `engine/narrowing.pl` metatheory, `engine/prelude.pl` the vocabulary tier (Prolog bodies of the 37 prelude heads). Each included unit is a plain source file owned by its umbrella module. `engine/main.pl` declares `metta_main`. Engine facades declare their own module and explicit exports; `metta_engine_reexport/2` publishes the subsystem operations the host tier needs. Execution resolves through the space parents, `&self`, `prelude`, `metta_engine`, `user`, then `system` | |
-| `engine/ext_points.pl` | every extension seam, each declared with its KIND. Five of them, and the count of each: `host_service` 146, `service` 96, `ownership` 41, `event` 23, `declaration` 20. Ownership, event and declaration clauses are contributed by an extension; the two service kinds are defined by the engine and called by an extension (`clauses_from/2`). `metta_space_registered/1` reflects existing native and foreign namespaces independently of their value species. `metta_with_trailed/3` restores context at each answer; `metta_with_trailed_enumeration/3` retains it until the generator finishes; `metta_with_trailed_push/3` pushes one item onto a stack-shaped root for that span. `metta_atom_index_new/1`, `metta_atom_index_bind/4` and `metta_atom_index_get/3` own temporary atom-key bindings with original values and trailed insertion. A `seam:context_reader/3` directive derives the callable reader and its inline read from one `context_reader/4` declaration. The contract for extending the engine | `ext_points.plt` |
+| `engine/**/*.pl` | `engine/metta.pl` declares `metta_engine`, the bootstrap including the 25 `engine/metta/*.pl` units (limits, terms, operators, input_guards, types, type_aliases, type_unions, refinements, effects, completion, algebra_operations, algebra_formula, algebra_polynomial, algebra_fixpoint, space_hooks, runtime, control, interop, references, reference_sources, reference_loading, reference_refresh, properties, registration, prelude), `engine/translator.pl` compilation facade over the seven `engine/translator/*.pl` units (analysis, lowering, folding, constructors, special_forms, typing, runtime), `engine/spaces.pl` store facade over the twelve `engine/spaces/*.pl` units (catalog, lifecycle, foreign, bounded_matching, native_matching, segment_matching, generic_join, arrow_products, tokens, receipts, owned_records, vocabulary_seed); vocabulary_seed has its own module and compiles the guarded initial vocabulary atoms, `engine/filereader.pl` loader over `engine/filereader/source_lifecycle.pl`, `engine/parser.pl` reader and writer (with `engine/c/reader.c`, 949 lines of C parsing shipped-grammar sources and handing back each source's signature and declaration summaries from the same walk when `engine/reader.so` is built beside it; the Prolog grammar stays the specification, the custom-token path, and the fallback), `engine/json_codec.pl` the one JSON door this repository reads and writes through (with `engine/c/json_codec.c`, 1,219 lines of C answering a document exactly as `library(json)` answers it or declining to it, when `engine/json_codec.so` is built beside it), `engine/kernel.pl` the performance vocabulary beyond the conforming stdlib, `engine/type_rules.pl` the typing registry, `engine/translator_rules.pl` the translator rule registry, `engine/support_graph.pl` derived-artifact dependencies, plus `engine/packages.pl` the package laws every implementation owes a manifest, `engine/owned_resources.pl` the outcome-preserving release combinator it and three libraries share, `engine/specializer.pl`, `engine/duals.pl`, `engine/scc.pl`, `engine/tracer.pl`, `engine/trs.pl` and `engine/narrowing.pl` metatheory, `engine/prelude.pl` the vocabulary tier (Prolog bodies of the 37 prelude heads). Each included unit is a plain source file owned by its umbrella module. `engine/main.pl` declares `metta_main`. Engine facades declare their own module and explicit exports; `metta_engine_reexport/2` publishes the subsystem operations the host tier needs. Execution resolves through the space parents, `&self`, `prelude`, `metta_engine`, `user`, then `system` | |
+| `engine/ext_points.pl` | every extension seam, each declared with its KIND in the `seam` module's multifile `kind/2`: most clauses here, the rest as `seam:kind/2` beside the unit that owns the seam (`engine/json_codec.pl`, `engine/metta/interop.pl`, `engine/metta/limits.pl`, `engine/metta/registration.pl`, `engine/support_graph.pl`). Five of them, and the count of each: `host_service` 146, `service` 96, `ownership` 41, `event` 23, `declaration` 20. Ownership, event and declaration clauses are contributed by an extension; the two service kinds are defined by the engine and called by an extension (`clauses_from/2`). `metta_space_registered/1` reflects existing native and foreign namespaces independently of their value species. `metta_with_trailed/3` restores context at each answer; `metta_with_trailed_enumeration/3` retains it until the generator finishes; `metta_with_trailed_push/3` pushes one item onto a stack-shaped root for that span. `metta_atom_index_new/1`, `metta_atom_index_bind/4` and `metta_atom_index_get/3` own temporary atom-key bindings with original values and trailed insertion. A `seam:context_reader/3` directive derives the callable reader and its inline read from one `context_reader/4` declaration. The contract for extending the engine | `ext_points.plt` |
 | `lib/*/` | 60 MeTTa libraries, each a directory holding a `pkg.metta` manifest, implemented in `.metta`, `.pl`, or both; all 40 shipped Prolog halves own distinct modules with explicit exports: 37 are libraries' own `lib_*` modules, including the builtin and minimal-MeTTa ones, with local autoload tables, and 3 are the helpers under `lib/_support/` that libraries share. Libraries load with `!(import! &self (library lib_x))`; from Python the write door imports them, `m += lib.x` | `extensions/python/tests/ch08_data/test_library_door.py` |
 | `lib/builtin_mods/*` | modules the engine SHIPS, imported by bare name: `!(import! &self skel)` | `builtin_modules` |
 | `extensions/*/extension.pl` | one control file per seat, read when argv carries `extensions` and never read without it; a seat's `entry(engine, _)` loads only where its declared needs hold and its `entry(host, _)` is recorded for the seat's own runtime to consult, so the engine names neither a host nor a backend | |
@@ -119,6 +119,16 @@ context for a space door raises an `AttributeError` naming `m.self`, rather
 than a bare one. Two contexts are two engines' worth of state in one process,
 so a library never has to own the global one.
 
+Known issue: a long-lived process that creates and releases many contexts and
+imports libraries into them can grow the engine's predicate registry with its
+history, so a later import costs far more than the same import in a fresh
+process. In one test run replayed in a single process (measured 2026-09-26),
+the process held 7.7 million predicates, 1.55 million clauses and 4.4 GB by
+its 5,255th test, and a property test creating a fresh `MeTTa()` and importing
+`lib.file` for each example took about 130 s and added about 1.37 million
+predicates, against 4.8 s and under 500 predicates in a fresh process. The fix
+lands after this release.
+
 Module-level `metta.run/match/eval/add/remove/parse/fn/trace` act on one lazily
 created default engine, for scripts that never need a second space.
 
@@ -156,14 +166,16 @@ python -m metta run --json prog.metta | jq -c .    # one object a line
 python -m metta run --json=wire - < prog.metta     # tagged atoms in answers
 ```
 
-`metta.config` is the process-wide `Config` object. Inspect all four settings
+`metta.config` is the process-wide `Config` object. Inspect all seven settings
 with `config.as_dict()` and set them atomically with
 `config.configure(stack_limit=..., heartbeat_interval=...,
-declaration_limit=..., display_rows=...)`. The stack byte ceiling and Janus
-heartbeat interval freeze after the first engine starts; declaration expansion
-and displayed-row limits remain live. Set the same values before import with
-`METTA_STACK_LIMIT`, `METTA_HEARTBEAT_INTERVAL`, `METTA_DECLARATION_LIMIT`, and
-`METTA_DISPLAY_ROWS`; invalid or nonpositive values stop import by name.
+declaration_limit=..., display_rows=..., chunk_cap=...,
+subscription_queue=..., repr_items=...)`. The stack byte ceiling and Janus
+heartbeat interval freeze after the first engine starts; the other five are the
+`(limit ...)` rows under "Bounds" below and remain live. Set the first four
+before import with `METTA_STACK_LIMIT`, `METTA_HEARTBEAT_INTERVAL`,
+`METTA_DECLARATION_LIMIT`, and `METTA_DISPLAY_ROWS`; invalid or nonpositive
+values stop import by name. The last three have no environment variable.
 
 ## Atoms: built in Python, no engine call
 
@@ -2257,8 +2269,10 @@ int is a Number, a `str` a String atom, an `Atom` itself, a `Space` its handle,
 anything else a grounded object.
 
 The generated spelling is `__metta_hole_<k>`, and the `__metta_hole_` prefix is
-RESERVED: program text spelling it is refused, and so is a `bind()` key in that
+RESERVED: template text spelling it is refused, and so is a `bind()` key in that
 namespace, so a hole and a name the program uses can never be the same symbol.
+Text passed with no values is not a template, so there it reads as an ordinary
+symbol.
 
 The markers at a hole are the atom constructors, not a new vocabulary:
 `{Symbol(name)}` for a symbol, `{Grounded(obj)}` for an opaque object,
@@ -2356,22 +2370,23 @@ constructor expression captured in one column.
 
 `under=` changes the annotation algebra for either a relational match or a
 call. Thirteen carriers ship. The answers below are one program's: two facts tagged
-`0.6` and `0.3` reaching one head through a rule tagged `1.0`.
+`0.6` and `0.3` reaching one head through a rule tagged `1.0`, in a space named
+`&s` whose head is `(h)`. Tags are floats, so `0.6 + 0.3` prints as the float it is.
 
 | carrier | combine, extend | answers | |
 |---|---|---|---|
-| `bag` | `+` `*` | `0.9` | the default when `under=` is omitted |
+| `bag` | `+` `*` | `0.8999999999999999` | the default when `under=` is omitted |
 | `bool` | `max` `*` | `0.6` | |
 | `visibility` | `max` `min` | refuses | requires `INTERNAL` or `PUBLIC`; reference faces read occurrence grades under this carrier |
 | `set` | `max` `*` | `0.6` | combine is idempotent, so multiplicity collapses |
 | `counting` | `+` `*` | `2` | an engine aggregate crossing no answer rows |
 | `ranked` | `max` `*` | `0.6` | orders highest first |
-| `prob` | `+` `*` | `0.9` | orders highest first |
+| `prob` | `+` `*` | `0.8999999999999999` | orders highest first |
 | `tropical` | `min` `+` | `1.3` | orders cheapest first |
 | `budget` | `min` `+` | `1.3` | ascending like tropical, spent rather than distance |
 | `prov` | `plus` `times` | `(plus (times 1.0 0.6) (times 1.0 0.3))` | a TERM, not a number |
-| `formula` | `formula-or` `formula-and` | `(formula 5)` | a decision diagram over the facts; `.under(prob)` is its exact model count, `0.72` here, where `prob` sums proofs to `0.9` |
-| `polynomial` | `polynomial-plus` `polynomial-times` | `(poly (1 (var (src &s 0) 0.6) (var (rule &s 2 (h)) 1.0)) (1 (var (src &s 1) 0.3) (var (rule &s 2 (h)) 1.0)))` | the free semiring: one monomial per derivation, its sources as variables, its coefficient how many derivations use exactly them |
+| `formula` | `formula-or` `formula-and` | `(formula 7)` | a decision diagram over the facts, named by its root node's process-wide id (a fresh process answers `7` here); `.under(prob)` is its exact model count, `0.72` here, where `prob` sums proofs to `0.8999999999999999` |
+| `polynomial` | `polynomial-plus` `polynomial-times` | `(poly (1 (var (rule &s 2 (h)) 1.0) (var (src &s 0) 0.6)) (1 (var (rule &s 2 (h)) 1.0) (var (src &s 1) 0.3)))` | the free semiring: one monomial per derivation, its sources as variables, its coefficient how many derivations use exactly them |
 | `amplitude` | `amplitude-add` `amplitude-multiply` | refuses | outside its declared fragment |
 
 Thirteen are objects: `metta.bool`, `.visibility`, `.bag`, `.counting`, `.set`, `.ranked`,
@@ -2415,12 +2430,13 @@ variables a formula mentions with their weights.
 
 A declared carrier states the three operations the engine reads as claims
 beside its row: `negate=` (unary, what `.under(...)` weighs a variable's
-false branch with; `bool` and `prob` ship `complement`), `saturated=` (the
-binary test that stops a fixpoint join), and `variable=` (the binary
+false branch with; `bool` and `prob` ship `complement` and `formula` ships
+`formula-not`), `saturated=` (the binary test that stops a fixpoint join, which
+no shipped carrier declares), and `variable=` (the binary
 operation that mints the carrier's value for a source key `(src space n)`
 or `(rule space n head)` and its written tag, which is how a carrier becomes
 free over the program's facts; `formula` ships `formula-var`, `counting`
-ships `counting-one`). Each is a callable, a Symbol, or an operation name,
+ships `counting-one` and `polynomial` ships `polynomial-var`). Each is a callable, a Symbol, or an operation name,
 exactly as `plus=` and `times=` are.
 
 In MeTTa the same fixpoint is `(match-under &space carrier pattern)`: one
@@ -2522,7 +2538,11 @@ return the three best. They offer `limit=3` to a foreign provider when its
 source is repeatable, it promises `emits("best-first")`, its annotations and
 ordering match the selected carrier, and it handles the single unguarded
 pattern with `Exact` routing. Otherwise the provider is drained and the
-answers are ordered here. `(top 3 ...)` uses the same engine license.
+answers are ordered here. `(top 3 ...)` uses the same engine license. A
+provider that implements `match` and no `atoms()`, the ranker or vector index
+the pushdown exists for, takes the bound through all three: a space that
+cannot enumerate holds no tagged program the Python doors could read, so they
+take the ordinary route `(top 3 ...)` takes.
 `m.sample(q, k=10, seed=7)`
 samples with replacement from implicit `(rate n)` tags using a local seeded
 generator.
@@ -2604,12 +2624,13 @@ transaction cursors remain lazy and keep their logical update view.
 `.group_by(name)` -> a dict from each column atom to its `Rows` slice,
 `.table()` -> dict of columns decoded to Python values, `.to_dicts()` -> plain
 mappings, `.to(library)` -> a frame of any REGISTERED frame library, with
-`.to_df()` and `.to_pl()` its pandas and polars sugar, `.build(column, cls)`
+`.to_df()` and `.to_pl()` the sugar `metta-pandas` and `metta-polars` declare
+(the `dataframes` extra installs both), `.build(column, cls)`
 rebuilds one named column, and `.build(cls)` rebuilds the sole constructor
 column. Both keep `cls` for type checkers.
 `.pipe(fn, *args)` chains, `_repr_html_` renders in notebooks, and
-`_repr_pretty_` on an atom gives IPython the same tree `__rich_repr__` gives
-rich.
+`_repr_pretty_` on an expression gives IPython the same grouped tree
+`__rich_repr__` gives rich.
 
 Rows and Answers ARE Arrow data. `__arrow_c_schema__()` and
 `__arrow_c_stream__(requested_schema=None)` are the Arrow PyCapsule Interface,
@@ -2759,8 +2780,10 @@ narrow one. Each composes STORAGE and is a provider, not an evaluation
 context: equations reachable through one are data, and read back by `atoms()`
 without firing, unless that provider declares `rules`.
 
-`m.live(*query, on="both", strategy=None)` materialises a query and keeps it
-current from this space's own committed writes: `live.rows` is what
+`m.live(*query, on="both", strategy=None)`, the door `metta-live` contributes
+(the `live` extra; without it `m.live` is `no door namespace 'live' is
+registered`), materialises a query and keeps it current from this space's own
+committed writes: `live.rows` is what
 `m.match(...)` would answer without asking, `len(live)`, `atom in live` and
 `live.count(atom_or_row)` are local reads, and `live.atoms()` is the answer as
 atoms for a one-atom query. The query is one pattern, a conjunction spelled the
@@ -2820,8 +2843,11 @@ not start at `symbol`, because that walk reads position 1 as the space.
 
 Every vocabulary has a MeTTa TYPE NAME, and the engine writes the type atoms
 itself: one `(: <TypeName> Type)` beside each `(vocabulary ...)` row and one
-`(: <member> <TypeName>)` per member, so `!(get-type pureStructural)` answers
-`EffectClass` and a program can match the closed sets by type. The name is the
+`(: <member> <TypeName>)` per member, all in `&metta`, so
+`!(get-type-space &metta pureStructural)` answers `EffectClass` and a program
+can match the closed sets by type there. Plain `get-type` asks the current
+space, which holds none of them: `!(get-type pureStructural)` answers
+`%Undefined%`. The name is the
 mechanical CamelCase of the kebab row name (`effect-class` is `EffectClass`,
 `answer-policy` is `AnswerPolicy`), and an exception is a row:
 `(vocabulary-type on-error-mode OnError)` is the only one that ships, and it is
@@ -2930,13 +2956,14 @@ read-only answers. A wait inside a transaction refuses; load eagerly before
 opening that transaction. Source owners wake waiters on failure and allow a
 later retry.
 
-Same-name references use native module imports. In the 3,000-call extension
+Same-name references use native module imports. Measured 2026-09-09
+(`docs/journal/2026-09-09-import-and-module-semantics.md`): in the 3,000-call extension
 driver, a local call and its reference each cost 3 inferences beyond the loop;
 prefix and rename each cost 4. A 2,000-call `eval-arith` loop costs 278,007 for
 local and referenced heads and 280,007 for renamed heads. Ordinary 1,000-row
 imports keep their per-row slopes and cost nine fewer inferences when warm:
 one rollback-state collection replaces three collections and an append. The
-first cold equation import grows by 483 for six new engine heads, the cost of
+first cold equation import grows by 507 for six new engine heads, the cost of
 the loader's initial predicate census. The design journal records paired
 control counts and the reference-publication batch that avoids rebuilding a
 shared caller once per changed dependency.
@@ -2954,13 +2981,13 @@ compatibility input. The remaining options are `name=`,
 `transport="encoded"|"raw"`, `declarations=` (ordinary Atom claims),
 `arities=`, and `inverse=` (the callable that runs it backwards).
 `m.unregister_op(name)` removes every arity and declaration, for the whole
-process. Its per-space half is `ops.withdraw(runtime, name, space)`: an
+process. Its per-space half is `metta.withdraw(runtime, name, space)`: an
 implementation is process-global while declarations are space-local, so a
 library uninstalling from ONE space an operation another space still uses
 releases that space's rows and leaves the operation registered, answering
 whether the space held any. It raises `KeyError` for an unregistered name, as
-`unregister` does, and withdrawing the last space leaves the operation
-registered and declared nowhere, `unregister` being the door for that. A
+`m.unregister_op` does, and withdrawing the last space leaves the operation
+registered and declared nowhere, `m.unregister_op` being the door for that. A
 coroutine
 operation answers a FutureSpace immediately rather than suspending the call:
 the future IS a space, so awaiting it is matching it, and `(async-op <name>
@@ -3213,7 +3240,10 @@ signature, because each constraint class encodes to the atom of its own name.
 `metta.vocabularies.Refinement` names the heads the engine decides: `Gt`,
 `Ge`, `Lt`, `Le`, `Interval` (as `(Interval (ge 0) (le 1))`, the bounds that
 were written), `MultipleOf`, `MinLen`, `MaxLen`, `Len` (as `(Len 2)` or
-`(Len 2 5)`), `Predicate` and `Unit`; `doc(...)` and `Timezone(...)` travel in
+`(Len 2 5)`), `Predicate`, `Unit` and `Literal` (as `(Literal 1 2)`, from
+`typing.Literal[1, 2]`, whose members split by base type, so
+`Literal[1, "one"]` is `(Annotated Number (Literal 1))` or
+`(Annotated String (Literal "one"))`); `doc(...)` and `Timezone(...)` travel in
 the annotation claim and never reach the type. A refined parameter accepts a
 value whose declared type unifies with the whole refined type, or whose type
 admits the base while every constraint holds on the value; a value the base
@@ -3229,13 +3259,14 @@ decide native numbers and host numerics through the seam; `Predicate` applies
 its function to the value, a defined head through its equations and a Python
 callable through the seam, and holds when the answer is True; `Unit` is a
 declaration, decided by unification between declared types and never against
-a bare number. An `%Undefined%`-typed value is not waved through a refinement
+a bare number; `Literal` holds when the value is identical to one listed member,
+binding nothing, so `1.0` is not a member of `(Literal 1)`. An `%Undefined%`-typed value is not waved through a refinement
 the way the gradual rule waves it through a plain type: the constraint reads
 the value, so `(a)` fails `(MinLen 2)` on its length. A constraint head
 outside the vocabulary, `(Shape ...)` included, is admitted only by declared
 type unification, exactly as before the vocabulary existed. The rules are one
 clause per head in `engine/metta/refinements.pl`, and the catalog's
-`(vocabulary refinement ...)` row names the same eleven heads.
+`(vocabulary refinement ...)` row names the same twelve heads.
 `(add-typing-rule! name family actual expected outcome)` adds a module-scoped
 checker rule; `outcome` is `Accept`, `(Refuse reason)`, or `Defer`, and
 `remove-typing-rule!` withdraws it. Families are `ordinary`, `derived`,
@@ -3372,11 +3403,15 @@ m.algebra:
         a reused named or pooled space starts clean. An operation returning an
         Error is refused as algebra_operation_error, never used as a tag.
 metta.algebra(name, *, plus, times, zero, one, laws=(), carrier=(), type=None,
-              requires=(), order=None) -> DeclaredAlgebra
+              requires=(), order=None, negate=None, saturated=None,
+              variable=None) -> DeclaredAlgebra
         construct an arbitrary algebra through the callable `metta.algebra`
-        module, whose plus and times may be plain Python callables; it targets
+        module, whose plus and times (`combine=` and `extend=` name the same
+        pair) may be plain Python callables; called with no name it decorates
+        a class whose attributes carry those fields and whose name it takes,
+        and a shipped carrier's name answers that carrier. It targets
         the space `metta.current_space()` names, so inside `with scratch:` the
-        row is owned by `scratch`. Ten carriers ship, tabled under `under=`
+        row is owned by `scratch`. Thirteen carriers ship, tabled under `under=`
         above, and each is also an object
 m.annotations:
         choose any declared algebra for this space or an operation; required
@@ -3507,7 +3542,8 @@ the mirror in step: `seam:catalog_row_changed/2` announces every `(limit ...)`
 write, so a MeTTa program's own `add-atom` reaches every cursor opened after
 it. Consulting the catalog per read instead cost 21 inferences and 3.2 of the
 35 microseconds a one-answer `match` takes; watching the head costs 1
-inference on a `&metta` write and nothing anywhere else. That point is
+inference on a `&metta` write and nothing anywhere else (measured 2026-09-08
+by `extensions/python/benchmarks/probes/bound_row_cost.py`). That point is
 general, not the bounds table's own: `spaces:watch_catalog_rows(<head>)` turns
 it on for any catalog head, and EXTENDING.md's "Mirroring a catalog row you
 read on a hot path" is the worked example.
@@ -3569,7 +3605,8 @@ m.record: Recording
         they are re-runnable and not only readable. rr's shape, where the
         nondeterministic input is recorded once and the replay is deterministic
         Recording(program, space, digest, seed, bound, engine, events,
-        replayable, reason); len(rec) is the event count and rec.events the
+        replayable, reason, live), `live` being the Space it was recorded in
+        and None once loaded; len(rec) is the event count and rec.events the
         Trace. A recorded run ALWAYS has a seed, minted when you name none
         navigation, all over recorded data and none of it re-running the
         program: rec.at(k) -> Frame (negative k counts from the end, one
@@ -3579,8 +3616,8 @@ m.record: Recording
         chain of open calls, outermost first, ending with this event's own term
         rec.save(path) -> event count, Recording.load(path); the file is wire
         JSON, named `<something>.metta-rec.json` by convention, gzipped when
-        the name ends `.gz`, measured 55 bytes an event and 9 gzipped over a
-        2,438-event recording. A file another engine version wrote
+        the name ends `.gz`, measured 2026-09-07 at 55 bytes an event and 9
+        gzipped over a 2,438-event recording. A file another engine version wrote
         loads and warns (RecordingVersionWarning); one that is not a recording,
         or holds a layout this reader does not know, refuses by name
         rec.replay(space=None) -> Trace re-runs under the recorded seed and
@@ -3640,12 +3677,12 @@ m.lint:        the silently-wrong class, from stored structure
         a Finding carries `.remedy`, the same Remedy the errors carry, beside
         `.autofix`; `duplicate-equation` removes, the six simplifications
         rewrite, and `possibly-undefined-reference` renames to its near miss
-metta.lint.lint_file(path, m=None)   the same findings anchored to file:line
+metta.lint.lint_file(path, *, m=None)   the same findings anchored to file:line
         with the sha256 of the bytes read, which is the document version
 metta.lint.apply(space, findings=None) -> Repair   writes every `machine`
         remedy into the space, remove-then-add; `.applied`, `.skipped` (each
         with its reason) and `.remaining`
-metta.lint.fix_file(path, findings=None, m=None) -> Repair   the same repair
+metta.lint.fix_file(path, findings=None, *, m=None) -> Repair   the same repair
         over the file, rewriting only a line that still holds exactly the
         form; refuses the whole file when its digest moved
 metta.lint.diagnostics(findings) -> list[dict]   LSP 3.17 Diagnostics,
@@ -3657,7 +3694,9 @@ m.explain: Explanation
         the MeTTa form `!(explain <query>)` answers. A match form answers
         handles, pushes, source, context, annotations, emits, events, writes,
         on-error, merge, materialized and PLAN; an operation call answers
-        effect, inverse, annotations, on-error and the memo's cache decision.
+        effect, inverse, annotations, on-error, origin and visibility, plus
+        the memo's cache decision for a compiled function and the op row for
+        a registered operation.
         Explanation is a Mapping from each item's head to the whole item atom,
         with .plan, .route (the handles item), .atoms (every item in order,
         which is what a space stores) and .analyzed
@@ -3669,8 +3708,9 @@ m.explain: Explanation
         no candidate. Deciding costs the query's shape plus one scan of each
         conjunct's relation, because a conjunction whose stored rows are not all
         ground declines the plan; nothing is sorted and no trie is built, so
-        explaining a triangle over 2,048 stored edges cost 6,204 inferences
-        against the query's own 237,222
+        explaining a triangle over 2,048 stored edges cost 7,362 inferences
+        against the query's own 237,341 [measured 2026-09-25T22:18:09+10:00:
+        extensions/python/benchmarks/probes/explain_plan_cost.py]
         analyze=True adds (inferences N), (answers N) and (cputime S), measured
         by running the query inside stats(). It REFUSES a query whose named
         operations write, because an analysis that mutates is not an analysis;
@@ -3695,16 +3735,24 @@ m.stats:       with-block yielding .inferences (deterministic, gate on this),
         thread the block JOINS is counted, because SWI adds an exited thread's
         inferences to the thread that waited for it; a detached one finishing
         beside the block is not; and a joined worker whose answer the block
-        did not use, a race's losers, a cancelled future or timer, the
-        branches par-any or par-forall stopped, is taken out again, so the
-        count is the work that produced the block's answers, one integer
-        rather than however far the schedule let a stopped branch run
+        did not use, a race's losers, a cancelled thread-backed future or
+        timer, the branches par-any or par-forall stopped, is taken out again,
+        so the count is the work that produced the block's answers, one
+        integer rather than however far the schedule let a stopped branch run
+        A spawned future runs as a scheduler engine that is never joined, so
+        its spin never reaches the block, but cancelling it costs the caller
+        27 inferences more when the task is still queued than when a carrier
+        is running it, and the schedule decides which
+        Known issue: a race pulled through a streaming door, such as race() or
+        a fn call, is counted partly inside that door's held engine, and that
+        part varies with the schedule, so the count is not one integer; the
+        same race through run reads one
         The door itself costs 7 inferences of the block it measures, which is
         constant and therefore cancels out of any comparison
 m.profile:     (groups, EngineProfile), per predicate
         EngineProfile: .samples, .ticks, .seconds, .nodes (Rows over predicate,
         calls, redos, ticks_self, ticks_siblings, file, line, seconds_self,
-        seconds_total), .top(n), .as_stats()
+        seconds_total, name, arity, recursive_calls), .top(n), .as_stats()
 prof.as_stats() -> pstats.Stats   the same profile in the currency every Python
         profile viewer reads: .sort_stats("cumulative").print_stats(), and
         .dump_stats(path) writes what snakeviz and tuna open. The key is
@@ -3721,7 +3769,9 @@ m.fn[name].origin -> tuple      where each clause of a head was written, in
         rather than a lookup. S["car-atom"].origin and metta.fn.car_atom.origin
         ask the same question of the ambient space
 m.prolog:                     the engine's own interactive toplevel
-metta.engine().info() -> versions of metta, janus, swi_prolog, python, metta_path
+metta.engine().info() -> {metta, janus, swi_prolog, python, metta_path, actor,
+        next_generation}: the four versions, the engine tree it consulted, the
+        engine's actor id and its next occurrence generation
 ```
 
 The engine's messages are `metta.engine` log records, so the tool a Python
@@ -3749,11 +3799,16 @@ raised out of `__getattr__`; the bracket and method doors (`fn["car-atmo"]`,
 `answers.column("wha")`) are not attribute access and would otherwise carry
 nothing.
 
-Errors: `MettaError` is the base, then `EngineError`, `MettaSyntaxError`,
-`CastError`, `CompileError`, `SourceNotFound`, `RegistrationError`,
-`MettaResultError`, `AssertionFailure`, `TransportFailure`, and `ResourceLimitError` with
-`TimeLimitError`, `InferenceLimitError` and `RestraintError` under it, plus
-`Interrupted`. Every refusal this library makes on purpose carries
+Errors: `MettaError` is the base. Under it sit `MettaSyntaxError`,
+`CastError` (also a `TypeError`), `CompileError`, `SourceNotFound` (also a
+`FileNotFoundError`), `RegistrationError` (also a `ValueError`),
+`MettaResultError`, `AssertionFailure`, `TransportFailure`, `SubscriberError`,
+`LockDrift`, `Timeout` (also a `TimeoutError`) and `EngineError`, and under
+`EngineError` sit `Interrupted`, `MettaOperationError`, `SpaceCapabilityError`,
+`PlatformCapabilityError` and `ResourceLimitError` with `TimeLimitError`,
+`InferenceLimitError`, `RestraintError` and `StackLimitError` under it.
+`NotReducible` is outside the family, since it is a signal rather than a
+refusal. Every refusal this library makes on purpose carries
 `.remedy` and `.ground` beside its message, and the message never changes
 for their presence. `metta._errors.errors.Remedy(title, kind, applicability, edit=,
 replace=, python=)` is the repair as data: `kind` is LSP's CodeActionKind
@@ -3810,11 +3865,12 @@ refusal a host can act on differently (`syntax`, `time_limit`,
 one off a raised ball. Every kind renders as its own sentence wherever a seat
 shows the engine's message text, a signal without the envelope's framing.
 `tests/data/error-kinds.json` lists them with the class each seat raises, and
-each seat's suite reads that file against its own map. This seat classifies the
-seven signal kinds through `_EXCEPTION_TYPES`, reaches `assertion`,
-`capability` and `operation` through their own classifiers, and every other
-kind from the one the engine reads off the ball, with that kind's fields as
-the class's keywords. The Node seat maps all fifteen.
+each seat's suite reads that file against its own map. This seat's
+`_EXCEPTION_TYPES` is derived from the rows below through the generated table
+and names a class for all fifteen kinds; `assertion`, `capability` and
+`operation` are taken apart by classifiers of their own, and every other kind
+arrives as the class its row names, read off the ball, with that kind's fields
+as the class's keywords. The Node seat maps all fifteen.
 Each kind is also a ROW in the `&metta` catalog, `(refusal <kind> <class>
 (ground <authority> "<citation>") (remedy "<title>" <kind> <applicability>
 <act>...))`, and the rows are what a seat READS rather than what it keeps a
@@ -3947,6 +4003,15 @@ report the crossing.
 operations use the same bounded buffer. `send` and `add` may block on capacity,
 `recv(deadline=)` waits, and `try_recv()` takes a waiting term or returns
 `None` immediately; close it with a context manager.
+It is one of the root doors over `lib_thread`, each of which runs in the
+current space and imports that library there first: `metta.spawn(expr)` starts
+an expression and
+returns the future space its answers fill, `metta.every(seconds, expr)` repeats
+one until its future is cancelled, `metta.race(*exprs)` answers the first
+success and cancels the other branches, and `metta.par_map(function, items)`
+evaluates a unary function over the items concurrently through `par-map`
+(natively `par_map`), answering in input order: `metta.par_map(S.inc, [1, 2, 3])` is `(2 3 4)` where
+`(= (inc $x) (+ $x 1))` is defined.
 
 In MeTTa, `(transaction EXPR)` and `(atomically EXPR)` run one atomic block.
 Both answer EVERY answer their body has and commit or roll back the whole
@@ -4004,7 +4069,7 @@ transport="raw")` registers a whole module's callables,
 `face(module, names=, purpose=, prefix=, rename=, effects=, signatures=) -> str`
 writes those same names out as MeTTa SOURCE instead of registering them,
 `facts(m, atoms)` bulk-writes,
-`wrap_callable(m, name, target, effect=)`,
+`wrap_callable(m, name, target, effect=, arities=)`,
 `wrap_object(m, name, obj, methods, effects=)`, `reflect(m, name, obj)`,
 `install_reflection_ops(m)`, `integrate(m, target)`, `Integration`,
 `SpaceProvider`, `entry_points(group=)` for unloaded discovery,
@@ -4026,7 +4091,7 @@ it has no audience for: `declaration` (rows read as data, all of them),
 `ownership` (the FIRST row whose `claims(...)` answers non-None wins, pluggy's
 `firstresult`), `event` (every row's `on(...)` runs), `service` (the SEAT
 writes it and a registrant CALLS it). The shipped points are `frame` (a
-dataframe library: `module`, `accessor`, `build`, optional `sugar`), `sql` (a
+dataframe library: `module`, `accessor`, `build`, optional `rows`), `sql` (a
 SQL engine: `claims`, `define`, optional `undeclared`), `array` (an Array API
 library: `module`, `default`, optional `missing`, `scalars`), `index` (a
 nearest-neighbour backend: `available`, `build`, `search`), `arrow` (who
@@ -4036,11 +4101,13 @@ builds the Arrow C structs: `claims`, `schema`, `stream`, `batches`), `ipc`
 default projection for
 a class of host types: `claims`), `graphql` (who EXECUTES a document:
 `claims`, `schema`, `execute`), `typing` (a type-equation TEMPLATE named by its
-rule kind: `equations`, `doc`) and `law` (an algebra law a declared carrier can
-be held to: `arity`, `sides`, optional `same`), plus `type`, `repr`,
+rule kind: `equations`, `doc`), `law` (an algebra law a declared carrier can
+be held to: `arity`, `sides`, optional `same`) and `door` (the typed host doors
+a package contributes as namespace members or receiver sugar: `doors`, which is
+where a frame library's short methods such as `to_df` are declared), plus `type`, `repr`,
 `reflector`,
 `provider`, `library` and `integration`, whose rows live where they always
-lived. The seven above are declared by `metta.seam` itself and are module attributes of it; `type`, `repr`, `reflector`, `provider`, `library` and `integration` are declared by `metta.integrate`, where their readers and adders live, and are reached with `seam.at(<name>)`, which loads that module only when the name is not already declared so a dispatch on the base layer never pays for it. Services published for a
+lived. The twelve above are declared by `metta.seam` itself and are module attributes of it; `type`, `repr`, `reflector`, `provider`, `library` and `integration` are declared by `metta.integrate`, where their readers and adders live, and are reached with `seam.at(<name>)`, which loads that module only when the name is not already declared so a dispatch on the base layer never pays for it. Services published for a
 registrant to call: `projection`, `arrow-view`, `space-of`, `module`,
 `optional-module` (its declining twin, for an ownership row's `claims()`),
 `field-types`, `sql-arity`, `sql-types`, `image-of`, `match` (the directional
@@ -4094,7 +4161,7 @@ There is no built-in tier. This is the shape Apache Airflow's providers have
 | `dataframes` | `metta-tables`, `metta-pandas`, `metta-polars` | the `tables` namespace, frame conversions, and each library's own `.metta` accessor |
 | `live` | `metta-live` | the callable `m.live` namespace and `m.live.view` |
 | `remote` | `metta-remote` | `m.remote.connect` and `m.remote.serve` |
-| `sql` | `metta-duckdb`, `metta-sqlite` | the `sql` point: a MeTTa head as a scalar SQL function |
+| `sql` | `metta-tables`, `metta-duckdb`, `metta-sqlite` | the `sql` point: a MeTTa head as a scalar SQL function |
 | `arrays` | `metta-arrays`, `metta-numpy`, `metta-faiss` | the array layer, its default library, its vector index |
 | `arrow` | `metta-nanoarrow`, `metta-pyarrow` | the `arrow` capsules and the `ipc` stream |
 | `graphql` | `metta-graphql` | the `graphql` point: executing a query, where the SDL needs nothing |
@@ -4105,14 +4172,20 @@ There is no built-in tier. This is the shape Apache Airflow's providers have
 `metta-otel` and `metta-benchmarking` are libraries reached by import and
 advertise no entry point. `metta-arrays` advertises its lightweight
 `metta_arrays_doors` module, which registers deferred implementation references
-for `m.arrays` without importing the array implementation. Every other
-workspace member advertises its declaration module.
+for `m.arrays` without importing the array implementation, and its
+`lib_arrays` library under `metta.libraries`. Every other workspace member
+advertises its declaration module.
 
 Every generic door works with NONE of them installed and refuses by name,
 saying which point it was, which registrants there are, and the command that
-fills it: `no frame registration handles to_df(); registered: nothing. ... The
-packages this repository ships for it install with pip install
-'pymetta[dataframes]'`. `tests/shell/test_the_core_names_no_library.sh` runs
+fills it: `rows.to("pandas")` raises `no frame registration handles the frame
+library 'pandas'; registered: nothing. ... The packages this repository ships
+for it install with pip install 'pymetta[dataframes]'`. A member's declared
+sugar stays absent until its package is installed, and `hasattr` answers
+False, but the `AttributeError` carries the same refusal: with no frame member,
+`.to_df` on what `match` answers raises `no frame registration handles
+answers.to_df(); registered: nothing. ...`, while an answer variable spelled
+`to_df` still reads as the variable. `tests/shell/test_the_core_names_no_library.sh` runs
 the core with zero packages and then with one, and
 `tests/checks/check_layering.py` holds the two rules that keep the boundary
 real: the core imports no member, and no member reaches the core's private
@@ -4146,7 +4219,7 @@ doors are `integrate.unregister_object_type` and `integrate.unregister_repr`,
 and the `broadcast-shape` relation, which `register_prolog` cannot withdraw.
 Dropping the space retires the row, the catalog retiring a space's
 declarations with it, but the process-wide operations stay until `uninstall`
-hands them back. `ops.registered()` remains the PROCESS-wide registry view,
+hands them back. `metta.registered()` remains the PROCESS-wide registry view,
 which is a different question from what one space installed. Installing again
 replaces the row, the aliases and the operations the outgoing roster alone
 named. A space with no install refuses by name, and two rows for one space
@@ -4239,7 +4312,8 @@ neither shipped nor registered is refused when the provider registers. A provide
 `Answer(theta, *, value=, residue=, k=)` instead of a plain atom: `theta` binds
 the query's variables, `value` is the answer atom unified with the pattern, and
 `k` is the provider's own annotation, which orders answers under `under=ranked`
-and becomes the tag under `under=prov`. That is how a store's own score, a
+and becomes the tag under `under=prov`; `Bindings(theta)` is the theta-only
+shorthand. That is how a store's own score, a
 cosine or a confidence, weights a derivation. Tagged-rule premises use that same
 match door and evaluation context, retain k in their proof traces, and read
 fresh complete source bags on each query. Linear provider derivations refuse with
@@ -4272,14 +4346,16 @@ spent inside the callback arrives as `InferenceLimitError` or `TimeLimitError`,
 and `KeyboardInterrupt` crosses unchanged. Answers already streamed before the
 failure are never delivered as a complete set.
 
-From Prolog, `engine/ext_points.pl` declares every seam WITH ITS KIND: an EVENT runs
+From Prolog, every seam is declared WITH ITS KIND in `seam:kind/2`, mostly in
+`engine/ext_points.pl`: an EVENT runs
 for effect and every handler runs; an OWNERSHIP seam is claimed by the first
 handler that succeeds and declined by failing; a DECLARATION is a fact table read
 as data; a SERVICE runs the other way, a predicate the ENGINE defines that an
 extension may CALL. Declaring a seam of any kind EXPORTS it from the engine's
 module, so published is a fact the module system holds rather than a comment,
-and the two surface walks ask the module system for it. The service list is
-the whole permitted inward surface
+and the two surface walks ask the module system for it. The `service` rows are
+the whole permitted inward surface; `seam:kind/2` lists every one, and
+these are the families they fall into, each with some of its rows
 (text: `swrite/2`, `sdisplay/2`, `sdisplay_with_names/3`, `sread/2`,
 `metta_symbol_writable/1`, `metta_unwritable_symbol/2`,
 `metta_reader_token_class/3`, `metta_reader_token_source/2`;
@@ -4323,9 +4399,11 @@ half-loading it, and `metta_require_platform/2` for a form to refuse by name,
 with what the absence costs, rather than raising an existence error from the
 engine's interior;
 native storage: `native_storage_module/2`, `native_storage_functor/2`,
-`ensure_native_storage_module/2`, `native_atom_clause/4` and
-`stored_atom_of_ref/4`, which construct and decode tokenized native storage;
-`add_sexp/4` owns occurrence publication, and static caches restore through it;
+`ensure_native_storage_module/2` and `native_atom_clause/4`, which construct
+and decode tokenized native storage, beside `stored_atom_of_ref/4` and
+`add_sexp/4`, which `metta_engine_reexport/2` publishes rather than a service
+row: `add_sexp/4` owns occurrence publication, and static caches restore
+through it;
 effects and caching: `metta_effect_class_canonical/2`, `metta_effect_rank/2`,
 `metta_effect_join/3`, `metta_effect_compose/2`, `metta_operation_effect/2`,
 `metta_annotated_operation_effect/2` for the class an annotated arrow
@@ -4396,7 +4474,9 @@ performed form is stored as its own atom, so the running app answers
 mid-way keeps its performed prefix's writes, closes any servers it started, and
 names the failing form.
 
-`python -m metta` has eleven subcommands: `run` (files, printing each `!` answer
+`python -m metta` has twelve subcommands: `extension` (`extension new` NAME
+writes a new extension distribution in `./NAME`, removing it again if a write
+fails), `run` (files, printing each `!` answer
 group), `repl` (paren-balance aware; on a terminal, TAB completes a head or a
 `&space` against the live engine and history persists in `~/.metta_history`, or
 wherever `METTA_HISTORY` points), `serve`, `boot`, `lint` (nonzero
@@ -4416,8 +4496,10 @@ itself, and `rows(name)` is the query under it, which
 that page cannot disagree. A `Card` carries `name`, `files`, `digest` (each
 file's sha256, sorted, listed under its path and hashed as one document),
 `since` (the version the library declares, else the engine's), `doc` (its own
-opening prose), `heads` (one `HeadCard(name, arrow, doc, effect, cost, origin,
-registered)` per head it declares, defines, documents or REGISTERS through a
+opening prose), `heads` (one `HeadCard(name, types, doc, effect, cost, origin,
+registered, visibility, origins)`, `types` every type the library declares for
+the head, overloads included, and `origins` every live defining space with its
+source location, per head it declares, defines, documents or REGISTERS through a
 runnable `!(import_prolog_function ...)` form), `effects`, `costs`, `examples`
 (the corpus programs that import it), `deprecations` and `needs` (the platform
 capabilities its `:- metta_requires(...)` declarations name). Reading a library
@@ -4443,12 +4525,13 @@ engine heads. It is the same machinery `metta.fn` is, over one library's
 catalog instead of the engine's; `metta.strategies`, which was that list
 written out by hand, is gone.
 
-`m.lock() -> Lock` pins what this PROCESS loaded, not what this context
+`context.lock() -> Lock`, a door of the `MeTTa` context rather than of a space,
+pins what this PROCESS loaded, not what this context
 loaded: the engine's load table, registrations and git pins are process-wide,
 so two contexts in one process take the same lock, which is the unit that has
 to be reproduced. The doors are `Lock.write(path)`,
-`metta.Lock.read(path)`, `m.check(lock) -> list[Drift]`, and
-`metta run --locked metta.lock file.metta`, which checks BEFORE the program
+`metta.Lock.read(path)`, `context.check(lock) -> list[Drift]`, and
+`python -m metta run --locked metta.lock file.metta`, which checks BEFORE the program
 runs and refuses with `LockDrift` naming every entry that differs. The file is
 TOML in uv's and PEP 751's shape: `lock-version`, `created-by`, an `[engine]`
 table (`metta`, `swi-prolog`, and `sources`, one digest over `engine/**/*.pl`,
@@ -4561,7 +4644,9 @@ over relations of 10, 100 and 1,000 rows, inferences per touching write: the
 for a transaction of ten, because it re-answers once per commit; `tabled` 563
 flat for a write that leaves its table valid at every size.
 
-`metta.subscribe`: `m.subscribe(pattern, callback, on="add", queue_max=10000)`
+`metta.subscribe`: `m.subscribe(pattern, callback=None, *, on="add", where=None,
+queue_max=None)`, `where=` a term evaluated per event and `queue_max=None` the
+standing `(limit subscription-queue ...)` row, 10000 by default,
 is the delivering fold, run INSIDE the write that matched it; without a
 callback, events queue until `drain()`, and a full queue raises rather than
 discarding the oldest. A callback that raises reaches the writer as
@@ -4597,7 +4682,7 @@ Gateway is a context manager because it owns one engine per open cursor.
 Cost: the declarations are read through the engine's own first-argument index,
 not by walking the store, so the document is derived per request and does not
 grow with the space (230 inferences over 20,000 atoms against 340,525 for the
-walk). Nothing is cached, so nothing goes stale.
+walk, measured 2026-09-07). Nothing is cached, so nothing goes stale.
 
 `Gateway.graphql_schema() -> str` is the same catalog as GraphQL SDL, answered
 at `GET /graphql` as `text/plain`. `scalar Atom` carries any atom as canonical
@@ -4640,9 +4725,10 @@ Cost: 360M retired instructions for a 2,000-row drained cursor against JSON's
 
 `metta.testing` ships what the suite fuzzes itself with: hypothesis strategies
 (`atoms`, `expressions`, `patterns`, `names`, `numbers`, `texts`, `symbols`,
-`variables`, `grounded`, `ground_atoms`, `numpy_scalars`, `programs`;
-`library_scalars(module)` is the general spelling and `numpy_scalars` the
-shipped name for the `array` point's numpy row),
+`variables`, `grounded`, `ground_atoms`, `programs`, and
+`library_scalars(module)`, the scalar values of an array library whose `array`
+row declares `scalars`, as `metta-numpy`'s does, refused naming the field where
+the row declares none),
 `from_pattern(pattern, max_leaves=8)` for ground instances that share every
 repeated named variable and draw anonymous occurrences independently,
 `programs(census=None, depth=3, facts=(1, 4), queries=(1, 3))` for whole MeTTa
@@ -4681,7 +4767,7 @@ and the container knob rather than sending a reader into the harness.
 One ROW can be refused while its neighbours decide, which is a different thing
 from a lane that measured nothing. A case whose measured region contains the
 engine load reads the LENGTH of the checkout's path, about 0.045% per
-character, so its instruction pin is true of one location: `engine/bench.pl`
+character (measured 2026-09-07), so its instruction pin is true of one location: `engine/bench.pl`
 declares `bench_whole_process(boot)`, `engine/bench-baseline.json` records
 `measurement.checkout_path_length`, and `engine/bench.py` reports such a row
 instead of comparing it, and declines to re-pin it, from a checkout of another
@@ -4719,7 +4805,8 @@ engine's own `assert-answers` and `assert-includes-answers`, so the relation is
 `subtraction-atom`'s, the failure is an `AssertionFailure` carrying the same
 `.missing` and `.excess`, and everything below the first line of the message is
 character-for-character what `assertEqualToResult` prints for the same bags. It
-costs one engine crossing per call, 289 inferences over two four-answer bags,
+costs one engine crossing per call, 289 inferences over two four-answer bags
+[measured 2026-09-25T22:18:48+10:00: beyond the 7 the `stats()` door itself reads],
 and the failure is printed on stderr as well as raised, exactly as a MeTTa
 assertion is. pytest's assertion rewriting is not involved.
 `testing.cases(head)` is deal.cases's shape over MeTTa's contracts: every
@@ -4761,36 +4848,36 @@ runs against upstream PeTTa and this package's contribution to it is the
 lexer its `language_info` MIME type resolves to. The `kernel` REPORT lane
 installs it at a pinned commit and starts it.
 
-These submodules and names load on first access rather than during
-`import metta`: `aio`, `algebra`, `amplitude`, `bag`, `bool`, `boot`,
-`budget`, `channel`, `convert`, `counting`, `derivation`, `events`,
-`every`, `foreign`, `integrate`, `library`, `lint`, `manifest`, `par_map`,
-`parallel`, `paths`, `prob`, `prov`, `race`, `ranked`, `remote`, `rules`,
-`set`, `spaces`, `spawn`, `structures`, `subscribe`, `tables`, `testing`,
-`tropical`, `typing`, `view`, `vocabularies`, and the
-classes `Answer`, `Bindings`, `Defined`, `MeTTa`, `Space`, `SpaceProvider`,
-`State`, `equation`. `metta.convert` is one door for the whole crossing now,
+`import metta` loads the atom model (`metta._atoms` and its submodules),
+`metta._errors.errors`, `metta.vocabularies`, `metta._spaces.ambient` and the
+`metta._binding` and `metta._spaces` package shells, and nothing else, so it
+never pulls in the HTTP, subscription and table machinery boot composes over.
+Every other public submodule (`aio`, `algebra`, `cli`, `convert`,
+`derivation`, `doors`, `events`, `foreign`, `importing`, `integrate`,
+`ipython`, `library`, `lint`, `live`, `manifest`, `parallel`, `paths`,
+`pytest_plugin`, `remote`, `seam`, `spaces`, `structures`, `subscribe`,
+`tables`, `testing`, `typing`) and every root name that lives in one, the
+classes `MeTTa`, `Space`, `Answer` and `State` and the carrier objects among
+them, loads on first access. `dir(metta)` lists what `metta.__all__` declares
+and the submodules, which is the whole surface: `metta.__all__` is generated
+from the root's re-exports and module doors.
+`metta.convert` is one door for the whole crossing now,
 `encode`, `decode`, `from_wire`, `atom_from_wire`, `cast` and the projection
 half together; `metta.wire` and `metta.casting` are gone with no alias.
-
-Importing metta therefore never pulls in the HTTP, subscription and table
-machinery boot composes over: `import metta` leaves `metta._atoms.factories` and
-`metta._errors.errors` loaded and nothing else. `dir(metta)` still lists every one of
-them, so completion and reflection see the whole surface.
 
 ## The MeTTa language surface
 
 Special forms are compiled by the translator rather than defined by equations,
 and most answer false to "is this a function", so "no equations" does not mean
-"nothing can prove it". These fifty-nine, plus the internal
+"nothing can prove it". These sixty, plus the internal
 `__metta_type_syntax__` the registry section below names:
 
 ```
 add-atom add-atoms add-reduct add-reducts annotation call case catch
 chain collapse cut elapsed eval evalc explain filter-atom foldall
 foldl-atom forall get-atoms get-metatype hyperpose if inferences let
-let* map-atom match metta-thread new-space noeval nop not-provable once
-prog1 progn quote reduce remove-atom return sealed space-atom-count
+let* map-atom match match-under metta-thread new-space noeval nop
+not-provable once prog1 progn quote reduce remove-atom return sealed space-atom-count
 space-contains subtract-atom super superpose switch take test
 test-no-answer timeout top transaction translatePredicate unify
 with-pragma! with-seed with_mutex |->
@@ -4916,14 +5003,14 @@ The exact-integer operators are engine heads rather than library equations:
 `bit-shift-right` and `floor-div`, with division by zero answering error
 DATA rather than raising.
 
-Seventy-two more engine heads the corpus exercises, by family. Numeric:
+Sixty-nine more engine heads the corpus exercises, by family. Numeric:
 `min`, `max`, `pow-math`, `exp-math`, `log-math`, `round-math`, `trunc-math`, `ceil-math`,
 `sin-math`, `cos-math`, `tan-math`, `asin-math`, `acos-math`, `atan-math`,
 `isnan-math`, `isinf-math`. Atoms: `alpha-unique-atom`, `is-alpha-member`,
 `is-member`, `is-var`, `is-expr`, `is-function`, `first-from-pair`,
 `second-from-pair`, `reverse`, `last`, `id`, `for-each-in-atom`, `foldl`.
 Logic: `xor`, `dif`. Spaces:
-`get-atoms`, `match-under`, `space-atom-count`, `is-space`, `new-state`, `has-declared-type`,
+`is-space`, `new-state`, `has-declared-type`,
 `space-admission-verdict`. Types: `match-types`, `match-type-or`, `type-cast`.
 Text, IO and files: `repr`, `println!`, `readln!`, `read-form!`, `format-args`,
 `sort-strings`, `parse-command`, `sleep`, `exists_file`.
@@ -4932,7 +5019,8 @@ modules: `add-translator-rule!`, `remove-translator-rule!`,
 `import_prolog_function`, `Predicate`, `callPredicate`,
 `assertaPredicate`, `git-import!`, `residual-goals`. Minimal MeTTa: `unquote`,
 `noreduce-eq`, `collapse-bind`, `superpose-bind`, `return-on-error`,
-`if-equal`, `repra`. Assertions beyond the four above: `assertEqualMsg`,
+`if-equal`, `repra`. Assertions beyond the four the corpus is written in
+(`assertEqual`, `assertAlphaEqual`, `assertEqualToResult`, `assertIncludes`): `assertEqualMsg`,
 `assertAlphaEqualMsg`, `assertAlphaEqualToResult`, `assertEqualToResultMsg`,
 `assertAlphaEqualToResultMsg`. `undocumented` reports what `doc` lacks.
 
@@ -5037,7 +5125,7 @@ incompatible patterns select the fallback.
 
 314 builtins are registered; `m.self.builtins()` lists the live union of the
 functions callable from `&self` and the translator special forms. That live union in full, measured
-2026-09-10 on a boot with this tree's extensions present, which is where the
+2026-09-25 on a boot with this tree's extensions present, which is where the
 three `mork-add-atoms`, `mork-flush` and `mm2-exec` heads come from:
 
 `!=` `#*` `#+` `#-` `#//` `#<` `#=` `#=<` `#>` `#>=` `#\=` `#div` `#max`
@@ -5071,20 +5159,21 @@ three `mork-add-atoms`, `mork-flush` and `mm2-exec` heads come from:
 `is-alpha-member` `is-expr` `is-function` `is-ground` `is-member`
 `is-space` `is-var` `isinf-math` `isnan-math` `last` `length`
 `let` `let*` `library` `list_to_set` `log-math` `map-atom` `maplist`
-`match` `match-type-or` `match-types` `max` `max-atom` `member` `metta`
+`match` `match-type-or` `match-types` `match-under` `max` `max-atom` `member` `metta`
 `metta-thread` `min` `min-atom` `mm2-exec` `mork-add-atoms` `mork-flush`
 `msort` `new-space` `new-state` `noeval` `nop` `noreduce-eq` `not`
-`not-provable` `on-unwind` `once` `only` `or` `or-else` `parse` `parse-command` `pow-math`
+`not-provable` `on-unwind` `once` `only` `or` `or-else` `owned-record-read`
+`package-prolog` `parse` `parse-command` `pow-math`
 `pragma!` `prefix` `pretty-atom` `println!` `prog1` `progn` `py-at` `py-atom`
 `py-call` `py-container-kind` `py-dict` `py-dict-pairs` `py-dot` `py-eq` `py-except`
 `py-format` `py-global-read` `py-global-write` `py-in` `py-iter`
 `py-iter-once` `py-len` `py-list` `py-operator` `py-range` `py-repr`
-`py-round` `py-set` `py-set-pairs` `py-slice` `py-str` `py-str-join`
+`py-round` `py-sequence-image` `py-set` `py-set-pairs` `py-slice` `py-str` `py-str-join`
 `py-truthy` `py-tuple` `qualified` `quote` `random-float` `random-int` `read-form!`
 `readln!` `reduce` `register-token!` `register_metta_library_path`
 `remove-atom` `remove-translator-rule!` `remove-typing-rule!` `rename` `repr`
 `repra` `require-extension!` `residual-goals` `retractPredicate` `return`
-`return-on-error` `reverse` `round-math` `sealed` `second-from-pair`
+`return-on-error` `reverse` `round-math` `sealed` `second-from-pair` `setup!`
 `sin-math` `size-atom` `sleep` `sort` `sort-atom` `sort-strings`
 `space-admission-verdict` `space-atom-count` `space-contains` `sqrt-math`
 `sread` `subtract-atom` `subtraction` `subtraction-atom` `super`
@@ -5881,8 +5970,9 @@ partial applications preserve literal data and variable identity. Callback
 alternatives remain alternative results, partition asks for a True answer,
 and grouping binds a key before comparing it so Error remains a literal key.
 Growing accumulators and slices can take quadratic work. Neither flatten takes the bare name, which is
-the host's own every-level one; `lib_gitimport` git-import!, Prolog-only, a
-module fetched from a repository;
+the host's own every-level one; `lib/lib_gitimport/` is no library, having no
+manifest to import, but the Prolog backing of the engine's `git-import!`, which
+acquires a module from a repository into a local checkout;
 `lib_graph` derives directed graphs as canonical (Vertex Neighbours) expressions
 from Sets, Pairs and Functional. Vertices compare by identity, including shared
 variables and quoted runnable terms. Construction, projections, edits, transpose
@@ -6081,7 +6171,11 @@ space and a sequence an expression, with the file doors derived from lib_file's
 and four refusals the host only fails at: a multi-document stream, an unsupported
 tag, a duplicate key and malformed text; declares the `yaml` capability;
 `lib_zar` Prolog interop, consult and
-use_module wrappers. Scored answers and fuzzy or regex matching
+use_module wrappers; `minimal_metta_lib` minimal MeTTa's instruction set
+(`function`, `collapse-bind`, `superpose-bind` and its own `unify-mod`), with
+switch, reduce and a Turing machine written over them under an `mm-` prefix,
+because the library loads into `&self` where those names would land on a
+program's own. Scored answers and fuzzy or regex matching
 are `lib_measure` and `lib_regex` riding the general seam, not Python modules:
 there is no `metta.measure` and no `metta.matching`.
 
@@ -6206,7 +6300,7 @@ comparisons. No cross-engine allowance was enlarged.
 Wall clock under ~100ms is bimodal on a loaded box and has produced false
 results here twice. `m.stats().inferences` is deterministic (five runs of one
 workload gave 1,000,601 every time, 0.0000% spread, while wall clock swung
-6.86%), so gate on inferences and let wall clock advise. For pure-Python paths
+6.86%, measured 2026-08-18), so gate on inferences and let wall clock advise. For pure-Python paths
 where the engine does nothing, use `perf stat -e instructions:u`. Instruction
 counts move with code LAYOUT, so perturb with inert clauses before believing a
 regression. Check `/proc/loadavg` before trusting any timing.
@@ -6223,7 +6317,8 @@ a quadratic body declared linear must fail the class gate, the same body
 declared quadratic must pass it, a linear body declared quadratic must fail it
 the other way, a naive Fibonacci with the memo refused must pass the exponential
 test, and a body whose answer counts are pinned from another row must fail the
-work gate while passing the class one. About 23 to 31 seconds, and load-immune,
+work gate while passing the class one. About 23 to 31 seconds (measured
+2026-09-07), and load-immune,
 because the counter is inferences. `--paired` adds the retired-instruction
 curve for the heads whose work crosses into C; it is advisory, never a gate, and
 it is why `unique-atom` has no row.
