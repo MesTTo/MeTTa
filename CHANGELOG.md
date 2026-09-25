@@ -386,6 +386,39 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- `m.fn[name].compiled` lists an engine builtin's clauses where it raised
+  `EngineError: Unknown procedure`, for `car-atom`, `+` and `match` among
+  them. The door listed each arity in the space's own module, where a builtin
+  is only imported and SWI's `listing/1` finds nothing, and now lists it in the
+  module that defines it.
+- `metta.__all__` names every public name the root resolves. The stub's list
+  had drifted from the lazy exports and the module doors, so `formula`,
+  `polynomial`, `visibility`, `debug`, `from_`, `get_property`, `load` and
+  `record` resolved but were missing from `dir(metta)`, `from metta import *`
+  and completion. `tools/rootgen.py` now derives `__all__` from the root
+  declaration's `X as X` re-exports and the module doors, and the Python API
+  reference gains the five doors it had left out.
+- A provider that implements `match` and no `atoms()`, a ranker or a vector
+  index, answers `space.match(q, under=..., limit=k)`, its `[:k]` slice,
+  `under=counting` and `eval(..., under=)`, and is handed `k` as
+  `(top k ...)` hands it. Each refused with "cannot enumerate atoms" before
+  any match, because asking whether a tagged program answers the query
+  enumerated the space; a space that cannot enumerate now answers no without
+  being asked, since the tagged route reads its program by enumeration.
+- `tools/fngen.py` reads the builtins the source declares from the files git
+  tracks under `engine/`, `lib/` and `extensions/`, so `fn-sync` and
+  `test_the_fn_namespace_is_generated` answer the same in every tree holding
+  the same source. It walked `extensions/`, and so counted the Node package's
+  staged `_runtime/` copy of the engine and libraries and any battery kept
+  inside a component: the check passed in a working tree holding them and
+  failed in a tree materialised without them.
+- With no frame member installed, `rows.to_df`, `rows.to_pl` and their
+  `Answers` twins stay absent, and their `AttributeError` now carries the
+  frame refusal `rows.to(...)` gives, naming the frame point's registrants and
+  `pip install 'pymetta[dataframes]'`, where it said
+  `no answer variable 'to_df'` or `no column 'to_df'`. The runtime now knows
+  the doors `tools/doorgen.py` declares for a type checker, by name and base
+  door, and a query variable of the same name still wins.
 - A function value that captured a variable or holds a non-text blob is
   applied by `maplist`, `foldl`, `include` and every other Prolog predicate
   that takes a closure. Such a value is `partial(F, Bound)`, and the

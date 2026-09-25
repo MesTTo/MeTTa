@@ -10339,6 +10339,52 @@ def current_space():
 
 > Return the ambient space selected by an enclosing space context.
 
+## `debug`
+
+```python
+def debug(
+    source: Atom | str,
+    *,
+    on: Any = None,
+    inferences: int | None = None,
+    at: int | None = None,
+) -> Debugger:
+```
+
+> Run a TERM, or source, under breakpoints, stepped from Python.
+>
+> Iterating the Debugger runs the program to each breakpoint, the loop
+> body is where the program is SUSPENDED, and leaving the body resumes
+> that same execution:
+>
+>     with m.debug(S.quad(3), on=[S.double]) as d:
+>         for stop in d:
+>             print(stop)      # halted here
+>             if stop.depth > 2:
+>                 d.step()     # stop at the next reduction instead
+>         print(d.answers)
+>
+> on= names the functions that stop it, the way every door here names a
+> head; naming none runs the program to the end in one advance.
+> `step()` stops at the very next reduction, breakpoint or not, and
+> lasts one advance. `breakpoints` is a live set, so one added while
+> the program is suspended stops it.
+>
+> at= is the third kind of breakpoint, a COUNT: it stops at the event
+> with that sequence number, numbering reductions from 0 the way a
+> Recording numbers them, so `at=200` is "put me where event 200 is".
+> `Recording.debug(at=k)` is the convenience over this one.
+>
+> inferences bound the WHOLE session cumulatively, so a resume that
+> would never reach another breakpoint stops. There is no timeout:
+> the session is suspended by design and a clock would run while a
+> person reads a stop. What is debugged executes for real, writes
+> included, and inherits the caller's scope. Close it, or leave its
+> with-block: the session holds a wrapper on every compiled function
+> until it does.
+>
+> Runs against the default context's self space.
+
 ## `define`
 
 ```python
@@ -10554,6 +10600,39 @@ def fresh() -> Variable:
 
 > Mint a variable for a library-authored pattern without name capture.
 
+## `from_`
+
+```python
+def from_(source: Any, map: Any = None) -> None:
+```
+
+> Reference a library or space through a stored ``(from source map)`` row.
+>
+>     target.from_(metta.lib.string, metta.parse("(prefix str-)"))
+>     target.from_(home)
+>
+> A missing map uses this space's ``from-map`` pragma. Definitions run in
+> their home and later additions follow the standing row. Removing the row
+> withdraws its links. Loading follows this space's ``load`` pragma.
+>
+> Runs against the default context's self space.
+
+## `get_property`
+
+```python
+def get_property(head: str | Symbol, /) -> tuple[Atom, ...]:
+```
+
+> Return visibility, origins and declared properties of a head.
+>
+>     space.get_property("car-atom")
+>
+> The answers are the atoms ``(get-property car-atom)`` enumerates, including
+> every defining origin. An unknown file is empty text and an unknown line
+> is -1. The query does not compile a lazy definition.
+>
+> Runs against the default context's self space.
+
 ## `ground`
 
 ```python
@@ -10674,6 +10753,51 @@ def llms() -> None:
 > reader here is usually a program with a pipe, for which that pager is
 > already `sys.stdout.write`, and a library call that starts a pager is
 > a surprise the one interactive reader can arrange for themselves.
+
+## `load`
+
+```python
+def load(
+    path: str | PathLike[str],
+    *,
+    timeout: float | None = None,
+    inferences: int | None = None,
+) -> list[list[Atom]]:
+```
+
+> Add a text program or trusted fast cache to this space.
+>
+> This is a consult, so it always loads and what it loads REPLACES
+> what the same file put in this space before. Edit the file, load it
+> again, and the space holds the new definitions and not both; the
+> engine says on stderr which file it replaced and how many atoms
+> went. Atoms from other sources, and ones you added yourself, stay.
+> A load that raises leaves the previous definitions standing, so a
+> broken edit costs nothing but the error.
+>
+> `!(import! &self path)` is the other form and loads a file that is
+> new or edited, skipping one that is neither. The two agree on what
+> a reload means and differ only in whether an unchanged file runs
+> again, which is SWI's consult/1 against its if(changed).
+>
+> A .gz path is detected and read through the decompressed bytes.
+>
+> `timeout` (seconds) and `inferences` (engine steps) bound the load
+> with the engine's own guards, raising TimeLimitError or
+> InferenceLimitError. A load is all or nothing: a stop takes back
+> everything the file had put in a space, the same way a load that
+> fails on a bad form does, because a file the space holds half of is
+> not a file it can replace later. run() is the entry point that
+> keeps finished work when a bound stops it. This is the one most
+> likely to be handed code the caller did not write, since a file can
+> carry `!` directives and an import graph, so it takes the same pair
+> its siblings take.
+>
+> Program text with holes is refused here. A hole is a binding, and a
+> PATH has nowhere to bind one: run() takes holes, and an f-string or a
+> Path builds a computed filename.
+>
+> Runs against the default context's self space.
 
 ## `match`
 
@@ -11027,6 +11151,48 @@ def reads(fn: Callable | None = None, /, **options: Any) -> Any:
 > ``declarations``, ``inverse`` and ``transport``. They arrive as
 > ``**options`` and forward unchanged, so the signature above shows
 > the mechanism and this line shows the surface.
+>
+> Runs against the default context's self space.
+
+## `record`
+
+```python
+def record(
+    source: Atom | str,
+    *,
+    seed: int | None = None,
+    max_events: int | None = None,
+    timeout: float | None = None,
+    inferences: int | None = None,
+) -> Recording:
+```
+
+> Run a TERM, or source, and keep the whole run as data.
+>
+> The data walks backwards, saves to a file, and re-runs.
+> `m.trace` is the rung below: it answers the events alone. A Recording
+> is those events plus the state that produced them, which is what makes
+> them re-runnable rather than only readable:
+>
+>     rec = m.record(S.fib(12))
+>     rec.save("fib.metta-rec.json")
+>     rec.at(-1)               # the last event, with its call stack
+>     rec.back()               # a step backwards costs a lookup
+>     rec.replay(other)        # the same run, in another engine
+>     with rec.debug(at=17) as d:   # live, stopped where event 17 is
+>         print(d.stop)
+>
+> A recorded run always has a seed, minted when you do not name one,
+> because a replay that cannot reproduce the draws is not a replay; the
+> generator is restored afterwards. `(with-seed S expr)` is the MeTTa
+> spelling of the same scope.
+>
+> max_events bounds the RECORDING and timeout and inferences bound the
+> RUN, exactly as on trace(); a cut recording says so through
+> `rec.events.stopped` and replays to the same length. A program whose
+> effect plan reaches oracleIO is recorded with `replayable` false and
+> the reason naming what it reached, and replay() then refuses rather
+> than re-reading the host.
 >
 > Runs against the default context's self space.
 
