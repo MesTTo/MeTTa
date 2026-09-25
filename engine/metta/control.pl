@@ -53,6 +53,10 @@
 %   [tested: engine_modules:returned_budgets_keep_their_private_helpers; commit=ede2ac57e213a0d4502c6bbbca6227f97015b720].
 % Guarantees: verify-cardinality checks annotated calls while plain calls
 %   retain their generated goal [tested: run_tests(metta_arrow_products); commit=bbb512316280110a747e31c26adfc31e8c5104be].
+% Guarantees: a function value partial(F, Bound) that a Prolog meta-predicate
+%   calls with 1 to 9 appended arguments runs F with Bound and then those
+%   arguments, in the calling module [tested 2026-09-25T19:52:12+10:00:
+%   closure_values].
 % Assumes: engine/metta.pl consults this plain file while its owning module is the load context.
 % Guarantees: every definition retains engine/metta.pl's implementation module and original load order.
 %   if-decons-expr selects its fallback on empty input or incompatible binders,
@@ -2061,6 +2065,85 @@ call_goals_in_(Module, [G|Gs]) :- call(Module:G),
                                   call_goals_in_(Module, Gs).
 
 %%% Higher-Order Functions: %%%
+%A FUNCTION VALUE IS A PROLOG CLOSURE. A MeTTa function value is a name, or
+%partial(Function, Bound) for a function given fewer arguments than it takes,
+%which is also what a |-> lambda capturing a variable or holding a non-text
+%blob evaluates to [source 2026-09-25T19:37:06+10:00:
+%engine/translator/special_forms.pl, the '|->' clause of
+%translate_special_dl/5]. A Prolog meta-predicate applies its closure argument
+%with call/N, which appends N arguments to the closure term, so (maplist $f
+%$xs) handed partial(F, Bound) called partial/4, which nothing defined:
+%`!(let $k 1 (maplist (|-> ($a) (+ $k $a)) (1 2 3)))` raised
+%`apply:maplist/3: Unknown procedure: partial/4` [measured
+%2026-09-25T18:37:30+10:00: that form through tools/run.sh]. partial/2 is the
+%closure's constructor and these clauses are its apply: F with Bound and then
+%the appended arguments, in the module the closure was called from.
+%library(yall) makes its own closure terms callable the same way, one clause
+%per appended-argument count [source 2026-09-25T19:37:06+10:00: swipl-devel
+%V10.1.14 library/yall.pl, '>>'/2..9]. The callee's own meta_predicate
+%declaration decides how many arguments call/N appends, and call/N is the only
+%way Prolog applies a closure, so every door takes this one: a compiled call,
+%the same call reached through reduce/3, and a library's Prolog half calling a
+%closure it was given. A closure that is a name never reaches these clauses
+%and pays nothing.
+%
+%One to nine appended arguments: a meta_predicate declaration marks a
+%closure argument with an integer from 0 to 9 and refuses 10 [measured
+%2026-09-25T19:09:33+10:00: `:- meta_predicate m10(10, ?)` raised a
+%domain error for meta_argument_specifier], and 0 marks a goal, which
+%supplies no argument for a MeTTa function's result. The goal is built with
+%=.. rather than call/N because SWI defines call/N as a predicate for at most
+%eight appended arguments, and list_undefined refuses call/9 and call/10
+%[measured 2026-09-25T19:12:38+10:00: the prolog and prolog-static lanes].
+%Time: one append and one =.., each linear in Bound's length plus the
+%appended count, then the call.
+:- meta_predicate
+    partial(:, +, ?),
+    partial(:, +, ?, ?),
+    partial(:, +, ?, ?, ?),
+    partial(:, +, ?, ?, ?, ?),
+    partial(:, +, ?, ?, ?, ?, ?),
+    partial(:, +, ?, ?, ?, ?, ?, ?),
+    partial(:, +, ?, ?, ?, ?, ?, ?, ?),
+    partial(:, +, ?, ?, ?, ?, ?, ?, ?, ?),
+    partial(:, +, ?, ?, ?, ?, ?, ?, ?, ?, ?).
+partial(M:F, Bound, A1) :-
+    append(Bound, [A1], Args),
+    Goal =.. [F|Args],
+    call(M:Goal).
+partial(M:F, Bound, A1, A2) :-
+    append(Bound, [A1, A2], Args),
+    Goal =.. [F|Args],
+    call(M:Goal).
+partial(M:F, Bound, A1, A2, A3) :-
+    append(Bound, [A1, A2, A3], Args),
+    Goal =.. [F|Args],
+    call(M:Goal).
+partial(M:F, Bound, A1, A2, A3, A4) :-
+    append(Bound, [A1, A2, A3, A4], Args),
+    Goal =.. [F|Args],
+    call(M:Goal).
+partial(M:F, Bound, A1, A2, A3, A4, A5) :-
+    append(Bound, [A1, A2, A3, A4, A5], Args),
+    Goal =.. [F|Args],
+    call(M:Goal).
+partial(M:F, Bound, A1, A2, A3, A4, A5, A6) :-
+    append(Bound, [A1, A2, A3, A4, A5, A6], Args),
+    Goal =.. [F|Args],
+    call(M:Goal).
+partial(M:F, Bound, A1, A2, A3, A4, A5, A6, A7) :-
+    append(Bound, [A1, A2, A3, A4, A5, A6, A7], Args),
+    Goal =.. [F|Args],
+    call(M:Goal).
+partial(M:F, Bound, A1, A2, A3, A4, A5, A6, A7, A8) :-
+    append(Bound, [A1, A2, A3, A4, A5, A6, A7, A8], Args),
+    Goal =.. [F|Args],
+    call(M:Goal).
+partial(M:F, Bound, A1, A2, A3, A4, A5, A6, A7, A8, A9) :-
+    append(Bound, [A1, A2, A3, A4, A5, A6, A7, A8, A9], Args),
+    Goal =.. [F|Args],
+    call(M:Goal).
+
 %THE OPERATOR ARRIVES AS WRITTEN. The closure spelling of these three declares
 %it `Expression`, which is on the evaluation mask, so a written
 %`(|-> ($y) (q $y))` reaches here as the three-element term the reader built

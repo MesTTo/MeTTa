@@ -2,6 +2,10 @@
 %   and metta_bridge_descend/1 restore roots through metta_with_trailed/3
 %   [source: engine/metta/effects.pl:metta_with_evaluation_context/2; commit=40b71fc99571872ca5fc85cdaf7902b467166539].
 %
+% Guarantees: the effect walk reads a closure partial(F, Bound) as F applied
+%   to Bound and the meta-predicate's appended arguments
+%   [tested 2026-09-25T19:52:12+10:00:
+%   closure_values:the_effect_walk_follows_the_function_a_partial_value_names].
 % Purpose: classify compiled effects, compose the five-rank effect lattice,
 %   plan reified-world admission, and manage memoization, dependencies, and
 %   bridge cascades.
@@ -284,9 +288,14 @@ metta_effect_construct(Meta, Goals) :-
 %bound arguments are KEPT, which is what makes the two-step case work:
 %include/3 holds metta_condition_holds(lambda_3), and losing that would leave
 %the walk classifying metta_condition_holds/2 and never reaching the lambda.
+%A MeTTa function value partial(F, Bound) is applied by partial/N, which
+%calls F with Bound first (engine/metta/control.pl), so the goal walked is F's
+%own and the walk reaches the lambda instead of classifying partial/N.
 metta_effect_closure(Closure, Extra, Goal) :-
     (   atom(Closure)
     ->  Name = Closure, Bound = []
+    ;   Closure = partial(Name, Bound), atom(Name), is_list(Bound)
+    ->  true
     ;   compound(Closure), Closure =.. [Name|Bound]
     ),
     length(Added, Extra),

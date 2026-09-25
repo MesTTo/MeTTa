@@ -386,6 +386,19 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- A function value that captured a variable or holds a non-text blob is
+  applied by `maplist`, `foldl`, `include` and every other Prolog predicate
+  that takes a closure. Such a value is `partial(F, Bound)`, and the
+  meta-predicate's `call/N` called it as `partial/4`, which nothing defined, so
+  `!(let $k 1 (maplist (|-> ($a) (+ $k $a)) (1 2 3)))` raised
+  `Unknown procedure: partial/4`. Since 64169238b names a lambda by its
+  content and lifts a blob in its body into the closure, a lambda holding a C
+  function value met the same failure, and CMeTTa-Examples' `05-lambda` twin
+  failed with it. `partial/3` to `partial/11` in `engine/metta/control.pl`
+  apply the value the way library(yall) applies its own closure terms, for
+  every count of appended arguments a `meta_predicate` declaration can name,
+  and the effect walk follows the function the value names.
+
 - A Python context that imported lib_thread before any other space did closes
   again. Its release failed recompiling `&self`'s
   `(= (await $handle) (thread_await $handle))`: the release restored
