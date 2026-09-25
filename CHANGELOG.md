@@ -386,6 +386,13 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- A space's own function named `with_metta_module` no longer takes the
+  argument check the compiler writes into a body that constructs an
+  arrow-declared data head. The call was written unqualified, so it resolved
+  in the space's module, and with such a function defined a refused
+  construction such as `(build-point "bad" 4)` answered nothing instead of
+  `(Error (Point "bad" 4) (BadArgType 1 Number String))`.
+
 - A `|->` lambda is named by its content, `lambda_` and 16 hex digits of the
   closed clause's `variant_sha1/2`, instead of a process-wide counter. Two
   compiles of one lambda share one predicate, a specialization over a lambda

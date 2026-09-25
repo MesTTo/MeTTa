@@ -1509,7 +1509,9 @@ data_head_answer_dl(HV, Written, AVs, Out, Goals0, Goals) :-
                                        Goals0, Goals)
         ->  true
         ;   current_metta_module(Owner),
-            Goals0 = [with_metta_module(Owner,
+            %Qualified with the engine's module for the reason
+            %compiled_constructor_answer/7 gives in constructors.pl.
+            Goals0 = [metta_engine:with_metta_module(Owner,
                           ( metta_bad_argument_error(HV, Written, Out)
                           *-> true
                           ;   Out = [HV|AVs] ))|Goals]

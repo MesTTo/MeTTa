@@ -38,9 +38,18 @@ compiled_constructor_answer(Fun, Chain, Written, Values, Out, Goals0, Goals) :-
         ;   true
         )
     ;   current_metta_module(Owner),
+        %A check written into a body runs in whichever space's module the
+        %clause lands in, so its call names the engine's module and no
+        %space's own function named with_metta_module takes it there [tested
+        %2026-09-25T18:01:16+10:00:
+        %translator_constructors:a_space_function_cannot_take_the_constructor_check].
+        %The module is written rather than asked of metta_engine_module/1,
+        %whose lookup at each check moved 24-sorted_constructors' twin past
+        %the twins lane's tolerance of four [measured 2026-09-25T18:03:11+10:00:
+        %20,620 inferences before, 20,619 written, 20,625 asked].
         Goals0 = [( Checks
                   -> Out = [Fun|Values]
-                  ;  with_metta_module(Owner,
+                  ;  metta_engine:with_metta_module(Owner,
                          ( metta_bad_argument_reason(Fun, Written, Reason)
                          *-> metta_error_atom(Fun, Written, Reason, Out)
                          ; Out = [Fun|Values] ))
@@ -64,6 +73,8 @@ constructor_signature_checks([Parameters-Origins|Rest], Written, Check) :-
     ).
 
 constructor_argument_checks([], [], [], []).
+%Both checks below call with_metta_module/2 engine-qualified, for the reason
+%compiled_constructor_answer/7 gives.
 constructor_argument_checks([Value|Values], [Type|Types], [Origin|Origins],
                             Checks) :-
     (   constructor_argument_proved(Value, Type, Origin)
@@ -71,13 +82,14 @@ constructor_argument_checks([Value|Values], [Type|Types], [Origin|Origins],
         ->  contract_fallback_goal(check_argument_type(Value, Type, Origin),
                                    Slow),
             current_metta_module(Owner),
-            Checks = [verified_discharge(true, with_metta_module(Owner, Slow),
-                         discharge(constructor, Type, Value))|Rest]
+            Checks = [verified_discharge(true,
+                                         metta_engine:with_metta_module(Owner, Slow),
+                                         discharge(constructor, Type, Value))|Rest]
         ;   Checks = Rest
         )
     ;   current_metta_module(Owner),
         type_check_goal(Value, Type,
-                       with_metta_module(Owner,
+                       metta_engine:with_metta_module(Owner,
                            check_argument_type(Value, Type, Origin)), Goal),
         Checks = [Goal|Rest]
     ),

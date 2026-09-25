@@ -55,6 +55,25 @@ test(constructed_values_and_errors_keep_their_written_call,
                       ['BadArgType', 1, 'Number', 'String']]]),
     evaluate_in(S, ['read-point'], Read), assertion(Read == [3]).
 
+% The argument check the compiler writes into build-point's body runs as the
+% engine's own goal. Written unqualified, it was taken in the space's bodies
+% by the space's own function named with_metta_module, and the refused
+% construction answered nothing instead of its BadArgType error.
+setup_captured_points(Space) :-
+    'new-space'(Space),
+    run_in(Space, "
+        (= (with_metta_module $m) captured)
+        (: Point (-> Number Number Point))
+        (= (build-point $x $y) (Point $x $y))", []).
+
+test(a_space_function_cannot_take_the_constructor_check,
+     [setup(setup_captured_points(S)), cleanup(metta_release_space(S))]) :-
+    evaluate_in(S, ['build-point', "bad", 4], Bad),
+    assertion(Bad == [['Error', ['Point', "bad", 4],
+                      ['BadArgType', 1, 'Number', 'String']]]),
+    evaluate_in(S, ['build-point', 3, 4], Good),
+    assertion(Good == [['Point', 3, 4]]).
+
 test(generated_constructor_arguments_preserve_answer_bags,
      [ setup(setup_points(S)), cleanup(metta_release_space(S)),
        forall((member(X, [0, 1, -1, 1.5, 1208925819614629174706176,
