@@ -386,6 +386,13 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- The door catalog's order verdicts are regenerated from the seat they
+  describe, and the `door-order` lane passes. `Space.copy()` crosses once to
+  the engine's restore of its rows where it re-added each row through
+  `add()`, so `space:copy` no longer reaches a door on a cycle. The table,
+  `metta/doors/_orders.py`, is the lane's own `tools/doororder.py --write`,
+  which moves: space:copy stopped being recursive.
+
 - A clear or a release of a space no longer leaves behind the records
   describing the generated predicates it sweeps. The translator's metadata,
   the specializer's rows and each clause's provenance go with the predicate,
