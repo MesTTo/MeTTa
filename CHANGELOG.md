@@ -361,6 +361,14 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- `test_vector_lib.py` imports lib_vector into a context of its own and
+  releases it after its last test. It imported the library into the process's
+  `&self`, which every later test in the worker reads, and lib_vector's `norm`
+  takes any argument and refuses one that is not numeric, so a class defined
+  later in the worker with a `norm` method answered its own instances with that
+  refusal and `test_method_entry_inferences_match_the_equivalent_native_body`
+  failed.
+
 - `test_answer_position_cache_does_not_own_generated_code` asks whether the
   Answers position cache holds a generated code object strongly, where it
   asked whether the code object died at `gc.collect()`. The gate's pytest lane
