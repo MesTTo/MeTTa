@@ -213,6 +213,16 @@ unstable. Record `/proc/loadavg` when a wall-clock result matters. Do not claim
 a speedup from wall time alone, and do not compare runs that produce different
 answers or errors.
 
+The inference count misses a cost that grows in each operation rather than in
+their number. A recursive generator whose recursive call stops being last keeps
+every ancestor frame, and each answer exits back through all of them, so its
+count stays linear while its time goes quadratic. Count what grows instead:
+the peak of `statistics(localused, Used)` read at each answer measures the
+retained frames deterministically. The generator test in
+`suites/translator/translator.plt` holds the count linear and the peak flat,
+and a control for each reading shows it refuses the generator the other
+misses.
+
 The Python API exposes the same engine deltas through `m.stats()` and exposes
 SWI profiler samples through `m.profile(source)`. Use the profiler to locate
 work, then use `statistics/2` or `m.stats()` for the A/B claim.

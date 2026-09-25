@@ -2447,14 +2447,23 @@ test(a_disjunction_arm_can_produce_one_private_return) :-
 %Prolog is linear at every size, so the quadratic was the engine's own and not
 %the substrate's.
 %
-%The test is TIMED rather than counted, which the performance contract in
-%tests/prolog/README.md allows for exactly this reason: the inference counter
-%reads this workload as LINEAR either way, 1,822 inferences at K=400, 5,122 at
-%1,600 and 18,322 at 6,400, because what grows is the cost of each operation
-%and not their number. CPU time is process time and does not move with machine
-%load, both readings come from one process, and the margin is wide: quadratic
-%measures about 16x for the 4x step where linear measures about 4.
-generator_enumeration_cost(K, Seconds) :-
+%The test COUNTS, in the two deterministic factors whose product is that
+%time, because a timed reading of about a tenth of a millisecond flaked: five
+%runs read 3.33x to 6.47x against its 8x bound. The inference count is the
+%number of operations, and it cannot see this regression on its own: a Prolog
+%generator with the recursive call last and the same generator with a
+%trailing (Out = V) after the call both cost 2,012, 8,012 and 32,012
+%inferences at K=400, 1,600 and 6,400. What the trailing unification changes
+%is what each answer costs. The call is no longer last, so every ancestor
+%frame stays on the local stack and each answer exits back through all of
+%them, which the peak local stack across the enumeration reads directly:
+%3,336 bytes at every K with the call last, and 44,392, 169,192 and 668,232
+%with it trailing, while CPU time went 4x against 15.5x per 4x K
+%[measured 2026-09-25T19:26:33+10:00: the MeTTa generator below and both
+%Prolog shapes enumerated under findall/3 at K=400, 1,600 and 6,400 in one
+%process]. So the count must stay linear and the peak must stay flat, and
+%each control below is refused by exactly one of the two.
+generator_enumeration_cost(K, Inferences, Peak) :-
     atom_concat('&plunit_gen_', K, Space),
     format(atom(Text),
            "(= (plunit_gen $n) (if (>= $n ~w) (superpose ()) (superpose ($n (plunit_gen (+ $n 1))))))~n",
@@ -2466,20 +2475,77 @@ generator_enumeration_cost(K, Seconds) :-
             filereader:process_metta_string(Source, _, Space),
             ( user:metta_module_space(Module, Space),
               !,
-              findall(x, Module:plunit_gen(0, _), _),
-              statistics(cputime, Before),
-              findall(x, Module:plunit_gen(0, _), Answers),
-              statistics(cputime, After),
-              length(Answers, K),
-              Seconds is After - Before ),
+              enumeration_cost(Module:plunit_gen(0, _), K, Inferences, Peak) ),
             ( user:clear_native_atoms(Space),
               user:metta_release_space(Space) )),
         erase(SilentRef)).
 
+%The inferences enumerating Goal's K answers costs, and the most local stack
+%in use when any one answer was produced. The first findall/3 warms the
+%compiled predicate, so neither reading includes a first call's compilation.
+%Time: two enumerations of Goal. Space: K stack readings.
+enumeration_cost(Goal, K, Inferences, Peak) :-
+    findall(x, Goal, _),
+    statistics(inferences, Before),
+    findall(Used, ( call(Goal), statistics(localused, Used) ), Useds),
+    statistics(inferences, After),
+    length(Useds, K),
+    max_list(Useds, Peak),
+    Inferences is After - Before.
+
+%The two sizes every reading here compares, a 4x step in K.
+enumeration_sizes(400, 1600).
+
+%Over that step a linear count grows 4x and a quadratic one 16x, so 8x
+%separates them.
+linear_count(Narrow, Wide) :- Wide < Narrow * 8.
+
+%A retained frame costs about a hundred bytes per answer, so a flat peak grows
+%by less than one byte per added answer.
+flat_peak(Narrow, Wide) :-
+    enumeration_sizes(NarrowK, WideK),
+    Wide - Narrow < WideK - NarrowK.
+
 test(a_recursive_generator_enumerates_in_time_linear_in_its_answers) :-
-    generator_enumeration_cost(400, Narrow),
-    generator_enumeration_cost(1600, Wide),
-    assertion(Wide < Narrow * 8).
+    enumeration_sizes(NarrowK, WideK),
+    generator_enumeration_cost(NarrowK, NarrowInferences, NarrowPeak),
+    generator_enumeration_cost(WideK, WideInferences, WidePeak),
+    assertion(linear_count(NarrowInferences, WideInferences)),
+    assertion(flat_peak(NarrowPeak, WidePeak)).
+
+%The controls, each quadratic in time and each caught by one reading alone:
+%the regressed shape, whose count stays linear while its peak grows by a
+%retained frame per answer, and a generator whose i-th answer walks i steps,
+%whose peak stays flat while its count grows quadratically.
+trailing_generator(N, K, Out) :-
+    N < K,
+    ( Out = N ; N1 is N + 1, trailing_generator(N1, K, V), Out = V ).
+
+walking_generator(N, K, Out) :-
+    N < K,
+    ( walk_down(N), Out = N ; N1 is N + 1, walking_generator(N1, K, Out) ).
+
+walk_down(0) :- !.
+walk_down(N) :- N1 is N - 1, walk_down(N1).
+
+test(each_reading_refuses_the_quadratic_generator_the_other_misses,
+     [forall(member(Generator-Expected,
+                    [ trailing_generator-(linear-grows),
+                      walking_generator-(quadratic-flat) ]))]) :-
+    enumeration_sizes(NarrowK, WideK),
+    enumeration_cost(call(Generator, 0, NarrowK, _), NarrowK,
+                     NarrowInferences, NarrowPeak),
+    enumeration_cost(call(Generator, 0, WideK, _), WideK,
+                     WideInferences, WidePeak),
+    (   linear_count(NarrowInferences, WideInferences)
+    ->  Count = linear
+    ;   Count = quadratic
+    ),
+    (   flat_peak(NarrowPeak, WidePeak)
+    ->  Peak = flat
+    ;   Peak = grows
+    ),
+    assertion(Count-Peak == Expected).
 
 :- end_tests(translator_branch_returns).
 

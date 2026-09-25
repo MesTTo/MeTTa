@@ -386,6 +386,11 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- The translator suite's recursive-generator test counts inferences and the
+  peak local stack instead of timing about a tenth of a millisecond, so it no
+  longer fails at random. A generator whose recursive call stops being last
+  still fails it, and two controls in the suite show each reading refuses the
+  quadratic generator the other misses.
 - An engine erase that meets a clause reference something else already erased
   no longer fails the operation around it. `erase/1` fails on a clause a second
   thread, a source rollback or the caller's own older transaction view took
