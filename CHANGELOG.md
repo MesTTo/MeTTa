@@ -412,6 +412,15 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- The seat's `test_a_cancelled_future_is_not_charged` no longer fails at
+  random. A cancel that found its task still queued disposed of the engine
+  itself, 27 inferences dearer than stopping a running one, and which branch
+  it took was the schedule's; the test now cancels only once a carrier runs
+  the task. `test_a_race_is_charged_for_its_caller_and_its_winner_only` tests
+  the stats block's discard of a race's stopped branch end to end, which the
+  cancelled-future test never reached. A race measured through a streaming
+  door such as `race()` still reads a different count from run to run.
+
 - A fresh install of pymetta's Linux wheels leaves its bundled SWI-Prolog
   library alone on its first boot. SWI 10.1.14 recompiled a library's `.qlf`
   file whenever its `.pl` was newer and wrote the new one over it, and an
