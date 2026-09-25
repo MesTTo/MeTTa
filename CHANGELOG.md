@@ -101,6 +101,21 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
   `-lnodefs.js` to `LDFLAGS`. NODEFS sets itself up only under Node, so the
   browser path is unchanged.
 
+- `tools/pymetta-host/run.sh` skips `build-swipl.sh` and `build-janus.sh`
+  when OUT already holds their output for exactly this tree's inputs, so a
+  host compiled once is assembled into later wheels without compiling SWI
+  again. A run that compiles both from the derived source tree records those
+  inputs in `OUT/host-inputs`: the interpreters, the image, every file of
+  `tools/pymetta-host` and every patch of the stack in the order
+  `fetch-source.sh` applies it, each with its sha256. A run over other inputs
+  prints the lines that differ and compiles; a run of one compile stage, or
+  from a `SRC` the caller supplies, leaves no record; and `fetch-source.sh`
+  runs, and `/src` is mounted, only for a compile stage, so `run.sh
+  assemble.sh` no longer clones swipl-devel. The `host-reuse-selftest` lane
+  holds these with docker and the fetch stubbed, and `host-reuse-mutants`
+  takes each of run.sh's rules away in turn and requires that lane's
+  self-test to fail without it.
+
 ### Changed
 
 - `prolog-static` refuses a host transport that evaluates any other way: a call
