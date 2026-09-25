@@ -23,7 +23,9 @@
 #                           resident memory where a scope can be made, a
 #                           quarter of it as data segment where it cannot)
 #     METTA_BOUNDED_SCOPE   `yes` or `no`, whether a scope can be made here,
-#                           for a caller that resolves it once for many spawns
+#                           for a caller that resolves it once for many spawns.
+#                           Read and never written: a rung that has to ask
+#                           keeps the answer to itself (see the Guarantees)
 #
 #   The ceiling and the grace are EXPORTED, so a command that bounds children
 #   of its own inherits them: `bounded --ceiling 290 sh run.sh f.metta` gives
@@ -139,6 +141,31 @@
 #     than here, which is what left this instance free to happen].
 #     Nothing is lost: the symbols a server would add are the host's, and every
 #     frame these lanes read belongs to a source built in this tree.
+#   - the command's environment does not say where its rung ran: a rung that
+#     makes a scope, one nested in an outer rung's scope and one that finds no
+#     scope to make hand the command the same variables, for a caller that
+#     passes no share of its own [tested 2026-09-25T16:08:35+10:00:
+#     tests/shell/test_bounded_reaping.sh case 5l]. Two things differed by rung
+#     and are kept out of it. Whether a scope can be made stays in the rung
+#     that asked: a rung inside a scope never asks, so an answer exported for
+#     the rungs beneath reached a command only when its rung sat outside one,
+#     and a program that reads its whole environment cost more there.
+#     examples/ch08-data/08-03-the-shipped-libraries/31-system_lib.metta walks
+#     the environment three times and reads 316,943 inferences under a twins
+#     lane inside a scope and outside one alike, and 319,643 with the
+#     METTA_BOUNDED_SCOPE=no a rung outside one used to export [measured
+#     2026-09-25T16:08:59+10:00: tests/checks/check_twin_coverage_selftest.py,
+#     the context plant]. And systemd-run --scope appends the INVOCATION_ID of
+#     the scope it makes to the command's environment [source
+#     2026-09-25T15:24:34+10:00: systemd v259 src/run/run.c:2760-2768,
+#     start_transient_scope();
+#     https://github.com/systemd/systemd/blob/9ca433482f2281d71718718705ca8cd3bf562ad6/src/run/run.c#L2760-L2768],
+#     so the rung that makes one hands the command the caller's own instead,
+#     or none where the caller had none. What a rung still spends by branch
+#     reaches the command: a share passed with --memory, unset beneath the
+#     scope it sizes and kept beneath a data limit, and METTA_BOUNDED_UNMETERED
+#     and METTA_BOUNDED_UNLINKED, the once-per-tree markers of the two notices
+#     below, which are written only where a bound came out other than asked.
 # Fails when:
 #   - no `timeout` is reachable: exit 2, naming the package that ships one.
 #   - the caller died before the signal was armed: exit 125, the same status
@@ -290,14 +317,16 @@ metta_bounded_in_scope() {
 # memory controller. Then one scope is started, because only the manager knows
 # whether it will make one, and a manager that refused the real command would
 # fail it before it ran. A caller that resolved the answer passes it in
-# METTA_BOUNDED_SCOPE, and the answer is exported for every rung beneath.
+# METTA_BOUNDED_SCOPE. The answer found here is this rung's alone and is never
+# exported: it reached the command only on a rung outside a scope, which is a
+# variable that said where the rung ran (see the Guarantees). A rung beneath
+# either sits in the scope this one made and never asks, or asks again over
+# the same PATH, socket, cgroup and delegation this one read.
 metta_bounded_scope_available() {
     case ${METTA_BOUNDED_SCOPE:-} in
         yes) return 0 ;;
         no) return 1 ;;
     esac
-    METTA_BOUNDED_SCOPE=no
-    export METTA_BOUNDED_SCOPE
     command -v systemd-run >/dev/null 2>&1 || return 1
     [ -S "${XDG_RUNTIME_DIR:-/nonexistent}/systemd/private" ] || return 1
     read -r metta_bounded_cgroup < /proc/self/cgroup 2>/dev/null || return 1
@@ -316,7 +345,6 @@ metta_bounded_scope_available() {
     esac
     systemd-run --user --scope --quiet --expand-environment=no --slice=metta-bounded.slice \
         -p MemoryMax=64M -p MemorySwapMax=0 -- true >/dev/null 2>&1 || return 1
-    METTA_BOUNDED_SCOPE=yes
     return 0
 }
 
@@ -453,6 +481,15 @@ if [ -n "${METTA_BOUNDED_ARMED:-}" ]; then
             # loaded" [measured 2026-09-24] and the command never runs.
             read -r metta_bounded_unit < /proc/sys/kernel/random/uuid 2>/dev/null ||
                 metta_bounded_unit=$$
+            # systemd-run gives the command the INVOCATION_ID of the scope it
+            # makes, which a rung nested in an outer rung's scope never adds,
+            # so env hands the command back the caller's own, or none, and
+            # execs in place, adding no process (see the Guarantees).
+            if [ -n "${INVOCATION_ID+set}" ]; then
+                set -- env "INVOCATION_ID=$INVOCATION_ID" "$@"
+            else
+                set -- env -u INVOCATION_ID "$@"
+            fi
             set -- systemd-run --user --scope --quiet --expand-environment=no \
                 --unit="metta-bounded-$metta_bounded_unit" --slice=metta-bounded.slice \
                 -p "MemoryMax=${metta_bounded_memory}K" -p MemorySwapMax=0 -- "$@"

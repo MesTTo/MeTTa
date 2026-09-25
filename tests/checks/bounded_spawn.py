@@ -54,7 +54,7 @@ CHILD_GRACE = 60
 
 
 def bounded(command: list[str], ceiling: float | None = None,
-            grace: float | None = None) -> list[str]:
+            grace: float | None = None, memory: str | None = None) -> list[str]:
     """The same command, bounded by a process that shares its fate.
 
     The ceiling defaults to bounded.sh's own hour, which is an orphan reaper
@@ -62,6 +62,10 @@ def bounded(command: list[str], ceiling: float | None = None,
     own `timeout=` stays the thing that fires first and stays what decides the
     outcome. Pass one only where the caller has no `timeout=` of its own or
     where the child should die sooner than the caller would notice.
+
+    `memory` is bounded.sh's `--memory`, kilobytes or `none`. `none` keeps the
+    deadline and the owner link and makes no scope, so a process started from
+    outside a scope stays outside one.
     """
     if not BOUNDED.is_file():
         refusal = (
@@ -76,4 +80,6 @@ def bounded(command: list[str], ceiling: float | None = None,
         options += ["--ceiling", str(int(ceiling))]
     if grace is not None:
         options += ["--grace", str(int(grace))]
+    if memory is not None:
+        options += ["--memory", memory]
     return ["sh", str(BOUNDED), *options, *command]

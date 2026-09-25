@@ -36,6 +36,14 @@ Guarantees:
   - the lane's re-pin reads a tag's time exactly as the evidence gate does,
     so it cannot write a stamp the gate reports
     [tested 2026-09-25T00:40:16+10:00: sh tools/check.sh twins-selftest]
+  - where the lane runs does not move a count: 31-system_lib's example and twin,
+    which walk the whole environment, read the same from a lane process inside
+    a metta-bounded scope and from one outside it, and one variable planted in
+    the lane's child environment moves the example, so the equality is about
+    the environment and not a plant that cannot see it; where no scope can be
+    made no lane runs inside one, and the plant says it is skipped
+    [tested 2026-09-25T16:08:59+10:00:
+    tests/checks/check_twin_coverage_selftest.py]
 Fails when: the lane stops exposing `run_example` and `run_twin` as its only
   process calls, or moves a verdict out of `check`.
 Owns resources: one TemporaryDirectory per plant, removed on every path.
@@ -46,16 +54,19 @@ Decides: the plants are written into scratch rather than committed under
 
 from __future__ import annotations
 
+import json
 import subprocess
 import sys
 import tempfile
 from pathlib import Path
+from typing import Any
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "extensions" / "python"))
 sys.path.insert(0, str(ROOT / "extensions" / "python" / "tools"))
 
 import twin_coverage as lane  # noqa: E402
+from bounded_spawn import BOUNDED, bounded  # noqa: E402
 
 #: The pair every plant is built from: one equation, one claim, no imports.
 EXAMPLE = ROOT / (
@@ -351,6 +362,115 @@ def orphan_failures() -> list[str]:
     return failures
 
 
+#: The example that walks its whole environment, three times, and so the one
+#: whose count read where the lane ran: tools/bounded.sh exported whether a
+#: scope could be made only from a rung that sat outside one (its Guarantees).
+CONTEXT_EXAMPLE = ROOT / (
+    "examples/ch08-data/08-03-the-shipped-libraries/31-system_lib.metta"
+)
+
+#: One lane process, measuring from wherever it was started: its cgroup, then
+#: the example and its twin through the lane's own run_example and run_twin,
+#: one fresh child each. Any NAME=VALUE after the example is planted into the
+#: environment the lane builds for its children and the example measured once
+#: more, which is the control: a plant that cannot move the count cannot say
+#: that where the lane ran does not.
+_LANE = """\
+import json, sys
+from pathlib import Path
+root, example = Path(sys.argv[1]), Path(sys.argv[2])
+sys.path.insert(0, str(root / "extensions" / "python"))
+sys.path.insert(0, str(root / "extensions" / "python" / "tools"))
+import twin_coverage as lane
+reading = {
+    "cgroup": Path("/proc/self/cgroup").read_text(encoding="utf-8").strip(),
+    "example": lane.run_example(example).cost,
+    "twin": lane.run_twin(lane.twin_for(example)).cost,
+}
+if sys.argv[3:]:
+    built, planted = lane._environment, dict(p.split("=", 1) for p in sys.argv[3:])
+    lane._environment = lambda: built() | planted
+    reading["planted"] = lane.run_example(example).cost
+print(json.dumps(reading))
+"""
+
+
+def _reading(completed: subprocess.CompletedProcess[str], where: str) -> dict[str, Any]:
+    """A lane process's reading, with an `error` naming what went wrong instead."""
+    lines = [line for line in completed.stdout.splitlines() if line.startswith("{")]
+    if completed.returncode != 0 or not lines:
+        tail = (completed.stderr or completed.stdout).strip().splitlines()[-3:]
+        return {"error": f"the lane process {where} exited {completed.returncode}: {tail}"}
+    reading = json.loads(lines[-1])
+    missing = [key for key, value in reading.items() if value is None]
+    if missing:
+        return {"error": f"the lane process {where} measured no cost for {missing}"}
+    return reading
+
+
+def context_failures() -> list[str]:
+    """The same example reads the same count from a lane inside a bounded scope and outside one.
+
+    The two lane processes are started the two ways a lane is: through
+    bounded.sh, which makes a scope from outside one and nests inside one, and
+    through bounded.sh with no memory bound under a scope of systemd-run's
+    own, which no metta-bounded scope encloses wherever this runs. The gate
+    runs this file inside a scope, which is why the second needs the escape,
+    as tests/shell/test_bounded_reaping.sh's outermost-rung cases do. Where no
+    scope can be made, no lane ever runs inside one and there is nothing to
+    compare, which is said rather than passed over.
+    """
+    answer = subprocess.run(
+        ["sh", str(BOUNDED), "--memory-scope"],
+        capture_output=True, text=True, check=False,
+    ).stdout.strip()
+    if answer != "yes":
+        print("twins selftest: the context plant is skipped, since no memory "
+              "scope can be made here and no lane runs inside one")
+        return []
+    measure = [sys.executable, "-c", _LANE, str(ROOT), str(CONTEXT_EXAMPLE)]
+    inside = _reading(subprocess.run(
+        bounded([*measure, "METTA_TWINS_SELFTEST_PLANT=1"]),
+        capture_output=True, text=True, check=False, cwd=ROOT,
+    ), "inside a scope")
+    outside = _reading(subprocess.run(
+        ["systemd-run", "--user", "--scope", "--quiet",
+         "--expand-environment=no", "--", *bounded(measure, memory="none")],
+        capture_output=True, text=True, check=False, cwd=ROOT,
+    ), "outside a scope")
+    failures = [reading["error"] for reading in (inside, outside) if "error" in reading]
+    if failures:
+        return failures
+    scoped = "/metta-bounded.slice/"
+    if scoped not in inside["cgroup"] or scoped in outside["cgroup"]:
+        return [
+            "the plant is wrong: the lane meant to run inside a scope ran in "
+            f"{inside['cgroup']!r} and the one meant to run outside in "
+            f"{outside['cgroup']!r}"
+        ]
+    if inside["planted"] <= inside["example"]:
+        failures.append(
+            "the plant is wrong: one more variable in the lane's child "
+            f"environment left {CONTEXT_EXAMPLE.name} at {inside['planted']} "
+            f"against {inside['example']}, so equal readings in and out of a "
+            "scope say nothing about the environment"
+        )
+    failures.extend(
+        f"{CONTEXT_EXAMPLE.name}'s {side} costs {inside[side]} inferences "
+        f"from a lane inside a bounded scope and {outside[side]} from one "
+        "outside it, so a lane run by hand and the gate's read different "
+        "counts against one pin"
+        for side in ("example", "twin")
+        if inside[side] != outside[side]
+    )
+    if not failures:
+        print(f"twins selftest: {CONTEXT_EXAMPLE.name} reads {inside['example']} "
+              f"and its twin {inside['twin']} inferences from a lane inside a "
+              f"scope and outside one, and {inside['planted']} with one "
+              "variable planted in the lane's child environment")
+    return failures
+
+
 def stamp_failures() -> list[str]:
     """The lane's re-pin reads a tag's time exactly as the evidence gate does.
 
@@ -381,6 +501,7 @@ def main() -> int:
         *capability_failures(),
         *orphan_failures(),
         *stamp_failures(),
+        *context_failures(),
     ]
     for failure in failures:
         print(f"twins selftest: {failure}", file=sys.stderr)
@@ -392,8 +513,10 @@ def main() -> int:
         "an undeclared band overrun each fail the lane, a budget declared "
         "where a capability is present stays uncompared where it is absent, "
         "and a twin covering nothing is reported while a mounted repository's "
-        "own file is not; the honest copies of all four pass, and the re-pin "
-        "reads a tag's time as the evidence gate does"
+        "own file is not; the honest copies of all four pass, the re-pin "
+        "reads a tag's time as the evidence gate does, and wherever a scope "
+        "can be made a lane inside one and a lane outside one read the same "
+        "counts for an example that walks its whole environment"
     )
     return 0
 

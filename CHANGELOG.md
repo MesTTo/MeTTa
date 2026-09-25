@@ -361,6 +361,21 @@ All notable user-facing changes to MeTTa are recorded here. The format follows
 
 ### Fixed
 
+- `tools/bounded.sh` hands a command the same environment wherever its rung
+  runs. A rung outside a scope probed for one and exported its answer as
+  `METTA_BOUNDED_SCOPE`, and a rung that made a scope passed on the
+  `INVOCATION_ID` systemd-run gives it, where a rung nested in an outer rung's
+  scope did neither. So a program that reads its whole environment cost more
+  under a twins lane started outside a scope than under the gate's:
+  `31-system_lib`'s example read 2,700 inferences more and its twin 1,585,
+  one variable's walk three times, and the twin's pin was the outside
+  reading, which the gate reported. The probe's answer now stays in the rung
+  that asked, a rung that makes a scope gives the command back the caller's
+  own `INVOCATION_ID`, and the twin is re-pinned at the count both now read.
+  `tests/shell/test_bounded_reaping.sh` case 5l and the twins selftest's
+  context plant, which measures the example and its twin from a lane inside a
+  scope and from one outside it, pin it.
+
 - A library half's compiled artifact no longer depends on which process
   claimed the half first. The compile child ran `qcompile/1` again on each
   governed source its argument's load pulled in, in the process that had

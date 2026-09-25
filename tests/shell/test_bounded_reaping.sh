@@ -49,6 +49,11 @@
 #     `${USER}` included, which systemd-run would otherwise rewrite
 #   - case 5k: where no scope can be made the bound is the data segment, a
 #     number derived from the box, so the fallback is still a bound
+#   - case 5l: the command sees the same environment through a rung that
+#     probes for a scope and through one nested in an outer rung's scope, for
+#     a block the probe makes a scope for and one it finds none for, so a
+#     program that reads its whole environment costs the same inside a scope
+#     and outside one
 #   - case 5g: the command starts in the normalised environment the wrapper
 #     promises -- DISPLAY and WAYLAND_DISPLAY gone, DEBUGINFOD_URLS empty --
 #     which is the one guarantee in bounded.sh that nothing used to pin
@@ -346,9 +351,66 @@ if [ "$(sh "$ROOT/tools/bounded.sh" --memory-scope 2>/dev/null)" = yes ]; then
             fi ;;
         *)  fail "case 5i: the outer rung made no scope, it ran in '$outer'" ;;
     esac
+
+    # ------------------------------------------------------------ case 5l
+    # One input block, through a rung that probes for a scope and through a
+    # rung nested in an outer rung's scope: the command has to see the same
+    # variables either way. It did not. The probing rung exported its answer
+    # as METTA_BOUNDED_SCOPE and a rung that made its own scope passed on
+    # systemd-run's INVOCATION_ID, where a nested rung does neither, so a
+    # program that walks its whole environment cost more outside a scope than
+    # inside one: examples/ch08-data/08-03-the-shipped-libraries/31-system_lib.metta
+    # did, by one variable, under the twins lane. One block per answer the
+    # probe can give: without XDG_RUNTIME_DIR the probe fails, which is the
+    # shape of every twins-lane child, and with it the probing rung makes a
+    # scope of its own. Neither block carries a share, which a rung spends by
+    # branch (bounded.sh's Guarantees). `env -i` runs inside $OUTSIDE, whose
+    # systemd-run adds an INVOCATION_ID of its own.
+    #
+    # The cgroup comes first, so a nested command that never sat in the outer
+    # rung's scope is reported rather than compared: two probing rungs agree
+    # with each other whatever bounded.sh writes.
+    environment_through() {
+        if [ -n "$2" ]; then
+            set -- "$1" HOME="$HOME" PATH="$PATH" XDG_RUNTIME_DIR="$2"
+        else
+            set -- "$1" HOME="$HOME" PATH="$PATH"
+        fi
+        environment_rung=$1
+        shift
+        environment_show='cut -d: -f3 /proc/self/cgroup; env | LC_ALL=C sort'
+        if [ "$environment_rung" = nested ]; then
+            $OUTSIDE $WRAPPER env -i "$@" $WRAPPER /bin/sh -c "$environment_show" 2>&1
+        else
+            $OUTSIDE env -i "$@" $WRAPPER /bin/sh -c "$environment_show" 2>&1
+        fi
+    }
+    for xdg in '' "${XDG_RUNTIME_DIR:-}"; do
+        if [ -n "$xdg" ]; then
+            label='a block the probe makes a scope for'
+        else
+            label='a block the probe finds no scope for'
+        fi
+        environment_through probing "$xdg" | sed 1d > "$WORK/probing.env"
+        environment_through nested "$xdg" > "$WORK/nested.raw"
+        where=$(sed -n 1p "$WORK/nested.raw")
+        sed 1d "$WORK/nested.raw" > "$WORK/nested.env"
+        case $where in
+            */metta-bounded.slice/*)
+                if cmp -s "$WORK/probing.env" "$WORK/nested.env"; then
+                    printf 'ok  5l %s reaches the command alike through a probing rung and a nested one\n' "$label"
+                else
+                    fail "case 5l: for $label the probing rung's command alone saw [$(
+                        grep -vxF -f "$WORK/nested.env" "$WORK/probing.env" | tr '\n' ' ')] and the nested rung's alone [$(
+                        grep -vxF -f "$WORK/probing.env" "$WORK/nested.env" | tr '\n' ' ')]"
+                fi ;;
+            *)  fail "case 5l: the outer rung made no scope, its command ran in '$where'" ;;
+        esac
+    done
 else
     printf 'ok  5h skipped: no memory scope can be made here, so the bound is the data segment\n'
     printf 'ok  5i skipped: no memory scope can be made here, so no rung makes one\n'
+    printf 'ok  5l skipped: no memory scope can be made here, so no rung is nested in one\n'
 fi
 
 # ---------------------------------------------------------------- case 5j
